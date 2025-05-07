@@ -43,8 +43,9 @@ jobs:
           }
 
       - name: Download Yak CLI
+        shell: pwsh
         run: |
-          Invoke-WebRequest -Uri "https://github.com/mcneel/yak/releases/download/3.13.0/yak.exe" -OutFile yak.exe
+          curl -L -o yak.exe "https://github.com/mcneel/yak/releases/download/3.13.0/yak.exe"
 
       - name: Yank previous version from Yak
         env:
