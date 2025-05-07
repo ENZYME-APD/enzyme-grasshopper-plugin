@@ -77,11 +77,8 @@ jobs:
         shell: pwsh
         run: |
           if (-not (Test-Path bin/Release/net48/enzyme.gha)) { throw "enzyme.gha not found in bin/Release/net48/" }
-          # Create a temporary directory for Yak packaging
-          New-Item -ItemType Directory -Path ./yak-package | Out-Null
-          Copy-Item bin/Release/net48/enzyme.gha ./yak-package/enzyme.gha
-          Copy-Item manifest.yml ./yak-package/manifest.yml
-          ./yak.exe build ./yak-package --version ${{ steps.get_version.outputs.version }}
+          Copy-Item bin/Release/net48/enzyme.gha ./enzyme.gha
+          ./yak.exe build . --manifest manifest.yml --version ${{ steps.get_version.outputs.version }}
 
       - name: Push package (.yak)
         env:
