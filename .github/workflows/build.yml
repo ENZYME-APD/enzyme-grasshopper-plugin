@@ -48,7 +48,7 @@ jobs:
       - name: Yank previous version from Yak
         env:
           YAK_TOKEN: ${{ secrets.YAK_TOKEN }}
-        if: ${{ secrets.YAK_TOKEN != '' }}
+        if: env.YAK_TOKEN != ''
         shell: pwsh
         run: |
           $pkgName = "${{ steps.get_pkg_name.outputs.pkg_name }}"
@@ -77,7 +77,7 @@ jobs:
       - name: Push package (.yak)
         env:
           YAK_TOKEN: ${{ secrets.YAK_TOKEN }}
-        if: ${{ secrets.YAK_TOKEN != '' }}
+        if: env.YAK_TOKEN != ''
         shell: pwsh
         run: |
           $package = Get-ChildItem *.yak | Select-Object -First 1
