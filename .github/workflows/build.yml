@@ -3,6 +3,8 @@ name: Build Enzyme Grasshopper Plugin
 on:
   push:
     branches: [ main, master ]
+    tags:
+      - 'v*'
   workflow_dispatch:
 
 jobs:
@@ -34,6 +36,21 @@ jobs:
         with:
           name: enzyme-plugin-gha
           path: bin/Release/net48/enzyme.gha
+
+      - name: Download Yak CLI
+        run: |
+          Invoke-WebRequest -Uri "https://github.com/mcneel/yak/releases/download/3.13.0/yak.exe" -OutFile yak.exe
+
+      - name: Package .gha with Yak
+        run: |
+          ./yak.exe pack bin/Release/net48/enzyme.gha --manifest manifest.yml --version ${{ steps.get_version.outputs.version }}
+
+      - name: Push package (.yak)
+        env:
+          YAK_TOKEN: ${{ secrets.YAK_TOKEN }}
+        run: |
+          $package = Get-ChildItem *.yak | Select-Object -First 1
+          ./yak.exe push $package --api-key $env:YAK_TOKEN
 
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
