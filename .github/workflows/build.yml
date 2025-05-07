@@ -55,6 +55,7 @@ jobs:
           setlocal enabledelayedexpansion
           set pkgName=${{ steps.get_pkg_name.outputs.pkg_name }}
           for /F "tokens=*" %%i in ('yak.exe search %pkgName%') do (
+            echo "Line: %%i"
             echo %%i | find /i "(%pkgName%)" > nul && (
               for /F "tokens=3 delims=() " %%a in ("%%i") do (
                 set prevVersion=%%a
