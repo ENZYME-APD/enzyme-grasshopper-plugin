@@ -109,7 +109,7 @@ jobs:
           if (-not $yakFilename) { throw "No .yak file found" }
           dir yakdir
           $yakFilepath = Join-Path -Path "yakdir" -ChildPath $yakFilename
-          ./yak.exe push $yakFilepath --api-key "$env:YAK_TOKEN"
+          ./yak.exe push $yakFilepath
 
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
