@@ -18,6 +18,14 @@ jobs:
       - name: Restore NuGet packages
         run: nuget restore enzGhPlugin.csproj
 
+      - name: Extract version from csproj
+        id: get_version
+        shell: pwsh
+        run: |
+          [xml]$csproj = Get-Content enzGhPlugin.csproj
+          $version = $csproj.Project.PropertyGroup.Version
+          echo "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+
       - name: Build plugin
         run: msbuild enzGhPlugin.csproj /p:Configuration=Release
 
@@ -25,25 +33,14 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: enzyme-plugin-gha
-          path: bin/Release/**/*.gha
-
-      - name: Copy Release files to repo
-        run: |
-          mkdir -p Release
-          cp -r bin/Release/net48/* Release/
-
-      - name: Upload Release folder as artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: enzyme-plugin-Release-folder
-          path: Release/
+          path: bin/Release/net48/enzyme.gha
 
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          name: Enzyme Plugin ${{ github.ref_name }}
-          tag_name: ${{ github.ref_name }}
+          name: Enzyme Plugin v${{ steps.get_version.outputs.version }}
+          tag_name: v${{ steps.get_version.outputs.version }}
           body: |
             Automated release for Enzyme Grasshopper plugin.
             See the attached files for the plugin binaries.
@@ -54,6 +51,6 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          files: Release/enzyme.gha
+          files: bin/Release/net48/enzyme.gha
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
