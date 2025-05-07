@@ -40,6 +40,7 @@ jobs:
           if ($manifest -match 'name:\s*(.+)') {
             $pkgName = $matches[1].Trim()
             echo "pkg_name=$pkgName" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          }
 
       - name: Download Yak CLI
         shell: pwsh
@@ -54,8 +55,8 @@ jobs:
           setlocal enabledelayedexpansion
           set pkgName=${{ steps.get_pkg_name.outputs.pkg_name }}
           for /F "tokens=*" %%i in ('yak.exe search %pkgName%') do (
-            echo %%i | findstr /c:"(%pkgName%)" > nul && (
-              for /F "tokens=2 delims=()" %%a in ("%%i") do (
+            echo %%i | find /i "(%pkgName%)" > nul && (
+              for /F "tokens=3 delims=() " %%a in ("%%i") do (
                 set prevVersion=%%a
                 echo Yanking previous version !prevVersion!
                 yak.exe yank %pkgName% !prevVersion! --api-key %YAK_TOKEN%
