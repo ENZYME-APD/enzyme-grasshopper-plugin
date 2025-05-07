@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Version>1.0.2</Version>
+    <Title>Enzyme</Title>
+    <Description>Enzyme Grasshopper plugin</Description>
+    <AssemblyName>enzyme</AssemblyName>
+    <RootNamespace>Enzyme</RootNamespace>
+    <TargetExt>.gha</TargetExt>
+    <TargetFramework>net48</TargetFramework>
+    <Rhino7GrasshopperLibPath>$(HOME)/Library/Application Support/McNeel/Rhinoceros/7.0/Plug-ins/Grasshopper (b45a29b1-4343-4035-989e-044e8580d9cf)/Libraries/</Rhino7GrasshopperLibPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>portable</DebugType>
+    <Optimize>false</Optimize>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Grasshopper" Version="7.36.23346.16351" IncludeAssets="compile;build" />
+    <PackageReference Include="RhinoCommon" Version="7.36.23346.16351" IncludeAssets="compile;build" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources/*.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="manifest.yml" />
+  </ItemGroup>
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="if [ -d &quot;$(Rhino7GrasshopperLibPath)&quot; ]; then cp &quot;$(TargetPath)&quot; &quot;$(Rhino7GrasshopperLibPath)&quot;; fi" Condition="'$(OS)' != 'Windows_NT'" />
+  </Target>
+</Project>

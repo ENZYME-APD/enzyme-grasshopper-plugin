@@ -1,0 +1,59 @@
+name: Build Enzyme Grasshopper Plugin
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET Framework
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Restore NuGet packages
+        run: nuget restore enzGhPlugin.csproj
+
+      - name: Build plugin
+        run: msbuild enzGhPlugin.csproj /p:Configuration=Release
+
+      - name: Upload built .gha artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: enzyme-plugin-gha
+          path: bin/Release/**/*.gha
+
+      - name: Copy Release files to repo
+        run: |
+          mkdir -p Release
+          cp -r bin/Release/net48/* Release/
+
+      - name: Upload Release folder as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: enzyme-plugin-Release-folder
+          path: Release/
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Enzyme Plugin ${{ github.ref_name }}
+          tag_name: ${{ github.ref_name }}
+          body: |
+            Automated release for Enzyme Grasshopper plugin.
+            See the attached files for the plugin binaries.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload .gha to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: Release/enzyme.gha
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
