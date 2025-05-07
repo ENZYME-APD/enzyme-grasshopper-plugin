@@ -72,7 +72,7 @@ jobs:
         shell: pwsh
         run: |
           if (-not (Test-Path bin/Release/net48/enzyme.gha)) { throw "enzyme.gha not found" }
-          ./yak.exe pack bin/Release/net48/enzyme.gha --manifest manifest.yml --version ${{ steps.get_version.outputs.version }}
+          ./yak.exe build bin/Release/net48/enzyme.gha --manifest manifest.yml --version ${{ steps.get_version.outputs.version }}
 
       - name: Push package (.yak)
         env:
