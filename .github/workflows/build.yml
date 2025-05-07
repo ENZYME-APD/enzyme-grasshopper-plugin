@@ -105,9 +105,10 @@ jobs:
         if: env.YAK_TOKEN != ''
         shell: pwsh
         run: |
-          $yakFile = "${{ steps.package_yak.outputs.yak_file }}"
-          if (-not $yakFile) { throw "No .yak file found" }
-          ./yak.exe push $yakFile --api-key $env:YAK_TOKEN
+          $yakFilename = "${{ steps.package_yak.outputs.yak_file }}"
+          if (-not $yakFilename) { throw "No .yak file found" }
+          dir .
+          ./yak.exe push "$yakFilename" --api-key "$env:YAK_TOKEN"
 
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
