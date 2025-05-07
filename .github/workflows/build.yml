@@ -84,6 +84,13 @@ jobs:
           Copy-Item -Path Resources -Destination yakdir -Recurse
           dir yakdir
           cd yakdir
+          $version = "${{ steps.get_version.outputs.version }}"
+          Write-Output "Extracted version: $version"
+          $manifestContent = Get-Content manifest.yml -Raw
+          $updatedManifestContent = $manifestContent -replace '\$version', $version
+          $updatedManifestContent | Out-File -Path manifest.yml -Force
+          Write-Output "Content of manifest.yml after update:"
+          Get-Content manifest.yml
           ..\yak.exe build
 
       - name: Push package (.yak)
