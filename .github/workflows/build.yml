@@ -74,6 +74,7 @@ jobs:
           path: bin/Release/net48/enzyme.gha
 
       - name: Package .gha with Yak
+        id: package_yak
         shell: pwsh
         run: |
           if (-not (Test-Path bin/Release/net48/enzyme.gha)) { throw "enzyme.gha not found in bin/Release/net48/" }
@@ -89,9 +90,14 @@ jobs:
           $manifestContent = Get-Content manifest.yml -Raw
           $updatedManifestContent = $manifestContent -replace '\$version', $version
           $updatedManifestContent | Out-File -Path manifest.yml -Force
-          Write-Output "Content of manifest.yml after update:"
-          Get-Content manifest.yml
           ..\yak.exe build
+                
+          # Find the created .yak file and copy it back to the root directory
+          $yakFile = Get-ChildItem *.yak | Select-Object -First 1
+          if (-not $yakFile) { throw "No .yak file was created" }
+          Copy-Item $yakFile.FullName -Destination ..
+          Write-Output "Created package: $($yakFile.Name)"
+          echo "yak_file=$($yakFile.Name)" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
 
       - name: Push package (.yak)
         env:
@@ -99,7 +105,7 @@ jobs:
         if: env.YAK_TOKEN != ''
         shell: pwsh
         run: |
-          $package = Get-ChildItem *.yak | Select-Object -First 1
+          $yakFile = "${{ steps.package_yak.outputs.yak_file }}"
           if (-not $package) { throw "No .yak file found" }
           ./yak.exe push $package --api-key $env:YAK_TOKEN
 
