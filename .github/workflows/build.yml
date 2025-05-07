@@ -13,11 +13,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 6.0.x
+
       - name: Setup .NET Framework
         uses: microsoft/setup-msbuild@v2
 
       - name: Restore NuGet packages
-        run: nuget restore enzGhPlugin.csproj
+        run: dotnet restore enzGhPlugin.csproj
 
       - name: Extract version from csproj
         id: get_version
