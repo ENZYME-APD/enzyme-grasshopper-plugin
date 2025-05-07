@@ -1,11 +1,9 @@
 name: Build Enzyme Grasshopper Plugin
-
 on:
   push:
     tags:
       - 'v*'
   workflow_dispatch:
-
 jobs:
   build:
     runs-on: windows-latest
@@ -30,7 +28,7 @@ jobs:
         run: |
           [xml]$csproj = Get-Content enzGhPlugin.csproj
           $version = $csproj.Project.PropertyGroup.Version
-          echo "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          echo "version=$version" >> $env:GITHUB_OUTPUT
 
       - name: Extract package name from manifest
         id: get_pkg_name
@@ -39,13 +37,13 @@ jobs:
           $manifest = Get-Content manifest.yml | Out-String
           if ($manifest -match 'name:\s*(.+)') {
             $pkgName = $matches[1].Trim()
-            echo "pkg_name=$pkgName" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+            echo "pkg_name=$pkgName" >> $env:GITHUB_OUTPUT
           }
 
       - name: Download Yak CLI
         shell: pwsh
         run: |
-          curl -L -o yak.exe "https://github.com/mcneel/yak/releases/download/3.13.0/yak.exe"
+          Invoke-WebRequest -Uri "https://github.com/mcneel/yak/releases/download/3.13.0/yak.exe" -OutFile "yak.exe"
 
       - name: Yank previous version from Yak
         env:
@@ -53,21 +51,20 @@ jobs:
         shell: pwsh
         run: |
           $pkgName = "${{ steps.get_pkg_name.outputs.pkg_name }}"
-          $yakOutput = & ./yak.exe search $pkgName 2>&1
-          if ($LASTEXITCODE -ne 0) {
-            Write-Output "Error running yak search: $yakOutput"
-            exit 1
-          }
-          $yakOutput -split "`n" | ForEach-Object {
-            if ($_ -match "\($pkgName\)\s*(\S+)") {
-              $prevVersion = $matches[1]
-              Write-Output "Yanking previous version $prevVersion"
-              & ./yak.exe yank $pkgName $prevVersion --api-key $env:YAK_TOKEN
-              if ($LASTEXITCODE -ne 0) {
-                Write-Output "Error yanking version $prevVersion"
-                exit 1
+          try {
+            # Run search without redirecting stderr to stdout
+            $yakOutput = & ./yak.exe search $pkgName
+            
+            foreach($line in $yakOutput) {
+              if ($line -match "\($pkgName\)\s*(\S+)") {
+                $prevVersion = $matches[1]
+                Write-Output "Yanking previous version $prevVersion"
+                & ./yak.exe yank $pkgName $prevVersion --api-key $env:YAK_TOKEN
               }
             }
+          } catch {
+            Write-Output "Error processing Yak packages: $_"
+            # Don't fail the build if yanking previous versions fails
           }
 
       - name: Build plugin
@@ -80,15 +77,17 @@ jobs:
           path: bin/Release/net48/enzyme.gha
 
       - name: Package .gha with Yak
+        shell: pwsh
         run: |
-          ./yak.exe pack bin/Release/net48/enzyme.gha --manifest manifest.yml --version ${{ steps.get_version.outputs.version }}
+          & ./yak.exe pack bin/Release/net48/enzyme.gha --manifest manifest.yml --version ${{ steps.get_version.outputs.version }}
 
       - name: Push package (.yak)
         env:
           YAK_TOKEN: ${{ secrets.YAK_TOKEN }}
+        shell: pwsh
         run: |
           $package = Get-ChildItem *.yak | Select-Object -First 1
-          ./yak.exe push $package --api-key $env:YAK_TOKEN
+          & ./yak.exe push $package.FullName --api-key $env:YAK_TOKEN
 
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
