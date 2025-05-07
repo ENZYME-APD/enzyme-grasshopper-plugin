@@ -107,8 +107,9 @@ jobs:
         run: |
           $yakFilename = "${{ steps.package_yak.outputs.yak_file }}"
           if (-not $yakFilename) { throw "No .yak file found" }
-          dir .
-          ./yak.exe push "$yakFilename" --api-key "$env:YAK_TOKEN"
+          dir yakdir
+          $yakFilepath = Join-Path -Path "yakdir" -ChildPath $yakFilename
+          ./yak.exe push $yakFilepath --api-key "$env:YAK_TOKEN"
 
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
