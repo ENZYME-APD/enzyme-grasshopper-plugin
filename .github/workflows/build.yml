@@ -84,7 +84,7 @@ jobs:
           Copy-Item -Path Resources -Destination yakdir -Recurse
           dir yakdir
           cd yakdir
-          yak build
+          ..\yak.exe build
 
       - name: Push package (.yak)
         env:
