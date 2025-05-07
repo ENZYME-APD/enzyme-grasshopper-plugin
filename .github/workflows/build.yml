@@ -78,11 +78,12 @@ jobs:
         run: |
           if (-not (Test-Path bin/Release/net48/enzyme.gha)) { throw "enzyme.gha not found in bin/Release/net48/" }
           # Create a temporary directory for Yak packaging
-          $yakDir = "./yak-package"
-          New-Item -ItemType Directory -Path $yakDir -Force | Out-Null # Use -Force to overwrite if exists
-          Copy-Item bin/Release/net48/enzyme.gha "$yakDir/enzyme.gha"
-          Copy-Item manifest.yml "$yakDir/manifest.yml"
-          ./yak.exe build $yakDir --version ${{ steps.get_version.outputs.version }}
+          mkdir yakdir
+          copy bin/Release/net48/enzyme.gha yakdir
+          copy manifest.yml yakdir
+          dir yakdir
+          cd yakdir
+          ./yak.exe build
 
       - name: Push package (.yak)
         env:
