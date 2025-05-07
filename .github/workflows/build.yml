@@ -27,6 +27,31 @@ jobs:
           $version = $csproj.Project.PropertyGroup.Version
           echo "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
 
+      - name: Extract package name from manifest
+        id: get_pkg_name
+        shell: pwsh
+        run: |
+          $manifest = Get-Content manifest.yml | Out-String
+          if ($manifest -match 'name:\s*(.+)') {
+            $pkgName = $matches[1].Trim()
+            echo "pkg_name=$pkgName" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          }
+
+      - name: Yank previous version from Yak
+        env:
+          YAK_TOKEN: ${{ secrets.YAK_TOKEN }}
+        shell: pwsh
+        run: |
+          $pkgName = "${{ steps.get_pkg_name.outputs.pkg_name }}"
+          $result = ./yak.exe search $pkgName
+          if ($result -match "$pkgName \(([\d\.]+)\)") {
+            $prevVersion = $matches[1]
+            Write-Host "Yanking previous version $prevVersion"
+            ./yak.exe yank $pkgName $prevVersion --api-key $env:YAK_TOKEN
+          } else {
+            Write-Host "No previous version found to yank."
+          }
+
       - name: Build plugin
         run: msbuild enzGhPlugin.csproj /p:Configuration=Release
 
