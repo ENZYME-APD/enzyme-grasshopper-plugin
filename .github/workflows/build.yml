@@ -50,21 +50,25 @@ jobs:
       - name: Yank previous version from Yak
         env:
           YAK_TOKEN: ${{ secrets.YAK_TOKEN }}
-        shell: cmd
+        shell: pwsh
         run: |
-          setlocal enabledelayedexpansion
-          set pkgName=${{ steps.get_pkg_name.outputs.pkg_name }}
-          for /F "tokens=*" %%i in ('yak.exe search %pkgName%') do (
-            echo "Line: %%i"
-            echo %%i | find /i "(%pkgName%)" > nul && (
-              for /F "tokens=3 delims=() " %%a in ("%%i") do (
-                set prevVersion=%%a
-                echo Yanking previous version !prevVersion!
-                yak.exe yank %pkgName% !prevVersion! --api-key %YAK_TOKEN%
-              )
-            )
-          )
-          endlocal
+          $pkgName = "${{ steps.get_pkg_name.outputs.pkg_name }}"
+          $yakOutput = & ./yak.exe search $pkgName 2>&1
+          if ($LASTEXITCODE -ne 0) {
+            Write-Output "Error running yak search: $yakOutput"
+            exit 1
+          }
+          $yakOutput -split "`n" | ForEach-Object {
+            if ($_ -match "\($pkgName\)\s*(\S+)") {
+              $prevVersion = $matches[1]
+              Write-Output "Yanking previous version $prevVersion"
+              & ./yak.exe yank $pkgName $prevVersion --api-key $env:YAK_TOKEN
+              if ($LASTEXITCODE -ne 0) {
+                Write-Output "Error yanking version $prevVersion"
+                exit 1
+              }
+            }
+          }
 
       - name: Build plugin
         run: msbuild enzGhPlugin.csproj /p:Configuration=Release
