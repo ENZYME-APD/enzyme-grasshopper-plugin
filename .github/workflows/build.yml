@@ -42,6 +42,10 @@ jobs:
             echo "pkg_name=$pkgName" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
           }
 
+      - name: Download Yak CLI
+        run: |
+          Invoke-WebRequest -Uri "https://github.com/mcneel/yak/releases/download/3.13.0/yak.exe" -OutFile yak.exe
+
       - name: Yank previous version from Yak
         env:
           YAK_TOKEN: ${{ secrets.YAK_TOKEN }}
@@ -65,10 +69,6 @@ jobs:
         with:
           name: enzyme-plugin-gha
           path: bin/Release/net48/enzyme.gha
-
-      - name: Download Yak CLI
-        run: |
-          Invoke-WebRequest -Uri "https://github.com/mcneel/yak/releases/download/3.13.0/yak.exe" -OutFile yak.exe
 
       - name: Package .gha with Yak
         run: |
