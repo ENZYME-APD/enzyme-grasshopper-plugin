@@ -50,14 +50,19 @@ jobs:
       - name: Yank previous version from Yak
         env:
           YAK_TOKEN: ${{ secrets.YAK_TOKEN }}
-        shell: cmd
+        shell: pwsh
         run: |
-          set pkgName=${{ steps.get_pkg_name.outputs.pkg_name }}
-          for /f "tokens=2 delims=()" %%A in ('yak.exe search %pkgName% ^| find "%pkgName%"') do (
-            set prevVersion=%%~A
-            echo Yanking previous version %prevVersion%
-            yak.exe yank %pkgName% %prevVersion% --api-key %YAK_TOKEN%
-          )
+          $pkgName = "${{ steps.get_pkg_name.outputs.pkg_name }}"
+          ./yak.exe search $pkgName > yak_output.txt
+          $output = Get-Content yak_output.txt
+          foreach ($line in $output) {
+            if ($line -match "$pkgName\s+\((.+?)\)") {
+              $prevVersion = $matches[1]
+              Write-Host "Yanking previous version $prevVersion"
+              ./yak.exe yank $pkgName $prevVersion --api-key $env:YAK_TOKEN
+              break
+            }
+          }
 
       - name: Build plugin
         run: msbuild enzGhPlugin.csproj /p:Configuration=Release
