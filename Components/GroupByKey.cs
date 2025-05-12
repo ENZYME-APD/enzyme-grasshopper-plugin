@@ -6,17 +6,18 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
+using Enzyme; // for IconLoader
 
-namespace Enzyme
+namespace Enzyme.Components
 {
-    public class GroupByKeyComponent : GH_Component
+    public class GroupByKey : GH_Component
     {
-        public GroupByKeyComponent()
+        public GroupByKey()
             : base("GroupByKey", "GrpByKey",
                 "Groups a list of values by a corresponding list of keys",
                 "Enzyme", "Data")
         {
-            Trace.WriteLine("GroupByKeyComponent constructor called");
+            Trace.WriteLine("GroupByKey constructor called");
         }
 
         protected override void RegisterInputParams(GH_InputParamManager pManager)
