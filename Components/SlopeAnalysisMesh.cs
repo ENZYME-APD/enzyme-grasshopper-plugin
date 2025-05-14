@@ -32,18 +32,18 @@ namespace Enzyme.Components
 
         protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
-            pManager.AddMeshParameter("Mesh", "M", "Input mesh topography", GH_ParamAccess.item);
-            pManager.AddColourParameter("Start Color", "C1", "Color for areas below threshold", GH_ParamAccess.item, Color.Green);
-            pManager.AddColourParameter("End Color", "C2", "Color for areas above threshold", GH_ParamAccess.item, Color.Red);
-            pManager.AddNumberParameter("Threshold", "T", "Slope threshold in degrees", GH_ParamAccess.item, 30.0);
-            pManager.AddBooleanParameter("Binary Mode", "B", "Use binary coloring instead of gradient", GH_ParamAccess.item, false);
+            pManager.AddMeshParameter("Mesh", "Mesh", "Input mesh topography", GH_ParamAccess.item);
+            pManager.AddColourParameter("Start Color", "Start Color", "Color for areas below threshold", GH_ParamAccess.item, Color.Green);
+            pManager.AddColourParameter("End Color", "End Color", "Color for areas above threshold", GH_ParamAccess.item, Color.Red);
+            pManager.AddNumberParameter("Threshold", "Threshold", "Slope threshold in degrees", GH_ParamAccess.item, 30.0);
+            pManager.AddBooleanParameter("Binary Mode", "Binary Mode", "Use binary coloring instead of gradient", GH_ParamAccess.item, false);
         }
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
         {
-            pManager.AddMeshParameter("Slope Mesh", "SM", "Colored mesh showing slope analysis", GH_ParamAccess.item);
-            pManager.AddGenericParameter("Color Legend", "L", "Legend of colors and their corresponding percentages", GH_ParamAccess.item);
-            pManager.AddNumberParameter("Percent Over Threshold", "P", "Percentage of faces over the slope threshold", GH_ParamAccess.item);
+            pManager.AddMeshParameter("Slope Mesh", "Slope Mesh", "Colored mesh showing slope analysis", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Color Legend", "Color Legend", "Legend of colors and their corresponding percentages", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Percent Over Threshold", "Percent Over Threshold", "Percentage of faces over the slope threshold", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)

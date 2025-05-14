@@ -22,14 +22,14 @@ namespace Enzyme.Components
 
         protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
-            pManager.AddGenericParameter("Keys", "K", "Keys to group by", GH_ParamAccess.list);
-            pManager.AddGenericParameter("List", "L", "List of values to be grouped (must be same length as Keys)", GH_ParamAccess.list);
+            pManager.AddGenericParameter("Keys", "Keys", "Keys to group by", GH_ParamAccess.list);
+            pManager.AddGenericParameter("List", "List", "List of values to be grouped (must be same length as Keys)", GH_ParamAccess.list);
         }
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
         {
-            pManager.AddGenericParameter("UniqueKeys", "UK", "List of unique keys", GH_ParamAccess.list);
-            pManager.AddGenericParameter("Grouped", "G", "Data tree with values grouped by keys", GH_ParamAccess.tree);
+            pManager.AddGenericParameter("Unique Keys", "UniqueKeys", "List of unique keys", GH_ParamAccess.list);
+            pManager.AddGenericParameter("Grouped Values", "GroupedValues", "Data tree with values grouped by keys", GH_ParamAccess.tree);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
@@ -90,11 +90,7 @@ namespace Enzyme.Components
             int itemCount = values.Count;
             int branchCount = keyToIndex.Count;
 
-            // Get version from assembly
-            Version version = GetType().Assembly.GetName().Version;
-            string versionString = $"{version.Major}.{version.Minor}.{version.Build}";
-
-            Message = $"GrpKey v{versionString}\n{itemCount} values → {branchCount} groups";
+            Message = $"{itemCount} values\n{branchCount} groups";
         }
 
         protected override Bitmap Icon

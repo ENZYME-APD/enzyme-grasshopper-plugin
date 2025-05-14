@@ -32,25 +32,28 @@ namespace Enzyme.Components
 
         protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
-            pManager.AddCurveParameter("Curves", "C", "2D curves representing roads", GH_ParamAccess.list);
-            pManager.AddMeshParameter("Terrain", "T", "Terrain mesh for projection", GH_ParamAccess.item);
-            pManager.AddNumberParameter("Threshold", "Th", "Slope threshold in percentage", GH_ParamAccess.item, 8.0);
-            pManager.AddNumberParameter("Segment Size", "S", "Size of segments for analysis", GH_ParamAccess.item, 5.0);
-            pManager.AddBooleanParameter("Ray Upward", "R", "Cast rays upward instead of both directions", GH_ParamAccess.item, false);
+            pManager.AddCurveParameter("Curves", "Curves", "2D curves representing roads", GH_ParamAccess.list);
+            pManager.AddMeshParameter("Terrain", "Terrain", "Terrain mesh for projection", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Threshold", "Threshold", "Slope threshold in percentage", GH_ParamAccess.item, 8.0);
+            pManager.AddNumberParameter("Segment Size", "Segment Size", "Size of segments for analysis", GH_ParamAccess.item, 5.0);
+            pManager.AddBooleanParameter("Ray Upward", "Ray Upward", "Cast rays upward instead of both directions", GH_ParamAccess.item, false);
         }
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
         {
-            pManager.AddCurveParameter("Analyzed Segments", "A", "Road segments with slope analysis", GH_ParamAccess.list);
-            pManager.AddNumberParameter("Slope Values", "S", "Slope values for each segment", GH_ParamAccess.list);
-            pManager.AddPointParameter("Center Points", "C", "Center points of segments", GH_ParamAccess.list);
-            pManager.AddNumberParameter("Compliance Percentage", "P", "Percentage of compliant/non-compliant segments", GH_ParamAccess.item);
-            pManager.AddPointParameter("Projected Points", "PP", "Points projected onto terrain", GH_ParamAccess.list);
-            pManager.AddLineParameter("Projection Lines", "PL", "Lines showing projection from original to terrain", GH_ParamAccess.list);
+            pManager.AddCurveParameter("Analyzed Segments", "Analyzed Segments", "Road segments with slope analysis", GH_ParamAccess.list);
+            pManager.AddNumberParameter("Slope Values", "Slope Values", "Slope values for each segment", GH_ParamAccess.list);
+            pManager.AddPointParameter("Center Points", "Center Points", "Center points of segments", GH_ParamAccess.list);
+            pManager.AddNumberParameter("Compliance Percentage", "Pompliance Percentage", "Percentage of compliant/non-compliant segments", GH_ParamAccess.item);
+            pManager.AddPointParameter("Projected Points", "Projected Points", "Points projected onto terrain", GH_ParamAccess.list);
+            pManager.AddLineParameter("Projection Lines", "Projection Lines", "Lines showing projection from original to terrain", GH_ParamAccess.list);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+
             // Input variables
             var curves = new System.Collections.Generic.List<Rhino.Geometry.Curve>();
             Rhino.Geometry.Mesh terrain = null;
@@ -87,17 +90,28 @@ namespace Enzyme.Components
             // Process the curves and analyze road slopes
             var result = AnalyzeRoadSlopes(curves, terrain, threshold, segmentSize, rayUpward);
 
+            stopwatch.Stop();
+            double executionTime = stopwatch.Elapsed.TotalSeconds;
+
             // Set output data
-            DA.SetDataList(0, result.AnalyzedSegments);
-            DA.SetDataList(1, result.SlopeValues);
-            DA.SetDataList(2, result.CenterPoints);
+            DA.SetDataTree(0, result.AnalyzedSegments);
+            DA.SetDataTree(1, result.SlopeValues);
+            DA.SetDataTree(2, result.CenterPoints);
             DA.SetData(3, result.CompliancePercentage);
-            DA.SetDataList(4, result.ProjectedPoints);
-            DA.SetDataList(5, result.ProjectionLines);
+            DA.SetDataTree(4, result.ProjectedPoints);
+            DA.SetDataTree(5, result.ProjectionLines);
+
+            Message = $"Compliant: {result.CompliancePercentage}%";
+            Message += $"\nNon-compliant: {Math.Round(100 - result.CompliancePercentage, 1)}%";
+            Message += $"\nTime: {executionTime:F3}s";
         }
 
-        private RoadAnalysisResult AnalyzeRoadSlopes(System.Collections.Generic.List<Rhino.Geometry.Curve> curves,
-            Rhino.Geometry.Mesh terrain, double threshold, double segmentSize, bool rayUpward)
+        private RoadAnalysisResult AnalyzeRoadSlopes(
+            System.Collections.Generic.List<Rhino.Geometry.Curve> curves,
+            Rhino.Geometry.Mesh terrain,
+            double threshold,
+            double segmentSize,
+            bool rayUpward)
         {
             var result = new RoadAnalysisResult();
 
@@ -105,8 +119,10 @@ namespace Enzyme.Components
             terrain.FaceNormals.ComputeFaceNormals();
 
             // Process each curve
-            foreach (var curve in curves)
+            for (int curveIndex = 0; curveIndex < curves.Count; curveIndex++)
             {
+                var curve = curves[curveIndex];
+
                 // Skip invalid curves
                 if (curve == null || !curve.IsValid) continue;
 
@@ -149,14 +165,20 @@ namespace Enzyme.Components
                         // Determine if the segment complies with the threshold
                         bool isCompliant = slopePercentage <= threshold;
 
-                        // Add to results
-                        result.AnalyzedSegments.Add(segment);
-                        result.SlopeValues.Add(slopePercentage);
-                        result.CenterPoints.Add(segment.PointAtNormalizedLength(0.5));
-                        result.ProjectedPoints.Add(p0Projected);
-                        result.ProjectedPoints.Add(p1Projected);
-                        result.ProjectionLines.Add(new Rhino.Geometry.Line(p0, p0Projected));
-                        result.ProjectionLines.Add(new Rhino.Geometry.Line(p1, p1Projected));
+                        // Branch index: 0 for compliant, 1 for non-compliant
+                        int branchIndex = isCompliant ? 0 : 1;
+
+                        // Define path as {curveIndex;branchIndex}
+                        var path = new Grasshopper.Kernel.Data.GH_Path(branchIndex);
+
+                        // Add to results using data trees
+                        result.AnalyzedSegments.Append(new Grasshopper.Kernel.Types.GH_Curve(segment), path);
+                        result.SlopeValues.Append(new Grasshopper.Kernel.Types.GH_Number(slopePercentage), path);
+                        result.CenterPoints.Append(new Grasshopper.Kernel.Types.GH_Point(segment.PointAtNormalizedLength(0.5)), path);
+                        result.ProjectedPoints.Append(new Grasshopper.Kernel.Types.GH_Point(p0Projected), path);
+                        result.ProjectedPoints.Append(new Grasshopper.Kernel.Types.GH_Point(p1Projected), path);
+                        result.ProjectionLines.Append(new Grasshopper.Kernel.Types.GH_Line(new Rhino.Geometry.Line(p0, p0Projected)), path);
+                        result.ProjectionLines.Append(new Grasshopper.Kernel.Types.GH_Line(new Rhino.Geometry.Line(p1, p1Projected)), path);
 
                         if (isCompliant)
                         {
@@ -171,7 +193,7 @@ namespace Enzyme.Components
             // Calculate compliance percentage
             if (result.TotalSegmentCount > 0)
             {
-                result.CompliancePercentage = (double)result.CompliantSegmentCount / result.TotalSegmentCount * 100.0;
+                result.CompliancePercentage = Math.Round((double)result.CompliantSegmentCount / result.TotalSegmentCount * 100.0, 1);
             }
 
             return result;
@@ -227,11 +249,16 @@ namespace Enzyme.Components
 
         private class RoadAnalysisResult
         {
-            public System.Collections.Generic.List<Rhino.Geometry.Curve> AnalyzedSegments { get; set; } = new System.Collections.Generic.List<Rhino.Geometry.Curve>();
-            public System.Collections.Generic.List<double> SlopeValues { get; set; } = new System.Collections.Generic.List<double>();
-            public System.Collections.Generic.List<Rhino.Geometry.Point3d> CenterPoints { get; set; } = new System.Collections.Generic.List<Rhino.Geometry.Point3d>();
-            public System.Collections.Generic.List<Rhino.Geometry.Point3d> ProjectedPoints { get; set; } = new System.Collections.Generic.List<Rhino.Geometry.Point3d>();
-            public System.Collections.Generic.List<Rhino.Geometry.Line> ProjectionLines { get; set; } = new System.Collections.Generic.List<Rhino.Geometry.Line>();
+            public Grasshopper.Kernel.Data.GH_Structure<Grasshopper.Kernel.Types.GH_Curve> AnalyzedSegments { get; set; } 
+                = new Grasshopper.Kernel.Data.GH_Structure<Grasshopper.Kernel.Types.GH_Curve>();
+            public Grasshopper.Kernel.Data.GH_Structure<Grasshopper.Kernel.Types.GH_Number> SlopeValues { get; set; } 
+                = new Grasshopper.Kernel.Data.GH_Structure<Grasshopper.Kernel.Types.GH_Number>();
+            public Grasshopper.Kernel.Data.GH_Structure<Grasshopper.Kernel.Types.GH_Point> CenterPoints { get; set; } 
+                = new Grasshopper.Kernel.Data.GH_Structure<Grasshopper.Kernel.Types.GH_Point>();
+            public Grasshopper.Kernel.Data.GH_Structure<Grasshopper.Kernel.Types.GH_Point> ProjectedPoints { get; set; } 
+                = new Grasshopper.Kernel.Data.GH_Structure<Grasshopper.Kernel.Types.GH_Point>();
+            public Grasshopper.Kernel.Data.GH_Structure<Grasshopper.Kernel.Types.GH_Line> ProjectionLines { get; set; } 
+                = new Grasshopper.Kernel.Data.GH_Structure<Grasshopper.Kernel.Types.GH_Line>();
             public int CompliantSegmentCount { get; set; } = 0;
             public int TotalSegmentCount { get; set; } = 0;
             public double CompliancePercentage { get; set; } = 0.0;

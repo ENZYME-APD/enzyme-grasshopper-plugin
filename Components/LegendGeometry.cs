@@ -11,7 +11,7 @@ namespace Enzyme.Components
         public LegendGeometry()
             : base("Legend Geometry", "Legend",
                 "Creates a legend of colors with geometric representation",
-                "Enzyme", "Display")
+                "Enzyme", "Terrain")
         {
         }
 
@@ -32,17 +32,17 @@ namespace Enzyme.Components
 
         protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
-            pManager.AddGenericParameter("Color Legend", "L", "Legend data from analysis components", GH_ParamAccess.item);
-            pManager.AddPointParameter("Base Point", "P", "Base point for legend placement", GH_ParamAccess.item, new Rhino.Geometry.Point3d(0, 0, 0));
-            pManager.AddNumberParameter("Scale", "S", "Scale factor for legend geometry", GH_ParamAccess.item, 1.0);
+            pManager.AddGenericParameter("Color Legend", "Color Legend", "Legend data from analysis components", GH_ParamAccess.item);
+            pManager.AddPointParameter("Base Point", "Base Point", "Base point for legend placement", GH_ParamAccess.item, new Rhino.Geometry.Point3d(0, 0, 0));
+            pManager.AddNumberParameter("Scale", "Scale", "Scale factor for legend geometry", GH_ParamAccess.item, 1.0);
         }
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
         {
-            pManager.AddCurveParameter("Legend Rectangles", "R", "Rectangle curves for legend", GH_ParamAccess.list);
-            pManager.AddTextParameter("Legend Labels", "T", "Text labels for legend", GH_ParamAccess.list);
-            pManager.AddPointParameter("Label Positions", "P", "Positions for text labels", GH_ParamAccess.list);
-            pManager.AddColourParameter("Legend Colors", "C", "Colors for legend elements", GH_ParamAccess.list);
+            pManager.AddCurveParameter("Legend Rectangles", "Rectangles", "Rectangle curves for legend", GH_ParamAccess.list);
+            pManager.AddTextParameter("Legend Labels", "Labels", "Text labels for legend", GH_ParamAccess.list);
+            pManager.AddPointParameter("Label Positions", "Label Positions", "Positions for text labels", GH_ParamAccess.list);
+            pManager.AddColourParameter("Legend Colors", "Legend Colors", "Colors for legend elements", GH_ParamAccess.list);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)

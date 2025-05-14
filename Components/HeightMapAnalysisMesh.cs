@@ -32,15 +32,15 @@ namespace Enzyme.Components
 
         protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
-            pManager.AddMeshParameter("Mesh", "M", "Input mesh topography", GH_ParamAccess.item);
-            pManager.AddColourParameter("Color Gradient", "C", "Colors for height gradient (minimum 2 colors)", GH_ParamAccess.list);
-            pManager.AddBooleanParameter("Flip Colors", "F", "Flip the color gradient direction", GH_ParamAccess.item, true);
+            pManager.AddMeshParameter("Mesh", "Mesh", "Input mesh topography", GH_ParamAccess.item);
+            pManager.AddColourParameter("Color Gradient", "Color Gradient", "Colors for height gradient (minimum 2 colors)", GH_ParamAccess.list);
+            pManager.AddBooleanParameter("Flip Colors", "Flip Colors", "Flip the color gradient direction", GH_ParamAccess.item, true);
         }
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
         {
-            pManager.AddMeshParameter("Height Mesh", "HM", "Colored mesh showing height distribution", GH_ParamAccess.item);
-            pManager.AddGenericParameter("Color Legend", "L", "Legend of colors and their corresponding heights", GH_ParamAccess.item);
+            pManager.AddMeshParameter("Height Mesh", "Height Mesh", "Colored mesh showing height distribution", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Color Legend", "Color Legend", "Legend of colors and their corresponding heights", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)

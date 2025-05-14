@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Version>1.1.0</Version>
+    <Version>1.2.0</Version>
     <Title>Enzyme</Title>
     <Description>Enzyme Grasshopper plugin</Description>
     <AssemblyName>enzyme</AssemblyName>
@@ -9,6 +9,7 @@
     <TargetExt>.gha</TargetExt>
     <TargetFramework>net48</TargetFramework>
     <Rhino7GrasshopperLibPath>$(HOME)/Library/Application Support/McNeel/Rhinoceros/7.0/Plug-ins/Grasshopper (b45a29b1-4343-4035-989e-044e8580d9cf)/Libraries/</Rhino7GrasshopperLibPath>
+    <Rhino8GrasshopperLibPath>$(HOME)/Library/Application Support/McNeel/Rhinoceros/8.0/Plug-ins/Grasshopper (b45a29b1-4343-4035-989e-044e8580d9cf)/Libraries/</Rhino8GrasshopperLibPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
     <OutputPath>bin\Debug\</OutputPath>
@@ -35,5 +36,6 @@
   </ItemGroup>
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <Exec Command="if [ -d &quot;$(Rhino7GrasshopperLibPath)&quot; ]; then cp &quot;$(TargetPath)&quot; &quot;$(Rhino7GrasshopperLibPath)&quot;; fi" Condition="'$(OS)' != 'Windows_NT'" />
+    <Exec Command="if [ -d &quot;$(Rhino8GrasshopperLibPath)&quot; ]; then cp &quot;$(TargetPath)&quot; &quot;$(Rhino8GrasshopperLibPath)&quot;; fi" Condition="'$(OS)' != 'Windows_NT'" />
   </Target>
 </Project>
