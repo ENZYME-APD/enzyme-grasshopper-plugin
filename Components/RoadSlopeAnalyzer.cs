@@ -44,7 +44,7 @@ namespace Enzyme.Components
             pManager.AddCurveParameter("Analyzed Segments", "Analyzed Segments", "Road segments with slope analysis", GH_ParamAccess.list);
             pManager.AddNumberParameter("Slope Values", "Slope Values", "Slope values for each segment", GH_ParamAccess.list);
             pManager.AddPointParameter("Center Points", "Center Points", "Center points of segments", GH_ParamAccess.list);
-            pManager.AddNumberParameter("Compliance Percentage", "Pompliance Percentage", "Percentage of compliant/non-compliant segments", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Compliance Percentage", "Compliance Percentage", "Percentage of compliant/non-compliant segments", GH_ParamAccess.item);
             pManager.AddPointParameter("Projected Points", "Projected Points", "Points projected onto terrain", GH_ParamAccess.list);
             pManager.AddLineParameter("Projection Lines", "Projection Lines", "Lines showing projection from original to terrain", GH_ParamAccess.list);
         }

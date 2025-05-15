@@ -48,6 +48,9 @@ namespace Enzyme.Components
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+
             // Input variables
             Rhino.Geometry.Mesh mesh = null;
             Color startColor = Color.Green;
@@ -81,10 +84,18 @@ namespace Enzyme.Components
             // Create legend data
             var legendData = CreateLegendData(startColor, endColor, threshold, percentOverThreshold);
 
+            stopwatch.Stop();
+            double executionTime = stopwatch.Elapsed.TotalSeconds;
+
             // Set output data
             DA.SetData(0, coloredMesh);
             DA.SetData(1, legendData);
             DA.SetData(2, percentOverThreshold);
+
+            string mode = binaryMode ? "Binary" : "Gradient";
+            Message = $"Mode: {mode}";
+            Message += $"\n{Math.Round(percentOverThreshold, 2)}% over {Math.Round(threshold, 2)} threshold";
+            Message += $"\nTime: {executionTime:F3}s";
         }
 
         private Rhino.Geometry.Mesh AnalyzeMeshSlopes(Rhino.Geometry.Mesh mesh, Color startColor, Color endColor, double threshold, bool binaryMode, out double percentOverThreshold)
@@ -165,8 +176,8 @@ namespace Enzyme.Components
                 EndColor = endColor,
                 Threshold = threshold,
                 PercentOverThreshold = percentOverThreshold,
-                Title = $"Slope Analysis (Threshold: {threshold:F1}°)",
-                Description = $"{percentOverThreshold:F1}% of area exceeds {threshold:F1}° slope"
+                Title = $"Slope Analysis (Threshold: {threshold:F3}°)",
+                Description = $"{percentOverThreshold:F2}% of area exceeds {threshold:F3}° slope"
             };
 
             return legendData;

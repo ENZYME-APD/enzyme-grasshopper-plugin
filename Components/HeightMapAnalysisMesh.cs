@@ -45,6 +45,9 @@ namespace Enzyme.Components
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+
             // Input variables
             Rhino.Geometry.Mesh mesh = null;
             var colors = new System.Collections.Generic.List<Color>();
@@ -96,9 +99,16 @@ namespace Enzyme.Components
             // Create legend data
             var legendData = CreateHeightLegendData(colors, minZ, maxZ, flipColors);
 
+            stopwatch.Stop();
+            double executionTime = stopwatch.Elapsed.TotalSeconds;
+
             // Set output data
             DA.SetData(0, coloredMesh);
             DA.SetData(1, legendData);
+
+            Message = $"Ht. variation: {minZ:F2} to {maxZ:F2} ({heightRange:F2})";
+            Message += $"\nNo. of Colors: {colors.Count}";
+            Message += $"\nTime: {executionTime:F3}s";
         }
 
         private Rhino.Geometry.Mesh ColorMeshByHeight(Rhino.Geometry.Mesh mesh, System.Collections.Generic.List<Color> colors, double minZ, double maxZ, bool flipColors)
