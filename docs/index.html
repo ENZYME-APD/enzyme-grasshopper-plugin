@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enzyme Grasshopper Plugin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="index.html" class="nav-brand">
+            <span class="logo">E</span> Enzyme
+        </a>
+        <div class="nav-links">
+            <a href="#components">Components</a>
+            <a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank">GitHub</a>
+            <a href="#install" class="btn-primary">Install</a>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <h1>Enzyme<span>.</span></h1>
+        <div class="tagline">Grasshopper tools for computational design</div>
+        <p>A suite of advanced utilities and terrain analysis components designed to streamline computational workflows in Rhino and Grasshopper.</p>
+        <div class="hero-actions">
+            <a href="#components" class="btn-primary">Browse Components</a>
+            <a href="#install" class="btn-secondary">Install via Yak</a>
+        </div>
+    </header>
+
+    <section id="components">
+        <h2>Components</h2>
+        <div class="components-grid">
+            
+            <a href="components/group-by-key.html" class="card">
+                <span class="badge utilities">Utilities</span>
+                <h3>GroupByKey</h3>
+                <p>Groups a list of values by a corresponding list of keys into a DataTree.</p>
+                <div class="card-meta">
+                    <span>2 Inputs</span>
+                    <span>2 Outputs</span>
+                </div>
+                <span class="card-link">View docs →</span>
+            </a>
+
+            <a href="components/tile-grid-generator.html" class="card">
+                <span class="badge utilities">Utilities</span>
+                <h3>Grid Pattern Generator</h3>
+                <p>Generates grid patterns within a boundary curve and trims cells to fit.</p>
+                <div class="card-meta">
+                    <span>5 Inputs</span>
+                    <span>6 Outputs</span>
+                </div>
+                <span class="card-link">View docs →</span>
+            </a>
+
+            <a href="components/road-slope-analyzer.html" class="card">
+                <span class="badge terrain">Terrain</span>
+                <h3>Road Slope Analyzer</h3>
+                <p>Analyzes road slopes by projecting 2D curves onto a terrain mesh.</p>
+                <div class="card-meta">
+                    <span>5 Inputs</span>
+                    <span>6 Outputs</span>
+                </div>
+                <span class="card-link">View docs →</span>
+            </a>
+
+            <a href="components/slope-analysis-mesh.html" class="card">
+                <span class="badge terrain">Terrain</span>
+                <h3>Slope Analysis Mesh</h3>
+                <p>Analyses a mesh topography and displays areas with slopes over a threshold.</p>
+                <div class="card-meta">
+                    <span>5 Inputs</span>
+                    <span>3 Outputs</span>
+                </div>
+                <span class="card-link">View docs →</span>
+            </a>
+
+            <a href="components/height-map-analysis-mesh.html" class="card">
+                <span class="badge terrain">Terrain</span>
+                <h3>Height Map Analysis Mesh</h3>
+                <p>Analyses a mesh topography and provides a coloured mesh displaying height distribution.</p>
+                <div class="card-meta">
+                    <span>3 Inputs</span>
+                    <span>2 Outputs</span>
+                </div>
+                <span class="card-link">View docs →</span>
+            </a>
+
+            <a href="components/legend-geometry.html" class="card">
+                <span class="badge utilities">Utilities</span>
+                <h3>Legend Geometry</h3>
+                <p>Generates visual legend geometry for display.</p>
+                <div class="card-meta">
+                    <span>- Inputs</span>
+                    <span>- Outputs</span>
+                </div>
+                <span class="card-link">View docs →</span>
+            </a>
+
+        </div>
+    </section>
+
+    <section id="install">
+        <h2>Installation</h2>
+        <div class="install-card">
+            <p>Install directly within Rhino 8 using the Package Manager.</p>
+            <div class="code-block">
+                PackageManager
+            </div>
+            <p>Search for <strong>Enzyme-Grasshopper-Plugin</strong> and click Install.</p>
+        </div>
+    </section>
+
+    <footer>
+        <p>Built by Dushyant Basson & Jorge Beneitez | <a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank">GitHub</a> | Enzyme-APD</p>
+    </footer>
+
+    <script src="js/main.js"></script>
+</body>
+</html>

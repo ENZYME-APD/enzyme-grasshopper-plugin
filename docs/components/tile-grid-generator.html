@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grid Pattern Generator - Enzyme</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="../index.html" class="nav-brand">
+            <span class="logo">E</span> Enzyme
+        </a>
+        <div class="nav-links">
+            <a href="../index.html#components">Components</a>
+            <a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank">GitHub</a>
+        </div>
+    </nav>
+
+    <div class="breadcrumb">
+        <a href="../index.html">← Back to Components</a>
+    </div>
+
+    <div class="component-header">
+        <span class="badge utilities">Utilities</span>
+        <h1>Grid Pattern Generator and Trimmer <span class="component-nickname">GridPattern</span></h1>
+        <p class="component-description">Generates a grid pattern (rectangular, offset rectangular, hexagonal, triangular) within a boundary curve and trims cells to fit.</p>
+    </div>
+
+    <div class="component-content">
+        <h2>Inputs</h2>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Nickname</th>
+                        <th>Type</th>
+                        <th>Access</th>
+                        <th>Default</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Boundary</td>
+                        <td>Boundary</td>
+                        <td>Curve</td>
+                        <td>Item</td>
+                        <td>—</td>
+                        <td>Closed boundary curve</td>
+                    </tr>
+                    <tr>
+                        <td>Origin Plane</td>
+                        <td>Plane</td>
+                        <td>Plane</td>
+                        <td>Item</td>
+                        <td>WorldXY</td>
+                        <td>Grid base plane</td>
+                    </tr>
+                    <tr>
+                        <td>Grid Type</td>
+                        <td>Grid Type</td>
+                        <td>Text</td>
+                        <td>Item</td>
+                        <td>"rectangular"</td>
+                        <td>Grid type: rectangular, offset_rectangular, hexagonal, triangular</td>
+                    </tr>
+                    <tr>
+                        <td>Cell Width</td>
+                        <td>X Dim</td>
+                        <td>Number</td>
+                        <td>Item</td>
+                        <td>1.0</td>
+                        <td>Cell width</td>
+                    </tr>
+                    <tr>
+                        <td>Cell Height</td>
+                        <td>Y Dim</td>
+                        <td>Number</td>
+                        <td>Item</td>
+                        <td>1.0</td>
+                        <td>Cell height (used for rectangular types)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h2>Outputs</h2>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Nickname</th>
+                        <th>Type</th>
+                        <th>Access</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Tile Status</td>
+                        <td>Tile Status</td>
+                        <td>Integer</td>
+                        <td>List</td>
+                        <td>0 = full tile, 1 = trimmed tile</td>
+                    </tr>
+                    <tr>
+                        <td>Full Count</td>
+                        <td>Full Count</td>
+                        <td>Integer</td>
+                        <td>Item</td>
+                        <td>Number of full tiles</td>
+                    </tr>
+                    <tr>
+                        <td>Trimmed Count</td>
+                        <td>Trim Count</td>
+                        <td>Integer</td>
+                        <td>Item</td>
+                        <td>Number of trimmed tiles</td>
+                    </tr>
+                    <tr>
+                        <td>All Tiles</td>
+                        <td>All Tiles</td>
+                        <td>Curve</td>
+                        <td>List</td>
+                        <td>All grid tiles (both full and trimmed)</td>
+                    </tr>
+                    <tr>
+                        <td>Full Tiles</td>
+                        <td>Full Tiles</td>
+                        <td>Curve</td>
+                        <td>List</td>
+                        <td>Tiles fully inside the boundary</td>
+                    </tr>
+                    <tr>
+                        <td>Trimmed Tiles</td>
+                        <td>Trimmed Tiles</td>
+                        <td>Curve</td>
+                        <td>List</td>
+                        <td>Tiles partially inside the boundary, clipped</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="notes">
+            <h3>Notes & Behaviour</h3>
+            <p>Uses local plane coordinate space for all grid calculations then transforms back to world space. Supports 4 grid types. Status message shows grid type, full/trimmed counts, and execution time.</p>
+        </div>
+    </div>
+
+    <footer>
+        <p>Built by Dushyant Basson & Jorge Beneitez | <a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank">GitHub</a> | Enzyme-APD</p>
+    </footer>
+
+</body>
+</html>

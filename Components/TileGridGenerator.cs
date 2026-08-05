@@ -30,7 +30,7 @@ namespace Enzyme.Components
             }
         }
 
-        public override Guid ComponentGuid => new Guid("A1B2C3D4-E5F6-7890-1234-56789ABCDEF0"); // Generate a new GUID
+        public override Guid ComponentGuid => new Guid("3E7B9F2A-C4D8-4A1E-B5F3-8D2C6E0A9B4F");
 
         protected override void RegisterInputParams(GH_InputParamManager pManager)
         {

@@ -25,8 +25,9 @@
     <Optimize>true</Optimize>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Grasshopper" Version="7.36.23346.16351" IncludeAssets="compile;build" />
-    <PackageReference Include="RhinoCommon" Version="7.36.23346.16351" IncludeAssets="compile;build" />
+    <PackageReference Include="Grasshopper" Version="8.*" IncludeAssets="compile;build" />
+    <PackageReference Include="RhinoCommon" Version="8.*" IncludeAssets="compile;build" />
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="All" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources/*.png" />

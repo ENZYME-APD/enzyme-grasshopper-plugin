@@ -4,8 +4,12 @@ authors:
   - Dushyant Basson
   - Jorge Beneitez
 description: Enzyme Grasshopper plugin
+url: https://github.com/enzyme-apd/enzyme-grasshopper-plugin
 keywords:
   - grasshopper
   - data
   - manipulation
 icon: Resources/enzyme_logo.png
+compatibility:
+  rhinocommon:
+    version: "^8"
