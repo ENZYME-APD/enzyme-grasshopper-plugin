@@ -12,7 +12,7 @@ using Grasshopper.Kernel.Types;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace Enzyme.Grasshopper.Components
+namespace Enzyme.Components
 {
     public class MassParserComponent : GH_Component
     {

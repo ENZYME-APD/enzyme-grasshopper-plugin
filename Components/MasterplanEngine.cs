@@ -8,7 +8,7 @@ using Rhino.Geometry;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace Enzyme.Grasshopper.Components
+namespace Enzyme.Components
 {
     public class MasterplanEngineComponent : GH_Component
     {

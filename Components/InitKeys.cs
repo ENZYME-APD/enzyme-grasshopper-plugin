@@ -5,7 +5,7 @@ using Grasshopper.Kernel;
 using Rhino;
 using Rhino.DocObjects;
 
-namespace Enzyme.Grasshopper.Components
+namespace Enzyme.Components
 {
     public class InitKeysComponent : GH_Component
     {

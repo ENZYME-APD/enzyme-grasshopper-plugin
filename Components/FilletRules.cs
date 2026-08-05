@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Grasshopper.Kernel;
 using Newtonsoft.Json;
 
-namespace Enzyme.Grasshopper.Components
+namespace Enzyme.Components
 {
     public class FilletRulesComponent : GH_Component
     {

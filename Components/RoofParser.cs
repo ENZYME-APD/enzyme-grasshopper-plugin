@@ -9,7 +9,7 @@ using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
 using Newtonsoft.Json.Linq;
 
-namespace Enzyme.Grasshopper.Components
+namespace Enzyme.Components
 {
     public class RoofParserComponent : GH_Component
     {

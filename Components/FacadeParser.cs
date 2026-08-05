@@ -10,7 +10,7 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
 
-namespace Enzyme.Grasshopper.Components
+namespace Enzyme.Components
 {
     public class FacadeParserComponent : GH_Component
     {

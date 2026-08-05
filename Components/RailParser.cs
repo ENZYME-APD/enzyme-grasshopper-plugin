@@ -9,7 +9,7 @@ using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
 using Newtonsoft.Json.Linq;
 
-namespace Enzyme.Grasshopper.Components
+namespace Enzyme.Components
 {
     public class RailParserComponent : GH_Component
     {
