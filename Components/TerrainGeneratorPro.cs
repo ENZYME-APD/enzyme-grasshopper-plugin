@@ -378,7 +378,7 @@ namespace Enzyme.Components
             DA.SetDataList(3, treesOut);
 
             double area = Rhino.Geometry.AreaMassProperties.Compute(boundary).Area;
-            Message = $"Time: {stopwatch.ElapsedMilliseconds} ms\nArea: {area:N0} m2\nTrees: {treesOut.Count}";
+            Message = $"{this.NickName}\nTime: {stopwatch.ElapsedMilliseconds} ms\nArea: {area:N0} m2\nTrees: {treesOut.Count}";
         }
 
         private double[] Hash2D(double x, double y, int seed)
