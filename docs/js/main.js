@@ -113,7 +113,8 @@ document.addEventListener('DOMContentLoaded', () => {
           const dist = Math.sqrt(dx * dx + dy * dy);
           
           let s = baseSize;
-          let opacity = currentMode === 'pluses' ? 0.05 : 0.20;
+          let baseOpacity = currentMode === 'pluses' ? 0.10 : 0.20;
+          let opacity = baseOpacity;
           
           if (dist < falloff) {
             const factor = 1 - (dist / falloff);
@@ -121,13 +122,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (currentMode !== 'pluses') {
               s = baseSize + (maxSize - baseSize) * ease;
             }
-            opacity = (currentMode === 'pluses' ? 0.05 : 0.20) + ((currentMode === 'pluses' ? 0.5 : 0.25) * ease); 
+            opacity = baseOpacity + ((currentMode === 'pluses' ? 0.6 : 0.25) * ease); 
           }
           
           if (currentMode === 'pluses') {
-            const noise = Math.sin(x * 0.01 + time) * Math.cos(y * 0.01 + time * 1.2) * Math.sin((x+y)*0.02 - time*0.8);
-            if (noise > 0.8) {
-               opacity += (noise - 0.8) * 1.5; 
+            const wave = Math.sin(x * 0.02 + time * 1.5) + Math.cos(y * 0.02 - time * 1.1);
+            if (wave > 1.2) {
+               opacity += (wave - 1.2) * 0.5; 
             }
             ctx.strokeStyle = `rgba(198, 198, 203, ${opacity})`;
             ctx.lineWidth = 1;
