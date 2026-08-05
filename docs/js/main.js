@@ -33,11 +33,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const ctx = canvas.getContext('2d');
     let width, height;
     
-    const isRectMode = Math.random() < 0.5;
-    const spacing = isRectMode ? 16 : 8; 
-    const baseSize = isRectMode ? 4 : 1.5;
-    const maxSize = isRectMode ? 12 : baseSize * 1.5;
-    const falloff = 200; 
+    const modes = ['dots', 'rects', 'pluses'];
+    const currentMode = modes[Math.floor(Math.random() * modes.length)];
+    
+    let spacing, baseSize, maxSize, falloff;
+    if (currentMode === 'pluses') {
+      spacing = 32;
+      baseSize = 4;
+      maxSize = 4; 
+      falloff = 250;
+    } else if (currentMode === 'rects') {
+      spacing = 16;
+      baseSize = 4;
+      maxSize = 12;
+      falloff = 200;
+    } else { // dots
+      spacing = 8;
+      baseSize = 1.5;
+      maxSize = baseSize * 1.5;
+      falloff = 200;
+    }
     
     let mouse = { x: -1000, y: -1000 };
     
@@ -69,6 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     function draw() {
       ctx.clearRect(0, 0, width, height);
+      const time = Date.now() / 1000;
       
       for (let x = spacing / 2; x < width; x += spacing) {
         for (let y = spacing / 2; y < height; y += spacing) {
@@ -77,24 +93,40 @@ document.addEventListener('DOMContentLoaded', () => {
           const dist = Math.sqrt(dx * dx + dy * dy);
           
           let s = baseSize;
-          let opacity = 0.20;
+          let opacity = currentMode === 'pluses' ? 0.05 : 0.20;
           
           if (dist < falloff) {
             const factor = 1 - (dist / falloff);
             const ease = 1 - Math.pow(1 - factor, 3);
-            s = baseSize + (maxSize - baseSize) * ease;
-            opacity = 0.20 + (0.25 * ease); 
+            if (currentMode !== 'pluses') {
+              s = baseSize + (maxSize - baseSize) * ease;
+            }
+            opacity = (currentMode === 'pluses' ? 0.05 : 0.20) + ((currentMode === 'pluses' ? 0.5 : 0.25) * ease); 
           }
           
-          ctx.fillStyle = `rgba(198, 198, 203, ${opacity})`; 
-          
-          ctx.beginPath();
-          if (isRectMode) {
-            ctx.rect(x - s/2, y - s/2, s, s);
+          if (currentMode === 'pluses') {
+            const noise = Math.sin(x * 0.01 + time) * Math.cos(y * 0.01 + time * 1.2) * Math.sin((x+y)*0.02 - time*0.8);
+            if (noise > 0.8) {
+               opacity += (noise - 0.8) * 1.5; 
+            }
+            ctx.strokeStyle = `rgba(198, 198, 203, ${opacity})`;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(x - s, y);
+            ctx.lineTo(x + s, y);
+            ctx.moveTo(x, y - s);
+            ctx.lineTo(x, y + s);
+            ctx.stroke();
           } else {
-            ctx.arc(x, y, s, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(198, 198, 203, ${opacity})`; 
+            ctx.beginPath();
+            if (currentMode === 'rects') {
+              ctx.rect(x - s/2, y - s/2, s, s);
+            } else {
+              ctx.arc(x, y, s, 0, Math.PI * 2);
+            }
+            ctx.fill();
           }
-          ctx.fill();
         }
       }
       requestAnimationFrame(draw);
