@@ -60,6 +60,20 @@ a {
   font-size: 1.5rem;
 }
 
+.nav-brand .logo-img {
+  height: 28px;
+  width: auto;
+  border-radius: 4px;
+}
+
+.hero .hero-logo {
+  height: 72px;
+  width: auto;
+  vertical-align: middle;
+  margin-right: 16px;
+  border-radius: 8px;
+}
+
 .nav-links {
   display: flex;
   gap: 1.5rem;
