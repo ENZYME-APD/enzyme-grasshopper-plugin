@@ -122,17 +122,16 @@
         </div>
     </section>
 
-    <section id="authors" style="text-align: center; padding: 4rem 2rem 0 2rem; max-width: 1200px; margin: 0 auto;">
-        <h2>Created By</h2>
-        <div style="display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap; margin-top: 2rem;">
-            <div style="background: rgba(255,255,255,0.02); border: 1px solid #1e1e26; padding: 2rem 3.5rem; border-radius: 16px; backdrop-filter: blur(10px); transition: transform 0.2s ease, border-color 0.2s ease;" onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='#2dd4a0';" onmouseout="this.style.transform='none'; this.style.borderColor='#1e1e26';">
-                <h3 style="margin: 0 0 0.5rem 0; font-size: 1.25rem; color: #fff;">Dushyant Basson</h3>
-                <p style="margin: 0; color: #2dd4a0; font-weight: 500;">Enzyme-APD</p>
-            </div>
-            <div style="background: rgba(255,255,255,0.02); border: 1px solid #1e1e26; padding: 2rem 3.5rem; border-radius: 16px; backdrop-filter: blur(10px); transition: transform 0.2s ease, border-color 0.2s ease;" onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='#2dd4a0';" onmouseout="this.style.transform='none'; this.style.borderColor='#1e1e26';">
-                <h3 style="margin: 0 0 0.5rem 0; font-size: 1.25rem; color: #fff;">Jorge Beneitez</h3>
-                <p style="margin: 0; color: #2dd4a0; font-weight: 500;">Enzyme-APD</p>
-            </div>
+    <section id="about" style="text-align: center; padding: 4rem 2rem 0 2rem; max-width: 800px; margin: 0 auto;">
+        <h2 style="font-size: 1.5rem; margin-bottom: 1.5rem;">About</h2>
+        <p style="color: #a1a1aa; line-height: 1.6; margin-bottom: 3rem; font-size: 0.95rem;">
+            This plugin has been developed under <a href="https://weareenzyme.com" target="_blank" style="color: #2dd4a0; text-decoration: none; border-bottom: 1px solid rgba(45, 212, 160, 0.3); padding-bottom: 1px; transition: border-color 0.2s ease;" onmouseover="this.style.borderColor='#2dd4a0'" onmouseout="this.style.borderColor='rgba(45, 212, 160, 0.3)'">Enzyme APD</a> for its internal use.<br>
+            Main contributors: <span id="dynamic-contributors" style="font-weight: 500;">Loading...</span>
+        </p>
+        
+        <h3 style="font-size: 1.1rem; color: #fff; margin-bottom: 1.5rem; font-weight: 500;">Recent Commits</h3>
+        <div class="chart-container" style="position: relative; height: 250px; width: 100%; background: rgba(255,255,255,0.02); border: 1px solid #1e1e26; border-radius: 12px; padding: 1.5rem;">
+            <canvas id="contributionsChart"></canvas>
         </div>
     </section>
 
@@ -140,6 +139,8 @@
         <p><a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank" style="color: #a1a1aa; text-decoration: none; border-bottom: 1px solid #3f3f46; padding-bottom: 2px; transition: color 0.2s ease;" onmouseover="this.style.color='#fff';" onmouseout="this.style.color='#a1a1aa';">View on GitHub</a></p>
     </footer>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="js/main.js?v=20260805_v3"></script>
+    <script src="js/stats.js?v=20260805_v1"></script>
 </body>
 </html>
