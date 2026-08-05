@@ -40,18 +40,6 @@ jobs:
           curl -L -o yak "https://files.mcneel.com/yak/tools/0.13.0/mac/yak"
           chmod +x yak
 
-      - name: Yank previous version from Yak
-        env:
-          YAK_TOKEN: ${{ secrets.YAK_TOKEN }}
-        if: env.YAK_TOKEN != ''
-        run: |
-          pkg_name="${{ steps.get_pkg_name.outputs.pkg_name }}"
-          versions=$(./yak search "$pkg_name" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' || true)
-          for ver in $versions; do
-            echo "Yanking version $ver"
-            ./yak yank "$pkg_name" "$ver"
-          done
-
       - name: Build plugin
         run: dotnet build enzGhPlugin.csproj -c Release
 
