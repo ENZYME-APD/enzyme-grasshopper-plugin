@@ -51,7 +51,8 @@ document.addEventListener('DOMContentLoaded', () => {
       localStorage.setItem('bgHistory', JSON.stringify(history));
     } catch(e) {}
     
-    let spacing = 16;
+    let spacingX = 16;
+    let spacingY = 16;
     let falloff = 200;
     let baseSize, maxSize;
     
@@ -63,7 +64,8 @@ document.addEventListener('DOMContentLoaded', () => {
       maxSize = 10;
     } else if (currentMode === 'rects_v') {
       baseSize = 2.5; 
-      maxSize = 20;  
+      maxSize = 20;
+      spacingY = 26; // 24px height + 2px margin to prevent overlap
     } else { // dots
       baseSize = 1.5;
       maxSize = 2.25;
@@ -101,15 +103,17 @@ document.addEventListener('DOMContentLoaded', () => {
       ctx.clearRect(0, 0, width, height);
       const time = Date.now() / 1000;
       
-      for (let gridX = spacing / 2; gridX < width + spacing; gridX += spacing) {
-        for (let gridY = spacing / 2; gridY < height + spacing; gridY += spacing) {
+      const points = [];
+      
+      for (let gridX = spacingX / 2; gridX < width + spacingX; gridX += spacingX) {
+        let col = [];
+        for (let gridY = spacingY / 2; gridY < height + spacingY; gridY += spacingY) {
           let x = gridX;
           let y = gridY;
           
-          // Sinuous movement ONLY for pluses
           if (currentMode === 'pluses') {
-            const offsetX = Math.sin(gridX * 0.015 + time * 1.2) * (spacing * 0.25);
-            const offsetY = Math.cos(gridY * 0.015 + time * 0.9) * (spacing * 0.25);
+            const offsetX = Math.sin(gridX * 0.015 + time * 1.2) * (spacingX * 0.25);
+            const offsetY = Math.cos(gridY * 0.015 + time * 0.9) * (spacingY * 0.25);
             x += offsetX;
             y += offsetY;
           }
@@ -119,14 +123,13 @@ document.addEventListener('DOMContentLoaded', () => {
           const dist = Math.sqrt(dx * dx + dy * dy);
           
           let s = baseSize;
-          let baseOpacity = 0.20; 
-          let opacity = baseOpacity;
+          let opacity = 0.20; 
           
           if (dist < falloff) {
             const factor = 1 - (dist / falloff);
             const ease = 1 - Math.pow(1 - factor, 3);
             s = baseSize + (maxSize - baseSize) * ease;
-            opacity = baseOpacity + (0.20 * ease); // Base 20% + up to 20% = 40% Max
+            opacity = 0.20 + (0.20 * ease); 
           }
           
           if (currentMode === 'pluses') {
@@ -134,29 +137,49 @@ document.addEventListener('DOMContentLoaded', () => {
             opacity += wave * 0.10; 
             if (opacity < 0.10) opacity = 0.10; 
             if (opacity > 1.0) opacity = 1.0;
-            
-            ctx.strokeStyle = `rgba(198, 198, 203, ${opacity})`;
-            ctx.lineWidth = 1.5;
+          }
+          
+          col.push({ x, y, s, opacity });
+        }
+        points.push(col);
+      }
+      
+      for (let i = 0; i < points.length; i++) {
+        for (let j = 0; j < points[i].length; j++) {
+          const p = points[i][j];
+          
+          if (currentMode === 'pluses') {
+            ctx.strokeStyle = `rgba(198, 198, 203, ${p.opacity * 0.4})`;
+            ctx.lineWidth = 1;
             ctx.beginPath();
-            ctx.moveTo(x - s, y);
-            ctx.lineTo(x + s, y);
-            ctx.moveTo(x, y - s);
-            ctx.lineTo(x, y + s);
+            if (i < points.length - 1) {
+              ctx.moveTo(p.x, p.y);
+              ctx.lineTo(points[i+1][j].x, points[i+1][j].y);
+            }
+            if (j < points[i].length - 1) {
+              ctx.moveTo(p.x, p.y);
+              ctx.lineTo(points[i][j+1].x, points[i][j+1].y);
+            }
             ctx.stroke();
-          } else if (currentMode === 'rects_v') {
-            ctx.fillStyle = `rgba(198, 198, 203, ${opacity})`; 
+            
+            ctx.fillStyle = `rgba(198, 198, 203, ${p.opacity})`;
             ctx.beginPath();
-            const startX = x - spacing/2 + (spacing * 0.05); 
+            ctx.arc(p.x, p.y, p.s, 0, Math.PI * 2);
+            ctx.fill();
+          } else if (currentMode === 'rects_v') {
+            ctx.fillStyle = `rgba(198, 198, 203, ${p.opacity})`; 
+            ctx.beginPath();
+            const startX = p.x - spacingX/2 + (spacingX * 0.05); 
             const h = 24;
-            ctx.rect(startX, y - h/2, s, h);
+            ctx.rect(startX, p.y - h/2, p.s, h);
             ctx.fill();
           } else {
-            ctx.fillStyle = `rgba(198, 198, 203, ${opacity})`; 
+            ctx.fillStyle = `rgba(198, 198, 203, ${p.opacity})`; 
             ctx.beginPath();
             if (currentMode === 'rects') {
-              ctx.rect(x - s/2, y - s/2, s, s);
+              ctx.rect(p.x - p.s/2, p.y - p.s/2, p.s, p.s);
             } else {
-              ctx.arc(x, y, s, 0, Math.PI * 2);
+              ctx.arc(p.x, p.y, p.s, 0, Math.PI * 2);
             }
             ctx.fill();
           }
