@@ -33,8 +33,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const ctx = canvas.getContext('2d');
     let width, height;
     
-    const spacing = 8; 
-    const baseRadius = 1.5;
+    const isRectMode = Math.random() < 0.5;
+    const spacing = isRectMode ? 16 : 8; 
+    const baseSize = isRectMode ? 4 : 1.5;
+    const maxSize = isRectMode ? 12 : baseSize * 1.5;
     const falloff = 200; 
     
     let mouse = { x: -1000, y: -1000 };
@@ -74,20 +76,24 @@ document.addEventListener('DOMContentLoaded', () => {
           const dy = mouse.y - y;
           const dist = Math.sqrt(dx * dx + dy * dy);
           
-          let r = baseRadius;
+          let s = baseSize;
           let opacity = 0.20;
           
           if (dist < falloff) {
             const factor = 1 - (dist / falloff);
             const ease = 1 - Math.pow(1 - factor, 3);
-            r = baseRadius * (1 + 0.5 * ease); // Max growth 50%
+            s = baseSize + (maxSize - baseSize) * ease;
             opacity = 0.20 + (0.25 * ease); 
           }
           
           ctx.fillStyle = `rgba(198, 198, 203, ${opacity})`; 
           
           ctx.beginPath();
-          ctx.arc(x, y, r, 0, Math.PI * 2);
+          if (isRectMode) {
+            ctx.rect(x - s/2, y - s/2, s, s);
+          } else {
+            ctx.arc(x, y, s, 0, Math.PI * 2);
+          }
           ctx.fill();
         }
       }
