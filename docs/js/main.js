@@ -84,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
             opacity = 0.15 + (0.25 * ease); 
           }
           
-          ctx.fillStyle = `rgba(160, 160, 165, ${opacity})`; 
+          ctx.fillStyle = `rgba(198, 198, 203, ${opacity})`; 
           
           ctx.beginPath();
           ctx.arc(x, y, r, 0, Math.PI * 2);
