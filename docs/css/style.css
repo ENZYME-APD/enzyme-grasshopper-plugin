@@ -262,6 +262,7 @@ section h2 {
   color: var(--badge-terrain-text);
 }
 
+.badge.data,
 .badge.utilities {
   background: var(--badge-utils-bg);
   color: var(--badge-utils-text);
