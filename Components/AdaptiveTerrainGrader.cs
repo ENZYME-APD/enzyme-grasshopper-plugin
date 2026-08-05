@@ -22,7 +22,7 @@ namespace Enzyme.Components
         {
             get
             {
-                return IconLoader.Load("TerrainGrader.png");
+                return IconLoader.Load("AdaptiveTerrainGrader.png");
             }
         }
 
@@ -97,7 +97,7 @@ namespace Enzyme.Components
                 DA.SetData(3, 0.0);
                 
                 timer.Stop();
-                Message = $"Time: {timer.ElapsedMilliseconds} ms\n---\nNO PADS: PASSTHROUGH";
+                Message = $"{this.NickName}\nTime: {timer.ElapsedMilliseconds} ms\n---\nNO PADS: PASSTHROUGH";
                 return;
             }
 
@@ -347,7 +347,7 @@ namespace Enzyme.Components
 
             double siteArea = (bbox.Max.X - bbox.Min.X) * (bbox.Max.Y - bbox.Min.Y);
 
-            Message = $"Time: {timer.ElapsedMilliseconds} ms\n---\nSITE: {siteArea:N0} m²\nGRID: {MeshResolution:N1} m\nCUT: {cutAcc:N1} m³\nFILL: {fillAcc:N1} m³";
+            Message = $"{this.NickName}\nTime: {timer.ElapsedMilliseconds} ms\n---\nSITE: {siteArea:N0} m²\nGRID: {MeshResolution:N1} m\nCUT: {cutAcc:N1} m³\nFILL: {fillAcc:N1} m³";
         }
     }
 }

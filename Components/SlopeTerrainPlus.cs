@@ -220,7 +220,7 @@ namespace Enzyme.Components
             string mode_str = is_binary ? "Binary" : "Gradient";
             string conversion_str = $"{deg:F1}° | {pct:F1}% | 1:{ratio:F1}";
 
-            Message = $"Time: {exec_ms:F1} ms\n---\nInput: {conversion_str}\n● {mode_str} | ○ Over: {total_pct_over:F1}%";
+            Message = $"{this.NickName}\nTime: {exec_ms:F1} ms\n---\nInput: {conversion_str}\n● {mode_str} | ○ Over: {total_pct_over:F1}%";
         }
     }
 }

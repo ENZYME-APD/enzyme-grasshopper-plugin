@@ -153,7 +153,7 @@ namespace Enzyme.Components
             DA.SetData(1, finalWaterLevel);
 
             sw.Stop();
-            Message = $"Time: {sw.ElapsedMilliseconds} ms\n---\n● Flooded: {floodedVertexCount} | ○ Dry: {totalVertices - floodedVertexCount}";
+            Message = $"{this.NickName}\nTime: {sw.ElapsedMilliseconds} ms\n---\n● Flooded: {floodedVertexCount} | ○ Dry: {totalVertices - floodedVertexCount}";
         }
     }
 }

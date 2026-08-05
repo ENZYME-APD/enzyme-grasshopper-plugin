@@ -396,11 +396,11 @@ namespace Enzyme.Components
             if (execute)
             {
                 double finalComfortPercent = activeSensorCount > 0 ? ((double)comfortablePointCount / activeSensorCount) * 100.0 : 0.0;
-                Message = $"Time: {sw.ElapsedMilliseconds} ms\n---\n● Min Speed: {(minObservedSpeed == double.MaxValue ? 0.0 : minObservedSpeed):F1} m/s\n○ Max Speed: {(maxObservedSpeed == double.MinValue ? 0.0 : maxObservedSpeed):F1} m/s\n● Comfort: {finalComfortPercent:F1}% (≤ 5.0 m/s)";
+                Message = $"{this.NickName}\nTime: {sw.ElapsedMilliseconds} ms\n---\n● Min Speed: {(minObservedSpeed == double.MaxValue ? 0.0 : minObservedSpeed):F1} m/s\n○ Max Speed: {(maxObservedSpeed == double.MinValue ? 0.0 : maxObservedSpeed):F1} m/s\n● Comfort: {finalComfortPercent:F1}% (≤ 5.0 m/s)";
             }
             else
             {
-                Message = "STATUS: SLEEPING";
+                Message = $"{this.NickName}\nSTATUS: SLEEPING";
             }
         }
     }
