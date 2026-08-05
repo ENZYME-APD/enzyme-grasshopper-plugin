@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terrain Generator Pro - Enzyme Grasshopper Plugin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="../index.html" class="nav-brand">
+            <img src="../images/enzyme_logo.png" alt="Enzyme Logo" class="logo-img">
+        </a>
+        <div class="nav-links">
+            <a href="../index.html#components">Components</a>
+            <a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank">GitHub</a>
+        </div>
+    </nav>
+
+    <main class="component-page">
+        <div class="breadcrumb">
+            <a href="../index.html">← Back to Components</a>
+        </div>
+
+        <header class="component-header">
+            <div class="component-title-group">
+                <span class="badge terrain">Terrain</span>
+                <h1>Terrain Generator Pro</h1>
+                <span class="nickname-badge">TRN-P</span>
+            </div>
+            <p class="component-desc">Generates topography with noise-masked procedural forest scattering and strict elevation limits.</p>
+        </header>
+
+        <section class="component-section">
+            <h2>Description</h2>
+            <p>
+                A high-performance C# rewrite of the legacy Terrain Generator. This component uses multiple layers of Perlin and Fractal noise to procedurally generate terrain meshes. It features automatic contour generation, customizable steep slope coloring, and an intelligent forest scattering algorithm that only spawns trees in specific elevation bands using a procedural noise mask. It also supports extruding the generated mesh into a solid printable base.
+            </p>
+        </section>
+
+        <section class="component-section">
+            <h2>Inputs</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Access</th>
+                            <th>Default</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Boundary</td><td>Curve</td><td>Item</td><td>—</td><td>Closed boundary limits for the terrain generation.</td></tr>
+                        <tr><td>MaxHeight</td><td>Number</td><td>Item</td><td>100.0</td><td>Maximum elevation in meters.</td></tr>
+                        <tr><td>MinHeight</td><td>Number</td><td>Item</td><td>0.0</td><td>Minimum elevation in meters.</td></tr>
+                        <tr><td>Seed</td><td>Integer</td><td>Item</td><td>42</td><td>Randomization seed for fractal noise.</td></tr>
+                        <tr><td>PatternSizeXY</td><td>Number</td><td>List</td><td>500, 150, 30</td><td>List of feature sizes in meters for each noise octave.</td></tr>
+                        <tr><td>PatternHeightZ</td><td>Number</td><td>List</td><td>1.0, 0.3, 0.05</td><td>List of relative feature strengths for each noise octave.</td></tr>
+                        <tr><td>ContourStep</td><td>Number</td><td>Item</td><td>1.0</td><td>Interval for normal contour lines.</td></tr>
+                        <tr><td>MainStep</td><td>Number</td><td>Item</td><td>5.0</td><td>Interval for main contour lines.</td></tr>
+                        <tr><td>Colors</td><td>Color</td><td>List</td><td>Green, Brown, White</td><td>List of gradient colors based on height.</td></tr>
+                        <tr><td>Resolution</td><td>Integer</td><td>Item</td><td>100</td><td>Grid density (tessellation count).</td></tr>
+                        <tr><td>UseSlopeColor</td><td>Boolean</td><td>Item</td><td>false</td><td>Toggle steep slope coloring.</td></tr>
+                        <tr><td>SlopeColor</td><td>Color</td><td>Item</td><td>DarkGray</td><td>Color applied to sheer cliffs and steep slopes.</td></tr>
+                        <tr><td>SlopeAngle</td><td>Number</td><td>Item</td><td>30.0</td><td>Angle threshold where slope color starts blending.</td></tr>
+                        <tr><td>TerrainStyle</td><td>Integer</td><td>Item</td><td>0</td><td>0 = Realistic Soft Hills, 1 = Ridged/Cellular Pattern.</td></tr>
+                        <tr><td>Solid</td><td>Boolean</td><td>Item</td><td>false</td><td>Toggle closed mesh extrusion (solid base).</td></tr>
+                        <tr><td>BaseCol</td><td>Color</td><td>Item</td><td>DimGray</td><td>Color for the extruded solid base section.</td></tr>
+                        <tr><td>TreeMsk</td><td>Number</td><td>Item</td><td>0.0</td><td>Coverage mask threshold for forest scattering (0.0 to 1.0).</td></tr>
+                        <tr><td>TreeDns</td><td>Number</td><td>Item</td><td>0.0</td><td>Density multiplier inside mask areas.</td></tr>
+                        <tr><td>TreeSeed</td><td>Integer</td><td>Item</td><td>12345</td><td>Dedicated seed for the forest noise map.</td></tr>
+                        <tr><td>TreeZMin</td><td>Number</td><td>Item</td><td>0.15</td><td>Minimum relative elevation for trees (0.0 to 1.0).</td></tr>
+                        <tr><td>TreeZMax</td><td>Number</td><td>Item</td><td>0.85</td><td>Maximum relative elevation for trees (0.0 to 1.0).</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="component-section">
+            <h2>Outputs</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Access</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Mesh</td><td>Mesh</td><td>Item</td><td>Gradient colored terrain geometry.</td></tr>
+                        <tr><td>NormContours</td><td>Curve</td><td>List</td><td>Standard contour lines generated across the surface.</td></tr>
+                        <tr><td>MainContours</td><td>Curve</td><td>List</td><td>Major interval contour lines (based on MainStep).</td></tr>
+                        <tr><td>Trees</td><td>Point</td><td>List</td><td>Scattered point coordinates for trees based on noise mask and elevation limits.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <footer>
+        <p><a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank" style="color: #a1a1aa; text-decoration: none; border-bottom: 1px solid #3f3f46; padding-bottom: 2px; transition: color 0.2s ease;" onmouseover="this.style.color='#fff';" onmouseout="this.style.color='#a1a1aa';">View on GitHub</a></p>
+    </footer>
+
+    <script src="../js/main.js"></script>
+</body>
+</html>
