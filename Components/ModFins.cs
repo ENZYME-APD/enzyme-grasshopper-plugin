@@ -103,10 +103,16 @@ namespace Enzyme.Masterplan
 
                 for (int i = 0; i < crvs.Count; i++)
                 {
-                    if (crvs[i] == null || crvs[i].Value == null) continue;
-                    Curve crv = crvs[i].Value;
+                    var ghCrv = crvs[i] as GH_Curve;
+                    if (ghCrv == null || ghCrv.Value == null) continue;
+                    Curve crv = ghCrv.Value;
 
-                    double h = (hts.Count > i && hts[i] != null) ? hts[i].Value : 4.0;
+                    double h = 4.0;
+                    if (hts.Count > i)
+                    {
+                        var ghNum = hts[i] as GH_Number;
+                        if (ghNum != null) h = ghNum.Value;
+                    }
                     double crvLen = crv.GetLength();
 
                     // --- INNER WALL: GLASS & SPANDREL ---

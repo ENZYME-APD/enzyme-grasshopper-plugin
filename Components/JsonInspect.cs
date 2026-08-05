@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Linq;
 using Grasshopper.Kernel;
 using Newtonsoft.Json.Linq;
-using Enzyme.Core.UI; 
 
 namespace Enzyme.Components
 {

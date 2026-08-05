@@ -112,8 +112,8 @@ namespace Enzyme.Components
             for (int p = 0; p < boundsTree.PathCount; p++)
             {
                 GH_Path path = boundsTree.get_Path(p);
-                var crvs = boundsTree.get_Branch(path).Select(g => g?.Value).ToList();
-                var hts = heightsTree != null && heightsTree.PathExists(path) ? heightsTree.get_Branch(path).Select(g => g?.Value ?? 0.0).ToList() : new List<double>();
+                var crvs = boundsTree.get_Branch(path).Cast<GH_Curve>().Select(g => g?.Value).ToList();
+                var hts = heightsTree != null && heightsTree.PathExists(path) ? heightsTree.get_Branch(path).Cast<GH_Number>().Select(g => g?.Value ?? 0.0).ToList() : new List<double>();
 
                 void GenerateSolidBeam(Curve cIn, Curve cOut, double startZ, double bW)
                 {

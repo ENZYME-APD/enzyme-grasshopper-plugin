@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Version>1.7.2</Version>
+    <Version>1.7.3</Version>
     <Title>Enzyme</Title>
     <Description>Enzyme Grasshopper plugin</Description>
     <AssemblyName>enzyme</AssemblyName>
@@ -31,6 +31,7 @@
     <PackageReference Include="Grasshopper" Version="8.*" IncludeAssets="compile;build" />
     <PackageReference Include="RhinoCommon" Version="8.*" IncludeAssets="compile;build" />
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="All" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources/*.png" />

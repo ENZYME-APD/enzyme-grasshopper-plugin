@@ -89,7 +89,7 @@ namespace Enzyme.Components
                 var hts = new List<double>();
                 if (ghHeights != null && ghHeights.PathExists(path))
                 {
-                    foreach (var ghNum in ghHeights.get_Branch(path))
+                    foreach (GH_Number ghNum in ghHeights.get_Branch(path))
                     {
                         if (ghNum != null) hts.Add(ghNum.Value);
                     }
@@ -98,7 +98,7 @@ namespace Enzyme.Components
                 for (int i = 0; i < crvs.Count; i++)
                 {
                     if (crvs[i] == null) continue;
-                    Curve crv = crvs[i].Value;
+                    Curve crv = ((GH_Curve)crvs[i]).Value;
                     if (crv == null) continue;
 
                     double h = (hts.Count > i) ? hts[i] : 4.0;

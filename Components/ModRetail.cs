@@ -74,7 +74,7 @@ namespace Enzyme.Components
             foreach (GH_Path path in ghBounds.Paths)
             {
                 var branch = ghBounds.get_Branch(path);
-                foreach (var item in branch)
+                foreach (GH_Curve item in branch)
                 {
                     if (item != null && item.Value != null)
                         Bounds.Add(item.Value, path);
@@ -89,7 +89,7 @@ namespace Enzyme.Components
                 foreach (GH_Path path in ghHeights.Paths)
                 {
                     var branch = ghHeights.get_Branch(path);
-                    foreach (var item in branch)
+                    foreach (GH_Number item in branch)
                     {
                         if (item != null)
                             Heights.Add(item.Value, path);

@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using Rhino.Geometry;
+using Grasshopper;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
@@ -103,7 +104,7 @@ namespace Enzyme.Masterplan
                 {
                     var path = ghBounds.get_Path(p);
                     var list = ghBounds.get_Branch(path);
-                    foreach (var ghCrv in list)
+                    foreach (GH_Curve ghCrv in list)
                     {
                         if (ghCrv != null && ghCrv.Value != null)
                             Bounds.Add(ghCrv.Value, path);
@@ -120,7 +121,7 @@ namespace Enzyme.Masterplan
                 {
                     var path = ghHeights.get_Path(p);
                     var list = ghHeights.get_Branch(path);
-                    foreach (var ghNum in list)
+                    foreach (GH_Number ghNum in list)
                     {
                         if (ghNum != null)
                             Heights.Add(ghNum.Value, path);
