@@ -86,6 +86,7 @@ jobs:
         env:
           YAK_TOKEN: ${{ secrets.YAK_TOKEN }}
         if: env.YAK_TOKEN != ''
+        continue-on-error: true
         run: |
           yak_filename="${{ steps.package_yak.outputs.yak_file }}"
           if [ -z "$yak_filename" ]; then echo "No .yak filename provided" && exit 1; fi
