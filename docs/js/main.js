@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
       maxSize = 10;
     } else if (currentMode === 'rects_v') {
       baseSize = 2.5; 
-      maxSize = 20;
+      maxSize = 15;
       spacingY = 26; // 24px height + 2px margin to prevent overlap
     } else { // dots
       baseSize = 1.5;
