@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const ctx = canvas.getContext('2d');
     let width, height;
     
-    const spacing = 12; 
+    const spacing = 8; 
     const baseRadius = 1.5;
     const falloff = 200; 
     
@@ -75,13 +75,13 @@ document.addEventListener('DOMContentLoaded', () => {
           const dist = Math.sqrt(dx * dx + dy * dy);
           
           let r = baseRadius;
-          let opacity = 0.15;
+          let opacity = 0.20;
           
           if (dist < falloff) {
             const factor = 1 - (dist / falloff);
             const ease = 1 - Math.pow(1 - factor, 3);
             r = baseRadius * (1 + 0.5 * ease); // Max growth 50%
-            opacity = 0.15 + (0.25 * ease); 
+            opacity = 0.20 + (0.25 * ease); 
           }
           
           ctx.fillStyle = `rgba(198, 198, 203, ${opacity})`; 
