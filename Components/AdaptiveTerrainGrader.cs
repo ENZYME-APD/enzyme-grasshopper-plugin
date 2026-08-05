@@ -347,3 +347,7 @@ namespace Enzyme.Components
 
             double siteArea = (bbox.Max.X - bbox.Min.X) * (bbox.Max.Y - bbox.Min.Y);
 
+            Message = $"{this.NickName}\nTime: {timer.ElapsedMilliseconds} ms\n---\nSITE: {siteArea:N0} m²\nGRID: {MeshResolution:N1} m\nCUT: {cutAcc:N1} m³\nFILL: {fillAcc:N1} m³";
+        }
+    }
+}
