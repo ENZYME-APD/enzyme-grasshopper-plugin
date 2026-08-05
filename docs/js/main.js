@@ -34,7 +34,22 @@ document.addEventListener('DOMContentLoaded', () => {
     let width, height;
     
     const modes = ['dots', 'rects', 'pluses'];
-    const currentMode = modes[Math.floor(Math.random() * modes.length)];
+    
+    let history = [];
+    try {
+      history = JSON.parse(localStorage.getItem('bgHistory')) || [];
+    } catch(e) {}
+    
+    let currentMode;
+    do {
+      currentMode = modes[Math.floor(Math.random() * modes.length)];
+    } while (history.length >= 2 && history[0] === currentMode && history[1] === currentMode);
+    
+    history.unshift(currentMode);
+    if (history.length > 2) history.length = 2;
+    try {
+      localStorage.setItem('bgHistory', JSON.stringify(history));
+    } catch(e) {}
     
     let spacing, baseSize, maxSize, falloff;
     if (currentMode === 'pluses') {
