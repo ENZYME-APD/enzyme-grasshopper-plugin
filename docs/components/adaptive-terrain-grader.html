@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adaptive Terrain Grader - Enzyme Grasshopper Plugin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="../index.html" class="nav-brand">
+            <img src="../images/enzyme_logo.png" alt="Enzyme Logo" class="logo-img">
+        </a>
+        <div class="nav-links">
+            <a href="../index.html#components">Components</a>
+            <a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank">GitHub</a>
+        </div>
+    </nav>
+
+    <main class="component-page">
+        <div class="breadcrumb">
+            <a href="../index.html">← Back to Components</a>
+        </div>
+
+        <header class="component-header">
+            <div class="component-title-group">
+                <span class="badge terrain">Terrain</span>
+                <h1>Adaptive Terrain Grader</h1>
+                <span class="nickname-badge">TERRAIN GRADER</span>
+            </div>
+            <p class="component-desc">Generates adaptive grading meshes, volumes, and crisp cut/fill colors.</p>
+        </header>
+
+        <section class="component-section">
+            <h2>Description</h2>
+            <p>
+                A powerful tool to adapt existing topography to architectural pads and footprints. This component casts rays to sample an original mesh, dynamically blends the points to given boundary curves based on a maximum angle, and generates a new Delaunay-tessellated mesh. It simultaneously calculates highly accurate Cut and Fill volumes by comparing the modified mesh against the original on an adaptive grid, and generates visual cut/fill coloring using unwelded faces to ensure completely crisp borders.
+            </p>
+        </section>
+
+        <section class="component-section">
+            <h2>Inputs</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Access</th>
+                            <th>Default</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Mesh</td><td>Mesh</td><td>Item</td><td>—</td><td>Original Topography to grade.</td></tr>
+                        <tr><td>BoundaryCurves</td><td>Curve</td><td>List</td><td>[]</td><td>Closed pads defining grading footprints. (Optional)</td></tr>
+                        <tr><td>BlendAngle</td><td>Number</td><td>Item</td><td>45.0</td><td>Max allowable slope angle in degrees for blending.</td></tr>
+                        <tr><td>CutColor</td><td>Color</td><td>Item</td><td>Red</td><td>Color to visualize cut zones.</td></tr>
+                        <tr><td>FillColor</td><td>Color</td><td>Item</td><td>Blue</td><td>Color to visualize fill zones.</td></tr>
+                        <tr><td>MeshResolution</td><td>Number</td><td>Item</td><td>10.0</td><td>Base sampling grid size for grading math.</td></tr>
+                        <tr><td>ShowContours</td><td>Boolean</td><td>Item</td><td>false</td><td>Toggle generation of output contour lines.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="component-section">
+            <h2>Outputs</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Access</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>ModMesh</td><td>Mesh</td><td>Item</td><td>The final adaptive tri-mesh topography.</td></tr>
+                        <tr><td>ColoredMesh</td><td>Mesh</td><td>Item</td><td>Unwelded mesh visualizing exact cut/fill areas with crisp coloring.</td></tr>
+                        <tr><td>CutVolume</td><td>Number</td><td>Item</td><td>Total cut volume (soil removed, Negative Z diff).</td></tr>
+                        <tr><td>FillVolume</td><td>Number</td><td>Item</td><td>Total fill volume (soil added, Positive Z diff).</td></tr>
+                        <tr><td>Contours</td><td>Curve</td><td>List</td><td>Standard contour curves at 1m intervals.</td></tr>
+                        <tr><td>MainContours</td><td>Curve</td><td>List</td><td>Main contour curves at 5m intervals.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <footer>
+        <p><a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank" style="color: #a1a1aa; text-decoration: none; border-bottom: 1px solid #3f3f46; padding-bottom: 2px; transition: color 0.2s ease;" onmouseover="this.style.color='#fff';" onmouseout="this.style.color='#a1a1aa';">View on GitHub</a></p>
+    </footer>
+
+    <script src="../js/main.js"></script>
+</body>
+</html>
