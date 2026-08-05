@@ -49,7 +49,7 @@ jobs:
           versions=$(./yak search "$pkg_name" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' || true)
           for ver in $versions; do
             echo "Yanking version $ver"
-            ./yak yank "$pkg_name" "$ver" --api-key "$YAK_TOKEN"
+            ./yak yank "$pkg_name" "$ver"
           done
 
       - name: Build plugin
