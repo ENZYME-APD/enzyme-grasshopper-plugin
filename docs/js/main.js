@@ -51,27 +51,22 @@ document.addEventListener('DOMContentLoaded', () => {
       localStorage.setItem('bgHistory', JSON.stringify(history));
     } catch(e) {}
     
-    let spacing, baseSize, maxSize, falloff;
+    let spacing = 16;
+    let falloff = 200;
+    let baseSize, maxSize;
+    
     if (currentMode === 'pluses') {
-      spacing = 32;
-      baseSize = 4;
-      maxSize = 4; 
-      falloff = 250;
-    } else if (currentMode === 'rects') {
-      spacing = 16;
-      baseSize = 4;
-      maxSize = 12;
-      falloff = 200;
-    } else if (currentMode === 'rects_v') {
-      spacing = 24;
-      baseSize = spacing * 0.2; // 0.2 of spacing
-      maxSize = spacing * 0.8;  // 0.8 of spacing
-      falloff = 200;
-    } else { // dots
-      spacing = 12;
       baseSize = 1.5;
-      maxSize = baseSize * 1.5;
-      falloff = 200;
+      maxSize = 2.25; 
+    } else if (currentMode === 'rects') {
+      baseSize = 4;
+      maxSize = 10;
+    } else if (currentMode === 'rects_v') {
+      baseSize = 2.5; 
+      maxSize = 20;  
+    } else { // dots
+      baseSize = 1.5;
+      maxSize = 2.25;
     }
     
     let mouse = { x: -1000, y: -1000 };
@@ -108,34 +103,36 @@ document.addEventListener('DOMContentLoaded', () => {
       
       for (let gridX = spacing / 2; gridX < width + spacing; gridX += spacing) {
         for (let gridY = spacing / 2; gridY < height + spacing; gridY += spacing) {
-          // Sinuous movement (water ripples)
-          const offsetX = Math.sin(gridX * 0.015 + time * 1.2) * (spacing * 0.25);
-          const offsetY = Math.cos(gridY * 0.015 + time * 0.9) * (spacing * 0.25);
+          let x = gridX;
+          let y = gridY;
           
-          const x = gridX + offsetX;
-          const y = gridY + offsetY;
+          // Sinuous movement ONLY for pluses
+          if (currentMode === 'pluses') {
+            const offsetX = Math.sin(gridX * 0.015 + time * 1.2) * (spacing * 0.25);
+            const offsetY = Math.cos(gridY * 0.015 + time * 0.9) * (spacing * 0.25);
+            x += offsetX;
+            y += offsetY;
+          }
           
           const dx = mouse.x - x;
           const dy = mouse.y - y;
           const dist = Math.sqrt(dx * dx + dy * dy);
           
           let s = baseSize;
-          let baseOpacity = 0.15; // 15% base transparency to see the whole grid
+          let baseOpacity = 0.20; 
           let opacity = baseOpacity;
           
           if (dist < falloff) {
             const factor = 1 - (dist / falloff);
             const ease = 1 - Math.pow(1 - factor, 3);
-            if (currentMode !== 'pluses') {
-              s = baseSize + (maxSize - baseSize) * ease;
-            }
-            opacity = baseOpacity + ((currentMode === 'pluses' ? 0.6 : 0.30) * ease); 
+            s = baseSize + (maxSize - baseSize) * ease;
+            opacity = baseOpacity + (0.20 * ease); // Base 20% + up to 20% = 40% Max
           }
           
           if (currentMode === 'pluses') {
             const wave = Math.sin(x * 0.03 + time * 2.0) + Math.cos(y * 0.03 - time * 1.5);
             opacity += wave * 0.10; 
-            if (opacity < 0.10) opacity = 0.10; // Ensure it doesn't vanish
+            if (opacity < 0.10) opacity = 0.10; 
             if (opacity > 1.0) opacity = 1.0;
             
             ctx.strokeStyle = `rgba(198, 198, 203, ${opacity})`;
@@ -149,8 +146,8 @@ document.addEventListener('DOMContentLoaded', () => {
           } else if (currentMode === 'rects_v') {
             ctx.fillStyle = `rgba(198, 198, 203, ${opacity})`; 
             ctx.beginPath();
-            const startX = x - spacing/2 + (spacing * 0.1); 
-            const h = spacing * 0.6;
+            const startX = x - spacing/2 + (spacing * 0.05); 
+            const h = 24;
             ctx.rect(startX, y - h/2, s, h);
             ctx.fill();
           } else {
