@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const ctx = canvas.getContext('2d');
     let width, height;
     
-    const spacing = 24; 
+    const spacing = 12; 
     const baseRadius = 1.5;
     const falloff = 200; 
     
