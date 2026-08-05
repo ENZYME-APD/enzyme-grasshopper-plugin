@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Flood Engine - Enzyme Grasshopper Plugin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="../index.html" class="nav-brand">
+            <img src="../images/enzyme_logo.png" alt="Enzyme Logo" class="logo-img">
+        </a>
+        <div class="nav-links">
+            <a href="../index.html#components">Components</a>
+            <a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank">GitHub</a>
+        </div>
+    </nav>
+
+    <main class="component-page">
+        <div class="breadcrumb"><a href="../index.html">← Back to Components</a></div>
+        <header class="component-header">
+            <div class="component-title-group">
+                <span class="badge terrain">Terrain</span>
+                <h1>Global Flood Engine</h1>
+                <span class="nickname-badge">GlobalFlood</span>
+            </div>
+            <p class="component-desc">Simulates global terrain flooding based on a target water volume and generates a depth heatmap.</p>
+        </header>
+
+        <section class="component-section">
+            <h2>Description</h2>
+            <p>Calculates the water level required to fill a given volume across a terrain mesh. Output includes the final water elevation and a heatmap representing depth.</p>
+        </section>
+
+        <section class="component-section">
+            <h2>Inputs</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>TerrainMesh</td><td>Mesh</td><td>Item</td><td>Input Terrain Mesh</td></tr>
+                        <tr><td>TargetVolume</td><td>Number</td><td>Item</td><td>Target volume of water</td></tr>
+                        <tr><td>ZStep</td><td>Number</td><td>Item</td><td>Iteration step for Z level (default: 0.1)</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="component-section">
+            <h2>Outputs</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>FloodMesh</td><td>Mesh</td><td>Item</td><td>Flooded terrain heatmap mesh</td></tr>
+                        <tr><td>WaterLevel</td><td>Number</td><td>Item</td><td>Final water elevation</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p><a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank" style="color: #a1a1aa; text-decoration: none; border-bottom: 1px solid #3f3f46; padding-bottom: 2px; transition: color 0.2s ease;">View on GitHub</a></p>
+    </footer>
+    <script src="../js/main.js"></script>
+</body>
+</html>

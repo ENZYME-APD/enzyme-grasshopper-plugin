@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mesh Height Analysis - Enzyme Grasshopper Plugin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="../index.html" class="nav-brand">
+            <img src="../images/enzyme_logo.png" alt="Enzyme Logo" class="logo-img">
+        </a>
+        <div class="nav-links">
+            <a href="../index.html#components">Components</a>
+            <a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank">GitHub</a>
+        </div>
+    </nav>
+
+    <main class="component-page">
+        <div class="breadcrumb"><a href="../index.html">← Back to Components</a></div>
+        <header class="component-header">
+            <div class="component-title-group">
+                <span class="badge terrain">Terrain</span>
+                <h1>Mesh Height Analysis</h1>
+                <span class="nickname-badge">Terrain</span>
+            </div>
+            <p class="component-desc">Analyzes mesh extremes, unrolls sections bi-directionally, and generates 3D/2D metadata labels.</p>
+        </header>
+
+        <section class="component-section">
+            <h2>Description</h2>
+            <p>Analyzes terrain models to find local peaks, global maximums and minimums, and generates dynamic cross sections in both X and Y directions. Includes functionality to unroll sections flat onto the XY plane alongside the terrain.</p>
+        </section>
+
+        <section class="component-section">
+            <h2>Inputs</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>TargetMeshes</td><td>Mesh</td><td>Tree</td><td>The meshes to analyze.</td></tr>
+                        <tr><td>SearchRings</td><td>Integer</td><td>Item</td><td>Topological radius in rings.</td></tr>
+                        <tr><td>ProminenceLimit</td><td>Number</td><td>Item</td><td>Minimum Z-delta to be considered a peak/valley.</td></tr>
+                        <tr><td>CustomColors</td><td>Color</td><td>List</td><td>Custom colormap list (Optional).</td></tr>
+                        <tr><td>CullGlobals</td><td>Boolean</td><td>Item</td><td>Toggle to remove the absolute highest/lowest points.</td></tr>
+                        <tr><td>AvoidBoundaries</td><td>Boolean</td><td>Item</td><td>Toggle to ignore naked edge vertices.</td></tr>
+                        <tr><td>EnableHeatmap</td><td>Boolean</td><td>Item</td><td>Toggle to compute and output the vertex heatmap mesh.</td></tr>
+                        <tr><td>RotationPlane</td><td>Plane</td><td>Item</td><td>Orientation plane for the bounding box sectioning.</td></tr>
+                        <tr><td>SectionsX</td><td>Integer</td><td>Item</td><td>Number of sections running parallel to the X-axis.</td></tr>
+                        <tr><td>SectionsY</td><td>Integer</td><td>Item</td><td>Number of sections running parallel to the Y-axis.</td></tr>
+                        <tr><td>LayoutFlat</td><td>Boolean</td><td>Item</td><td>Toggle to generate 2D XY print layouts next to the mesh.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="component-section">
+            <h2>Outputs</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>LocalPeaks</td><td>Point</td><td>Tree</td><td>Output points for local highs.</td></tr>
+                        <tr><td>PeakElevations</td><td>Number</td><td>Tree</td><td>Z-values for local highs.</td></tr>
+                        <tr><td>GlobalMaxPoint</td><td>Point</td><td>Tree</td><td>Absolute highest point on the mesh.</td></tr>
+                        <tr><td>GlobalMaxElevation</td><td>Number</td><td>Tree</td><td>Absolute highest Z-value.</td></tr>
+                        <tr><td>LocalValleys</td><td>Point</td><td>Tree</td><td>Output points for local lows.</td></tr>
+                        <tr><td>ValleyElevations</td><td>Number</td><td>Tree</td><td>Z-values for local lows.</td></tr>
+                        <tr><td>GlobalMinPoint</td><td>Point</td><td>Tree</td><td>Absolute lowest point on the mesh.</td></tr>
+                        <tr><td>GlobalMinElevation</td><td>Number</td><td>Tree</td><td>Absolute lowest Z-value.</td></tr>
+                        <tr><td>HeatmapMeshes</td><td>Mesh</td><td>Tree</td><td>The vertex-colored duplicate mesh.</td></tr>
+                        <tr><td>SectionOutlinesX</td><td>Curve</td><td>Tree</td><td>3D Polylines running parallel to the X-axis.</td></tr>
+                        <tr><td>SectionOutlinesY</td><td>Curve</td><td>Tree</td><td>3D Polylines running parallel to the Y-axis.</td></tr>
+                        <tr><td>FlatSectionsX</td><td>Curve</td><td>Tree</td><td>2D X-Sections stacked downwards (-Y direction).</td></tr>
+                        <tr><td>FlatSectionsY</td><td>Curve</td><td>Tree</td><td>2D Y-Sections stacked leftwards (-X direction).</td></tr>
+                        <tr><td>LabelText3D</td><td>Text</td><td>Tree</td><td>Text strings for 3D section labels.</td></tr>
+                        <tr><td>LabelPoints3D</td><td>Point</td><td>Tree</td><td>Points for 3D section labels.</td></tr>
+                        <tr><td>LabelTextFlat</td><td>Text</td><td>Tree</td><td>Text strings for the flattened section layout.</td></tr>
+                        <tr><td>LabelPointsFlat</td><td>Point</td><td>Tree</td><td>Points for the flattened section layout.</td></tr>
+                        <tr><td>SectionMetadata</td><td>Text</td><td>Tree</td><td>Dictionary keys containing spatial transform & ID data.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p><a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank" style="color: #a1a1aa; text-decoration: none; border-bottom: 1px solid #3f3f46; padding-bottom: 2px; transition: color 0.2s ease;">View on GitHub</a></p>
+    </footer>
+    <script src="../js/main.js"></script>
+</body>
+</html>

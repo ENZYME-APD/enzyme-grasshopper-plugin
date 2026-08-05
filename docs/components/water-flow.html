@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Water Flow - Enzyme Grasshopper Plugin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="../index.html" class="nav-brand">
+            <img src="../images/enzyme_logo.png" alt="Enzyme Logo" class="logo-img">
+        </a>
+        <div class="nav-links">
+            <a href="../index.html#components">Components</a>
+            <a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank">GitHub</a>
+        </div>
+    </nav>
+
+    <main class="component-page">
+        <div class="breadcrumb"><a href="../index.html">← Back to Components</a></div>
+        <header class="component-header">
+            <div class="component-title-group">
+                <span class="badge terrain">Terrain</span>
+                <h1>Water Flow</h1>
+                <span class="nickname-badge">WaterFlow</span>
+            </div>
+            <p class="component-desc">Generates a parametric grid, projects it to the terrain, and simulates downhill flow paths.</p>
+        </header>
+
+        <section class="component-section">
+            <h2>Description</h2>
+            <p>Simulates water drop flow paths over a terrain mesh, tracing the exact geometric descent based on face normals and gravity.</p>
+        </section>
+
+        <section class="component-section">
+            <h2>Inputs</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>TerrainMesh</td><td>Mesh</td><td>Item</td><td>The unified topological surface.</td></tr>
+                        <tr><td>GridSpacing</td><td>Number</td><td>Item</td><td>The XY distance between starting raindrops.</td></tr>
+                        <tr><td>StepSize</td><td>Number</td><td>Item</td><td>Distance the water travels per tick.</td></tr>
+                        <tr><td>MaxSteps</td><td>Integer</td><td>Item</td><td>Safety limit for the simulation loop.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="component-section">
+            <h2>Outputs</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>FlowPaths</td><td>Curve</td><td>Tree</td><td>The generated water movement paths.</td></tr>
+                        <tr><td>DropPoints</td><td>Point</td><td>Tree</td><td>The valid starting grid points on the mesh.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p><a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank" style="color: #a1a1aa; text-decoration: none; border-bottom: 1px solid #3f3f46; padding-bottom: 2px; transition: color 0.2s ease;">View on GitHub</a></p>
+    </footer>
+    <script src="../js/main.js"></script>
+</body>
+</html>

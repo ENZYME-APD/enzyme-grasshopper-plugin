@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slope Terrain Plus - Enzyme Grasshopper Plugin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="../index.html" class="nav-brand">
+            <img src="../images/enzyme_logo.png" alt="Enzyme Logo" class="logo-img">
+        </a>
+        <div class="nav-links">
+            <a href="../index.html#components">Components</a>
+            <a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank">GitHub</a>
+        </div>
+    </nav>
+
+    <main class="component-page">
+        <div class="breadcrumb"><a href="../index.html">← Back to Components</a></div>
+        <header class="component-header">
+            <div class="component-title-group">
+                <span class="badge terrain">Terrain</span>
+                <h1>Slope Terrain Plus</h1>
+                <span class="nickname-badge">SlopeMesh+</span>
+            </div>
+            <p class="component-desc">Ultra-fast mesh slope analyzer using raw C# sequential array processing and safe UI automation.</p>
+        </header>
+
+        <section class="component-section">
+            <h2>Description</h2>
+            <p>Analyzes terrain slope using degrees, percentage, or ratio, applying a binary or gradient heatmap to the output mesh.</p>
+        </section>
+
+        <section class="component-section">
+            <h2>Inputs</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>TargetMeshes</td><td>Mesh</td><td>List</td><td>Meshes to analyze</td></tr>
+                        <tr><td>ThresholdValue</td><td>Number</td><td>Item</td><td>Threshold for slope analysis</td></tr>
+                        <tr><td>ThresholdMode</td><td>Integer</td><td>Item</td><td>0: Degrees, 1: Percentage, 2: Ratio</td></tr>
+                        <tr><td>ColorStart</td><td>Color</td><td>Item</td><td>Color for flat terrain</td></tr>
+                        <tr><td>ColorEnd</td><td>Color</td><td>Item</td><td>Color for steep terrain</td></tr>
+                        <tr><td>EnableBinaryMode</td><td>Boolean</td><td>Item</td><td>If true, snaps to binary colors</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="component-section">
+            <h2>Outputs</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>AnalyzedMeshes</td><td>Mesh</td><td>List</td><td>Colored Meshes</td></tr>
+                        <tr><td>LegendColors</td><td>Color</td><td>List</td><td>Legend Colors</td></tr>
+                        <tr><td>LegendValues</td><td>Text</td><td>List</td><td>Legend Values</td></tr>
+                        <tr><td>OverThresholdRatio</td><td>Number</td><td>List</td><td>Ratio of faces over threshold</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p><a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank" style="color: #a1a1aa; text-decoration: none; border-bottom: 1px solid #3f3f46; padding-bottom: 2px; transition: color 0.2s ease;">View on GitHub</a></p>
+    </footer>
+    <script src="../js/main.js"></script>
+</body>
+</html>
