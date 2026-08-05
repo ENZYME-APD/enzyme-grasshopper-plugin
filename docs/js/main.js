@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
       maxSize = spacing * 0.8;  // 0.8 of spacing
       falloff = 200;
     } else { // dots
-      spacing = 10;
+      spacing = 12;
       baseSize = 1.5;
       maxSize = baseSize * 1.5;
       falloff = 200;
