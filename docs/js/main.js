@@ -106,14 +106,21 @@ document.addEventListener('DOMContentLoaded', () => {
       ctx.clearRect(0, 0, width, height);
       const time = Date.now() / 1000;
       
-      for (let x = spacing / 2; x < width; x += spacing) {
-        for (let y = spacing / 2; y < height; y += spacing) {
+      for (let gridX = spacing / 2; gridX < width + spacing; gridX += spacing) {
+        for (let gridY = spacing / 2; gridY < height + spacing; gridY += spacing) {
+          // Sinuous movement (water ripples)
+          const offsetX = Math.sin(gridX * 0.015 + time * 1.2) * (spacing * 0.25);
+          const offsetY = Math.cos(gridY * 0.015 + time * 0.9) * (spacing * 0.25);
+          
+          const x = gridX + offsetX;
+          const y = gridY + offsetY;
+          
           const dx = mouse.x - x;
           const dy = mouse.y - y;
           const dist = Math.sqrt(dx * dx + dy * dy);
           
           let s = baseSize;
-          let baseOpacity = currentMode === 'pluses' ? 0.25 : 0.20;
+          let baseOpacity = 0.15; // 15% base transparency to see the whole grid
           let opacity = baseOpacity;
           
           if (dist < falloff) {
@@ -122,13 +129,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (currentMode !== 'pluses') {
               s = baseSize + (maxSize - baseSize) * ease;
             }
-            opacity = baseOpacity + ((currentMode === 'pluses' ? 0.5 : 0.25) * ease); 
+            opacity = baseOpacity + ((currentMode === 'pluses' ? 0.6 : 0.30) * ease); 
           }
           
           if (currentMode === 'pluses') {
             const wave = Math.sin(x * 0.03 + time * 2.0) + Math.cos(y * 0.03 - time * 1.5);
-            opacity += wave * 0.15; 
-            if (opacity < 0.05) opacity = 0.05;
+            opacity += wave * 0.10; 
+            if (opacity < 0.10) opacity = 0.10; // Ensure it doesn't vanish
             if (opacity > 1.0) opacity = 1.0;
             
             ctx.strokeStyle = `rgba(198, 198, 203, ${opacity})`;
@@ -143,7 +150,6 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.fillStyle = `rgba(198, 198, 203, ${opacity})`; 
             ctx.beginPath();
             const startX = x - spacing/2 + (spacing * 0.1); 
-            // 1/3 proportion at base size: baseSize is spacing*0.2, so height is spacing*0.6
             const h = spacing * 0.6;
             ctx.rect(startX, y - h/2, s, h);
             ctx.fill();
