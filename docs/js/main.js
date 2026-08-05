@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const ctx = canvas.getContext('2d');
     let width, height;
     
-    const modes = ['dots', 'rects', 'pluses'];
+    const modes = ['dots', 'rects', 'pluses', 'rects_v'];
     
     let history = [];
     try {
@@ -62,8 +62,13 @@ document.addEventListener('DOMContentLoaded', () => {
       baseSize = 4;
       maxSize = 12;
       falloff = 200;
+    } else if (currentMode === 'rects_v') {
+      spacing = 24;
+      baseSize = spacing * 0.2; // 0.2 of spacing
+      maxSize = spacing * 0.8;  // 0.8 of spacing
+      falloff = 200;
     } else { // dots
-      spacing = 8;
+      spacing = 10;
       baseSize = 1.5;
       maxSize = baseSize * 1.5;
       falloff = 200;
@@ -132,6 +137,14 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.moveTo(x, y - s);
             ctx.lineTo(x, y + s);
             ctx.stroke();
+          } else if (currentMode === 'rects_v') {
+            ctx.fillStyle = `rgba(198, 198, 203, ${opacity})`; 
+            ctx.beginPath();
+            const startX = x - spacing/2 + (spacing * 0.1); 
+            // 1/3 proportion at base size: baseSize is spacing*0.2, so height is spacing*0.6
+            const h = spacing * 0.6;
+            ctx.rect(startX, y - h/2, s, h);
+            ctx.fill();
           } else {
             ctx.fillStyle = `rgba(198, 198, 203, ${opacity})`; 
             ctx.beginPath();
