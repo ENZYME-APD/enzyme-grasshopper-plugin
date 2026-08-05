@@ -113,7 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const dist = Math.sqrt(dx * dx + dy * dy);
           
           let s = baseSize;
-          let baseOpacity = currentMode === 'pluses' ? 0.10 : 0.20;
+          let baseOpacity = currentMode === 'pluses' ? 0.25 : 0.20;
           let opacity = baseOpacity;
           
           if (dist < falloff) {
@@ -122,16 +122,17 @@ document.addEventListener('DOMContentLoaded', () => {
             if (currentMode !== 'pluses') {
               s = baseSize + (maxSize - baseSize) * ease;
             }
-            opacity = baseOpacity + ((currentMode === 'pluses' ? 0.6 : 0.25) * ease); 
+            opacity = baseOpacity + ((currentMode === 'pluses' ? 0.5 : 0.25) * ease); 
           }
           
           if (currentMode === 'pluses') {
-            const wave = Math.sin(x * 0.02 + time * 1.5) + Math.cos(y * 0.02 - time * 1.1);
-            if (wave > 1.2) {
-               opacity += (wave - 1.2) * 0.5; 
-            }
+            const wave = Math.sin(x * 0.03 + time * 2.0) + Math.cos(y * 0.03 - time * 1.5);
+            opacity += wave * 0.15; 
+            if (opacity < 0.05) opacity = 0.05;
+            if (opacity > 1.0) opacity = 1.0;
+            
             ctx.strokeStyle = `rgba(198, 198, 203, ${opacity})`;
-            ctx.lineWidth = 1;
+            ctx.lineWidth = 1.5;
             ctx.beginPath();
             ctx.moveTo(x - s, y);
             ctx.lineTo(x + s, y);
