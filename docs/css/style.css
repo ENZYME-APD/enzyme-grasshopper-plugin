@@ -444,3 +444,75 @@ footer a {
 footer a:hover {
   text-decoration: underline;
 }
+
+
+/* --- Search & Filter Controls --- */
+.controls-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.search-container {
+  position: relative;
+  max-width: 500px;
+  width: 100%;
+}
+
+.search-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+}
+
+#component-search {
+  width: 100%;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 0.8rem 1rem 0.8rem 2.8rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: var(--font-family);
+  transition: var(--transition);
+  outline: none;
+}
+
+#component-search:focus {
+  border-color: var(--accent-teal);
+  box-shadow: 0 0 0 2px rgba(45, 212, 160, 0.2);
+}
+
+.category-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.filter-btn {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  padding: 0.4rem 1rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.filter-btn:hover {
+  border-color: #3f3f46;
+  color: var(--text-primary);
+}
+
+.filter-btn.active {
+  background-color: rgba(45, 212, 160, 0.1);
+  border-color: var(--accent-teal);
+  color: var(--accent-teal);
+}

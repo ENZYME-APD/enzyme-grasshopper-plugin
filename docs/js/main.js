@@ -190,3 +190,92 @@ document.addEventListener('DOMContentLoaded', () => {
     draw();
   }
 });
+
+// --- Components Search & Filter Logic ---
+document.addEventListener('DOMContentLoaded', () => {
+    const grid = document.querySelector('.components-grid');
+    const searchInput = document.getElementById('component-search');
+    const filtersContainer = document.getElementById('category-filters');
+    
+    if (!grid || !searchInput || !filtersContainer) return;
+
+    // 1. Sort the components by category alphabetically
+    const cards = Array.from(grid.querySelectorAll('.card'));
+    
+    cards.sort((a, b) => {
+        const catA = (a.querySelector('.badge')?.textContent || '').trim().toLowerCase();
+        const catB = (b.querySelector('.badge')?.textContent || '').trim().toLowerCase();
+        if (catA < catB) return -1;
+        if (catA > catB) return 1;
+        // If categories are same, sort alphabetically by title
+        const titleA = (a.querySelector('h3')?.textContent || '').trim().toLowerCase();
+        const titleB = (b.querySelector('h3')?.textContent || '').trim().toLowerCase();
+        if (titleA < titleB) return -1;
+        if (titleA > titleB) return 1;
+        return 0;
+    });
+    
+    // Clear the grid and append sorted cards
+    grid.innerHTML = '';
+    cards.forEach(card => grid.appendChild(card));
+
+    // 2. Extract unique categories and create filter buttons
+    const categories = new Set();
+    cards.forEach(card => {
+        const badge = card.querySelector('.badge');
+        if (badge) categories.add(badge.textContent.trim());
+    });
+
+    const sortedCategories = Array.from(categories).sort();
+    
+    // Create 'All' button
+    const allBtn = document.createElement('button');
+    allBtn.className = 'filter-btn active';
+    allBtn.textContent = 'All';
+    allBtn.dataset.category = 'all';
+    filtersContainer.appendChild(allBtn);
+
+    sortedCategories.forEach(cat => {
+        const btn = document.createElement('button');
+        btn.className = 'filter-btn';
+        btn.textContent = cat;
+        btn.dataset.category = cat;
+        filtersContainer.appendChild(btn);
+    });
+
+    let currentCategory = 'all';
+    
+    // 3. Filter logic function
+    function filterCards() {
+        const searchTerm = searchInput.value.toLowerCase();
+        
+        cards.forEach(card => {
+            const title = (card.querySelector('h3')?.textContent || '').toLowerCase();
+            const desc = (card.querySelector('p')?.textContent || '').toLowerCase();
+            const category = (card.querySelector('.badge')?.textContent || '').trim();
+            
+            const matchesSearch = title.includes(searchTerm) || desc.includes(searchTerm);
+            const matchesCategory = currentCategory === 'all' || category === currentCategory;
+            
+            if (matchesSearch && matchesCategory) {
+                card.style.display = 'flex';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+
+    // Event listeners
+    searchInput.addEventListener('input', filterCards);
+    
+    filtersContainer.addEventListener('click', (e) => {
+        if (e.target.classList.contains('filter-btn')) {
+            // Update active state
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            e.target.classList.add('active');
+            
+            currentCategory = e.target.dataset.category;
+            filterCards();
+        }
+    });
+});
