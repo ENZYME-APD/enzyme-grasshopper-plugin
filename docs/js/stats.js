@@ -30,6 +30,7 @@ async function loadGitHubStats() {
             const labels = [];
             const data = [];
             
+            let cumulative = 0;
             if (sortedKeys.length > 0) {
                 let current = new Date(sortedKeys[0]);
                 const end = new Date();
@@ -37,7 +38,8 @@ async function loadGitHubStats() {
                     const key = current.toISOString().split('T')[0];
                     const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
                     labels.push(monthNames[current.getMonth()] + ' ' + current.getDate());
-                    data.push(daily[key] || 0);
+                    cumulative += (daily[key] || 0);
+                    data.push(cumulative);
                     current.setDate(current.getDate() + 1);
                 }
             }

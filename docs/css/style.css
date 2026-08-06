@@ -109,7 +109,7 @@ a {
 }
 
 .btn-secondary {
-  background: transparent;
+  background: rgba(255, 255, 255, 0.05);
   color: var(--text-primary);
   padding: 0.5rem 1rem;
   border-radius: 6px;
@@ -120,7 +120,7 @@ a {
 }
 
 .btn-secondary:hover {
-  background: var(--bg-card);
+  background: rgba(255, 255, 255, 0.1);
   border-color: var(--text-secondary);
 }
 
