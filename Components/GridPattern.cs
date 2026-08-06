@@ -20,6 +20,14 @@ namespace Enzyme.Components
 
         public override Guid ComponentGuid => new Guid("D7A50BEF-4309-4C41-BCA6-455AB0B2C471");
 
+        protected override System.Drawing.Bitmap Icon
+        {
+            get
+            {
+                return IconLoader.Load("GridPattern.png");
+            }
+        }
+
         protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
             pManager.AddCurveParameter("Boundary", "Boundary", "Closed boundary curve(s)", GH_ParamAccess.tree);

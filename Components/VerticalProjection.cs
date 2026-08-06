@@ -79,6 +79,14 @@ namespace Enzyme.Components
             DA.SetData(2, message);
         }
 
+        protected override System.Drawing.Bitmap Icon
+        {
+            get
+            {
+                return IconLoader.Load("VerticalProjection.png");
+            }
+        }
+
         public override Guid ComponentGuid
         {
             get { return new Guid("B95F5651-7667-4638-A3BA-F0121F247920"); }
