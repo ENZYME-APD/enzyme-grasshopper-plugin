@@ -10,7 +10,7 @@ namespace Enzyme.Components
         public RecipeBuilder()
           : base("Recipe JSON Builder", "RecipeBuilder",
               "Parametrically compiles lists of programs, heights, and floor counts into the standardized JSON array required by the Stage 1 Adapters.",
-              "Enzyme", "Utilities")
+              "Enzyme", "Masterplan")
         {
         }
 

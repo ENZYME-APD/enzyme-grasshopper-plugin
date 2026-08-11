@@ -15,7 +15,7 @@ namespace Enzyme.Components
         public FacadeDist()
           : base("Facade Module Distributor", "FACADE_DIST",
               "Dynamically streams procedural facade modules with high-performance hot-reloading.",
-              "Enzyme", "Utilities")
+              "Enzyme", "Facade")
         {
         }
 
@@ -193,5 +193,7 @@ namespace Enzyme.Components
         }
 
         public override Guid ComponentGuid => new Guid("08412F4D-DDE4-42CE-A1C8-243B5761358F");
+
+        public override GH_Exposure Exposure => GH_Exposure.secondary;
     }
 }

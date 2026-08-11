@@ -11,7 +11,7 @@ namespace Enzyme.Components
         public AD_LEGO()
           : base("Adapter: The Lego Builder", "AD_LEGO",
               "STAGE 1 ADAPTER: THE LEGO BUILDER (METHOD 3) - VERBOSE DIAGNOSTICS & FIXED STACKING",
-              "Enzyme", "Utilities")
+              "Enzyme", "Masterplan")
         {
         }
 
@@ -38,6 +38,8 @@ namespace Enzyme.Components
         
         protected override System.Drawing.Bitmap Icon => null;
         public override Guid ComponentGuid => new Guid("0a47d2c3-4211-4770-b4bd-5561a34c11b1");
+
+        public override GH_Exposure Exposure => GH_Exposure.secondary;
 
         private string DoubleArrToJson(double[] arr)
         {

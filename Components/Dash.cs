@@ -33,7 +33,7 @@ namespace Enzyme.Components
         public DashComponent()
           : base("Masterplan Dashboard", "DASH",
               "Reads a summarized JSON payload from the OOP Masterplan Engine and renders a responsive HUD.",
-              "Enzyme", "Utilities")
+              "Enzyme", "Masterplan")
         {
         }
 
