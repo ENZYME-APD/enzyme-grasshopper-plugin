@@ -319,6 +319,9 @@ namespace Enzyme.Components
 
         protected override System.Drawing.Bitmap Icon => IconLoader.Load("AD_ARCHICAD.png");
 
+        
+        public override GH_Exposure Exposure => GH_Exposure.tertiary;
+
         public override Guid ComponentGuid
         {
             get { return new Guid("1f6b432a-5a9e-4e42-b054-933e4b75a133"); }

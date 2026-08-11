@@ -130,6 +130,9 @@ namespace Enzyme.Components
             DA.SetDataTree(4, treeDims);
         }
 
+        
+        public override GH_Exposure Exposure => GH_Exposure.secondary;
+
         public override Guid ComponentGuid
         {
             get { return new Guid("B5D142EF-0158-45F4-A0C3-8B39B2A7EAC4"); }

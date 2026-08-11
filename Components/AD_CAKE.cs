@@ -286,6 +286,9 @@ namespace Enzyme.Components
 
         protected override System.Drawing.Bitmap Icon => IconLoader.Load("AD_CAKE.png");
 
+        
+        public override GH_Exposure Exposure => GH_Exposure.tertiary;
+
         public override Guid ComponentGuid
         {
             get { return new Guid("11111111-2222-3333-4444-555555555555"); }

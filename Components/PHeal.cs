@@ -134,6 +134,9 @@ namespace Enzyme.Components
             }
         }
 
+        
+        public override GH_Exposure Exposure => GH_Exposure.secondary;
+
         public override Guid ComponentGuid
         {
             get { return new Guid("13e61c5a-73d7-4c7b-944a-d8c7c91d84f4"); }

@@ -301,6 +301,11 @@ namespace Enzyme.Components
             return segments_data;
         }
 
+        
+        public override GH_Exposure Exposure => GH_Exposure.tertiary;
+
+        protected override System.Drawing.Bitmap Icon => IconLoader.Load("AD_SCULPT.png");
+
         public override Guid ComponentGuid
         {
             get { return new Guid("7D50DE24-F428-40F1-BEB4-3E7DBE94F8D7"); }

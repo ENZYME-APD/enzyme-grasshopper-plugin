@@ -16,7 +16,7 @@ namespace Enzyme.Components
         public TopologySplitEdgeClassifier()
           : base("Topology Split Edge Classifier", "TSEC",
               "Explodes and splits room boundaries at intersections, classifies edge topology, and generates unified floor slabs.",
-              "Enzyme", "Topology")
+              "Enzyme", "Utilities")
         {
         }
 
@@ -260,6 +260,9 @@ namespace Enzyme.Components
                 return IconLoader.Load("TopologySplitEdgeClassifier.png");
             }
         }
+
+        
+        public override GH_Exposure Exposure => GH_Exposure.tertiary;
 
         public override Guid ComponentGuid
         {

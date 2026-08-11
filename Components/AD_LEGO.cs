@@ -37,9 +37,12 @@ namespace Enzyme.Components
         }
         
         protected override System.Drawing.Bitmap Icon => IconLoader.Load("AD_LEGO.png");
+        
+        public override GH_Exposure Exposure => GH_Exposure.tertiary;
+
         public override Guid ComponentGuid => new Guid("0a47d2c3-4211-4770-b4bd-5561a34c11b1");
 
-        public override GH_Exposure Exposure => GH_Exposure.tertiary;
+        
 
         private string DoubleArrToJson(double[] arr)
         {
