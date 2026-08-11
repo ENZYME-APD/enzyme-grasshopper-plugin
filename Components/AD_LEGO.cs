@@ -29,6 +29,8 @@ namespace Enzyme.Components
             pManager[2].Optional = true;
             pManager[3].Optional = true;
             pManager[4].Optional = true;
+        
+            for (int i = 0; i < pManager.ParamCount; i++) { pManager[i].Optional = true; }
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)

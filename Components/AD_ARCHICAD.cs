@@ -33,6 +33,8 @@ namespace Enzyme.Components
             pManager[3].Optional = true;
             pManager[4].Optional = true;
             pManager[5].Optional = true;
+        
+            for (int i = 0; i < pManager.ParamCount; i++) { pManager[i].Optional = true; }
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
@@ -111,7 +113,7 @@ namespace Enzyme.Components
 
             if (floorContours.Count == 0 || floorHeights.Count == 0)
             {
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "FloorContours or FloorHeights input is missing.");
+                
                 return;
             }
 
