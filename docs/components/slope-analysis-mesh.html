@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Slope Analysis Mesh - Enzyme</title>
+    <title>Slope Analysis Mesh - Enzyme Plugin</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
-
     <nav class="navbar">
         <a href="../index.html" class="nav-brand">
             <img src="../images/enzyme_logo.png" alt="Enzyme Logo" class="logo-img">
@@ -19,122 +18,42 @@
         </div>
     </nav>
 
-    <div class="breadcrumb">
-        <a href="../index.html">← Back to Components</a>
-    </div>
-
-    <div class="component-header">
-        <span class="badge terrain">Terrain</span>
-        <h1>Slope Analysis Mesh <span class="component-nickname">SlopeAnalysis</span></h1>
-        <p class="component-description">Analyses a mesh topography and provides a coloured mesh displaying areas with slopes over a threshold.</p>
-    </div>
-
-    <div class="component-content">
-        <h2>Inputs</h2>
-        <div class="table-wrapper">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Nickname</th>
-                        <th>Type</th>
-                        <th>Access</th>
-                        <th>Default</th>
-                        <th>Description</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Mesh</td>
-                        <td>Mesh</td>
-                        <td>Mesh</td>
-                        <td>Item</td>
-                        <td>—</td>
-                        <td>Input mesh topography</td>
-                    </tr>
-                    <tr>
-                        <td>Start Color</td>
-                        <td>Start Color</td>
-                        <td>Colour</td>
-                        <td>Item</td>
-                        <td>Green</td>
-                        <td>Colour for areas below threshold</td>
-                    </tr>
-                    <tr>
-                        <td>End Color</td>
-                        <td>End Color</td>
-                        <td>Colour</td>
-                        <td>Item</td>
-                        <td>Red</td>
-                        <td>Colour for areas above threshold</td>
-                    </tr>
-                    <tr>
-                        <td>Threshold</td>
-                        <td>Threshold</td>
-                        <td>Number</td>
-                        <td>Item</td>
-                        <td>30.0</td>
-                        <td>Slope threshold in degrees</td>
-                    </tr>
-                    <tr>
-                        <td>Binary Mode</td>
-                        <td>Binary Mode</td>
-                        <td>Boolean</td>
-                        <td>Item</td>
-                        <td>false</td>
-                        <td>Use binary colouring instead of gradient</td>
-                    </tr>
-                </tbody>
-            </table>
+    <main class="container doc-page">
+        <div class="doc-header" style="display: flex; align-items: center;">
+            <img src="../images/icons/slope_terrain_icon.png" alt="Slope Analysis Mesh Icon" class="comp-icon" style="width: 48px; height: 48px; margin-right: 1rem; border-radius: 8px;">
+            <div>
+                <h1>Slope Analysis Mesh</h1>
+                <p class="doc-subtitle">Analyzes a mesh topography and provides a colored mesh displaying the areas with slopes over the threshold</p>
+                <div class="doc-meta">
+                    <span class="badge terrain">Terrain</span>
+                    <span>Nickname: <strong>SlopeAnalysis</strong></span>
+                </div>
+            </div>
         </div>
 
-        <h2>Outputs</h2>
-        <div class="table-wrapper">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Nickname</th>
-                        <th>Type</th>
-                        <th>Access</th>
-                        <th>Description</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Slope Mesh</td>
-                        <td>Slope Mesh</td>
-                        <td>Mesh</td>
-                        <td>Item</td>
-                        <td>Coloured mesh showing slope distribution</td>
-                    </tr>
-                    <tr>
-                        <td>Color Legend</td>
-                        <td>Color Legend</td>
-                        <td>Generic</td>
-                        <td>Item</td>
-                        <td>Legend data (start/end colour, threshold, % over threshold)</td>
-                    </tr>
-                    <tr>
-                        <td>Percent Over Threshold</td>
-                        <td>Percent Over Threshold</td>
-                        <td>Number</td>
-                        <td>Item</td>
-                        <td>Percentage of mesh faces exceeding the slope threshold</td>
-                    </tr>
-                </tbody>
-            </table>
+        <div class="doc-content">
+            <h2>Overview</h2>
+            <p>Analyzes a mesh topography and provides a colored mesh displaying the areas with slopes over the threshold</p>
+            
+            <div class="io-grid">
+                <div class="io-col">
+                    <h3>Inputs (5)</h3>
+                    <ul>
+                        <li>Inputs detailed documentation coming soon.</li>
+                    </ul>
+                </div>
+                <div class="io-col">
+                    <h3>Outputs (3)</h3>
+                    <ul>
+                        <li>Outputs detailed documentation coming soon.</li>
+                    </ul>
+                </div>
+            </div>
         </div>
-
-        <div class="notes">
-            <h3>Notes & Behaviour</h3>
-            <p>Colour is applied per vertex based on face normals. Gradient mode interpolates linearly between Start and End colour. Binary mode snaps to one of the two colours. Slope angle is measured from vertical (Z-axis). Status message shows mode, percentage over threshold, and execution time.</p>
-        </div>
-    </div>
+    </main>
 
     <footer>
-        <p>Built by Dushyant Basson & Jorge Beneitez | <a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank">GitHub</a> | Enzyme-APD</p>
+        <p><a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank" style="color: #a1a1aa; text-decoration: none; border-bottom: 1px solid #3f3f46; padding-bottom: 2px;">View on GitHub</a></p>
     </footer>
-
 </body>
 </html>

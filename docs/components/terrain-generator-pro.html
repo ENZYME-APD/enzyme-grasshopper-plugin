@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Terrain Generator Pro - Enzyme Grasshopper Plugin</title>
+    <title>Terrain Generator Pro - Enzyme Plugin</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
 </head>
@@ -18,78 +18,42 @@
         </div>
     </nav>
 
-    <main class="component-page">
-        <div class="breadcrumb"><a href="../index.html">← Back to Components</a></div>
-        <header class="component-header">
-            <div class="component-title-group">
-                <span class="badge terrain">Terrain</span>
+    <main class="container doc-page">
+        <div class="doc-header" style="display: flex; align-items: center;">
+            <img src="../images/icons/TRN-P.png" alt="Terrain Generator Pro Icon" class="comp-icon" style="width: 48px; height: 48px; margin-right: 1rem; border-radius: 8px;">
+            <div>
                 <h1>Terrain Generator Pro</h1>
-                <span class="nickname-badge">TRN-P</span>
+                <p class="doc-subtitle">Generates topography with noise-masked procedural forest scattering and strict elevation limits.</p>
+                <div class="doc-meta">
+                    <span class="badge terrain">Terrain</span>
+                    <span>Nickname: <strong>TRN-P</strong></span>
+                </div>
             </div>
-            <p class="component-desc">Generates highly detailed terrains from 2D curves with procedural noise, contour lines, and forested areas.</p>
-        </header>
+        </div>
 
-        <section class="component-section">
-            <h2>Description</h2>
-            <p>A comprehensive terrain generator that applies fractal procedural noise to closed boundary curves. It outputs detailed gradient-colored meshes, main and normal contour lines, and random point distributions restricted to elevation bands and procedural masks for scattering trees.</p>
-        </section>
-
-        <section class="component-section">
-            <h2>Inputs</h2>
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr><th>Name</th><th>Nickname</th><th>Type</th><th>Access</th><th>Default</th><th>Description</th></tr>
-                    </thead>
-                    <tbody>
-                        <tr><td>Boundary</td><td>Boundary</td><td>Curve</td><td>Tree</td><td>—</td><td>Closed boundary limits</td></tr>
-                        <tr><td>MaxHeight</td><td>MaxHeight</td><td>Number</td><td>Tree</td><td>100.0</td><td>Maximum elevation in meters</td></tr>
-                        <tr><td>MinHeight</td><td>MinHeight</td><td>Number</td><td>Tree</td><td>0.0</td><td>Minimum elevation in meters</td></tr>
-                        <tr><td>Seed</td><td>Seed</td><td>Integer</td><td>Tree</td><td>42</td><td>Randomization seed</td></tr>
-                        <tr><td>PatternSizeXY</td><td>PatternSizeXY</td><td>Number</td><td>Tree</td><td>500.0</td><td>List of feature sizes in meters</td></tr>
-                        <tr><td>PatternHeightZ</td><td>PatternHeightZ</td><td>Number</td><td>Tree</td><td>1.0</td><td>List of relative feature strengths</td></tr>
-                        <tr><td>ContourStep</td><td>ContourStep</td><td>Number</td><td>Tree</td><td>1.0</td><td>Interval for normal contour lines</td></tr>
-                        <tr><td>MainStep</td><td>MainStep</td><td>Number</td><td>Tree</td><td>5.0</td><td>Interval for main contour lines</td></tr>
-                        <tr><td>Colors</td><td>Colors</td><td>Colour</td><td>Tree</td><td>LightGreen</td><td>List of gradient colors based on height</td></tr>
-                        <tr><td>Resolution</td><td>Resolution</td><td>Integer</td><td>Tree</td><td>100</td><td>Grid density</td></tr>
-                        <tr><td>UseSlopeColor</td><td>UseSlopeColor</td><td>Boolean</td><td>Tree</td><td>false</td><td>Toggle steep slope coloring</td></tr>
-                        <tr><td>SlopeColor</td><td>SlopeColor</td><td>Colour</td><td>Tree</td><td>DarkGray</td><td>Color applied to sheer cliffs/slopes</td></tr>
-                        <tr><td>SlopeAngle</td><td>SlopeAngle</td><td>Number</td><td>Tree</td><td>30.0</td><td>Angle where slope color starts</td></tr>
-                        <tr><td>TerrainStyle</td><td>TerrainStyle</td><td>Integer</td><td>Tree</td><td>0</td><td>0 = Soft Hills, 1 = Ridged/Cellular Pattern</td></tr>
-                        <tr><td>Solid</td><td>Solid</td><td>Boolean</td><td>Tree</td><td>false</td><td>Toggle closed mesh extrusion</td></tr>
-                        <tr><td>BaseCol</td><td>BaseCol</td><td>Colour</td><td>Tree</td><td>DimGray</td><td>Color for the extruded solid base section</td></tr>
-                        <tr><td>TreeMsk</td><td>TreeMsk</td><td>Number</td><td>Tree</td><td>0.0</td><td>Coverage mask threshold 0.0 to 1.0</td></tr>
-                        <tr><td>TreeDns</td><td>TreeDns</td><td>Number</td><td>Tree</td><td>0.0</td><td>Density multiplier inside mask areas</td></tr>
-                        <tr><td>TreeSeed</td><td>TreeSeed</td><td>Integer</td><td>Tree</td><td>12345</td><td>Dedicated seed for the forest noise map</td></tr>
-                        <tr><td>TreeZMin</td><td>TreeZMin</td><td>Number</td><td>Tree</td><td>0.15</td><td>Minimum relative elevation for trees 0.0 to 1.0</td></tr>
-                        <tr><td>TreeZMax</td><td>TreeZMax</td><td>Number</td><td>Tree</td><td>0.85</td><td>Maximum relative elevation for trees 0.0 to 1.0</td></tr>
-                    </tbody>
-                </table>
+        <div class="doc-content">
+            <h2>Overview</h2>
+            <p>Generates topography with noise-masked procedural forest scattering and strict elevation limits.</p>
+            
+            <div class="io-grid">
+                <div class="io-col">
+                    <h3>Inputs (21)</h3>
+                    <ul>
+                        <li>Inputs detailed documentation coming soon.</li>
+                    </ul>
+                </div>
+                <div class="io-col">
+                    <h3>Outputs (4)</h3>
+                    <ul>
+                        <li>Outputs detailed documentation coming soon.</li>
+                    </ul>
+                </div>
             </div>
-        </section>
-
-        <section class="component-section">
-            <h2>Outputs</h2>
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr><th>Name</th><th>Nickname</th><th>Type</th><th>Access</th><th>Description</th></tr>
-                    </thead>
-                    <tbody>
-                        <tr><td>Instructions</td><td>Instructions</td><td>Text</td><td>Item</td><td>Interface mapping guide</td></tr>
-                        <tr><td>Mesh</td><td>Mesh</td><td>Mesh</td><td>Tree</td><td>Gradient colored terrain geometry</td></tr>
-                        <tr><td>NormContours</td><td>NormContours</td><td>Curve</td><td>Tree</td><td>Standard contour lines</td></tr>
-                        <tr><td>MainContours</td><td>MainContours</td><td>Curve</td><td>Tree</td><td>Major interval contour lines</td></tr>
-                        <tr><td>Trees</td><td>Trees</td><td>Point</td><td>Tree</td><td>Scattered point coordinates for trees</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
+        </div>
     </main>
 
     <footer>
-        <p><a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank" style="color: #a1a1aa; text-decoration: none; border-bottom: 1px solid #3f3f46; padding-bottom: 2px; transition: color 0.2s ease;">View on GitHub</a></p>
+        <p><a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank" style="color: #a1a1aa; text-decoration: none; border-bottom: 1px solid #3f3f46; padding-bottom: 2px;">View on GitHub</a></p>
     </footer>
-    <script src="../js/main.js"></script>
 </body>
 </html>

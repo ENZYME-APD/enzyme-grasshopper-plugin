@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Road Slope Analyzer - Enzyme</title>
+    <title>Road Slope Analyzer - Enzyme Plugin</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
-
     <nav class="navbar">
         <a href="../index.html" class="nav-brand">
             <img src="../images/enzyme_logo.png" alt="Enzyme Logo" class="logo-img">
@@ -19,143 +18,42 @@
         </div>
     </nav>
 
-    <div class="breadcrumb">
-        <a href="../index.html">← Back to Components</a>
-    </div>
-
-    <div class="component-header">
-        <span class="badge terrain">Terrain</span>
-        <h1>Road Slope Analyzer <span class="component-nickname">RoadSlope</span></h1>
-        <p class="component-description">Analyzes road slopes by projecting 2D curves onto a terrain mesh, computing slope percentage per segment.</p>
-    </div>
-
-    <div class="component-content">
-        <h2>Inputs</h2>
-        <div class="table-wrapper">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Nickname</th>
-                        <th>Type</th>
-                        <th>Access</th>
-                        <th>Default</th>
-                        <th>Description</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Curves</td>
-                        <td>Curves</td>
-                        <td>Curve</td>
-                        <td>List</td>
-                        <td>—</td>
-                        <td>2D curves representing roads</td>
-                    </tr>
-                    <tr>
-                        <td>Terrain</td>
-                        <td>Terrain</td>
-                        <td>Mesh</td>
-                        <td>Item</td>
-                        <td>—</td>
-                        <td>Terrain mesh for projection</td>
-                    </tr>
-                    <tr>
-                        <td>Threshold</td>
-                        <td>Threshold</td>
-                        <td>Number</td>
-                        <td>Item</td>
-                        <td>8.0</td>
-                        <td>Slope threshold in percentage</td>
-                    </tr>
-                    <tr>
-                        <td>Segment Size</td>
-                        <td>Segment Size</td>
-                        <td>Number</td>
-                        <td>Item</td>
-                        <td>5.0</td>
-                        <td>Size of segments for analysis</td>
-                    </tr>
-                    <tr>
-                        <td>Ray Upward</td>
-                        <td>Ray Upward</td>
-                        <td>Boolean</td>
-                        <td>Item</td>
-                        <td>false</td>
-                        <td>Cast rays upward instead of both directions</td>
-                    </tr>
-                </tbody>
-            </table>
+    <main class="container doc-page">
+        <div class="doc-header" style="display: flex; align-items: center;">
+            <img src="../images/icons/road_slope_icon.png" alt="Road Slope Analyzer Icon" class="comp-icon" style="width: 48px; height: 48px; margin-right: 1rem; border-radius: 8px;">
+            <div>
+                <h1>Road Slope Analyzer</h1>
+                <p class="doc-subtitle">Analyzes road slopes by projecting 2D curves onto a terrain mesh</p>
+                <div class="doc-meta">
+                    <span class="badge terrain">Terrain</span>
+                    <span>Nickname: <strong>RoadSlope</strong></span>
+                </div>
+            </div>
         </div>
 
-        <h2>Outputs</h2>
-        <div class="table-wrapper">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Nickname</th>
-                        <th>Type</th>
-                        <th>Access</th>
-                        <th>Description</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Analyzed Segments</td>
-                        <td>Analyzed Segments</td>
-                        <td>Curve</td>
-                        <td>Tree</td>
-                        <td>Road segments: branch 0 = compliant, branch 1 = non-compliant</td>
-                    </tr>
-                    <tr>
-                        <td>Slope Values</td>
-                        <td>Slope Values</td>
-                        <td>Number</td>
-                        <td>Tree</td>
-                        <td>Slope percentage for each segment (same tree structure)</td>
-                    </tr>
-                    <tr>
-                        <td>Center Points</td>
-                        <td>Center Points</td>
-                        <td>Point</td>
-                        <td>Tree</td>
-                        <td>Center point of each analysed segment</td>
-                    </tr>
-                    <tr>
-                        <td>Compliance Percentage</td>
-                        <td>Compliance Percentage</td>
-                        <td>Number</td>
-                        <td>Item</td>
-                        <td>Percentage of segments within the threshold</td>
-                    </tr>
-                    <tr>
-                        <td>Projected Points</td>
-                        <td>Projected Points</td>
-                        <td>Point</td>
-                        <td>Tree</td>
-                        <td>Points projected onto the terrain surface</td>
-                    </tr>
-                    <tr>
-                        <td>Projection Lines</td>
-                        <td>Projection Lines</td>
-                        <td>Line</td>
-                        <td>Tree</td>
-                        <td>Lines from original point to projected terrain point</td>
-                    </tr>
-                </tbody>
-            </table>
+        <div class="doc-content">
+            <h2>Overview</h2>
+            <p>Analyzes road slopes by projecting 2D curves onto a terrain mesh</p>
+            
+            <div class="io-grid">
+                <div class="io-col">
+                    <h3>Inputs (5)</h3>
+                    <ul>
+                        <li>Inputs detailed documentation coming soon.</li>
+                    </ul>
+                </div>
+                <div class="io-col">
+                    <h3>Outputs (6)</h3>
+                    <ul>
+                        <li>Outputs detailed documentation coming soon.</li>
+                    </ul>
+                </div>
+            </div>
         </div>
-
-        <div class="notes">
-            <h3>Notes & Behaviour</h3>
-            <p>Projects points vertically onto the mesh using ray casting. Falls back to upward ray if downward misses. Slope = (vertical rise / horizontal run) × 100. Output tree branch 0 = compliant segments, branch 1 = non-compliant. Status message shows compliance %, non-compliance %, and execution time.</p>
-        </div>
-    </div>
+    </main>
 
     <footer>
-        <p>Built by Dushyant Basson & Jorge Beneitez | <a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank">GitHub</a> | Enzyme-APD</p>
+        <p><a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank" style="color: #a1a1aa; text-decoration: none; border-bottom: 1px solid #3f3f46; padding-bottom: 2px;">View on GitHub</a></p>
     </footer>
-
 </body>
 </html>
