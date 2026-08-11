@@ -284,10 +284,7 @@ namespace Enzyme.Components
             return segmentsData;
         }
 
-        protected override System.Drawing.Bitmap Icon
-        {
-            get { return null; }
-        }
+        protected override System.Drawing.Bitmap Icon => IconLoader.Load("AD_CAKE.png");
 
         public override Guid ComponentGuid
         {

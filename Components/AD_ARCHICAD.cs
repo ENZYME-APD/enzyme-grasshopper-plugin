@@ -317,10 +317,7 @@ namespace Enzyme.Components
             return segments_data;
         }
 
-        protected override System.Drawing.Bitmap Icon
-        {
-            get { return null; }
-        }
+        protected override System.Drawing.Bitmap Icon => IconLoader.Load("AD_ARCHICAD.png");
 
         public override Guid ComponentGuid
         {

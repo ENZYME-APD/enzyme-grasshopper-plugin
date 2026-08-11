@@ -194,6 +194,8 @@ namespace Enzyme.Components
 
         public override Guid ComponentGuid => new Guid("08412F4D-DDE4-42CE-A1C8-243B5761358F");
 
+        protected override System.Drawing.Bitmap Icon => IconLoader.Load("FacadeDist.png");
+
         public override GH_Exposure Exposure => GH_Exposure.secondary;
     }
 }
