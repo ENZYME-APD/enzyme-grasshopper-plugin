@@ -39,13 +39,36 @@
                 <div class="io-col">
                     <h3>Inputs (21)</h3>
                     <ul>
-                        <li>Inputs detailed documentation coming soon.</li>
+                        <li><strong>Boundary</strong> (Curve): Closed boundary limits</li>
+                        <li><strong>MaxHeight</strong> (Number): Maximum elevation in meters</li>
+                        <li><strong>MinHeight</strong> (Number): Minimum elevation in meters</li>
+                        <li><strong>Seed</strong> (Integer): Randomization seed</li>
+                        <li><strong>PatternSizeXY</strong> (Number): List of feature sizes in meters</li>
+                        <li><strong>PatternHeightZ</strong> (Number): List of relative feature strengths</li>
+                        <li><strong>ContourStep</strong> (Number): Interval for normal contour lines</li>
+                        <li><strong>MainStep</strong> (Number): Interval for main contour lines</li>
+                        <li><strong>Colors</strong> (Colour): List of gradient colors based on height</li>
+                        <li><strong>Resolution</strong> (Integer): Grid density</li>
+                        <li><strong>UseSlopeColor</strong> (Boolean): Toggle steep slope coloring</li>
+                        <li><strong>SlopeColor</strong> (Colour): Color applied to sheer cliffs/slopes</li>
+                        <li><strong>SlopeAngle</strong> (Number): Angle where slope color starts</li>
+                        <li><strong>TerrainStyle</strong> (Integer): 0 = Realistic Soft Hills, 1 = Ridged/Cellular Pattern</li>
+                        <li><strong>Solid</strong> (Boolean): Toggle closed mesh extrusion</li>
+                        <li><strong>BaseCol</strong> (Colour): Color for the extruded solid base section</li>
+                        <li><strong>TreeMsk</strong> (Number): Coverage mask threshold 0.0 to 1.0</li>
+                        <li><strong>TreeDns</strong> (Number): Density multiplier inside mask areas</li>
+                        <li><strong>TreeSeed</strong> (Integer): Dedicated seed for the forest noise map</li>
+                        <li><strong>TreeZMin</strong> (Number): Minimum relative elevation for trees 0.0 to 1.0</li>
+                        <li><strong>TreeZMax</strong> (Number): Maximum relative elevation for trees 0.0 to 1.0</li>
                     </ul>
                 </div>
                 <div class="io-col">
                     <h3>Outputs (4)</h3>
                     <ul>
-                        <li>Outputs detailed documentation coming soon.</li>
+                        <li><strong>Mesh</strong> (Mesh): Gradient colored terrain geometry</li>
+                        <li><strong>NormContours</strong> (Curve): Standard contour lines</li>
+                        <li><strong>MainContours</strong> (Curve): Major interval contour lines</li>
+                        <li><strong>Trees</strong> (Point): Scattered point coordinates for trees</li>
                     </ul>
                 </div>
             </div>

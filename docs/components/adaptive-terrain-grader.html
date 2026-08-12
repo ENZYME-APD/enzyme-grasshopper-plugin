@@ -39,13 +39,24 @@
                 <div class="io-col">
                     <h3>Inputs (7)</h3>
                     <ul>
-                        <li>Inputs detailed documentation coming soon.</li>
+                        <li><strong>Mesh</strong> (Mesh): Original Topography</li>
+                        <li><strong>BoundaryCurves</strong> (Curve): Closed pads (Optional)</li>
+                        <li><strong>BlendAngle</strong> (Number): Max allowable slope in degrees</li>
+                        <li><strong>CutColor</strong> (Colour): Cut zones color</li>
+                        <li><strong>FillColor</strong> (Colour): Fill zones color</li>
+                        <li><strong>MeshResolution</strong> (Number): Base grid size</li>
+                        <li><strong>ShowContours</strong> (Boolean): Toggle contour generation</li>
                     </ul>
                 </div>
                 <div class="io-col">
                     <h3>Outputs (6)</h3>
                     <ul>
-                        <li>Outputs detailed documentation coming soon.</li>
+                        <li><strong>ModMesh</strong> (Mesh): Adaptive Tri-Mesh</li>
+                        <li><strong>ColoredMesh</strong> (Mesh): Unwelded crisp cut/fill visualizer</li>
+                        <li><strong>CutVolume</strong> (Number): Total Cut (Negative Z)</li>
+                        <li><strong>FillVolume</strong> (Number): Total Fill (Positive Z)</li>
+                        <li><strong>Contours</strong> (Curve): 1m Interval Curves</li>
+                        <li><strong>MainContours</strong> (Curve): 5m Interval Curves</li>
                     </ul>
                 </div>
             </div>

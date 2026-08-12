@@ -39,13 +39,26 @@
                 <div class="io-col">
                     <h3>Inputs (11)</h3>
                     <ul>
-                        <li>Inputs detailed documentation coming soon.</li>
+                        <li><strong>BaseCurves</strong> (Curve): Planar boundary curves to extrude.</li>
+                        <li><strong>Heights</strong> (Number): Floor-to-floor heights corresponding to curves.</li>
+                        <li><strong>GridVertical</strong> (Number): Spacing pattern for vertical mullions (e.g., [1.5, 2.0]).</li>
+                        <li><strong>GridHorizontal</strong> (Number): Spacing pattern for horizontal transoms (e.g., [1.0, 2.0]).</li>
+                        <li><strong>Align</strong> (Text): Grid justification ('Start', 'Middle', 'End').</li>
+                        <li><strong>VertExt</strong> (Number): Fallback extrusion depth for vertical mullions.</li>
+                        <li><strong>HorExt</strong> (Number): Fallback extrusion depth for horizontal transoms.</li>
+                        <li><strong>DetailVertical</strong> (Curve): Optional 2D profile to sweep for vertical mullions.</li>
+                        <li><strong>DetailHorizontal</strong> (Curve): Optional 2D profile to sweep for horizontal transoms.</li>
+                        <li><strong>DetailCorner</strong> (Curve): Optional 2D profile to sweep for corner mullions.</li>
+                        <li><strong>CurvedGridVertical</strong> (Number): Optional alternative vertical spacing for curved segments.</li>
                     </ul>
                 </div>
                 <div class="io-col">
                     <h3>Outputs (4)</h3>
                     <ul>
-                        <li>Outputs detailed documentation coming soon.</li>
+                        <li><strong>Mullions</strong> (Brep): Generated vertical mullions.</li>
+                        <li><strong>Transoms</strong> (Brep): Generated horizontal transoms.</li>
+                        <li><strong>CornerMullions</strong> (Brep): Vertical mullions generated specifically at sharp vertices.</li>
+                        <li><strong>GlassWall</strong> (Brep): Uncapped extruded glass surfaces.</li>
                     </ul>
                 </div>
             </div>

@@ -39,13 +39,41 @@
                 <div class="io-col">
                     <h3>Inputs (11)</h3>
                     <ul>
-                        <li>Inputs detailed documentation coming soon.</li>
+                        <li><strong>TargetMeshes</strong> (Mesh): The meshes to analyze.</li>
+                        <li><strong>SearchRings</strong> (Integer): Topological radius in rings.</li>
+                        <li><strong>ProminenceLimit</strong> (Number): Minimum Z-delta to be considered a peak/valley.</li>
+                        <li><strong>CustomColors</strong> (Colour): Custom colormap list.</li>
+                        <li><strong>CullGlobals</strong> (Boolean): Toggle to remove the absolute highest/lowest points.</li>
+                        <li><strong>AvoidBoundaries</strong> (Boolean): Toggle to ignore naked edge vertices.</li>
+                        <li><strong>EnableHeatmap</strong> (Boolean): Toggle to compute and output the vertex heatmap mesh.</li>
+                        <li><strong>RotationPlane</strong> (Plane): Orientation plane for the bounding box sectioning.</li>
+                        <li><strong>SectionsX</strong> (Integer): Number of sections running parallel to the X-axis.</li>
+                        <li><strong>SectionsY</strong> (Integer): Number of sections running parallel to the Y-axis.</li>
+                        <li><strong>LayoutFlat</strong> (Boolean): Toggle to generate 2D XY print layouts next to the mesh.</li>
                     </ul>
                 </div>
                 <div class="io-col">
                     <h3>Outputs (19)</h3>
                     <ul>
-                        <li>Outputs detailed documentation coming soon.</li>
+                        <li><strong>Instructions</strong> (Text): Component documentation and usage manual.</li>
+                        <li><strong>LocalPeaks</strong> (Point): Output points for local highs.</li>
+                        <li><strong>PeakElevations</strong> (Number): Z-values for local highs.</li>
+                        <li><strong>GlobalMaxPoint</strong> (Point): Absolute highest point on the mesh.</li>
+                        <li><strong>GlobalMaxElevation</strong> (Number): Absolute highest Z-value.</li>
+                        <li><strong>LocalValleys</strong> (Point): Output points for local lows.</li>
+                        <li><strong>ValleyElevations</strong> (Number): Z-values for local lows.</li>
+                        <li><strong>GlobalMinPoint</strong> (Point): Absolute lowest point on the mesh.</li>
+                        <li><strong>GlobalMinElevation</strong> (Number): Absolute lowest Z-value.</li>
+                        <li><strong>HeatmapMeshes</strong> (Mesh): The vertex-colored duplicate mesh.</li>
+                        <li><strong>SectionOutlinesX</strong> (Curve): 3D Polylines running parallel to the X-axis.</li>
+                        <li><strong>SectionOutlinesY</strong> (Curve): 3D Polylines running parallel to the Y-axis.</li>
+                        <li><strong>FlatSectionsX</strong> (Curve): 2D X-Sections stacked downwards (-Y direction).</li>
+                        <li><strong>FlatSectionsY</strong> (Curve): 2D Y-Sections stacked leftwards (-X direction).</li>
+                        <li><strong>LabelText3D</strong> (Text): Text strings for 3D section labels.</li>
+                        <li><strong>LabelPoints3D</strong> (Point): Points for 3D section labels.</li>
+                        <li><strong>LabelTextFlat</strong> (Text): Text strings for the flattened section layout.</li>
+                        <li><strong>LabelPointsFlat</strong> (Point): Points for the flattened section layout.</li>
+                        <li><strong>SectionMetadata</strong> (Text): Dictionary keys containing spatial transform & ID data.</li>
                     </ul>
                 </div>
             </div>

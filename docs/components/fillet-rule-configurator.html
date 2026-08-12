@@ -39,13 +39,18 @@
                 <div class="io-col">
                     <h3>Inputs (5)</h3>
                     <ul>
-                        <li>Inputs detailed documentation coming soon.</li>
+                        <li><strong>DefaultRadius</strong> (Number): The base radius if no rules match.</li>
+                        <li><strong>RuleTypes</strong> (Text): List of target types ('Tower', 'Program', 'Building').</li>
+                        <li><strong>RuleMatches</strong> (Text): List of target names ('Main_Tower', 'Retail', '*').</li>
+                        <li><strong>RuleRadii</strong> (Number): List of radii to apply to the matched targets.</li>
+                        <li><strong>ExactMatch</strong> (Boolean): True = Exact, False = Contains. Defaults to True.</li>
                     </ul>
                 </div>
                 <div class="io-col">
                     <h3>Outputs (2)</h3>
                     <ul>
-                        <li>Outputs detailed documentation coming soon.</li>
+                        <li><strong>Fillet_JSON</strong> (Text): The compiled JSON string to feed into BIM_JSON.</li>
+                        <li><strong>Instructions</strong> (Text): Detailed usage instructions.</li>
                     </ul>
                 </div>
             </div>

@@ -39,13 +39,27 @@
                 <div class="io-col">
                     <h3>Inputs (9)</h3>
                     <ul>
-                        <li>Inputs detailed documentation coming soon.</li>
+                        <li><strong>Run</strong> (Boolean): Global execution toggle switch</li>
+                        <li><strong>TerrainMesh</strong> (Mesh): The underlying site topography</li>
+                        <li><strong>ContextBuildings</strong> (Mesh): Lightweight mesh context structures</li>
+                        <li><strong>WindDirection</strong> (Vector): Travel vector of incoming air</li>
+                        <li><strong>WindSpeed</strong> (Number): Baseline velocity metric</li>
+                        <li><strong>AnalysisHeight</strong> (Number): Human pedestrian offset</li>
+                        <li><strong>GridSpacing</strong> (Number): Resolution size of pixel elements</li>
+                        <li><strong>CustomColors</strong> (Colour): Custom color spectrum override</li>
+                        <li><strong>HeatmapHeight</strong> (Number): Z-axis elevation to project the flat heatmap</li>
                     </ul>
                 </div>
                 <div class="io-col">
                     <h3>Outputs (7)</h3>
                     <ul>
-                        <li>Outputs detailed documentation coming soon.</li>
+                        <li><strong>VelocityHeatmap</strong> (Mesh): Flat, unwelded crisp horizontal pixel-tile matrix</li>
+                        <li><strong>WindVectors</strong> (Line): Spatial direction markers</li>
+                        <li><strong>VectorColors</strong> (Colour): Velocity color map matching lines</li>
+                        <li><strong>Streamlines</strong> (Curve): Continuous particle flow paths</li>
+                        <li><strong>VelocityData</strong> (Text): Raw velocity values formatted</li>
+                        <li><strong>TagPoints</strong> (Point): Anchor coordinates for Text Tag</li>
+                        <li><strong>PlainMesh</strong> (Mesh): Original topography mesh without vertex colors</li>
                     </ul>
                 </div>
             </div>

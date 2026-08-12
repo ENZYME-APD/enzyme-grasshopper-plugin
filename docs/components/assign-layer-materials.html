@@ -39,13 +39,18 @@
                 <div class="io-col">
                     <h3>Inputs (3)</h3>
                     <ul>
-                        <li>Inputs detailed documentation coming soon.</li>
+                        <li><strong>LayerNames</strong> (Text): Layer names or paths. Connect a Value List here!</li>
+                        <li><strong>UseFullPath</strong> (Boolean): If True, material name = 'Parent::Child'. If False, just 'Child'.</li>
+                        <li><strong>RunScript</strong> (Boolean): Connect a Button/Toggle to execute.</li>
                     </ul>
                 </div>
                 <div class="io-col">
                     <h3>Outputs (4)</h3>
                     <ul>
-                        <li>Outputs detailed documentation coming soon.</li>
+                        <li><strong>Instructions_Out</strong> (Text): Component interface documentation.</li>
+                        <li><strong>LogOutput</strong> (Text): Persistent execution log.</li>
+                        <li><strong>UpdatedCount</strong> (Integer): Number of layers that received a new material.</li>
+                        <li><strong>SkippedCount</strong> (Integer): Number of layers that already had a material.</li>
                     </ul>
                 </div>
             </div>

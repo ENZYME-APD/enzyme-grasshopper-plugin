@@ -39,13 +39,17 @@
                 <div class="io-col">
                     <h3>Inputs (4)</h3>
                     <ul>
-                        <li>Inputs detailed documentation coming soon.</li>
+                        <li><strong>TerrainMesh</strong> (Mesh): The unified topological surface.</li>
+                        <li><strong>GridSpacing</strong> (Number): The XY distance between starting raindrops.</li>
+                        <li><strong>StepSize</strong> (Number): Distance the water travels per tick.</li>
+                        <li><strong>MaxSteps</strong> (Integer): Safety limit for the simulation loop.</li>
                     </ul>
                 </div>
                 <div class="io-col">
                     <h3>Outputs (2)</h3>
                     <ul>
-                        <li>Outputs detailed documentation coming soon.</li>
+                        <li><strong>FlowPaths</strong> (Curve): The generated water movement paths.</li>
+                        <li><strong>DropPoints</strong> (Point): The valid starting grid points on the mesh.</li>
                     </ul>
                 </div>
             </div>
