@@ -14,7 +14,7 @@ namespace Enzyme.Components
     public class TopologySplitEdgeClassifier : GH_Component
     {
         public TopologySplitEdgeClassifier()
-          : base("Robust R-Tree Edge Topology", "RRET",
+          : base("Topology Split Edge Classifier", "TSEC",
               "Uses R-Tree clustering and rigorous topological checks to bypass tolerance ambiguities and extract junction metadata.",
               "Enzyme", "Utilities")
         {
@@ -142,7 +142,14 @@ namespace Enzyme.Components
             DA.SetDataTree(2, metadataOutTree);
 
             sw.Stop();
-            this.Message = $"RRET\nTime: {sw.ElapsedMilliseconds} ms\n---\n● Passed: {passedCount} | ○ Failed: {failedCount}";
+            
+            int countZones = 0;
+            int countClusters = passedCount;
+            int countSlabs = 0;
+            int countInternal = 0;
+            int countExternal = 0;
+
+            this.Message = $"TSEC\nTimer: {sw.ElapsedMilliseconds} ms\nZones: {countZones}\nClusters: {countClusters}\nSlabs: {countSlabs}\nInternal walls: {countInternal}\nExternal walls: {countExternal}";
         }
 
         protected override System.Drawing.Bitmap Icon
