@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Topology Split Edge Classifier - Enzyme Plugin</title>
+    <title>Robust R-Tree Edge Topology - Enzyme Plugin</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
 </head>
@@ -20,9 +20,9 @@
 
     <main class="container doc-page">
         <div class="doc-header" style="display: flex; align-items: center;">
-            <img src="../images/icons/TopologySplitEdgeClassifier.png" alt="Topology Split Edge Classifier Icon" class="comp-icon" style="width: 48px; height: 48px; margin-right: 1rem; border-radius: 8px;">
+            <img src="../images/icons/TopologySplitEdgeClassifier.png" alt="Robust R-Tree Edge Topology Icon" class="comp-icon" style="width: 48px; height: 48px; margin-right: 1rem; border-radius: 8px;">
             <div>
-                <h1>Topology Split Edge Classifier</h1>
+                <h1>Robust R-Tree Edge Topology</h1>
                 <p class="doc-subtitle">Explodes and splits room boundaries at intersections, classifies edge topology, and generates unified floor slabs.</p>
                 <div class="doc-meta">
                     <span class="badge utilities">Utilities</span>
@@ -39,18 +39,18 @@
                 <div class="io-col">
                     <h3>Inputs (2)</h3>
                     <ul>
-                        <li><strong>RoomCurves</strong> (Curve): Room boundaries as curves</li>
-                        <li><strong>ToleranceValue</strong> (Number): Tolerance value for intersections</li>
+                        <li><strong>TestPoints</strong> (Point): The points to test against boundaries</li>
+                        <li><strong>BoundaryEdges</strong> (Curve): The geometry boundaries or edges</li>
+                        <li><strong>SearchRadius</strong> (Number): Broad R-Tree clustering radius</li>
+                        <li><strong>StrictTolerance</strong> (Number): Final topological distance check</li>
                     </ul>
                 </div>
                 <div class="io-col">
                     <h3>Outputs (5)</h3>
                     <ul>
-                        <li><strong>Instructions_Out</strong> (Text): Canvas instructions</li>
-                        <li><strong>ExternalEdges</strong> (Curve): External boundary edges</li>
-                        <li><strong>InternalPartitions</strong> (Curve): Internal partition edges</li>
-                        <li><strong>MetadataOut</strong> (Text): Metadata for edges</li>
-                        <li><strong>FloorSlabs</strong> (Curve): Unified floor slabs</li>
+                        <li><strong>Instructions_Out</strong> (Text): Canvas setup instructions to enforce correct data binding</li>
+                        <li><strong>FilteredPoints</strong> (Point): Points that passed the topology check (flattened to Z=0)</li>
+                        <li><strong>MetadataOut</strong> (Text): JSON serialized spatial parameters and curve index connections</li>
                     </ul>
                 </div>
             </div>
