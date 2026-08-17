@@ -39,18 +39,18 @@
                 <div class="io-col">
                     <h3>Inputs (2)</h3>
                     <ul>
-                        <li><strong>TestPoints</strong> (Point): The points to test against boundaries</li>
-                        <li><strong>BoundaryEdges</strong> (Curve): The geometry boundaries or edges</li>
-                        <li><strong>SearchRadius</strong> (Number): Broad R-Tree clustering radius</li>
-                        <li><strong>StrictTolerance</strong> (Number): Final topological distance check</li>
+                        <li><strong>RoomCurves</strong> (Curve): The primary tree of input room boundary curves</li>
+                        <li><strong>ToleranceValue</strong> (Number): The strict proximity tolerance to merge shared walls</li>
                     </ul>
                 </div>
                 <div class="io-col">
                     <h3>Outputs (5)</h3>
                     <ul>
                         <li><strong>Instructions_Out</strong> (Text): Canvas setup instructions to enforce correct data binding</li>
-                        <li><strong>FilteredPoints</strong> (Point): Points that passed the topology check (flattened to Z=0)</li>
-                        <li><strong>MetadataOut</strong> (Text): JSON serialized spatial parameters and curve index connections</li>
+                        <li><strong>ExternalEdges</strong> (Curve): The flattened (Z=0) external boundary curves</li>
+                        <li><strong>InternalPartitions</strong> (Curve): The flattened (Z=0) internal shared partition curves</li>
+                        <li><strong>MetadataOut</strong> (Text): JSON serialized spatial parameters for orientation reconstruction</li>
+                        <li><strong>FloorSlabs</strong> (Curve): The flattened (Z=0) combined boolean union of the rooms</li>
                     </ul>
                 </div>
             </div>
