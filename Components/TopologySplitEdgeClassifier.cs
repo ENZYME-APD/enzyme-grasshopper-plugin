@@ -276,9 +276,9 @@ namespace Enzyme.Components
                         {
                             var parameters = splitParams[i].Distinct().ToList();
                             parameters.Sort();
-                            for (int p = 0; p < parameters.Count - 1; p++)
+                            for (int paramIdx = 0; paramIdx < parameters.Count - 1; paramIdx++)
                             {
-                                Curve subCrv = initialSegments[i].Trim(parameters[p], parameters[p + 1]);
+                                Curve subCrv = initialSegments[i].Trim(parameters[paramIdx], parameters[paramIdx + 1]);
                                 if (subCrv != null && subCrv.GetLength() > tol)
                                 {
                                     refinedSegments.Add(subCrv);
