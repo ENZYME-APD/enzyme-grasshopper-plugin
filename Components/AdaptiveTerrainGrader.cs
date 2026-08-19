@@ -28,6 +28,24 @@ namespace Enzyme.Components
 
         public override Guid ComponentGuid => new Guid("B5D1A2C3-E8F7-4A6B-9C0D-1E2F3A4B5C6D");
 
+                public override void AddedToDocument(GH_Document document)
+        {
+            base.AddedToDocument(document);
+            if (this.Attributes == null) this.CreateAttributes();
+
+            bool hasSources = false;
+            foreach (var param in this.Params.Input)
+                if (param.SourceCount > 0) { hasSources = true; break; }
+
+            if (!hasSources)
+            {
+                int ix = 200, ox = 250;
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 0.0, 90.0, 45.0, ix, -120);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 5, 0.0, 20.0, 10.0, ix, -90);
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 6, false, ix, -60);
+            }
+        }
+
         protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
             pManager.AddMeshParameter("Mesh", "Mesh", "Original Topography", GH_ParamAccess.item);

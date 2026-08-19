@@ -29,6 +29,25 @@ namespace Enzyme.Components
 
         public override Guid ComponentGuid => new Guid("C3D4E5F6-A7B8-490A-1B2C-3D4E5F6A7B8C");
 
+                public override void AddedToDocument(GH_Document document)
+        {
+            base.AddedToDocument(document);
+            if (this.Attributes == null) this.CreateAttributes();
+
+            bool hasSources = false;
+            foreach (var param in this.Params.Input)
+                if (param.SourceCount > 0) { hasSources = true; break; }
+
+            if (!hasSources)
+            {
+                int ix = 200, ox = 250;
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 0, false, ix, -120);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 4, 0.0, 20.0, 10.0, ix, -90);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 5, 0.0, 10.0, 1.5, ix, -60);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 6, 0.0, 10.0, 5.0, ix, -30);
+            }
+        }
+
         protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
             pManager.AddBooleanParameter("Run", "Run", "Global execution toggle switch", GH_ParamAccess.item, false);

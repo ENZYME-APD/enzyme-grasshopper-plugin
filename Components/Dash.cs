@@ -39,6 +39,30 @@ namespace Enzyme.Components
 
         public override GH_Exposure Exposure => GH_Exposure.primary;
 
+                public override void AddedToDocument(GH_Document document)
+        {
+            base.AddedToDocument(document);
+            if (this.Attributes == null) this.CreateAttributes();
+
+            bool hasSources = false;
+            foreach (var param in this.Params.Input)
+                if (param.SourceCount > 0) { hasSources = true; break; }
+
+            if (!hasSources)
+            {
+                int ix = 200, ox = 250;
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 0, false, ix, -120);
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 2, false, ix, -90);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 5, 0.0, 10.0, 0.0, ix, -60);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 7, 0.0, 24.0, 12.0, ix, -30);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 8, 0.0, 10, 0, ix, 0);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 10, 0.0, 10.0, 0.8, ix, 30);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 11, 0.0, 40.0, 20.0, ix, 60);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 12, 0.0, 40.0, 20.0, ix, 90);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 13, 0.0, 20.0, 10.0, ix, 120);
+            }
+        }
+
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddBooleanParameter("Run", "run", "Enable HUD", GH_ParamAccess.item, false);

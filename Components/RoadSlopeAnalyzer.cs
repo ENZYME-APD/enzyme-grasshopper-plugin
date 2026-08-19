@@ -30,6 +30,24 @@ namespace Enzyme.Components
 
         public override Guid ComponentGuid => new Guid("D4E5F6A7-B8C9-4D0E-A1F2-93A4B5C6D7E8");
 
+                public override void AddedToDocument(GH_Document document)
+        {
+            base.AddedToDocument(document);
+            if (this.Attributes == null) this.CreateAttributes();
+
+            bool hasSources = false;
+            foreach (var param in this.Params.Input)
+                if (param.SourceCount > 0) { hasSources = true; break; }
+
+            if (!hasSources)
+            {
+                int ix = 200, ox = 250;
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 0.0, 16.0, 8.0, ix, -120);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 3, 0.0, 10.0, 5.0, ix, -90);
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 4, false, ix, -60);
+            }
+        }
+
         protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
             pManager.AddCurveParameter("Curves", "Curves", "2D curves representing roads", GH_ParamAccess.list);

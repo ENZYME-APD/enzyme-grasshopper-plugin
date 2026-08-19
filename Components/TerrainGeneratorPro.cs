@@ -33,6 +33,36 @@ namespace Enzyme.Components
 
         public override Guid ComponentGuid => new Guid("E3F2D4A1-B9C8-4D7E-A5F1-92A3B4C5D6E7");
 
+                public override void AddedToDocument(GH_Document document)
+        {
+            base.AddedToDocument(document);
+            if (this.Attributes == null) this.CreateAttributes();
+
+            bool hasSources = false;
+            foreach (var param in this.Params.Input)
+                if (param.SourceCount > 0) { hasSources = true; break; }
+
+            if (!hasSources)
+            {
+                int ix = 200, ox = 250;
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 1, 0.0, 200.0, 100.0, ix, -120);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 0.0, 10.0, 0.0, ix, -90);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 3, 0.0, 84, 42, ix, -60);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 6, 0.0, 10.0, 1.0, ix, -30);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 7, 0.0, 10.0, 5.0, ix, 0);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 9, 0.0, 200, 100, ix, 30);
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 10, false, ix, 60);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 12, 0.0, 60.0, 30.0, ix, 90);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 13, 0.0, 10, 0, ix, 120);
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 14, false, ix, 150);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 16, 0.0, 10.0, 0.0, ix, 180);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 17, 0.0, 10.0, 0.0, ix, 210);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 18, 0.0, 24690, 12345, ix, 240);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 19, 0.0, 10.0, 0.15, ix, 270);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 20, 0.0, 10.0, 0.85, ix, 300);
+            }
+        }
+
         protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
             pManager.AddCurveParameter("Boundary", "Boundary", "Closed boundary limits", GH_ParamAccess.item);

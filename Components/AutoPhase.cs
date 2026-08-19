@@ -22,6 +22,22 @@ namespace Enzyme.Components
 
         public override GH_Exposure Exposure => GH_Exposure.primary;
 
+                public override void AddedToDocument(GH_Document document)
+        {
+            base.AddedToDocument(document);
+            if (this.Attributes == null) this.CreateAttributes();
+
+            bool hasSources = false;
+            foreach (var param in this.Params.Input)
+                if (param.SourceCount > 0) { hasSources = true; break; }
+
+            if (!hasSources)
+            {
+                int ix = 200, ox = 250;
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 1, false, ix, -120);
+            }
+        }
+
         protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
             pManager.AddGenericParameter("Guids", "Guids", "Referenced Rhino geometry IDs.", GH_ParamAccess.list);

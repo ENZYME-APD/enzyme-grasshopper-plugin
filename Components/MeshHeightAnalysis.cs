@@ -20,6 +20,29 @@ namespace Enzyme.Terrain
         {
         }
 
+                public override void AddedToDocument(GH_Document document)
+        {
+            base.AddedToDocument(document);
+            if (this.Attributes == null) this.CreateAttributes();
+
+            bool hasSources = false;
+            foreach (var param in this.Params.Input)
+                if (param.SourceCount > 0) { hasSources = true; break; }
+
+            if (!hasSources)
+            {
+                int ix = 200, ox = 250;
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 1, 0.0, 10, 5, ix, -120);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 0.0, 10.0, 0.5, ix, -90);
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 4, false, ix, -60);
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 5, false, ix, -30);
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 6, true, ix, 0);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 8, 0.0, 10, 0, ix, 30);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 9, 0.0, 10, 0, ix, 60);
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 10, false, ix, 90);
+            }
+        }
+
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddMeshParameter("TargetMeshes", "M", "The meshes to analyze.", GH_ParamAccess.tree);
