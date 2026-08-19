@@ -26,8 +26,8 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                int ix = 200, ox = 250;
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 5, 0.0, 10, 0, ix, -120);
+                int ix = 220, ox = 250;
+                Enzyme.Utils.AutoWireHelper.WireValueList(this, document, 5, new string[]{"Strict Cutoff", "Stretch Top Floor"}, new string[]{"0", "1"}, ix, -150);
             }
         }
 

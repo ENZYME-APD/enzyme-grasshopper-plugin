@@ -31,9 +31,9 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                int ix = 200, ox = 250;
-                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 1, false, ix, -120);
-                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 3, false, ix, -90);
+                int ix = 220, ox = 250;
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 1, false, ix, -150);
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 3, false, ix, -120);
             }
         }
 

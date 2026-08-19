@@ -84,5 +84,83 @@ namespace Enzyme.Utils
             preview.Params.Input[1].AddSource(swatch);
             preview.Params.Input[0].AddSource(comp.Params.Output[paramIndex]);
         }
+        public static void WireColorSwatch(GH_Component comp, GH_Document doc, int paramIndex, Color color, int offsetX, int offsetY)
+        {
+            if (paramIndex >= comp.Params.Input.Count) return;
+            if (comp.Params.Input[paramIndex].SourceCount > 0) return;
+
+            GH_ColourSwatch swatch = new GH_ColourSwatch();
+            swatch.CreateAttributes();
+            swatch.SwatchColour = color;
+
+            PointF pivot = comp.Attributes.Pivot;
+            swatch.Attributes.Pivot = new PointF(pivot.X - offsetX, pivot.Y + offsetY);
+
+            doc.AddObject(swatch, false);
+            comp.Params.Input[paramIndex].AddSource(swatch);
+        }
+
+        public static void WireButton(GH_Component comp, GH_Document doc, int paramIndex, int offsetX, int offsetY)
+        {
+            if (paramIndex >= comp.Params.Input.Count) return;
+            if (comp.Params.Input[paramIndex].SourceCount > 0) return;
+
+            GH_ButtonObject btn = new GH_ButtonObject();
+            btn.CreateAttributes();
+
+            PointF pivot = comp.Attributes.Pivot;
+            btn.Attributes.Pivot = new PointF(pivot.X - offsetX, pivot.Y + offsetY);
+
+            doc.AddObject(btn, false);
+            comp.Params.Input[paramIndex].AddSource(btn);
+        }
+
+        public static void WireValueList(GH_Component comp, GH_Document doc, int paramIndex, string[] keys, string[] values, int offsetX, int offsetY)
+        {
+            if (paramIndex >= comp.Params.Input.Count) return;
+            if (comp.Params.Input[paramIndex].SourceCount > 0) return;
+
+            GH_ValueList vl = new GH_ValueList();
+            vl.CreateAttributes();
+            vl.ListItems.Clear();
+            for (int i = 0; i < keys.Length; i++)
+            {
+                vl.ListItems.Add(new GH_ValueListItem(keys[i], values[i]));
+            }
+
+            PointF pivot = comp.Attributes.Pivot;
+            vl.Attributes.Pivot = new PointF(pivot.X - offsetX, pivot.Y + offsetY);
+
+            doc.AddObject(vl, false);
+            comp.Params.Input[paramIndex].AddSource(vl);
+        }
+
+        public static void WireOutputParam(GH_Component comp, GH_Document doc, int paramIndex, string paramType, int offsetX, int offsetY)
+        {
+            if (paramIndex >= comp.Params.Output.Count) return;
+            if (comp.Params.Output[paramIndex].Recipients.Count > 0) return;
+
+            IGH_Param param = null;
+            switch(paramType.ToLower())
+            {
+                case "curve": param = new Grasshopper.Kernel.Parameters.Param_Curve(); break;
+                case "point": param = new Grasshopper.Kernel.Parameters.Param_Point(); break;
+                case "mesh": param = new Grasshopper.Kernel.Parameters.Param_Mesh(); break;
+                case "brep": param = new Grasshopper.Kernel.Parameters.Param_Brep(); break;
+                case "surface": param = new Grasshopper.Kernel.Parameters.Param_Surface(); break;
+                case "integer": param = new Grasshopper.Kernel.Parameters.Param_Integer(); break;
+                case "number": param = new Grasshopper.Kernel.Parameters.Param_Number(); break;
+                case "string": param = new Grasshopper.Kernel.Parameters.Param_String(); break;
+                case "color": param = new Grasshopper.Kernel.Parameters.Param_Colour(); break;
+            }
+            if (param == null) return;
+
+            param.CreateAttributes();
+            PointF pivot = comp.Attributes.Pivot;
+            param.Attributes.Pivot = new PointF(pivot.X + offsetX, pivot.Y + offsetY);
+
+            doc.AddObject(param, false);
+            param.AddSource(comp.Params.Output[paramIndex]);
+        }
     }
 }

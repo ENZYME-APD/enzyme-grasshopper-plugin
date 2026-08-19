@@ -41,10 +41,13 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                int ix = 200, ox = 250;
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 0.0, 16.0, 8.0, ix, -120);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 3, 0.0, 10.0, 5.0, ix, -90);
-                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 4, false, ix, -60);
+                int ix = 220, ox = 250;
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 0.0, 16.0, 8.0, ix, -150);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 3, 0.0, 10.0, 5.0, ix, -120);
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 4, false, ix, -90);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 0, "curve", ox, -100);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 2, "point", ox, -20);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 4, "point", ox, 60);
             }
         }
 

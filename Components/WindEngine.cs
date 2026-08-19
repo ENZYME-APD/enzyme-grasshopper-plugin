@@ -40,11 +40,15 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                int ix = 200, ox = 250;
-                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 0, false, ix, -120);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 4, 0.0, 20.0, 10.0, ix, -90);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 5, 0.0, 10.0, 1.5, ix, -60);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 6, 0.0, 10.0, 5.0, ix, -30);
+                int ix = 220, ox = 250;
+                Enzyme.Utils.AutoWireHelper.WireButton(this, document, 0, ix, -150);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 4, 0.0, 20.0, 10.0, ix, -120);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 5, 0.0, 10.0, 1.5, ix, -90);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 6, 0.0, 10.0, 5.0, ix, -60);
+                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 0, System.Drawing.Color.FromArgb(230, 230, 230), ox, -100);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 3, "curve", ox, 20);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 5, "point", ox, 100);
+                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 6, System.Drawing.Color.FromArgb(230, 230, 230), ox, 140);
             }
         }
 

@@ -33,8 +33,8 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                int ix = 200, ox = 250;
-                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 1, false, ix, -120);
+                int ix = 220, ox = 250;
+                Enzyme.Utils.AutoWireHelper.WireButton(this, document, 1, ix, -150);
             }
         }
 

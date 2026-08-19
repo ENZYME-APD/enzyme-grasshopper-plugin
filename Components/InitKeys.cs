@@ -16,6 +16,22 @@ namespace Enzyme.Components
         {
         }
 
+        public override void AddedToDocument(GH_Document document)
+        {
+            base.AddedToDocument(document);
+            if (this.Attributes == null) this.CreateAttributes();
+
+            bool hasSources = false;
+            foreach (var param in this.Params.Input)
+                if (param.SourceCount > 0) { hasSources = true; break; }
+
+            if (!hasSources)
+            {
+                int ix = 120, ox = 250;
+                Enzyme.Utils.AutoWireHelper.WireButton(this, document, 1, ix, 0);
+            }
+        }
+
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddGenericParameter("Guids", "G", "Referenced Rhino geometry IDs.", GH_ParamAccess.list);

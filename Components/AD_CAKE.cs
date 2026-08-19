@@ -29,8 +29,8 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                int ix = 200, ox = 250;
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 4, 0.0, 10.0, 0.15, ix, -120);
+                int ix = 220, ox = 250;
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 4, 0.0, 10.0, 0.15, ix, -150);
             }
         }
 

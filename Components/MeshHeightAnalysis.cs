@@ -31,15 +31,26 @@ namespace Enzyme.Terrain
 
             if (!hasSources)
             {
-                int ix = 200, ox = 250;
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 1, 0.0, 10, 5, ix, -120);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 0.0, 10.0, 0.5, ix, -90);
-                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 4, false, ix, -60);
-                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 5, false, ix, -30);
-                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 6, true, ix, 0);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 8, 0.0, 10, 0, ix, 30);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 9, 0.0, 10, 0, ix, 60);
-                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 10, false, ix, 90);
+                int ix = 220, ox = 250;
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 1, 0.0, 10, 5, ix, -150);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 0.0, 10.0, 0.5, ix, -120);
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 4, false, ix, -90);
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 5, false, ix, -60);
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 6, true, ix, -30);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 8, 0.0, 10, 0, ix, 0);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 9, 0.0, 10, 0, ix, 30);
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 10, false, ix, 60);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 1, "point", ox, -60);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 3, "point", ox, 20);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 5, "point", ox, 100);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 7, "point", ox, 180);
+                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 9, System.Drawing.Color.FromArgb(230, 230, 230), ox, 260);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 10, "curve", ox, 300);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 11, "curve", ox, 340);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 12, "curve", ox, 380);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 13, "curve", ox, 420);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 15, "point", ox, 500);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 17, "point", ox, 580);
             }
         }
 

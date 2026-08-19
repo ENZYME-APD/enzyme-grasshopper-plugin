@@ -33,8 +33,9 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                int ix = 200, ox = 250;
-                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 4, false, ix, -120);
+                int ix = 220, ox = 250;
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 4, false, ix, -150);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 0, "curve", ox, -100);
             }
         }
 

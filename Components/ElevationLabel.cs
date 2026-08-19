@@ -21,6 +21,23 @@ namespace Enzyme.Terrain
         {
         }
 
+                public override void AddedToDocument(GH_Document document)
+        {
+            base.AddedToDocument(document);
+            if (this.Attributes == null) this.CreateAttributes();
+
+            bool hasSources = false;
+            foreach (var param in this.Params.Input)
+                if (param.SourceCount > 0) { hasSources = true; break; }
+
+            if (!hasSources)
+            {
+                int ix = 220, ox = 250;
+                Enzyme.Utils.AutoWireHelper.WireValueList(this, document, 5, new string[]{"XY", "XZ", "YZ"}, new string[]{"0", "1", "2"}, ix, -150);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 0, "curve", ox, -100);
+            }
+        }
+
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddPointParameter("Points", "P", "Coordinates to label", GH_ParamAccess.tree);
