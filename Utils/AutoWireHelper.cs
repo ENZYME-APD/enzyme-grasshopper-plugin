@@ -152,6 +152,7 @@ namespace Enzyme.Utils
                 case "number": param = new Grasshopper.Kernel.Parameters.Param_Number(); break;
                 case "string": param = new Grasshopper.Kernel.Parameters.Param_String(); break;
                 case "color": param = new Grasshopper.Kernel.Parameters.Param_Colour(); break;
+                case "generic": param = new Grasshopper.Kernel.Parameters.Param_GenericObject(); break;
             }
             if (param == null) return;
 
