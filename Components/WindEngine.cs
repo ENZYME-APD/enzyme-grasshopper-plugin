@@ -46,6 +46,7 @@ namespace Enzyme.Components
                 Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 5, 0.0, 10.0, 1.5, ix, -90);
                 Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 6, 0.0, 10.0, 5.0, ix, -60);
                 Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 0, System.Drawing.Color.FromArgb(230, 230, 230), ox, -100);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 1, "line", ox, -60);
                 Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 3, "curve", ox, 20);
                 Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 5, "point", ox, 100);
                 Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 6, System.Drawing.Color.FromArgb(230, 230, 230), ox, 140);

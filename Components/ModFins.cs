@@ -36,7 +36,9 @@ namespace Enzyme.Masterplan
                 Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 0.0, 10.0, 1.5, ix, -150);
                 Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 3, 0.0, 10.0, 0.3, ix, -120);
                 Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 4, 0.0, 10.0, 0.0, ix, -90);
-                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 7, false, ix, -60);
+                Enzyme.Utils.AutoWireHelper.WirePanel(this, document, 5, "1", ix, -60, 80, 25);
+                Enzyme.Utils.AutoWireHelper.WirePanel(this, document, 6, "0", ix, -30, 80, 25);
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 7, false, ix, 0);
                 Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 0, System.Drawing.Color.FromArgb(230, 230, 230), ox, -100);
                 Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 1, System.Drawing.Color.FromArgb(230, 230, 230), ox, -60);
                 Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 2, System.Drawing.Color.FromArgb(230, 230, 230), ox, -20);
