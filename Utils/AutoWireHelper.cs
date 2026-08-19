@@ -53,6 +53,7 @@ namespace Enzyme.Utils
             GH_Panel panel = new GH_Panel();
             panel.CreateAttributes();
             panel.UserText = text;
+            panel.Properties.Multiline = false;
             
             panel.Attributes.Bounds = new RectangleF(0, 0, width, height);
 
