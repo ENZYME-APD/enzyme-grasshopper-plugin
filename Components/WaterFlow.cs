@@ -31,6 +31,9 @@ namespace Enzyme.Terrain
             if (!hasSources)
             {
                 int ix = 220, ox = 250;
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 1, 0.0, 100.0, 10.0, ix, -30);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 0.0, 10.0, 1.0, ix, 0);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 3, 0, 5000, 500, ix, 30);
                 Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 0, "curve", ox, -100);
                 Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 1, "point", ox, -60);
             }
