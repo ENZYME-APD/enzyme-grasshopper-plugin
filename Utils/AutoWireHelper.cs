@@ -19,7 +19,7 @@ namespace Enzyme.Utils
             slider.Slider.Minimum = (decimal)min;
             slider.Slider.Maximum = (decimal)max;
             slider.Slider.Value = (decimal)val;
-            slider.Slider.Type = GH_SliderAccuracy.Float;
+            slider.Slider.Type = Grasshopper.GUI.Base.GH_SliderAccuracy.Float;
             slider.Slider.DecimalPlaces = 2;
             
             PointF pivot = comp.Attributes.Pivot;
