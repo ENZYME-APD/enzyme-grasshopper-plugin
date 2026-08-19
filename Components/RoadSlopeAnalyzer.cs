@@ -48,6 +48,7 @@ namespace Enzyme.Components
                 Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 0, "curve", ox, -100);
                 Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 2, "point", ox, -20);
                 Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 4, "point", ox, 60);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 5, "line", ox, 100);
             }
         }
 
