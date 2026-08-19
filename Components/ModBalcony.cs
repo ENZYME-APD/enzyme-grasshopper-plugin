@@ -20,7 +20,7 @@ namespace Enzyme.Components
         public override void AddedToDocument(GH_Document document)
         {
             base.AddedToDocument(document);
-            if (this.Attributes == null || !this.Attributes.Selected) return;
+            if (this.Attributes == null) this.CreateAttributes();
 
             bool hasSources = false;
             foreach (var param in this.Params.Input)
