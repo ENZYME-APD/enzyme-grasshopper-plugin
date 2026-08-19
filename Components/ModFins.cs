@@ -21,6 +21,31 @@ namespace Enzyme.Masterplan
         {
         }
 
+        public override void AddedToDocument(GH_Document document)
+        {
+            base.AddedToDocument(document);
+            if (this.Attributes == null || !this.Attributes.Selected) return;
+
+            bool hasSources = false;
+            foreach (var param in this.Params.Input)
+                if (param.SourceCount > 0) { hasSources = true; break; }
+
+            if (!hasSources)
+            {
+                int ix = 200, ox = 250;
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 0.0, 10.0, 0.75, ix, -60);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 3, 0.0, 10.0, 0.30, ix, -30);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 4, 0.0, 10.0, 1.00, ix, 0);
+                Enzyme.Utils.AutoWireHelper.WirePanel(this, document, 5, "0 1101101\n1 1010110", ix, 50);
+                Enzyme.Utils.AutoWireHelper.WirePanel(this, document, 6, "0 1010110", ix, 100);
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 7, true, ix, 140);
+
+                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 0, System.Drawing.Color.FromArgb(200, 230, 255), ox, -30);
+                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 1, System.Drawing.Color.FromArgb(250, 250, 250), ox, 30);
+                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 2, System.Drawing.Color.FromArgb(120, 120, 120), ox, 90);
+            }
+        }
+
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddCurveParameter("Bounds", "B", "Boundary curves", GH_ParamAccess.tree);
