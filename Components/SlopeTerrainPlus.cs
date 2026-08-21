@@ -1,3 +1,5 @@
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 using System;
 using System.Linq;
 using System.Collections.Generic;
@@ -59,12 +61,13 @@ namespace Enzyme.Components
             pManager.AddBooleanParameter("EnableBinaryMode", "EnableBinaryMode", "If true, snaps to binary colors", GH_ParamAccess.item, true);
         }
 
-        protected override void RegisterOutputParams(GH_OutputParamManager pManager)
+                protected override void RegisterOutputParams(GH_OutputParamManager pManager)
         {
             pManager.AddMeshParameter("AnalyzedMeshes", "AnalyzedMeshes", "Colored Meshes", GH_ParamAccess.list);
             pManager.AddColourParameter("LegendColors", "LegendColors", "Legend Colors", GH_ParamAccess.list);
             pManager.AddTextParameter("LegendValues", "LegendValues", "Legend Values", GH_ParamAccess.list);
             pManager.AddNumberParameter("OverThresholdRatio", "OverThresholdRatio", "Ratio of faces over threshold", GH_ParamAccess.list);
+            pManager.AddGenericParameter("Color Legend", "Color Legend", "JSON Legend Data", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
@@ -229,10 +232,33 @@ namespace Enzyme.Components
                 }
             }
 
-            DA.SetDataList(0, out_meshes);
+                        DA.SetDataList(0, out_meshes);
             DA.SetDataList(1, out_colors);
             DA.SetDataList(2, out_values);
             DA.SetDataList(3, out_ratios);
+
+            if (out_meshes.Count > 0)
+            {
+                var jColors = new JArray();
+                foreach (var c in out_colors) jColors.Add(new JObject { ["R"] = c.R, ["G"] = c.G, ["B"] = c.B });
+                
+                var jLabels = new JArray();
+                foreach (var v in out_values) jLabels.Add(v.ToString());
+                
+                double avgRatio = 0;
+                foreach (var r in out_ratios) avgRatio += r;
+                if (out_ratios.Count > 0) avgRatio = (avgRatio / out_ratios.Count) * 100.0;
+                
+                var legendObj = new JObject
+                {
+                    ["Type"] = is_binary ? "Blocks" : "Gradient",
+                    ["Title"] = $"Slope Terrain (Thresh: {deg:F1}°)",
+                    ["Colors"] = jColors,
+                    ["Labels"] = jLabels,
+                    ["SubLabels"] = new JArray($"{avgRatio:F1}% over threshold")
+                };
+                DA.SetData(4, legendObj.ToString());
+            }
 
             perf_start.Stop();
             double exec_ms = perf_start.Elapsed.TotalMilliseconds;

@@ -1,3 +1,5 @@
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 using System;
 using System.Drawing;
 using System.Diagnostics;
@@ -185,22 +187,20 @@ namespace Enzyme.Components
             return Color.FromArgb(r, g, b);
         }
 
-        private object CreateLegendData(Color startColor, Color endColor, double threshold, double percentOverThreshold)
+        private string CreateLegendData(Color startColor, Color endColor, double threshold, double percentOverThreshold)
         {
-            // Create a simple data structure to hold legend information
-            // In a real implementation, this would be a custom class
-            // For now, we'll use a dynamic object for simplicity
-            var legendData = new
+            var legendObj = new JObject
             {
-                StartColor = startColor,
-                EndColor = endColor,
-                Threshold = threshold,
-                PercentOverThreshold = percentOverThreshold,
-                Title = $"Slope Analysis (Threshold: {threshold:F3}°)",
-                Description = $"{percentOverThreshold:F2}% of area exceeds {threshold:F3}° slope"
+                ["Type"] = "Gradient",
+                ["Title"] = $"Slope Analysis (Threshold: {threshold:F1}°)",
+                ["Colors"] = new JArray(
+                    new JObject { ["R"] = startColor.R, ["G"] = startColor.G, ["B"] = startColor.B },
+                    new JObject { ["R"] = endColor.R, ["G"] = endColor.G, ["B"] = endColor.B }
+                ),
+                ["Labels"] = new JArray("0°", $"{threshold:F1}°+"),
+                ["SubLabels"] = new JArray($"{percentOverThreshold:F1}% over threshold")
             };
-
-            return legendData;
+            return legendObj.ToString();
         }
     }
 }

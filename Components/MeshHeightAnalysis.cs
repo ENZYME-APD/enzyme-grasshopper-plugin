@@ -1,3 +1,5 @@
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -90,7 +92,8 @@ namespace Enzyme.Terrain
             pManager.AddPointParameter("LabelPoints3D", "LP3D", "Points for 3D section labels.", GH_ParamAccess.tree);
             pManager.AddTextParameter("LabelTextFlat", "LTF", "Text strings for the flattened section layout.", GH_ParamAccess.tree);
             pManager.AddPointParameter("LabelPointsFlat", "LPF", "Points for the flattened section layout.", GH_ParamAccess.tree);
-            pManager.AddTextParameter("SectionMetadata", "SM", "Dictionary keys containing spatial transform & ID data.", GH_ParamAccess.tree);
+                        pManager.AddTextParameter("SectionMetadata", "SM", "Dictionary keys containing spatial transform & ID data.", GH_ParamAccess.tree);
+            pManager.AddGenericParameter("Color Legend", "Color Legend", "JSON Legend Data", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
@@ -566,7 +569,24 @@ namespace Enzyme.Terrain
             DA.SetDataTree(15, labelPoints3D);
             DA.SetDataTree(16, labelTextFlat);
             DA.SetDataTree(17, labelPointsFlat);
-            DA.SetDataTree(18, sectionMetadata);
+                        DA.SetDataTree(18, sectionMetadata);
+
+            if (enableHeatmap && totalVerticesCount > 0)
+            {
+                var jColors = new JArray();
+                var cList = customColorList.Count > 0 ? customColorList : new List<Color> { Color.Blue, Color.Cyan, Color.Lime, Color.Yellow, Color.Red };
+                foreach (var c in cList) jColors.Add(new JObject { ["R"] = c.R, ["G"] = c.G, ["B"] = c.B });
+                
+                var legendObj = new JObject
+                {
+                    ["Type"] = "Blocks",
+                    ["Title"] = "Mesh Terrain Elevation",
+                    ["Colors"] = jColors,
+                    ["Labels"] = new JArray($"{globalTerrainZMin:F1}m", $"{globalTerrainZMax:F1}m"),
+                    ["SubLabels"] = new JArray($"Relief: {(globalTerrainZMax - globalTerrainZMin):F1}m")
+                };
+                DA.SetData(19, legendObj.ToString());
+            }
 
             double terrainRelief = totalVerticesCount > 0 ? Math.Round(globalTerrainZMax - globalTerrainZMin, 2) : 0.0;
             double meanElevation = totalVerticesCount > 0 ? Math.Round(totalZSum / totalVerticesCount, 2) : 0.0;

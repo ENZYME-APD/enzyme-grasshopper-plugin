@@ -1,3 +1,5 @@
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 using System;
 using System.Drawing;
 using System.Diagnostics;
@@ -184,23 +186,19 @@ namespace Enzyme.Components
             return Color.FromArgb(r, g, b);
         }
 
-        private object CreateHeightLegendData(System.Collections.Generic.List<Color> colors, double minZ, double maxZ, bool flipColors)
+        private string CreateHeightLegendData(System.Collections.Generic.List<Color> colors, double minZ, double maxZ, bool flipColors)
         {
-            // Create a simple data structure to hold legend information
-            // In a real implementation, this would be a custom class
-            // For now, we'll use a dynamic object for simplicity
-            var legendData = new
+            var jColors = new JArray();
+            foreach (var c in colors) jColors.Add(new JObject { ["R"] = c.R, ["G"] = c.G, ["B"] = c.B });
+            var legendObj = new JObject
             {
-                Colors = new System.Collections.Generic.List<Color>(colors),
-                MinHeight = minZ,
-                MaxHeight = maxZ,
-                FlipColors = flipColors,
-                Title = "Height Map Analysis",
-                Description = $"Height range: {minZ:F2} to {maxZ:F2}",
-                HeightRange = maxZ - minZ
+                ["Type"] = "Blocks",
+                ["Title"] = "Height Map Analysis",
+                ["Colors"] = jColors,
+                ["Labels"] = new JArray($"{minZ:F1}m", $"{maxZ:F1}m"),
+                ["SubLabels"] = new JArray($"Relief: {(maxZ - minZ):F1}m")
             };
-
-            return legendData;
+            return legendObj.ToString();
         }
     }
 }
