@@ -28,8 +28,8 @@ namespace Enzyme.Components
             if (!hasSources)
             {
                 int ox = 250;
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 0, "string", ox, -20);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 1, "string", ox, 20);
+                                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 0, ox, -20, 150, 40);
+                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 1, ox, 20, 150, 40);
             }
         }
 

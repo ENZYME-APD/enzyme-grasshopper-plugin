@@ -136,6 +136,24 @@ namespace Enzyme.Utils
             comp.Params.Input[paramIndex].AddSource(vl);
         }
 
+        public static void WireOutputPanel(GH_Component comp, GH_Document doc, int paramIndex, int offsetX, int offsetY, int width = 120, int height = 40)
+        {
+            if (paramIndex >= comp.Params.Output.Count) return;
+            if (comp.Params.Output[paramIndex].Recipients.Count > 0) return;
+
+            Grasshopper.Kernel.Special.GH_Panel panel = new Grasshopper.Kernel.Special.GH_Panel();
+            panel.CreateAttributes();
+            panel.Properties.Multiline = false;
+            
+            panel.Attributes.Bounds = new System.Drawing.RectangleF(0, 0, width, height);
+
+            System.Drawing.PointF compPivot = comp.Attributes.Pivot;
+            panel.Attributes.Pivot = new System.Drawing.PointF(compPivot.X + offsetX, compPivot.Y + offsetY);
+
+            doc.AddObject(panel, false);
+            panel.AddSource(comp.Params.Output[paramIndex]);
+        }
+
         public static void WireOutputParam(GH_Component comp, GH_Document doc, int paramIndex, string paramType, int offsetX, int offsetY)
         {
             if (paramIndex >= comp.Params.Output.Count) return;
