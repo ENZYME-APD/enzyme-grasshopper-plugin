@@ -76,7 +76,7 @@ namespace Enzyme.Components
             get
             {
                 try {
-                    return IconLoader.Load("enzyme_logo.png");
+                    return IconLoader.Load("enzyme_logo_24.png");
                 } catch {
                     return null;
                 }
