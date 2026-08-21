@@ -7,7 +7,7 @@ namespace Enzyme.Components
 {
     public class PluginInfo : GH_Component
     {
-        public override GH_Exposure Exposure => GH_Exposure.primary;
+        public override GH_Exposure Exposure => GH_Exposure.septenary;
 
         public PluginInfo()
           : base("Enzyme Version Info", "EnzVer",
