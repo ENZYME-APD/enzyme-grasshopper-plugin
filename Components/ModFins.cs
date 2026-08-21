@@ -17,7 +17,7 @@ namespace Enzyme.Masterplan
         public ModFinsComponent()
           : base("Facade Module: Vertical Fins", "Mod_Fins",
               "Generates patterned vertical fins, spandrels, and vision glass.",
-              "Enzyme", "Masterplan")
+              "Enzyme", "Masterplan (Beta)")
         {
         }
 

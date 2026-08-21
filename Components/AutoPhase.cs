@@ -16,7 +16,7 @@ namespace Enzyme.Components
         public AutoPhaseComponent()
           : base("Auto-Phase Assigner by Z", "Auto_Phase",
               "Strictly sequences the podium first, then cascades that count to independent towers.",
-              "Enzyme", "Masterplan")
+              "Enzyme", "Masterplan (Beta)")
         {
         }
 

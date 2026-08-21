@@ -14,7 +14,7 @@ namespace Enzyme.Masterplan
         public ModRhythmBalcComponent()
           : base("Facade Module: Rhythmic Balconies", "Mod_Rhythm_Balc",
               "2D patterned balconies with merge logic, corner isolation, and fast math.",
-              "Enzyme", "Masterplan")
+              "Enzyme", "Masterplan (Beta)")
         {
         }
 

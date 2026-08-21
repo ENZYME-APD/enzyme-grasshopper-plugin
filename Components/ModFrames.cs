@@ -18,7 +18,7 @@ namespace Enzyme.Components
         public ModFramesComponent()
           : base("Facade Module: Frames", "Mod_Frames",
               "Deep structural exoskeleton grid utilizing the robust Area-Offset Method.",
-              "Enzyme", "Masterplan")
+              "Enzyme", "Masterplan (Beta)")
         {
         }
 

@@ -14,7 +14,7 @@ namespace Enzyme.Components
         public AD_ARCHICAD()
           : base("Adapter: Archicad Slabs (Tapir)", "AD_ARCHICAD",
               "Adapter for Archicad Slabs using Tapir workflow",
-              "Enzyme", "Masterplan")
+              "Enzyme", "Masterplan (Beta)")
         {
         }
 

@@ -11,7 +11,7 @@ namespace Enzyme.Components
         public AD_LEGO()
           : base("Adapter: The Lego Builder", "AD_LEGO",
               "STAGE 1 ADAPTER: THE LEGO BUILDER (METHOD 3) - VERBOSE DIAGNOSTICS & FIXED STACKING",
-              "Enzyme", "Masterplan")
+              "Enzyme", "Masterplan (Beta)")
         {
         }
 

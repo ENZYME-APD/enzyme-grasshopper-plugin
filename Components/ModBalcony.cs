@@ -13,7 +13,7 @@ namespace Enzyme.Components
         public ModBalconyComponent()
           : base("Facade Module: Balcony", "Mod_Balcony",
               "Continuous balconies with 2D wall patterns and intelligent corners.",
-              "Enzyme", "Masterplan")
+              "Enzyme", "Masterplan (Beta)")
         {
         }
 

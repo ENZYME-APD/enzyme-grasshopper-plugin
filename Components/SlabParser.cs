@@ -16,11 +16,11 @@ namespace Enzyme.Components
         public SlabParserComponent()
           : base("Slab JSON Parser", "Slab_Parser",
               "Parses Slab JSON data.",
-              "Enzyme", "Masterplan")
+              "Enzyme", "Masterplan (Beta)")
         {
         }
 
-        public override GH_Exposure Exposure => GH_Exposure.primary;
+        public override GH_Exposure Exposure => GH_Exposure.secondary;
 
                 public override void AddedToDocument(GH_Document document)
         {

@@ -12,7 +12,7 @@ namespace Enzyme.Components
         public ParseTableComponent()
           : base("Table to DataTree", "ParseTable",
               "Converts multiline tabular text into a Grasshopper DataTree.",
-              "Enzyme", "Masterplan")
+              "Enzyme", "Masterplan (Beta)")
         {
         }
 

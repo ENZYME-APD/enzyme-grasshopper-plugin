@@ -17,7 +17,7 @@ namespace Enzyme.Components
         public FacadeParserComponent()
           : base("Facade JSON Parser", "Facade_Parser",
               "Parses Facade JSON data into Curves, Heights, and Programs.",
-              "Enzyme", "Masterplan")
+              "Enzyme", "Masterplan (Beta)")
         {
         }
 
@@ -263,7 +263,7 @@ namespace Enzyme.Components
             return crvs;
         }
 
-        public override GH_Exposure Exposure => GH_Exposure.primary;
+        public override GH_Exposure Exposure => GH_Exposure.secondary;
 
         protected override Bitmap Icon => IconLoader.Load("Facade_Parser.png");
 

@@ -14,7 +14,7 @@ namespace Enzyme.Components
     public class RoofParserComponent : GH_Component
     {
         public RoofParserComponent()
-          : base("Roof JSON Parser", "Roof_Parser", "Parses roof data from JSON", "Enzyme", "Masterplan")
+          : base("Roof JSON Parser", "Roof_Parser", "Parses roof data from JSON", "Enzyme", "Masterplan (Beta)")
         {
         }
 
@@ -319,7 +319,7 @@ namespace Enzyme.Components
             }
         }
 
-        public override GH_Exposure Exposure => GH_Exposure.primary;
+        public override GH_Exposure Exposure => GH_Exposure.secondary;
 
         public override Guid ComponentGuid => new Guid("B415CDE1-3A2F-433A-8F8D-1A1A5B4C4472");
     }

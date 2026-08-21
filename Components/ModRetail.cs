@@ -18,7 +18,7 @@ namespace Enzyme.Components
         public ModRetailComponent()
           : base("Facade Module: Storefront", "Mod_Retail",
               "Generates patterned storefronts with intelligent canopies and structure.",
-              "Enzyme", "Masterplan")
+              "Enzyme", "Masterplan (Beta)")
         {
         }
 

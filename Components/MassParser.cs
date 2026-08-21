@@ -19,11 +19,11 @@ namespace Enzyme.Components
         public MassParserComponent()
           : base("Masses JSON Parser", "Mass_Parser",
               "Parses Masses JSON",
-              "Enzyme", "Masterplan")
+              "Enzyme", "Masterplan (Beta)")
         {
         }
 
-        public override GH_Exposure Exposure => GH_Exposure.primary;
+        public override GH_Exposure Exposure => GH_Exposure.secondary;
 
                 public override void AddedToDocument(GH_Document document)
         {

@@ -16,11 +16,11 @@ namespace Enzyme.Components
         public RailParserComponent()
           : base("Railing JSON Parser", "Rail_Parser",
               "Parses railing curves from JSON.",
-              "Enzyme", "Masterplan")
+              "Enzyme", "Masterplan (Beta)")
         {
         }
 
-        public override GH_Exposure Exposure => GH_Exposure.primary;
+        public override GH_Exposure Exposure => GH_Exposure.secondary;
 
                 public override void AddedToDocument(GH_Document document)
         {
