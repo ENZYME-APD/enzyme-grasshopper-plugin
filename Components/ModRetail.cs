@@ -33,26 +33,24 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                int ix = 220, ox = 250;
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 0.0, 10.0, 3.0, ix, -150);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 3, 0.0, 10.0, 0.5, ix, -120);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 4, 0.0, 10.0, 0.0, ix, -90);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 5, 0.0, 10.0, 0.15, ix, -60);
-                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 6, false, ix, -30);
-                Enzyme.Utils.AutoWireHelper.WirePanel(this, document, 7, "1", ix, 0, 80, 25);
-                Enzyme.Utils.AutoWireHelper.WirePanel(this, document, 8, "0", ix, 30, 80, 25);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 9, 0.0, 10.0, 1.0, ix, 60);
-                Enzyme.Utils.AutoWireHelper.WirePanel(this, document, 10, "1", ix, 90, 80, 25);
-                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 11, false, ix, 120);
-                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 12, true, ix, 150);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 13, 0.0, 10.0, 0.0, ix, 180);
-
-                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 0, System.Drawing.Color.FromArgb(230, 230, 230), ox, -100);
-                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 1, System.Drawing.Color.FromArgb(230, 230, 230), ox, -60);
-                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 2, System.Drawing.Color.FromArgb(230, 230, 230), ox, -20);
-                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 3, System.Drawing.Color.FromArgb(230, 230, 230), ox, 20);
-                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 4, System.Drawing.Color.FromArgb(230, 230, 230), ox, 60);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 5, "curve", ox, 100);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 0.0, 3.0, 1.5, 160, -165);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 3, 0.0, 3.0, 1.5, 160, -135);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 4, 0.0, 3.0, 1.5, 160, -105);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 5, 0.0, 3.0, 1.5, 160, -75);
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 6, false, 80, -45);
+                Enzyme.Utils.AutoWireHelper.WirePanel(this, document, 7, "1", 120, -15, 80, 25);
+                Enzyme.Utils.AutoWireHelper.WirePanel(this, document, 8, "1", 120, 15, 80, 25);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 9, 0.0, 3.0, 1.5, 160, 45);
+                Enzyme.Utils.AutoWireHelper.WirePanel(this, document, 10, "1", 120, 75, 80, 25);
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 11, false, 80, 105);
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 12, false, 80, 135);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 13, 0.0, 3.0, 1.5, 160, 165);
+                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 0, System.Drawing.Color.FromArgb(150, 200, 255), 150, -150);
+                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 1, System.Drawing.Color.FromArgb(250, 250, 250), 150, -90);
+                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 2, System.Drawing.Color.FromArgb(250, 250, 250), 150, -30);
+                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 3, System.Drawing.Color.FromArgb(50, 50, 50), 150, 30);
+                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 4, System.Drawing.Color.FromArgb(200, 200, 200), 150, 90);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 5, "curve", 150, 150);
             }
         }
 

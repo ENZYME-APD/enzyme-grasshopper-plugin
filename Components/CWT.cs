@@ -22,6 +22,22 @@ namespace Enzyme.Components
         {
         }
 
+                public override void AddedToDocument(GH_Document document)
+        {
+            base.AddedToDocument(document);
+            if (this.Attributes == null) this.CreateAttributes();
+
+            bool hasSources = false;
+            foreach (var param in this.Params.Input)
+                if (param.SourceCount > 0) { hasSources = true; break; }
+
+            if (!hasSources)
+            {
+                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 0, System.Drawing.Color.FromArgb(230, 230, 230), 150, -30);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 1, "line", 150, 30);
+            }
+        }
+
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddCurveParameter("curves", "curves", "curves", GH_ParamAccess.tree);

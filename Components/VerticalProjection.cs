@@ -13,6 +13,22 @@ namespace Enzyme.Components
         {
         }
 
+                public override void AddedToDocument(GH_Document document)
+        {
+            base.AddedToDocument(document);
+            if (this.Attributes == null) this.CreateAttributes();
+
+            bool hasSources = false;
+            foreach (var param in this.Params.Input)
+                if (param.SourceCount > 0) { hasSources = true; break; }
+
+            if (!hasSources)
+            {
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 1, "point", 150, -15);
+                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 2, 70, 4, 160, 22);
+            }
+        }
+
         protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
             pManager.AddPointParameter("Point", "pt", "Input point", GH_ParamAccess.item);

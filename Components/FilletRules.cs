@@ -25,10 +25,11 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                int ix = 220, ox = 250;
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 0, 0.0, 10.0, 0.0, ix, -150);
-                Enzyme.Utils.AutoWireHelper.WireValueList(this, document, 1, new string[]{"Tower", "Program", "Building"}, new string[]{"\"Tower\"", "\"Program\"", "\"Building\""}, ix, -120);
-                Enzyme.Utils.AutoWireHelper.WireValueList(this, document, 2, new string[]{"Main_Tower", "Retail", "*"}, new string[]{"\"Main_Tower\"", "\"Retail\"", "\"*\""}, ix, -90);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 0, 0.0, 2.0, 0.0, 160, -30);
+                Enzyme.Utils.AutoWireHelper.WireValueList(this, document, 1, new string[]{"Tower", "Program", "Building"}, new string[]{"\"Tower\"", "\"Program\"", "\"Building\""}, 150, 0);
+                Enzyme.Utils.AutoWireHelper.WireValueList(this, document, 2, new string[]{"Main_Tower", "Retail", "*"}, new string[]{"\"Main_Tower\"", "\"Retail\"", "\"*\""}, 150, 30);
+                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 0, 70, -26, 160, 22);
+                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 1, 70, 4, 160, 22);
             }
         }
 

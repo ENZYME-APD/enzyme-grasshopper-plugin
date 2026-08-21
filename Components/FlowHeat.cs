@@ -31,9 +31,9 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                int ix = 220, ox = 250;
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 0.0, 10.0, 1.0, ix, -150);
-                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 0, System.Drawing.Color.FromArgb(230, 230, 230), ox, -100);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 0.0, 2.0, 1.0, 160, 0);
+                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 0, System.Drawing.Color.FromArgb(230, 230, 230), 150, -30);
+                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 2, 70, 19, 160, 22);
             }
         }
 

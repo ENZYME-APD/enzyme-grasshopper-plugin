@@ -41,14 +41,13 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                int ix = 220, ox = 250;
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 0.0, 16.0, 8.0, ix, -150);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 3, 0.0, 10.0, 5.0, ix, -120);
-                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 4, false, ix, -90);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 0, "curve", ox, -100);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 2, "point", ox, -20);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 4, "point", ox, 60);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 5, "line", ox, 100);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 0.0, 16, 8.0, 160, -30);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 3, 0.0, 10.0, 5.0, 160, 0);
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 4, false, 80, 30);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 0, "curve", 150, -45);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 2, "point", 150, -15);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 4, "point", 150, 15);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 5, "line", 150, 45);
             }
         }
 

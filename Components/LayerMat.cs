@@ -20,6 +20,24 @@ namespace Enzyme.Components
         {
         }
 
+                public override void AddedToDocument(GH_Document document)
+        {
+            base.AddedToDocument(document);
+            if (this.Attributes == null) this.CreateAttributes();
+
+            bool hasSources = false;
+            foreach (var param in this.Params.Input)
+                if (param.SourceCount > 0) { hasSources = true; break; }
+
+            if (!hasSources)
+            {
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 1, true, 80, -15);
+                Enzyme.Utils.AutoWireHelper.WireButton(this, document, 2, 60, 15);
+                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 0, 70, -26, 160, 22);
+                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 1, 70, 4, 160, 22);
+            }
+        }
+
         protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
             pManager.AddTextParameter("LayerNames", "LN", "Layer names or paths. Connect a Value List here!", GH_ParamAccess.list);

@@ -20,6 +20,25 @@ namespace Enzyme.Components
         {
         }
 
+                public override void AddedToDocument(GH_Document document)
+        {
+            base.AddedToDocument(document);
+            if (this.Attributes == null) this.CreateAttributes();
+
+            bool hasSources = false;
+            foreach (var param in this.Params.Input)
+                if (param.SourceCount > 0) { hasSources = true; break; }
+
+            if (!hasSources)
+            {
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 1, 0.0, 400, 200.0, 160, -45);
+                Enzyme.Utils.AutoWireHelper.WireValueList(this, document, 2, new string[]{"Delaunay", "Proximity)"}, new string[]{"0", "1"}, 150, -15);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 3, 0.0, 100, 50.0, 160, 15);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 4, 0.0, 200, 100.0, 160, 45);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 1, "line", 150, 0);
+            }
+        }
+
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddCurveParameter("Outlines", "O", "Outlines", GH_ParamAccess.list);

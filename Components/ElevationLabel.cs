@@ -32,21 +32,10 @@ namespace Enzyme.Terrain
 
             if (!hasSources)
             {
-                int ix = 220, ox = 250;
-                Enzyme.Utils.AutoWireHelper.WirePanel(this, document, 1, "", ix, -150, 80, 30);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 0.0, 100.0, 10.0, ix, -120);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 3, 0.0, 10.0, 1.0, ix, -90);
-                Enzyme.Utils.AutoWireHelper.WirePanel(this, document, 4, "Default", ix, -60, 80, 30);
-                Enzyme.Utils.AutoWireHelper.WireValueList(this, document, 5, new string[]{"XY", "XZ", "YZ"}, new string[]{"0", "1", "2"}, ix, -30);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 6, 0.0, 360.0, 0.0, ix, 0);
-                Enzyme.Utils.AutoWireHelper.WireValueList(this, document, 7, new string[]{"BottomLeft", "BottomCenter", "BottomRight", "MiddleLeft", "MiddleCenter", "MiddleRight", "TopLeft", "TopCenter", "TopRight"}, new string[]{"1", "2", "3", "4", "5", "6", "7", "8", "9"}, ix, 30);
-                Enzyme.Utils.AutoWireHelper.WireButton(this, document, 8, ix, 60);
-                Enzyme.Utils.AutoWireHelper.WirePanel(this, document, 9, "Elevations", ix, 90, 80, 30);
-                Enzyme.Utils.AutoWireHelper.WirePanel(this, document, 10, "ElevLabel", ix, 120, 80, 30);
-                
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 0, "curve", ox, -60);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 1, "generic", ox, -20);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 2, "string", ox, 20);
+                Enzyme.Utils.AutoWireHelper.WirePanel(this, document, 1, "1", 120, -15, 80, 25);
+                Enzyme.Utils.AutoWireHelper.WireValueList(this, document, 5, new string[]{"XY", "XZ", "YZ"}, new string[]{"0", "1", "2"}, 150, 15);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 0, "curve", 150, -15);
+                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 2, 70, 4, 160, 22);
             }
         }
 

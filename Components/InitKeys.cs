@@ -16,7 +16,7 @@ namespace Enzyme.Components
         {
         }
 
-        public override void AddedToDocument(GH_Document document)
+                public override void AddedToDocument(GH_Document document)
         {
             base.AddedToDocument(document);
             if (this.Attributes == null) this.CreateAttributes();
@@ -27,8 +27,7 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                int ix = 120, ox = 250;
-                Enzyme.Utils.AutoWireHelper.WireButton(this, document, 1, ix, 0);
+                Enzyme.Utils.AutoWireHelper.WireButton(this, document, 1, 60, 0);
             }
         }
 

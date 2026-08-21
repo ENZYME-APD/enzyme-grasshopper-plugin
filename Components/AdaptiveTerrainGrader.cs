@@ -39,16 +39,15 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                int ix = 220, ox = 250;
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 0.0, 90.0, 45.0, ix, -150);
-                Enzyme.Utils.AutoWireHelper.WireColorSwatch(this, document, 3, System.Drawing.Color.Red, ix, -120);
-                Enzyme.Utils.AutoWireHelper.WireColorSwatch(this, document, 4, System.Drawing.Color.Blue, ix, -90);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 5, 0.0, 20.0, 10.0, ix, -60);
-                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 6, false, ix, -30);
-                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 0, System.Drawing.Color.FromArgb(230, 230, 230), ox, -100);
-                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 1, System.Drawing.Color.FromArgb(230, 230, 230), ox, -60);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 4, "curve", ox, 60);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 5, "curve", ox, 100);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 0.0, 90, 45.0, 160, -60);
+                Enzyme.Utils.AutoWireHelper.WireColorSwatch(this, document, 3, System.Drawing.Color.Red, 120, -30);
+                Enzyme.Utils.AutoWireHelper.WireColorSwatch(this, document, 4, System.Drawing.Color.Blue, 120, 0);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 5, 0.0, 20, 10.0, 160, 30);
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 6, false, 80, 60);
+                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 0, System.Drawing.Color.FromArgb(230, 230, 230), 150, -75);
+                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 1, System.Drawing.Color.FromArgb(230, 230, 230), 150, -15);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 4, "curve", 150, 45);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 5, "curve", 150, 75);
             }
         }
 

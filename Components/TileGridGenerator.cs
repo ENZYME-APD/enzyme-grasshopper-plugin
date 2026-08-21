@@ -32,6 +32,25 @@ namespace Enzyme.Components
 
         public override Guid ComponentGuid => new Guid("3E7B9F2A-C4D8-4A1E-B5F3-8D2C6E0A9B4F");
 
+                public override void AddedToDocument(GH_Document document)
+        {
+            base.AddedToDocument(document);
+            if (this.Attributes == null) this.CreateAttributes();
+
+            bool hasSources = false;
+            foreach (var param in this.Params.Input)
+                if (param.SourceCount > 0) { hasSources = true; break; }
+
+            if (!hasSources)
+            {
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 3, 0.0, 2.0, 1.0, 160, -15);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 4, 0.0, 2.0, 1.0, 160, 15);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 3, "curve", 150, -30);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 4, "curve", 150, 0);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 5, "curve", 150, 30);
+            }
+        }
+
         protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
             pManager.AddCurveParameter("Boundary", "Boundary", "Closed boundary curve", GH_ParamAccess.item);

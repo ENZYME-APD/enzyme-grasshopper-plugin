@@ -50,16 +50,15 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                int ix = 220, ox = 250;
-                Enzyme.Utils.AutoWireHelper.WireButton(this, document, 0, ix, -150);
-                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 2, false, ix, -120);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 5, 0.0, 10.0, 0.0, ix, -90);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 7, 0.0, 24.0, 12.0, ix, -60);
-                Enzyme.Utils.AutoWireHelper.WireValueList(this, document, 8, new string[]{"TL", "TR", "BL", "BR)"}, new string[]{"0", "1", "2", "3"}, ix, -30);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 10, 0.0, 10.0, 0.8, ix, 0);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 11, 0.0, 40.0, 20.0, ix, 30);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 12, 0.0, 40.0, 20.0, ix, 60);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 13, 0.0, 20.0, 10.0, ix, 90);
+                Enzyme.Utils.AutoWireHelper.WireButton(this, document, 0, 60, -120);
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 2, false, 80, -90);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 5, 0.0, 2.0, 0.0, 160, -60);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 7, 0.0, 24, 12.0, 160, -30);
+                Enzyme.Utils.AutoWireHelper.WireValueList(this, document, 8, new string[]{"TL", "TR", "BL", "BR)"}, new string[]{"0", "1", "2", "3"}, 150, 0);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 10, 0.0, 2.0, 0.8, 160, 30);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 11, 0.0, 40, 20.0, 160, 60);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 12, 0.0, 40, 20.0, 160, 90);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 13, 0.0, 20, 10.0, 160, 120);
             }
         }
 

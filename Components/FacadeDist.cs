@@ -19,6 +19,22 @@ namespace Enzyme.Components
         {
         }
 
+                public override void AddedToDocument(GH_Document document)
+        {
+            base.AddedToDocument(document);
+            if (this.Attributes == null) this.CreateAttributes();
+
+            bool hasSources = false;
+            foreach (var param in this.Params.Input)
+                if (param.SourceCount > 0) { hasSources = true; break; }
+
+            if (!hasSources)
+            {
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 3, false, 80, -15);
+                Enzyme.Utils.AutoWireHelper.WireButton(this, document, 4, 60, 15);
+            }
+        }
+
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddCurveParameter("Base_Curves", "Base_Curves", "Floor boundaries to run facade loops against.", GH_ParamAccess.tree);

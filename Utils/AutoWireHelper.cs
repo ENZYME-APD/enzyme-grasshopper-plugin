@@ -77,7 +77,7 @@ namespace Enzyme.Utils
             GH_ColourSwatch swatch = new GH_ColourSwatch();
             swatch.CreateAttributes();
             swatch.SwatchColour = color;
-            swatch.Attributes.Pivot = new PointF(preview.Attributes.Pivot.X - 90, preview.Attributes.Pivot.Y);
+            swatch.Attributes.Pivot = new System.Drawing.PointF(preview.Attributes.Pivot.X - 80, preview.Attributes.Pivot.Y + 25);
 
             doc.AddObject(preview, false);
             doc.AddObject(swatch, false);

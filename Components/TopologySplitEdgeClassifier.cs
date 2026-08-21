@@ -20,6 +20,26 @@ namespace Enzyme.Components
         {
         }
 
+                public override void AddedToDocument(GH_Document document)
+        {
+            base.AddedToDocument(document);
+            if (this.Attributes == null) this.CreateAttributes();
+
+            bool hasSources = false;
+            foreach (var param in this.Params.Input)
+                if (param.SourceCount > 0) { hasSources = true; break; }
+
+            if (!hasSources)
+            {
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 1, 0.0, 2.0, 0.001, 160, 0);
+                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 0, 70, -71, 160, 22);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 1, "curve", 150, -30);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 2, "curve", 150, 0);
+                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 3, 70, 19, 160, 22);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 4, "curve", 150, 60);
+            }
+        }
+
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddCurveParameter("RoomCurves", "RC", "The primary tree of input room boundary curves", GH_ParamAccess.tree);

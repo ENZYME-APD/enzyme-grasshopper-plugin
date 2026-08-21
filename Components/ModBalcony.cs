@@ -28,26 +28,25 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                int ix = 220, ox = 250;
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 0.0, 10.0, 3.0, ix, -150);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 3, 0.0, 10.0, 1.5, ix, -120);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 4, 0.0, 10.0, 1.1, ix, -90);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 5, 0.0, 10.0, 0.0, ix, -60);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 6, 0.0, 10.0, 0.0, ix, -30);
-                Enzyme.Utils.AutoWireHelper.WirePanel(this, document, 7, "1", ix, 0, 80, 25);
-                Enzyme.Utils.AutoWireHelper.WirePanel(this, document, 8, "0", ix, 30, 80, 25);
-                Enzyme.Utils.AutoWireHelper.WirePanel(this, document, 9, "1", ix, 60, 80, 25);
-                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 10, false, ix, 90);
-                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 11, false, ix, 120);
-                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 12, false, ix, 150);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 13, 0.0, 10.0, 0.0, ix, 180);
-                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 14, false, ix, 210);
-                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 0, System.Drawing.Color.FromArgb(230, 230, 230), ox, -100);
-                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 1, System.Drawing.Color.FromArgb(230, 230, 230), ox, -60);
-                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 2, System.Drawing.Color.FromArgb(230, 230, 230), ox, -20);
-                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 3, System.Drawing.Color.FromArgb(230, 230, 230), ox, 20);
-                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 4, System.Drawing.Color.FromArgb(230, 230, 230), ox, 60);
-                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 5, System.Drawing.Color.FromArgb(230, 230, 230), ox, 100);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 0.0, 10.0, 3.0, 160, -180);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 3, 0.0, 3.0, 1.5, 160, -150);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 4, 0.0, 3.0, 1.1, 160, -120);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 5, 0.0, 2.0, 0.0, 160, -90);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 6, 0.0, 2.0, 0.0, 160, -60);
+                Enzyme.Utils.AutoWireHelper.WirePanel(this, document, 7, "1", 120, -30, 80, 25);
+                Enzyme.Utils.AutoWireHelper.WirePanel(this, document, 8, "0", 120, 0, 80, 25);
+                Enzyme.Utils.AutoWireHelper.WirePanel(this, document, 9, "1", 120, 30, 80, 25);
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 10, false, 80, 60);
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 11, false, 80, 90);
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 12, false, 80, 120);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 13, 0.0, 2.0, 0.0, 160, 150);
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 14, false, 80, 180);
+                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 0, System.Drawing.Color.FromArgb(180, 180, 180), 150, -165);
+                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 1, System.Drawing.Color.FromArgb(150, 150, 150), 150, -105);
+                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 2, System.Drawing.Color.FromArgb(150, 200, 255), 150, -45);
+                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 3, System.Drawing.Color.FromArgb(250, 250, 250), 150, 15);
+                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 4, System.Drawing.Color.FromArgb(250, 250, 250), 150, 75);
+                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 5, System.Drawing.Color.FromArgb(250, 250, 250), 150, 135);
             }
         }
 

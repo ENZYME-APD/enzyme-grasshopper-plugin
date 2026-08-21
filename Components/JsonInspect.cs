@@ -16,6 +16,24 @@ namespace Enzyme.Components
         {
         }
 
+                public override void AddedToDocument(GH_Document document)
+        {
+            base.AddedToDocument(document);
+            if (this.Attributes == null) this.CreateAttributes();
+
+            bool hasSources = false;
+            foreach (var param in this.Params.Input)
+                if (param.SourceCount > 0) { hasSources = true; break; }
+
+            if (!hasSources)
+            {
+                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 0, 70, -56, 160, 22);
+                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 1, 70, -26, 160, 22);
+                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 2, 70, 4, 160, 22);
+                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 3, 70, 34, 160, 22);
+            }
+        }
+
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddTextParameter("MP_JSON", "MP_JSON", "Any JSON stream (Masses, Slabs, Roofs, Railings, Facades).", GH_ParamAccess.item);

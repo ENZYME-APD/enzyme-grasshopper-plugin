@@ -43,12 +43,11 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                int ix = 220, ox = 250;
-                Enzyme.Utils.AutoWireHelper.WireColorSwatch(this, document, 1, System.Drawing.Color.Green, ix, -150);
-                Enzyme.Utils.AutoWireHelper.WireColorSwatch(this, document, 2, System.Drawing.Color.Red, ix, -120);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 3, 0.0, 60.0, 30.0, ix, -90);
-                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 4, false, ix, -60);
-                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 0, System.Drawing.Color.FromArgb(230, 230, 230), ox, -100);
+                Enzyme.Utils.AutoWireHelper.WireColorSwatch(this, document, 1, System.Drawing.Color.Green, 120, -45);
+                Enzyme.Utils.AutoWireHelper.WireColorSwatch(this, document, 2, System.Drawing.Color.Red, 120, -15);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 3, 0.0, 60, 30.0, 160, 15);
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 4, false, 80, 45);
+                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 0, System.Drawing.Color.FromArgb(230, 230, 230), 150, -15);
             }
         }
 
