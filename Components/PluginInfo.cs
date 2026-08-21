@@ -7,8 +7,10 @@ namespace Enzyme.Components
 {
     public class PluginInfo : GH_Component
     {
+        public override GH_Exposure Exposure => GH_Exposure.primary;
+
         public PluginInfo()
-          : base("Enzyme Plugin Info", "EnzInfo",
+          : base("Enzyme Version Info", "EnzVer",
               "Outputs the current version and build date of the Enzyme plugin.",
               "Enzyme", "Utilities")
         {
@@ -69,7 +71,17 @@ namespace Enzyme.Components
             DA.SetData(1, buildDate);
         }
 
-        protected override System.Drawing.Bitmap Icon => null;
+        protected override System.Drawing.Bitmap Icon
+        {
+            get
+            {
+                try {
+                    return IconLoader.Load("enzyme_logo.png");
+                } catch {
+                    return null;
+                }
+            }
+        }
 
         public override Guid ComponentGuid => new Guid("fa77cbfa-e422-4e16-8a46-b447dd425067"); // Ensure unique GUID
     }
