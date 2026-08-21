@@ -27,9 +27,9 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                int ox = 250;
-                                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 0, ox, -20, 150, 40);
-                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 1, ox, 20, 150, 40);
+                int ox = 70;
+                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 0, ox, -22, 160, 22);
+                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 1, ox, 0, 160, 22);
             }
         }
 
