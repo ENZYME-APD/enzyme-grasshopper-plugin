@@ -28,8 +28,8 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 0, 70, -26, 160, 22);
-                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 1, 70, 4, 160, 22);
+                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 0, 220, -34, 180, 22);
+                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 1, 220, 11, 180, 22);
             }
         }
 

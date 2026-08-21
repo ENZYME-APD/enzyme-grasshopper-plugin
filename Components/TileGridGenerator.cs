@@ -43,11 +43,11 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 3, 0.0, 2.0, 1.0, 160, -15);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 4, 0.0, 2.0, 1.0, 160, 15);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 3, "curve", 150, -30);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 4, "curve", 150, 0);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 5, "curve", 150, 30);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 3, 0.0, 2.0, 1.0, 330, -20);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 4, 0.0, 2.0, 1.0, 330, 20);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 3, "curve", 220, -45);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 4, "curve", 220, 0);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 5, "curve", 220, 45);
             }
         }
 

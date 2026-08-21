@@ -30,13 +30,13 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                Enzyme.Utils.AutoWireHelper.WireValueList(this, document, 4, new string[]{"Start", "Middle", "End"}, new string[]{"\"Start\"", "\"Middle\"", "\"End\""}, 150, -30);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 5, 0.0, 2.0, 0.5, 160, 0);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 6, 0.0, 2.0, 0.3, 160, 30);
-                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 0, System.Drawing.Color.FromArgb(50, 50, 50), 150, -105);
-                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 1, System.Drawing.Color.FromArgb(230, 230, 230), 150, -45);
-                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 2, System.Drawing.Color.FromArgb(50, 50, 50), 150, 15);
-                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 3, System.Drawing.Color.FromArgb(150, 200, 255), 150, 75);
+                Enzyme.Utils.AutoWireHelper.WireValueList(this, document, 4, new string[]{"Start", "Middle", "End"}, new string[]{"\"Start\"", "\"Middle\"", "\"End\""}, 300, -40);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 5, 0.0, 2.0, 0.5, 330, 0);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 6, 0.0, 2.0, 0.3, 330, 40);
+                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 0, System.Drawing.Color.FromArgb(50, 50, 50), 220, -128);
+                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 1, System.Drawing.Color.FromArgb(230, 230, 230), 220, -53);
+                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 2, System.Drawing.Color.FromArgb(50, 50, 50), 220, 22);
+                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 3, System.Drawing.Color.FromArgb(150, 200, 255), 220, 97);
             }
         }
 

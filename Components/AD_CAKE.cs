@@ -29,8 +29,8 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 4, 0.0, 2.0, 0.15, 160, 0);
-                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 0, 70, -11, 160, 22);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 4, 0.0, 2.0, 0.15, 330, 0);
+                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 0, 220, -11, 180, 22);
             }
         }
 

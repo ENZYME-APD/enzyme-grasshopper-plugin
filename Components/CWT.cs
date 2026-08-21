@@ -33,8 +33,8 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 0, System.Drawing.Color.FromArgb(230, 230, 230), 150, -30);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 1, "line", 150, 30);
+                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 0, System.Drawing.Color.FromArgb(230, 230, 230), 220, -38);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 1, "line", 220, 37);
             }
         }
 

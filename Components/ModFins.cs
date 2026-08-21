@@ -32,15 +32,15 @@ namespace Enzyme.Masterplan
 
             if (!hasSources)
             {
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 0.0, 3.0, 1.5, 160, -75);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 3, 0.0, 2.0, 0.3, 160, -45);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 4, 0.0, 2.0, 0.0, 160, -15);
-                Enzyme.Utils.AutoWireHelper.WirePanel(this, document, 5, "1", 120, 15, 80, 25);
-                Enzyme.Utils.AutoWireHelper.WirePanel(this, document, 6, "0", 120, 45, 80, 25);
-                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 7, false, 80, 75);
-                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 0, System.Drawing.Color.FromArgb(150, 200, 255), 150, -75);
-                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 1, System.Drawing.Color.FromArgb(230, 230, 230), 150, -15);
-                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 2, System.Drawing.Color.FromArgb(230, 230, 230), 150, 45);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 0.0, 3.0, 1.5, 330, -100);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 3, 0.0, 2.0, 0.3, 330, -60);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 4, 0.0, 2.0, 0.0, 330, -20);
+                Enzyme.Utils.AutoWireHelper.WirePanel(this, document, 5, "1", 250, 20, 100, 25);
+                Enzyme.Utils.AutoWireHelper.WirePanel(this, document, 6, "0", 250, 60, 100, 25);
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 7, false, 210, 100);
+                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 0, System.Drawing.Color.FromArgb(150, 200, 255), 220, -90);
+                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 1, System.Drawing.Color.FromArgb(230, 230, 230), 220, -15);
+                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 2, System.Drawing.Color.FromArgb(230, 230, 230), 220, 60);
             }
         }
 

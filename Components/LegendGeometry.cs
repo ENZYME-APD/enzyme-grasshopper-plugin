@@ -42,10 +42,10 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 0.0, 2.0, 1.0, 160, 0);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 0, "curve", 150, -30);
-                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 1, 70, -11, 160, 22);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 2, "point", 150, 30);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 0.0, 2.0, 1.0, 330, 0);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 0, "curve", 220, -45);
+                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 1, 220, -11, 180, 22);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 2, "point", 220, 45);
             }
         }
 

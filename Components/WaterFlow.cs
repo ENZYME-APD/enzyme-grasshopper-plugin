@@ -30,11 +30,11 @@ namespace Enzyme.Terrain
 
             if (!hasSources)
             {
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 1, 0.0, 3.0, 1.5, 160, -30);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 0.0, 3.0, 1.5, 160, 0);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 3, 0.0, 2.0, 1, 160, 30);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 0, "curve", 150, -15);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 1, "point", 150, 15);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 1, 0.0, 3.0, 1.5, 330, -40);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 0.0, 3.0, 1.5, 330, 0);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 3, 0.0, 2.0, 1, 330, 40);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 0, "curve", 220, -23);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 1, "point", 220, 22);
             }
         }
 

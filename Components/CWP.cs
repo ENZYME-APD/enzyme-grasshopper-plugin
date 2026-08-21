@@ -26,12 +26,12 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 0, 0.0, 2.0, 0.3, 160, -60);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 1, 0.0, 2.0, 0.5, 160, -30);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 0.0, 2.0, 0.0, 160, 0);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 3, 0.0, 2.0, 0.0, 160, 30);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 4, 0.0, 2.0, 0.0, 160, 60);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 0, "curve", 150, 0);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 0, 0.0, 2.0, 0.3, 330, -80);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 1, 0.0, 2.0, 0.5, 330, -40);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 0.0, 2.0, 0.0, 330, 0);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 3, 0.0, 2.0, 0.0, 330, 40);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 4, 0.0, 2.0, 0.0, 330, 80);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 0, "curve", 220, 0);
             }
         }
 

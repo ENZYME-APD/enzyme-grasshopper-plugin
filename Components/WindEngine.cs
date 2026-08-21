@@ -40,17 +40,17 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                Enzyme.Utils.AutoWireHelper.WireButton(this, document, 0, 60, -60);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 4, 0.0, 20, 10.0, 160, -30);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 5, 0.0, 3.0, 1.5, 160, 0);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 6, 0.0, 10.0, 5.0, 160, 30);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 8, 0.0, 3.0, 1.5, 160, 60);
-                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 0, System.Drawing.Color.FromArgb(230, 230, 230), 150, -105);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 1, "line", 150, -45);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 3, "curve", 150, -15);
-                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 4, 70, 4, 160, 22);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 5, "point", 150, 45);
-                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 6, System.Drawing.Color.FromArgb(230, 230, 230), 150, 75);
+                Enzyme.Utils.AutoWireHelper.WireButton(this, document, 0, 210, -80);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 4, 0.0, 20, 10.0, 330, -40);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 5, 0.0, 3.0, 1.5, 330, 0);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 6, 0.0, 10.0, 5.0, 330, 40);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 8, 0.0, 3.0, 1.5, 330, 80);
+                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 0, System.Drawing.Color.FromArgb(230, 230, 230), 220, -143);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 1, "line", 220, -68);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 3, "curve", 220, -23);
+                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 4, 220, 11, 180, 22);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 5, "point", 220, 67);
+                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 6, System.Drawing.Color.FromArgb(230, 230, 230), 220, 112);
             }
         }
 

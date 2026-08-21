@@ -31,15 +31,15 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                Enzyme.Utils.AutoWireHelper.WireColorSwatch(this, document, 2, System.Drawing.Color.Empty, 120, -75);
-                Enzyme.Utils.AutoWireHelper.WireValueList(this, document, 3, new string[]{"X", "Y", "Z)"}, new string[]{"0", "1", "2"}, 150, -45);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 4, 0.0, 2.0, 0.0, 160, -15);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 5, 0.0, 2.0, 0.0, 160, 15);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 6, 0.0, 2.0, 1.0, 160, 45);
-                Enzyme.Utils.AutoWireHelper.WireButton(this, document, 7, 60, 75);
-                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 0, System.Drawing.Color.FromArgb(250, 250, 250), 150, -45);
-                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 2, 70, 4, 160, 22);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 3, "curve", 150, 45);
+                Enzyme.Utils.AutoWireHelper.WireColorSwatch(this, document, 2, System.Drawing.Color.Empty, 210, -100);
+                Enzyme.Utils.AutoWireHelper.WireValueList(this, document, 3, new string[]{"X", "Y", "Z)"}, new string[]{"0", "1", "2"}, 300, -60);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 4, 0.0, 2.0, 0.0, 330, -20);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 5, 0.0, 2.0, 0.0, 330, 20);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 6, 0.0, 2.0, 1.0, 330, 60);
+                Enzyme.Utils.AutoWireHelper.WireButton(this, document, 7, 210, 100);
+                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 0, System.Drawing.Color.FromArgb(250, 250, 250), 220, -60);
+                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 2, 220, 4, 180, 22);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 3, "curve", 220, 60);
             }
         }
 

@@ -36,12 +36,12 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 4, false, 80, -15);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 5, 0.0, 2.0, 0.0, 160, 15);
-                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 0, System.Drawing.Color.FromArgb(230, 230, 230), 150, -60);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 1, "curve", 150, 0);
-                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 5, 70, 19, 160, 22);
-                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 6, 70, 49, 160, 22);
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 4, false, 210, -20);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 5, 0.0, 2.0, 0.0, 330, 20);
+                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 0, System.Drawing.Color.FromArgb(230, 230, 230), 220, -83);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 1, "curve", 220, -8);
+                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 5, 220, 26, 180, 22);
+                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 6, 220, 71, 180, 22);
             }
         }
 

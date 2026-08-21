@@ -32,10 +32,10 @@ namespace Enzyme.Terrain
 
             if (!hasSources)
             {
-                Enzyme.Utils.AutoWireHelper.WirePanel(this, document, 1, "1", 120, -15, 80, 25);
-                Enzyme.Utils.AutoWireHelper.WireValueList(this, document, 5, new string[]{"XY", "XZ", "YZ"}, new string[]{"0", "1", "2"}, 150, 15);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 0, "curve", 150, -15);
-                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 2, 70, 4, 160, 22);
+                Enzyme.Utils.AutoWireHelper.WirePanel(this, document, 1, "1", 250, -20, 100, 25);
+                Enzyme.Utils.AutoWireHelper.WireValueList(this, document, 5, new string[]{"XY", "XZ", "YZ"}, new string[]{"0", "1", "2"}, 300, 20);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 0, "curve", 220, -23);
+                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 2, 220, 11, 180, 22);
             }
         }
 

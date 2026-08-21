@@ -30,8 +30,8 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 4, false, 80, 0);
-                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 0, 70, -11, 160, 22);
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 4, false, 210, 0);
+                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 0, 220, -11, 180, 22);
             }
         }
 

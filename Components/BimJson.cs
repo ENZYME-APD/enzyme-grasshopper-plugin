@@ -31,9 +31,9 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 1, false, 80, -15);
-                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 3, false, 80, 15);
-                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 0, 70, -11, 160, 22);
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 1, false, 210, -20);
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 3, false, 210, 20);
+                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 0, 220, -11, 180, 22);
             }
         }
 

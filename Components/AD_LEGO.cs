@@ -26,8 +26,8 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                Enzyme.Utils.AutoWireHelper.WireValueList(this, document, 5, new string[]{"Strict Cutoff", "Stretch Top Floor"}, new string[]{"0", "1"}, 150, 0);
-                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 0, 70, -11, 160, 22);
+                Enzyme.Utils.AutoWireHelper.WireValueList(this, document, 5, new string[]{"Strict Cutoff", "Stretch Top Floor"}, new string[]{"0", "1"}, 300, 0);
+                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 0, 220, -11, 180, 22);
             }
         }
 

@@ -24,8 +24,8 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 1, "point", 150, -15);
-                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 2, 70, 4, 160, 22);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 1, "point", 220, -23);
+                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 2, 220, 11, 180, 22);
             }
         }
 

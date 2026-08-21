@@ -27,7 +27,7 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 1, true, 80, 0);
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 1, true, 210, 0);
             }
         }
 

@@ -32,12 +32,12 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 0, 70, -86, 160, 22);
-                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 1, 70, -56, 160, 22);
-                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 2, 70, -26, 160, 22);
-                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 3, 70, 4, 160, 22);
-                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 4, 70, 34, 160, 22);
-                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 5, 70, 64, 160, 22);
+                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 0, 220, -124, 180, 22);
+                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 1, 220, -79, 180, 22);
+                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 2, 220, -34, 180, 22);
+                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 3, 220, 11, 180, 22);
+                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 4, 220, 56, 180, 22);
+                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 5, 220, 101, 180, 22);
             }
         }
 

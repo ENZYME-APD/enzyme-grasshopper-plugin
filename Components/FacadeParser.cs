@@ -32,10 +32,10 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 5, false, 80, 0);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 0, "curve", 150, -30);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 1, "curve", 150, 0);
-                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 3, 70, 19, 160, 22);
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 5, false, 210, 0);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 0, "curve", 220, -45);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 1, "curve", 220, 0);
+                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 3, 220, 34, 180, 22);
             }
         }
 
