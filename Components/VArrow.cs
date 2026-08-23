@@ -171,8 +171,7 @@ namespace Enzyme.Components
         {
             get
             {
-                // Assuming IconLoader is available in the global scope or Enzyme namespace
-                return IconLoader.Load("V-Arrow.png");
+                return IconLoader.Load("vector arrow generator.png");
             }
         }
 
