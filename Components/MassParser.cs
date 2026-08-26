@@ -37,7 +37,7 @@ namespace Enzyme.Components
             if (!hasSources)
             {
                 Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 4, false, 210, -20);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 5, 0.0, 2.0, 0.0, 330, 20);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 5, 0.0, 1.0, 0.0, 330, 20);
                 Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 0, System.Drawing.Color.FromArgb(230, 230, 230), 220, -83);
                 Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 1, "curve", 220, -8);
                 Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 5, 220, 26, 180, 22);
@@ -55,7 +55,7 @@ namespace Enzyme.Components
             pManager.AddTextParameter("Filter_Program", "Filter_Program", "Limit by Program", GH_ParamAccess.list);
             pManager[3].Optional = true;
             pManager.AddBooleanParameter("ExactMatch", "ExactMatch", "Exact Match", GH_ParamAccess.item, false);
-            pManager.AddNumberParameter("Transparency", "Transparency", "0.0 (Solid) to 1.0 (Invisible)", GH_ParamAccess.item, 0.0);
+            pManager.AddNumberParameter("Transparency", "Transparency", "Opacity 0.0 to 1.0 (Solid to Invisible)", GH_ParamAccess.item, 0.0);
         }
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)

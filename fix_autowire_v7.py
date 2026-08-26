@@ -68,7 +68,7 @@ def parse_inputs(content):
         name = name_match.group(1) if name_match else ""
 
         str_options = re.findall(r"'([^']+)'", desc)
-        int_options = re.findall(r"(\d+)\s*=\s*([^,]+?)(?:,|$)", desc)
+        int_options = re.findall(r"(\d+)\s*=\s*([^,]+?)(?:,|$|\))", desc)
         
         if str_options and "AddTextParameter" in line:
             keys = ", ".join(f'"{opt}"' for opt in str_options)
