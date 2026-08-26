@@ -61,10 +61,10 @@ namespace Enzyme.Components
                 Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 18, 0.0, 24690, 12345, 330, 240);
                 Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 19, 0.0, 1.0, 0.15, 330, 280);
                 Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 20, 0.0, 1.0, 0.85, 330, 320);
-                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 0, System.Drawing.Color.FromArgb(230, 230, 230), 220, -83);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 1, "curve", 220, -8);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 2, "curve", 220, 37);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 3, "point", 220, 82);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 0, "mesh", 300, -135);
+                Enzyme.Utils.AutoWireHelper.WireCurvePreview(this, document, 1, System.Drawing.Color.Gray, 0.05, 300, -45);
+                Enzyme.Utils.AutoWireHelper.WireCurvePreview(this, document, 2, System.Drawing.Color.Black, 0.15, 300, 45);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 3, "point", 300, 135);
             }
         }
 
