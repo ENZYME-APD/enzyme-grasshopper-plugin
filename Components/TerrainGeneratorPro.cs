@@ -56,11 +56,11 @@ namespace Enzyme.Components
                 Enzyme.Utils.AutoWireHelper.WireValueList(this, document, 13, new string[]{"Realistic Soft Hills", "Ridged/Cellular Pattern"}, new string[]{"0", "1"}, 300, 40);
                 Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 14, false, 210, 80);
                 Enzyme.Utils.AutoWireHelper.WireColorSwatch(this, document, 15, System.Drawing.Color.DimGray, 210, 120);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 16, 0.0, 2.0, 0.0, 330, 160);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 17, 0.0, 2.0, 0.0, 330, 200);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 16, 0.0, 1.0, 0.0, 330, 160);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 17, 0.0, 1.0, 0.0, 330, 200);
                 Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 18, 0.0, 24690, 12345, 330, 240);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 19, 0.0, 2.0, 0.15, 330, 280);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 20, 0.0, 2.0, 0.85, 330, 320);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 19, 0.0, 1.0, 0.15, 330, 280);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 20, 0.0, 1.0, 0.85, 330, 320);
                 Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 0, System.Drawing.Color.FromArgb(230, 230, 230), 220, -83);
                 Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 1, "curve", 220, -8);
                 Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 2, "curve", 220, 37);
@@ -87,7 +87,7 @@ namespace Enzyme.Components
             pManager.AddBooleanParameter("Solid", "Solid", "Toggle closed mesh extrusion", GH_ParamAccess.item, false);
             pManager.AddColourParameter("BaseCol", "BaseCol", "Color for the extruded solid base section", GH_ParamAccess.item, Color.DimGray);
             pManager.AddNumberParameter("TreeMsk", "TreeMsk", "Coverage mask threshold 0.0 to 1.0", GH_ParamAccess.item, 0.0);
-            pManager.AddNumberParameter("TreeDns", "TreeDns", "Density multiplier inside mask areas", GH_ParamAccess.item, 0.0);
+            pManager.AddNumberParameter("TreeDns", "TreeDns", "Density multiplier inside mask areas 0.0 to 1.0", GH_ParamAccess.item, 0.0);
             pManager.AddIntegerParameter("TreeSeed", "TreeSeed", "Dedicated seed for the forest noise map", GH_ParamAccess.item, 12345);
             pManager.AddNumberParameter("TreeZMin", "TreeZMin", "Minimum relative elevation for trees 0.0 to 1.0", GH_ParamAccess.item, 0.15);
             pManager.AddNumberParameter("TreeZMax", "TreeZMax", "Maximum relative elevation for trees 0.0 to 1.0", GH_ParamAccess.item, 0.85);

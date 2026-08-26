@@ -1,0 +1,58 @@
+Subcategory,Name,Description
+Terrain,AdaptiveTerrainGrader,a sloped terrain mesh with a flat graded terrace
+Terrain,GlobalFloodEngine,a terrain topography with a flat water plane intersecting it
+Terrain,RoadSlopeAnalyzer,a winding road projected onto a sloping hill
+Terrain,TerrainGeneratorPro,a mountainous topography mesh with contour lines
+Terrain,MeshHeightAnalysis,a topographic mesh divided into vertical height bands
+Terrain,SlopeAnalysisMesh,a terrain mesh with steep triangulated faces highlighted
+Terrain,FlowHeat,a heatmap gradient draped over a terrain valley
+Terrain,WaterFlow,water droplet pathlines flowing down a steep topography
+Terrain,WindEngine,wind flow arrows deflecting around an urban building massing
+Terrain,TileGridGenerator,a parametric grid projected onto an uneven surface
+Masterplan,MasterplanEngine,a clustered layout of urban building blocks
+Masterplan,MassParser,an abstract volumetric building massing
+Masterplan,RoofParser,a flat building roof outline with parapets
+Masterplan,SlabParser,stacked horizontal floor slabs
+Masterplan,RailParser,an architectural railing profile
+Masterplan,AutoPhase,"a sequence of building blocks with numbers 1, 2, 3"
+Masterplan,FacadeParser,a building facade subdivided into panels
+Masterplan,FilletRules,a sharp corner being rounded off by a fillet radius
+Masterplan,Dash,a pie chart and data readout for urban metrics
+Masterplan,Clearance,a measured distance gap between two building towers
+Facade,CWP,an extruded mullion profile section
+Facade,CWS,a framed glass curtain wall elevation
+Facade,CWT,a single framed glass panel
+Facade,ColorMeshTiles,a single leaf-shaped architectural panel tiled with a coarse hexagonal pattern
+Facade,ModBalcony,a cantilevered building balcony
+Facade,ModFins,vertical sun-shading fins on a facade
+Facade,ModFrames,horizontal and vertical facade structural framing
+Facade,ModRetail,a tall ground-floor storefront facade
+Facade,ModRhythmBalc,"a rhythmic, alternating pattern of facade balconies"
+Facade,ModSpandrel,a solid horizontal spandrel band between glass floors
+Utilities,AreaConv,a square with arrows converting one unit to a larger square unit
+Utilities,BranchConcat,data tree branches merging together
+Utilities,BranchSizeSplit,a data tree splitting based on list lengths
+Utilities,GroupByKey,scattered geometry sorting into organized folders
+Utilities,InitKeys,a master key unlocking a data structure
+Utilities,ParseTable,a structured spreadsheet or data table
+Utilities,RandomTreeSplit,a data tree splitting in random directions
+Utilities,RecipeBuilder,a list of ingredients merging into a single formula
+Utilities,TShuffle,data tree branches crossing and mixing
+Utilities,PHeal,a broken curve being stitched back together
+Utilities,SegDisp,a curve breaking into smaller line segments
+Utilities,CondFillet,a sharp angle selectively rounding based on an arrow condition
+Utilities,ElevationLabel,an architectural elevation target symbol
+Utilities,LegendGeometry,a color scale legend bar
+Utilities,LayerMat,a paint bucket applying color to a stacked layer
+Utilities,MakePalette,a color swatch palette
+Utilities,VArrow,a bold directional vector arrow
+Utilities,GridPattern,"an irregular polygonal boundary containing a coarse, 10-degree rotated rectangular grid"
+Utilities,PlaneFinder,a localized coordinate plane finding the center of a geometry
+Utilities,VerticalProjection,a geometry projecting straight down onto a flat surface
+Adapters,AD_ARCHICAD,the ArchiCAD logo merging into a Grasshopper node
+Adapters,AD_CAKE,a building massing sliced horizontally into floor layers
+Adapters,AD_LEGO,interlocking building blocks snapping together
+Adapters,AD_SCULPT,a chisel carving an organic massing
+JSON,BimJson,a JSON bracket { } enclosing a 3D building
+JSON,ConfigJson,a JSON bracket { } enclosing mechanical gears
+JSON,JsonInspect,a magnifying glass inspecting a JSON bracket { }
