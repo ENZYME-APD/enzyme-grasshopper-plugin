@@ -67,6 +67,6 @@ namespace Enzyme.Components
         }
 
         public override Guid ComponentGuid => new Guid("7d3f5b2c-6a4a-4e2b-a1b9-3f8c5b9f7d2a");
-        public override GH_Exposure Exposure => GH_Exposure.septenary;
+        public override GH_Exposure Exposure => GH_Exposure.secondary;
     }
 }
