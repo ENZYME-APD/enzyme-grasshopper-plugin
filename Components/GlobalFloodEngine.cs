@@ -172,7 +172,7 @@ namespace Enzyme.Components
 
         protected override System.Drawing.Bitmap Icon
         {
-            get { return null; }
+            get { return IconLoader.Load("GlobalFlood.png"); }
         }
 
         public override Guid ComponentGuid
