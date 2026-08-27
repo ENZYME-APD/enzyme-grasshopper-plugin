@@ -1,11 +1,7 @@
 using System;
-using System.Linq;
 using System.Collections.Generic;
-using System.Drawing;
-using Rhino;
-using Rhino.Geometry;
 using Grasshopper.Kernel;
-using Enzyme;
+using Rhino.Geometry;
 
 namespace Enzyme.Components
 {
@@ -13,22 +9,150 @@ namespace Enzyme.Components
     {
         public GlobalFloodEngine()
             : base("Global Volumetric Flood Engine", "GlobalFlood",
-                "Simulates global terrain flooding based on a target water volume and generates a depth heatmap.",
+                "Simulates rainfall accumulation pooling into local valleys and depressions.",
                 "Enzyme", "Terrain")
         {
         }
 
-        protected override Bitmap Icon
+        protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
-            get
-            {
-                return IconLoader.Load("GlobalFlood.png");
-            }
+            pManager.AddMeshParameter("TerrainMesh", "TM", "Input Terrain Mesh", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Rainfall", "RF", "Rainfall intensity in Liters/m2/hour (mm/h)", GH_ParamAccess.item, 50.0);
+            pManager.AddNumberParameter("Duration", "T", "Duration of the rain event in hours", GH_ParamAccess.item, 2.0);
+            pManager.AddIntegerParameter("Iterations", "I", "Simulation steps for water flow", GH_ParamAccess.item, 200);
         }
 
-        public override Guid ComponentGuid => new Guid("A1B2C3D4-E5F6-4789-9A0B-1C2D3E4F5A6B");
+        protected override void RegisterOutputParams(GH_OutputParamManager pManager)
+        {
+            pManager.AddMeshParameter("FloodMesh", "FM", "Flooded terrain heatmap mesh", GH_ParamAccess.item);
+            pManager.AddNumberParameter("WaterDepths", "WD", "Water depths at each vertex in meters", GH_ParamAccess.list);
+        }
 
-                public override void AddedToDocument(GH_Document document)
+        protected override void SolveInstance(IGH_DataAccess DA)
+        {
+            Mesh TerrainMesh = null;
+            if (!DA.GetData(0, ref TerrainMesh)) return;
+
+            double Rainfall = 50.0;
+            if (!DA.GetData(1, ref Rainfall)) return;
+
+            double Duration = 2.0;
+            if (!DA.GetData(2, ref Duration)) return;
+
+            int Iterations = 200;
+            if (!DA.GetData(3, ref Iterations)) return;
+
+            System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
+
+            if (TerrainMesh == null) return;
+            Mesh outMesh = TerrainMesh.DuplicateMesh();
+            outMesh.VertexColors.Clear();
+            
+            int numVertices = outMesh.Vertices.Count;
+            int numTopVertices = outMesh.TopologyVertices.Count;
+
+            // Initialize water depth (Rainfall is mm/h. 1 mm = 0.001 m)
+            // Depth in meters = (Rainfall * Duration) / 1000.0
+            double rainDepthMeters = (Rainfall * Duration) / 1000.0;
+
+            double[] topWaterDepth = new double[numTopVertices];
+            double[] topZ = new double[numTopVertices];
+
+            for (int i = 0; i < numTopVertices; i++)
+            {
+                topWaterDepth[i] = rainDepthMeters;
+                // Get Z of the topology vertex
+                int vIdx = outMesh.TopologyVertices.MeshVertexIndices(i)[0];
+                topZ[i] = outMesh.Vertices[vIdx].Z;
+            }
+
+            // Flow simulation
+            double[] nextWater = new double[numTopVertices];
+            for (int iter = 0; iter < Iterations; iter++)
+            {
+                Array.Copy(topWaterDepth, nextWater, numTopVertices);
+                bool moved = false;
+
+                for (int i = 0; i < numTopVertices; i++)
+                {
+                    if (topWaterDepth[i] <= 0.0001) continue;
+
+                    double myLevel = topZ[i] + topWaterDepth[i];
+                    int[] connected = outMesh.TopologyVertices.ConnectedTopologyVertices(i);
+                    
+                    int lowestNeighbor = -1;
+                    double lowestLevel = myLevel;
+
+                    for (int n = 0; n < connected.Length; n++)
+                    {
+                        int j = connected[n];
+                        double neighborLevel = topZ[j] + topWaterDepth[j];
+                        if (neighborLevel < lowestLevel)
+                        {
+                            lowestLevel = neighborLevel;
+                            lowestNeighbor = j;
+                        }
+                    }
+
+                    if (lowestNeighbor != -1)
+                    {
+                        // Flow half the difference to the lowest neighbor
+                        double delta = (myLevel - lowestLevel) / 2.0;
+                        if (delta > topWaterDepth[i]) delta = topWaterDepth[i]; // Can't flow more than we have
+                        
+                        nextWater[i] -= delta;
+                        nextWater[lowestNeighbor] += delta;
+                        moved = true;
+                    }
+                }
+                
+                Array.Copy(nextWater, topWaterDepth, numTopVertices);
+                if (!moved) break;
+            }
+
+            // Map back to mesh vertices and colorize
+            List<double> finalDepths = new List<double>(numVertices);
+            int floodedVertexCount = 0;
+            double maxDepth = 0.0;
+
+            for (int i = 0; i < numVertices; i++)
+            {
+                int topIdx = outMesh.TopologyVertices.TopologyVertexIndex(i);
+                double depth = topWaterDepth[topIdx];
+                finalDepths.Add(depth);
+                if (depth > maxDepth) maxDepth = depth;
+            }
+
+            if (maxDepth < 0.001) maxDepth = 0.001;
+
+            for (int i = 0; i < numVertices; i++)
+            {
+                double depth = finalDepths[i];
+                if (depth < 0.01) // less than 1cm water -> dry
+                {
+                    outMesh.VertexColors.Add(System.Drawing.Color.FromArgb(255, 230, 230, 230));
+                }
+                else
+                {
+                    floodedVertexCount++;
+                    double intensity = Math.Min(1.0, depth / maxDepth);
+                    
+                    int r = 0;
+                    int g = (int)(200 * (1.0 - intensity));
+                    int b = (int)(255 - (105 * intensity)); 
+                    
+                    outMesh.VertexColors.Add(System.Drawing.Color.FromArgb(255, r, g, b));
+                }
+            }
+
+            DA.SetData(0, outMesh);
+            DA.SetDataList(1, finalDepths);
+
+            sw.Stop();
+            Message = $"{this.NickName}\nTime: {sw.ElapsedMilliseconds} ms\n---\n● Flooded: {floodedVertexCount} | ○ Dry: {numVertices - floodedVertexCount}";
+        }
+        
+        public override void AddedToDocument(GH_Document document)
         {
             base.AddedToDocument(document);
             if (this.Attributes == null) this.CreateAttributes();
@@ -39,138 +163,21 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 1, 0.0, 3.0, 1.5, 330, -20);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 0.0, 2.0, 0.1, 330, 20);
-                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 0, System.Drawing.Color.FromArgb(230, 230, 230), 220, -15);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 1, 0.0, 500.0, 50.0, 330, -20);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 0.0, 48.0, 2.0, 330, 20);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 3, 10, 1000, 200, 330, 60);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 0, "mesh", 220, -10);
             }
         }
 
-        protected override void RegisterInputParams(GH_InputParamManager pManager)
+        protected override System.Drawing.Bitmap Icon
         {
-            pManager.AddMeshParameter("TerrainMesh", "TerrainMesh", "Input Terrain Mesh", GH_ParamAccess.item);
-            pManager.AddNumberParameter("TargetVolume", "TargetVolume", "Target volume of water", GH_ParamAccess.item);
-            pManager.AddNumberParameter("ZStep", "ZStep", "Iteration step for Z level", GH_ParamAccess.item, 0.1);
+            get { return null; }
         }
 
-        protected override void RegisterOutputParams(GH_OutputParamManager pManager)
+        public override Guid ComponentGuid
         {
-            pManager.AddMeshParameter("FloodMesh", "FloodMesh", "Flooded terrain heatmap mesh", GH_ParamAccess.item);
-            pManager.AddNumberParameter("WaterLevel", "WaterLevel", "Final water elevation", GH_ParamAccess.item);
-        }
-
-        protected override void SolveInstance(IGH_DataAccess DA)
-        {
-            Mesh TerrainMesh = null;
-            if (!DA.GetData(0, ref TerrainMesh)) return;
-
-            double TargetVolume = 0.0;
-            if (!DA.GetData(1, ref TargetVolume)) return;
-
-            double ZStep = 0.1;
-            DA.GetData(2, ref ZStep);
-
-            System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
-
-            Mesh outMesh = null;
-            double finalWaterLevel = 0.0;
-            int floodedVertexCount = 0;
-            int totalVertices = 0;
-
-            if (TerrainMesh != null && TargetVolume > 0 && ZStep > 0)
-            {
-                outMesh = TerrainMesh.DuplicateMesh();
-                outMesh.VertexColors.Clear();
-
-                totalVertices = outMesh.Vertices.Count;
-                double[] vertexAreas = new double[totalVertices];
-                double minZ = double.MaxValue;
-                double maxZ = double.MinValue;
-
-                for (int i = 0; i < totalVertices; i++)
-                {
-                    double z = outMesh.Vertices[i].Z;
-                    if (z < minZ) minZ = z;
-                    if (z > maxZ) maxZ = z;
-                }
-
-                foreach (MeshFace face in outMesh.Faces)
-                {
-                    Point3f A = outMesh.Vertices[face.A];
-                    Point3f B = outMesh.Vertices[face.B];
-                    Point3f C = outMesh.Vertices[face.C];
-                    
-                    double areaABC = 0.5 * Math.Abs((B.X - A.X) * (C.Y - A.Y) - (C.X - A.X) * (B.Y - A.Y));
-                    double thirdAreaABC = areaABC / 3.0;
-                    
-                    vertexAreas[face.A] += thirdAreaABC;
-                    vertexAreas[face.B] += thirdAreaABC;
-                    vertexAreas[face.C] += thirdAreaABC;
-
-                    if (face.IsQuad)
-                    {
-                        Point3f D = outMesh.Vertices[face.D];
-                        double areaACD = 0.5 * Math.Abs((C.X - A.X) * (D.Y - A.Y) - (D.X - A.X) * (C.Y - A.Y));
-                        double thirdAreaACD = areaACD / 3.0;
-                        
-                        vertexAreas[face.A] += thirdAreaACD;
-                        vertexAreas[face.C] += thirdAreaACD;
-                        vertexAreas[face.D] += thirdAreaACD;
-                    }
-                }
-
-                double currentZ = minZ;
-                double calcVolume = 0.0;
-                
-                while (currentZ <= maxZ)
-                {
-                    calcVolume = 0.0;
-                    for (int i = 0; i < totalVertices; i++)
-                    {
-                        double dz = currentZ - outMesh.Vertices[i].Z;
-                        if (dz > 0) 
-                        {
-                            calcVolume += dz * vertexAreas[i];
-                        }
-                    }
-
-                    if (calcVolume >= TargetVolume)
-                        break;
-
-                    currentZ += ZStep;
-                }
-
-                finalWaterLevel = currentZ;
-
-                double maxDepth = finalWaterLevel - minZ;
-                if (maxDepth <= 0) maxDepth = 0.001; 
-
-                for (int i = 0; i < totalVertices; i++)
-                {
-                    double z = outMesh.Vertices[i].Z;
-                    if (z >= finalWaterLevel)
-                    {
-                        outMesh.VertexColors.Add(System.Drawing.Color.FromArgb(255, 230, 230, 230));
-                    }
-                    else
-                    {
-                        floodedVertexCount++;
-                        double depth = finalWaterLevel - z;
-                        double intensity = Math.Min(1.0, depth / maxDepth);
-                        
-                        int r = 0;
-                        int g = (int)(200 * (1.0 - intensity));
-                        int b = (int)(255 - (105 * intensity)); 
-                        
-                        outMesh.VertexColors.Add(System.Drawing.Color.FromArgb(255, r, g, b));
-                    }
-                }
-            }
-
-            DA.SetData(0, outMesh);
-            DA.SetData(1, finalWaterLevel);
-
-            sw.Stop();
-            Message = $"{this.NickName}\nTime: {sw.ElapsedMilliseconds} ms\n---\n● Flooded: {floodedVertexCount} | ○ Dry: {totalVertices - floodedVertexCount}";
+            get { return new Guid("A1B2C3D4-E5F6-4789-9A0B-1C2D3E4F5A6B"); }
         }
     }
 }

@@ -226,6 +226,83 @@ namespace Enzyme.Utils
                 }
             }
         }
+        public static void WireMultilinePanel(GH_Component comp, GH_Document doc, int paramIndex, string text, int offsetX, int offsetY, int width = 120, int height = 80)
+        {
+            if (paramIndex >= comp.Params.Input.Count) return;
+            if (comp.Params.Input[paramIndex].SourceCount > 0) return;
+
+            Grasshopper.Kernel.Special.GH_Panel panel = new Grasshopper.Kernel.Special.GH_Panel();
+            panel.CreateAttributes();
+            panel.UserText = text;
+            panel.Properties.Multiline = true;
+            
+            panel.Attributes.Bounds = new System.Drawing.RectangleF(0, 0, width, height);
+
+            System.Drawing.PointF compPivot = comp.Attributes.Pivot;
+            panel.Attributes.Pivot = new System.Drawing.PointF(compPivot.X - offsetX, compPivot.Y + offsetY);
+
+            doc.AddObject(panel, false);
+            comp.Params.Input[paramIndex].AddSource(panel);
+        }
+        public static void WireInputParam(GH_Component comp, GH_Document doc, int paramIndex, string paramType, int offsetX, int offsetY)
+        {
+            if (paramIndex >= comp.Params.Input.Count) return;
+            if (comp.Params.Input[paramIndex].SourceCount > 0) return;
+
+            Grasshopper.Kernel.IGH_Param param = null;
+            paramType = paramType.ToLower();
+            if (paramType == "curve") param = new Grasshopper.Kernel.Parameters.Param_Curve();
+            else if (paramType == "point") param = new Grasshopper.Kernel.Parameters.Param_Point();
+            else if (paramType == "mesh") param = new Grasshopper.Kernel.Parameters.Param_Mesh();
+            else if (paramType == "line") param = new Grasshopper.Kernel.Parameters.Param_Line();
+
+            if (param != null)
+            {
+                param.CreateAttributes();
+                System.Drawing.PointF compPivot = comp.Attributes.Pivot;
+                param.Attributes.Pivot = new System.Drawing.PointF(compPivot.X - offsetX, compPivot.Y + offsetY);
+                doc.AddObject(param, false);
+                comp.Params.Input[paramIndex].AddSource(param);
+            }
+        }
+        public static void WirePointDisplay(GH_Component comp, GH_Document doc, int paramIndex, System.Drawing.Color color, double size, int offsetX, int offsetY)
+        {
+            if (paramIndex >= comp.Params.Output.Count) return;
+            if (comp.Params.Output[paramIndex].Recipients.Count > 0) return;
+
+            Grasshopper.Kernel.IGH_ObjectProxy proxy = Grasshopper.Instances.ComponentServer.FindObjectByName("Point Display", true, true);
+            if (proxy == null) return;
+
+            Grasshopper.Kernel.IGH_Component preview = proxy.CreateInstance() as Grasshopper.Kernel.IGH_Component;
+            if (preview == null) return;
+
+            preview.CreateAttributes();
+            System.Drawing.PointF compPivot = comp.Attributes.Pivot;
+            preview.Attributes.Pivot = new System.Drawing.PointF(compPivot.X + offsetX, compPivot.Y + offsetY);
+
+            Grasshopper.Kernel.Special.GH_ColourSwatch swatch = new Grasshopper.Kernel.Special.GH_ColourSwatch();
+            swatch.CreateAttributes();
+            swatch.SwatchColour = color;
+            swatch.Attributes.Pivot = new System.Drawing.PointF(preview.Attributes.Pivot.X - 100, preview.Attributes.Pivot.Y);
+            
+            Grasshopper.Kernel.Special.GH_NumberSlider slider = new Grasshopper.Kernel.Special.GH_NumberSlider();
+            slider.CreateAttributes();
+            slider.Slider.Minimum = 0.0m;
+            slider.Slider.Maximum = 20.0m;
+            slider.Slider.Value = (decimal)size;
+            slider.Attributes.Pivot = new System.Drawing.PointF(preview.Attributes.Pivot.X - 150, preview.Attributes.Pivot.Y + 30);
+            
+            doc.AddObject(preview, false);
+            doc.AddObject(swatch, false);
+            doc.AddObject(slider, false);
+            
+            preview.Params.Input[0].AddSource(comp.Params.Output[paramIndex]);
+            preview.Params.Input[1].AddSource(swatch);
+            preview.Params.Input[2].AddSource(slider);
+        }
+
+
+
 
     }
 }

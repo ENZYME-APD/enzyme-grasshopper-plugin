@@ -62,7 +62,7 @@ namespace Enzyme.Components
         {
             get
             {
-                return null;
+                return IconLoader.Load("ResetMeshColors.png");
             }
         }
 

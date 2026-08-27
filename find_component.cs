@@ -1,12 +1,11 @@
 using System;
 using System.Reflection;
 using Grasshopper.Kernel;
-using Grasshopper.Kernel.Components;
 
 public class Test
 {
     public static void Main()
     {
-        Console.WriteLine(typeof(GH_CustomPreviewComponent).FullName);
+        // This is a standalone executable, it won't have Grasshopper's component server loaded.
     }
 }
