@@ -99,6 +99,14 @@ namespace Enzyme.Components
             DA.SetDataTree(0, outTree);
         }
 
+        protected override System.Drawing.Bitmap Icon
+        {
+            get
+            {
+                return Enzyme.IconLoader.Load("sort curve by axis.png");
+            }
+        }
+
         public override Guid ComponentGuid
         {
             get { return new Guid("D5E2F6B2-72E9-5578-BC41-BCDEF2345678"); }

@@ -432,6 +432,14 @@ namespace Enzyme.Components
             Message = string.Join("\n", ui_lines);
         }
 
+        protected override System.Drawing.Bitmap Icon
+        {
+            get
+            {
+                return Enzyme.IconLoader.Load("Pixelated Surface.png");
+            }
+        }
+
         public override Guid ComponentGuid
         {
             get { return new Guid("C4D1E5A1-61F9-4467-AB30-ABCDE1234567"); }
