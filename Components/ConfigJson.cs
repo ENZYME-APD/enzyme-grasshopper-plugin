@@ -28,6 +28,20 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
+                Enzyme.Utils.AutoWireHelper.WireMultilinePanel(this, document, 0, "Office\nResidential\nServ.Apt\nRetail\nAmenities\nHotel\nPodium\nParking\nDefault", 250, -80, 100, 150);
+                Enzyme.Utils.AutoWireHelper.WireMultilinePanel(this, document, 1, "30000\n56500\n5000\n150000\n300000\n10000\n15000\n60000\n0", 140, -80, 100, 150);
+                var colors = new System.Drawing.Color[] {
+                    System.Drawing.Color.FromArgb(80, 180, 220),
+                    System.Drawing.Color.FromArgb(160, 120, 180),
+                    System.Drawing.Color.FromArgb(160, 220, 80),
+                    System.Drawing.Color.FromArgb(250, 180, 100),
+                    System.Drawing.Color.FromArgb(230, 130, 170),
+                    System.Drawing.Color.FromArgb(110, 130, 200),
+                    System.Drawing.Color.FromArgb(230, 100, 70),
+                    System.Drawing.Color.FromArgb(190, 180, 160),
+                    System.Drawing.Color.FromArgb(255, 255, 255)
+                };
+                Enzyme.Utils.AutoWireHelper.WireMergeWithSwatches(this, document, 2, colors, 150, 120);
                 Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 0, 220, -34, 180, 22);
                 Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 1, 220, 11, 180, 22);
             }
