@@ -233,8 +233,8 @@ namespace Enzyme.Utils
 
             Grasshopper.Kernel.Special.GH_Panel panel = new Grasshopper.Kernel.Special.GH_Panel();
             panel.CreateAttributes();
-            panel.UserText = text;
             panel.Properties.Multiline = false;
+            panel.UserText = text.Replace("\r\n", "\n").Replace("\n", Environment.NewLine);
             
             panel.Attributes.Bounds = new System.Drawing.RectangleF(0, 0, width, height);
 
