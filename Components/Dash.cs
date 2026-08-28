@@ -50,7 +50,7 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                Enzyme.Utils.AutoWireHelper.WireButton(this, document, 0, 210, -160);
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 0, false, 210, -160);
                 Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 2, false, 210, -120);
                 Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 5, 0.0, 2.0, 0.0, 330, -80);
                 Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 7, 0.0, 24, 12.0, 330, -40);
