@@ -31,15 +31,22 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                Enzyme.Utils.AutoWireHelper.WireColorSwatch(this, document, 2, System.Drawing.Color.Empty, 210, -100);
-                Enzyme.Utils.AutoWireHelper.WireValueList(this, document, 3, new string[]{"X", "Y", "Z"}, new string[]{"0", "1", "2"}, 300, -60);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 4, 0.0, 2.0, 0.0, 330, -20);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 5, 0.0, 2.0, 0.0, 330, 20);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 6, 0.0, 2.0, 1.0, 330, 60);
-                Enzyme.Utils.AutoWireHelper.WireButton(this, document, 7, 210, 100);
-                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 0, System.Drawing.Color.FromArgb(250, 250, 250), 220, -60);
-                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 2, 220, 4, 180, 22);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 3, "curve", 220, 60);
+                var colors = new System.Drawing.Color[] {
+                    System.Drawing.Color.FromArgb(240, 120, 120),
+                    System.Drawing.Color.FromArgb(200, 120, 120),
+                    System.Drawing.Color.FromArgb(250, 210, 210)
+                };
+                Enzyme.Utils.AutoWireHelper.WireMergeWithSwatches(this, document, 1, colors, 150, -140);
+                Enzyme.Utils.AutoWireHelper.WireColorSwatch(this, document, 2, System.Drawing.Color.FromArgb(255, 30, 0), 210, -50);
+                Enzyme.Utils.AutoWireHelper.WireValueList(this, document, 3, new string[]{"X", "Y", "Z"}, new string[]{"0", "1", "2"}, 300, -10);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 4, 0.0, 100.0, 30.0, 330, 30);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 5, 0.0, 100.0, 40.0, 330, 70);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 6, 0.0, 1.0, 0.94, 330, 110);
+                Enzyme.Utils.AutoWireHelper.WireButton(this, document, 7, 210, 150);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 0, "mesh", 220, -120);
+                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 1, 220, -50, 180, 50);
+                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 2, 220, 20, 180, 50);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 3, "mesh", 220, 90);
             }
         }
 
