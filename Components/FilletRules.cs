@@ -25,9 +25,11 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 0, 0.0, 2.0, 0.0, 330, -40);
-                Enzyme.Utils.AutoWireHelper.WireValueList(this, document, 1, new string[]{"Tower", "Program", "Building"}, new string[]{"\"Tower\"", "\"Program\"", "\"Building\""}, 300, 0);
-                Enzyme.Utils.AutoWireHelper.WireValueList(this, document, 2, new string[]{"Main_Tower", "Retail", "*"}, new string[]{"\"Main_Tower\"", "\"Retail\"", "\"*\""}, 300, 40);
+                Enzyme.Utils.AutoWireHelper.WirePanel(this, document, 0, "0", 250, -80, 80, 25);
+                Enzyme.Utils.AutoWireHelper.WireMultilinePanel(this, document, 1, "Program\nProgram\nBuilding", 250, -40, 150, 70);
+                Enzyme.Utils.AutoWireHelper.WireMultilinePanel(this, document, 2, "Residential-02\nOffice\nBuilding_11", 250, 50, 150, 70);
+                Enzyme.Utils.AutoWireHelper.WireMergeWithSliders(this, document, 3, new double[] { 6.0, 2.0, 4.0 }, 150, 140);
+                Enzyme.Utils.AutoWireHelper.WireMultilinePanel(this, document, 4, "True\nFalse\nTrue", 250, 230, 150, 70);
                 Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 0, 220, -34, 180, 22);
                 Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 1, 220, 11, 180, 22);
             }
