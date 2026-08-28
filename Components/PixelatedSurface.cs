@@ -26,7 +26,7 @@ namespace Enzyme.Components
 
         protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
-            pManager.AddTextParameter("Image Path", "Img", "Absolute path to the image file", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Image Sampler", "IS", "Connect a Grasshopper Image Sampler", GH_ParamAccess.item);
             pManager.AddSurfaceParameter("Surface", "Srf", "Base surface to pixelate", GH_ParamAccess.item);
             pManager.AddIntegerParameter("U_Subdivisions", "U", "Number of tiles in U direction", GH_ParamAccess.item, 20);
             pManager.AddIntegerParameter("V_Subdivisions", "V", "Number of tiles in V direction", GH_ParamAccess.item, 20);
@@ -49,6 +49,14 @@ namespace Enzyme.Components
         private bool hasSources = false;
         public override void AddedToDocument(GH_Document document)
         {
+            try {
+                var t = typeof(Grasshopper.Kernel.Special.GH_ImageSampler);
+                var lines = new System.Collections.Generic.List<string>();
+                foreach(var p in t.GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance)) lines.Add("P: " + p.Name);
+                foreach(var m in t.GetMethods(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance)) lines.Add("M: " + m.Name);
+                System.IO.File.WriteAllLines("sampler_dump.txt", lines);
+            } catch {}
+
             base.AddedToDocument(document);
             if (this.Attributes == null) this.CreateAttributes();
             foreach (var param in this.Params.Input)
@@ -109,29 +117,41 @@ namespace Enzyme.Components
             Stopwatch t_start = new Stopwatch();
             t_start.Start();
 
-            string imgPath = "";
-            DA.GetData(0, ref imgPath);
-
-            if (!string.IsNullOrEmpty(imgPath))
+            if (Params.Input[0].SourceCount > 0)
             {
-                if (imgPath != _cachedImagePath || _cachedBitmap == null)
+                var source = Params.Input[0].Sources[0];
+                if (source != null && source.GetType().Name.Contains("ImageSampler"))
                 {
-                    try
+                    System.Drawing.Bitmap foundImg = null;
+                    foreach (var prop in source.GetType().GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance))
                     {
-                        _cachedBitmap = new Bitmap(imgPath);
-                        _cachedImagePath = imgPath;
+                        if (prop.PropertyType == typeof(System.Drawing.Bitmap) || prop.PropertyType == typeof(System.Drawing.Image))
+                        {
+                            var val = prop.GetValue(source);
+                            if (val != null) { foundImg = (System.Drawing.Bitmap)val; break; }
+                        }
                     }
-                    catch (Exception ex)
+                    if (foundImg == null)
                     {
-                        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Failed to load image: " + ex.Message);
-                        return;
+                        foreach (var field in source.GetType().GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance))
+                        {
+                            if (field.FieldType == typeof(System.Drawing.Bitmap) || field.FieldType == typeof(System.Drawing.Image))
+                            {
+                                var val = field.GetValue(source);
+                                if (val != null) { foundImg = (System.Drawing.Bitmap)val; break; }
+                            }
+                        }
+                    }
+                    if (foundImg != null)
+                    {
+                        _cachedBitmap = foundImg;
                     }
                 }
             }
 
             if (_cachedBitmap == null)
             {
-                Message = "No Image";
+                Message = "No Image Sampler attached, or Image not loaded.";
                 return;
             }
 
