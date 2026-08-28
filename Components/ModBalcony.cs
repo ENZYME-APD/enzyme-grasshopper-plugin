@@ -28,25 +28,25 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 0.0, 10.0, 3.0, 330, -240);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 3, 0.0, 3.0, 1.5, 330, -200);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 4, 0.0, 3.0, 1.1, 330, -160);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 5, 0.0, 2.0, 0.0, 330, -120);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 6, 0.0, 2.0, 0.0, 330, -80);
-                Enzyme.Utils.AutoWireHelper.WirePanel(this, document, 7, "1", 250, -40, 100, 25);
-                Enzyme.Utils.AutoWireHelper.WirePanel(this, document, 8, "0", 250, 0, 100, 25);
-                Enzyme.Utils.AutoWireHelper.WirePanel(this, document, 9, "1", 250, 40, 100, 25);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 0.0, 10.0, 4.0, 330, -260);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 3, 0.0, 5.0, 2.9, 330, -220);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 4, 0.0, 3.0, 1.5, 330, -180);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 6, 0.0, 3.0, 1.0, 330, -100);
+                Enzyme.Utils.AutoWireHelper.WireMultilinePanel(this, document, 7, "0110101\n1010110", 250, -60, 100, 40);
+                Enzyme.Utils.AutoWireHelper.WireMultilinePanel(this, document, 8, "10", 250, 0, 100, 25);
+                Enzyme.Utils.AutoWireHelper.WireMultilinePanel(this, document, 9, "1", 250, 40, 100, 25);
                 Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 10, false, 210, 80);
                 Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 11, false, 210, 120);
                 Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 12, false, 210, 160);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 13, 0.0, 2.0, 0.0, 330, 200);
-                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 14, false, 210, 240);
-                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 0, System.Drawing.Color.FromArgb(180, 180, 180), 220, -203);
-                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 1, System.Drawing.Color.FromArgb(150, 150, 150), 220, -128);
-                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 2, System.Drawing.Color.FromArgb(150, 200, 255), 220, -53);
-                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 3, System.Drawing.Color.FromArgb(250, 250, 250), 220, 22);
-                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 4, System.Drawing.Color.FromArgb(250, 250, 250), 220, 97);
-                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 5, System.Drawing.Color.FromArgb(250, 250, 250), 220, 172);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 13, 0.0, 5.0, 3.0, 330, 200);
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 14, true, 210, 240);
+                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 0, System.Drawing.Color.FromArgb(180, 180, 180), 220, -240);
+                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 1, System.Drawing.Color.FromArgb(150, 150, 150), 220, -165);
+                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 2, System.Drawing.Color.FromArgb(150, 200, 255), 220, -90);
+                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 3, System.Drawing.Color.FromArgb(250, 250, 250), 220, -15);
+                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 4, System.Drawing.Color.FromArgb(250, 250, 250), 220, 60);
+                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 5, System.Drawing.Color.FromArgb(250, 250, 250), 220, 135);
+                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 6, System.Drawing.Color.FromArgb(230, 230, 230), 220, 210);
             }
         }
 

@@ -32,15 +32,15 @@ namespace Enzyme.Masterplan
 
             if (!hasSources)
             {
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 0.0, 3.0, 1.5, 330, -100);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 3, 0.0, 2.0, 0.3, 330, -60);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 4, 0.0, 2.0, 0.0, 330, -20);
-                Enzyme.Utils.AutoWireHelper.WirePanel(this, document, 5, "1", 250, 20, 100, 25);
-                Enzyme.Utils.AutoWireHelper.WirePanel(this, document, 6, "0", 250, 60, 100, 25);
-                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 7, false, 210, 100);
-                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 0, System.Drawing.Color.FromArgb(150, 200, 255), 220, -90);
-                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 1, System.Drawing.Color.FromArgb(230, 230, 230), 220, -15);
-                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 2, System.Drawing.Color.FromArgb(230, 230, 230), 220, 60);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 0.0, 5.0, 0.75, 330, -100);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 3, 0.0, 2.0, 0.30, 330, -60);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 4, 0.0, 2.0, 1.00, 330, -20);
+                Enzyme.Utils.AutoWireHelper.WireMultilinePanel(this, document, 5, "01101101\n11010110", 250, 40, 100, 40);
+                Enzyme.Utils.AutoWireHelper.WireMultilinePanel(this, document, 6, "01010110", 250, 100, 100, 25);
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 7, true, 210, 140);
+                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 0, System.Drawing.Color.FromArgb(150, 200, 255), 220, -120);
+                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 1, System.Drawing.Color.FromArgb(200, 200, 200), 220, -45);
+                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 2, System.Drawing.Color.FromArgb(50, 50, 50), 220, 30);
             }
         }
 

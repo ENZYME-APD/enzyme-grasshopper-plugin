@@ -29,18 +29,18 @@ namespace Enzyme.Masterplan
 
             if (!hasSources)
             {
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 0.0, 10.0, 3.0, 330, -220);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 3, 0.0, 3.0, 1.5, 330, -180);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 4, 0.0, 3.0, 1.1, 330, -140);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 5, 0.0, 2.0, 0.0, 330, -100);
-                Enzyme.Utils.AutoWireHelper.WirePanel(this, document, 6, "1", 250, -60, 100, 25);
-                Enzyme.Utils.AutoWireHelper.WirePanel(this, document, 7, "0", 250, -20, 100, 25);
-                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 8, false, 210, 20);
-                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 9, false, 210, 60);
-                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 10, false, 210, 100);
-                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 11, false, 210, 140);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 12, 0.0, 2.0, 0.0, 330, 180);
-                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 13, false, 210, 220);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 0.0, 10.0, 3.5, 330, -220);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 3, 0.0, 3.0, 2.9, 330, -180);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 4, 0.0, 3.0, 1.5, 330, -140);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 5, 0.0, 2.0, 1.0, 330, -100);
+                Enzyme.Utils.AutoWireHelper.WireMultilinePanel(this, document, 6, "0110101\n1010110", 250, -60, 100, 40);
+                Enzyme.Utils.AutoWireHelper.WireMultilinePanel(this, document, 7, "10", 250, 0, 100, 25);
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 8, false, 210, 40);
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 9, false, 210, 80);
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 10, true, 210, 120);
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 11, false, 210, 160);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 12, 0.0, 5.0, 3.0, 330, 200);
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 13, false, 210, 240);
                 Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 0, System.Drawing.Color.FromArgb(180, 180, 180), 220, -240);
                 Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 1, System.Drawing.Color.FromArgb(150, 150, 150), 220, -165);
                 Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 2, System.Drawing.Color.FromArgb(230, 230, 230), 220, -90);
