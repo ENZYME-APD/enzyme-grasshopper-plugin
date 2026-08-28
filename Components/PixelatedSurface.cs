@@ -26,7 +26,7 @@ namespace Enzyme.Components
 
         protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
-            pManager.AddGenericParameter("Image Sampler", "IS", "Connect a Grasshopper Image Sampler", GH_ParamAccess.item);
+            pManager.AddTextParameter("Image Path", "Img", "Absolute path to the image file", GH_ParamAccess.item);
             pManager.AddSurfaceParameter("Surface", "Srf", "Base surface to pixelate", GH_ParamAccess.item);
             pManager.AddIntegerParameter("U_Subdivisions", "U", "Number of tiles in U direction", GH_ParamAccess.item, 20);
             pManager.AddIntegerParameter("V_Subdivisions", "V", "Number of tiles in V direction", GH_ParamAccess.item, 20);
@@ -49,14 +49,6 @@ namespace Enzyme.Components
         private bool hasSources = false;
         public override void AddedToDocument(GH_Document document)
         {
-            try {
-                var t = typeof(Grasshopper.Kernel.Special.GH_ImageSampler);
-                var lines = new System.Collections.Generic.List<string>();
-                foreach(var p in t.GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance)) lines.Add("P: " + p.Name);
-                foreach(var m in t.GetMethods(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance)) lines.Add("M: " + m.Name);
-                System.IO.File.WriteAllLines("sampler_dump.txt", lines);
-            } catch {}
-
             base.AddedToDocument(document);
             if (this.Attributes == null) this.CreateAttributes();
             foreach (var param in this.Params.Input)
@@ -64,22 +56,6 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                Enzyme.Utils.AutoWireHelper.WirePanel(this, document, 0, "C:\\path\\to\\image.jpg", 300, -220, 150, 40);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 1, 1, 100, 20, 330, -80);
-                // Oh wait, param 1 is Surface, not Slider! I should use param 2 and 3 for U and V.
-                // Actually let me fix the auto-wiring indices correctly:
-                // 0: Image Path
-                // 1: Surface
-                // 2: U
-                // 3: V
-                // 4: Colors
-                // 5: Accent Color
-                // 6: Jitter Pct
-                // 7: Accent Pct
-                // 8: Inset Factor
-                // 9: Bake
-                // 10: Bake Name
-                
                 Enzyme.Utils.AutoWireHelper.WirePanel(this, document, 0, "C:\\path\\to\\image.jpg", 300, -180, 150, 40);
                 Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 1, 100, 20, 330, -100);
                 Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 3, 1, 100, 20, 330, -60);
@@ -117,41 +93,29 @@ namespace Enzyme.Components
             Stopwatch t_start = new Stopwatch();
             t_start.Start();
 
-            if (Params.Input[0].SourceCount > 0)
+            string imgPath = "";
+            DA.GetData(0, ref imgPath);
+
+            if (!string.IsNullOrEmpty(imgPath))
             {
-                var source = Params.Input[0].Sources[0];
-                if (source != null && source.GetType().Name.Contains("ImageSampler"))
+                if (imgPath != _cachedImagePath || _cachedBitmap == null)
                 {
-                    System.Drawing.Bitmap foundImg = null;
-                    foreach (var prop in source.GetType().GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance))
+                    try
                     {
-                        if (prop.PropertyType == typeof(System.Drawing.Bitmap) || prop.PropertyType == typeof(System.Drawing.Image))
-                        {
-                            var val = prop.GetValue(source);
-                            if (val != null) { foundImg = (System.Drawing.Bitmap)val; break; }
-                        }
+                        _cachedBitmap = new Bitmap(imgPath);
+                        _cachedImagePath = imgPath;
                     }
-                    if (foundImg == null)
+                    catch (Exception ex)
                     {
-                        foreach (var field in source.GetType().GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance))
-                        {
-                            if (field.FieldType == typeof(System.Drawing.Bitmap) || field.FieldType == typeof(System.Drawing.Image))
-                            {
-                                var val = field.GetValue(source);
-                                if (val != null) { foundImg = (System.Drawing.Bitmap)val; break; }
-                            }
-                        }
-                    }
-                    if (foundImg != null)
-                    {
-                        _cachedBitmap = foundImg;
+                        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Failed to load image: " + ex.Message);
+                        return;
                     }
                 }
             }
 
             if (_cachedBitmap == null)
             {
-                Message = "No Image Sampler attached, or Image not loaded.";
+                Message = "No Image";
                 return;
             }
 
