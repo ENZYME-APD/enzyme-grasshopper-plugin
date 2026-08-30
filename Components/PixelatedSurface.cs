@@ -80,7 +80,7 @@ namespace Enzyme.Components
                 Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 0, "mesh", 220, -50);
                 Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 1, 220, 0, 180, 50);
                 Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 2, 220, 70, 180, 50);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 3, "mesh", 220, 140);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 3, "curve", 220, 140);
             }
         }
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
