@@ -25,7 +25,7 @@ namespace Enzyme.Components
             pManager.AddColourParameter("Colors", "C", "Gradient color palette", GH_ParamAccess.list);
             pManager.AddIntervalParameter("Domain", "D", "Target domain for geometry size (Radius/Height)", GH_ParamAccess.item, new Interval(0.5, 5.0));
             pManager.AddIntegerParameter("Type", "T", "Visual Type (0: Bar, 1: Flat Dot, 2: Sphere)", GH_ParamAccess.item, 2);
-            pManager.AddNumberParameter("Bar Thickness", "W", "Thickness for Bar Chart (Type 0 only)", GH_ParamAccess.item, 0.5);
+            pManager.AddNumberParameter("Bar Thickness", "W", "Thickness for Bar Chart (Type 0 only)", GH_ParamAccess.list);
 
             pManager[2].Optional = true;
             pManager[3].Optional = true;
@@ -84,8 +84,11 @@ namespace Enzyme.Components
             int type = 2;
             DA.GetData(4, ref type);
 
-            double thickness = 0.5;
-            DA.GetData(5, ref thickness);
+            List<double> thicknesses = new List<double>();
+            if (!DA.GetDataList(5, thicknesses) || thicknesses.Count == 0)
+            {
+                thicknesses.Add(0.5);
+            }
 
             if (pts.Count == 0 || vals.Count == 0) return;
             if (colors.Count == 0) colors.Add(Color.White);
@@ -116,7 +119,8 @@ namespace Enzyme.Components
                 double mappedSize = targetDomain.T0 + normalized * (targetDomain.T1 - targetDomain.T0);
                 Color c = GetInterpolatedColor(normalized, colors);
 
-                Mesh m = CreateGeometry(type, p, mappedSize, thickness);
+                double currentThickness = thicknesses[i % thicknesses.Count];
+                Mesh m = CreateGeometry(type, p, mappedSize, currentThickness);
                 
                 // Assign vertex colors
                 for (int j = 0; j < m.Vertices.Count; j++)
