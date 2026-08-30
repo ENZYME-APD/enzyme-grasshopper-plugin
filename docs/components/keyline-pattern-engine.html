@@ -34,6 +34,19 @@
             <h2>Overview</h2>
             <p>Generates parametric plowing lines or swale networks by offsetting guide curves along a terrain mesh.</p>
             
+            <div class="workflow-section" style="margin: 2rem 0; padding: 1.5rem; background: #27272a; border-radius: 8px; border-left: 4px solid #3b82f6;">
+                <h3 style="margin-top: 0; color: #60a5fa;">Workflow & Methodology</h3>
+                <p><strong>Phase: Prepare (TNFD/LEAP)</strong></p>
+        <p>Standard contour plowing keeps water static. Keyline plowing forces water to move from wet, eroding valleys out toward dry ridges by plowing <em>slightly off-contour</em>. Grasshopper natively struggles with geodesic mesh offsets, so this engine provides a robust 2.5D parametric solution.</p>
+        <p><strong>How it works:</strong></p>
+        <ol>
+            <li><strong>Base Contour:</strong> You provide the Master Keyline (from the Keypoint Finder) as the <code>Guide Curve</code>.</li>
+            <li><strong>2D Patterning:</strong> The engine offsets this curve outward perfectly parallel in the horizontal plane using your specified tractor/swale <code>Spacing</code>.</li>
+            <li><strong>3D Raycasting:</strong> It raycasts these sprawling offset networks straight down onto the 3D terrain mesh.</li>
+            <li><strong>The Result:</strong> Because the valleys and ridges have different slopes, these parallel lines naturally warp and fall slightly off-contour, creating the exact geometric pattern required to passively distribute rainwater and restore soil hydration.</li>
+        </ol>
+            </div>
+            
             <div class="io-grid">
                 <div class="io-col">
                     <h3>Inputs (4)</h3>

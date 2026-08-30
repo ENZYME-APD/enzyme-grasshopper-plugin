@@ -34,6 +34,19 @@
             <h2>Overview</h2>
             <p>Visualizes points and data values as a fast gradient mesh (Bars, Dots, or Spheres).</p>
             
+            <div class="workflow-section" style="margin: 2rem 0; padding: 1.5rem; background: #27272a; border-radius: 8px; border-left: 4px solid #3b82f6;">
+                <h3 style="margin-top: 0; color: #60a5fa;">Workflow & Methodology</h3>
+                <p><strong>Performance & Visualization</strong></p>
+        <p>Visualizing big data (like 100,000+ points of flow accumulation) usually crashes Grasshopper if you try to bake or render individual geometry objects like Spheres or Cylinders. This component bypasses Grasshopper's bottleneck by mathematically generating a single, unified mesh painted with Vertex Colors.</p>
+        <p><strong>How it works:</strong></p>
+        <ol>
+            <li><strong>Data Normalization:</strong> It takes your raw values, finds the absolute minimum and maximum, and normalizes the entire dataset.</li>
+            <li><strong>Domain Mapping:</strong> It scales the physical size of the geometry (Radius or Height) precisely into your target <code>Domain</code> interval.</li>
+            <li><strong>Color Interpolation:</strong> It smoothly samples your provided <code>Colors</code> palette to generate a gradient based on the normalized values.</li>
+            <li><strong>Low-Poly Meshing:</strong> Based on your <code>Type</code> selection, it generates highly optimized mesh primitives (e.g., mathematically perfect Icosahedrons for Spheres, or Hexagonal Prisms for Bars), assigns the vertex colors, and merges them into one single mesh for instant viewport rendering.</li>
+        </ol>
+            </div>
+            
             <div class="io-grid">
                 <div class="io-col">
                     <h3>Inputs (6)</h3>
@@ -43,7 +56,7 @@
                         <li><strong>Colors</strong> (Colour): Gradient color palette</li>
                         <li><strong>Domain</strong> (Interval): Target domain for geometry size (Radius/Height)</li>
                         <li><strong>Type</strong> (Integer): Visual Type (0: Bar, 1: Flat Dot, 2: Sphere)</li>
-                        <li><strong>Bar Thickness</strong> (Number): Thickness for Bar Chart (Type 0 only)</li>
+                        <li><strong>Bar Thickness</strong> (Number): List of Thicknesses for Bar Chart (Type 0 only)</li>
                     </ul>
                 </div>
                 <div class="io-col">

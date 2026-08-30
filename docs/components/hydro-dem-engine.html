@@ -34,6 +34,18 @@
             <h2>Overview</h2>
             <p>Calculates Flow Direction and Flow Accumulation on a terrain mesh to extract stream networks.</p>
             
+            <div class="workflow-section" style="margin: 2rem 0; padding: 1.5rem; background: #27272a; border-radius: 8px; border-left: 4px solid #3b82f6;">
+                <h3 style="margin-top: 0; color: #60a5fa;">Workflow & Methodology</h3>
+                <p><strong>Phase: Locate & Evaluate (TNFD/LEAP)</strong></p>
+        <p>This engine acts as the foundational step for hydrological analysis. Traditional GIS algorithms rely on strict raster grids, but this engine is built directly on Rhino's <code>TopologyVertices</code> graph, allowing it to process standard parametric meshes, chaotic Delaunay triangulations, or native surveyor point clouds seamlessly.</p>
+        <p><strong>How it works:</strong></p>
+        <ol>
+            <li><strong>Steepest Descent:</strong> It analyzes every vertex on your 3D mesh, calculates the slope to all connected neighbors, and maps the steepest path downwards.</li>
+            <li><strong>Flow Accumulation:</strong> It sorts the terrain from highest peak to lowest valley, cascading simulated water drop by drop until it pools in sinks.</li>
+            <li><strong>Stream Extraction:</strong> Using your `Threshold` slider, it traces these high-accumulation paths to generate continuous, clean Polylines that map exactly where water flows and where erosion is most likely to occur.</li>
+        </ol>
+            </div>
+            
             <div class="io-grid">
                 <div class="io-col">
                     <h3>Inputs (2)</h3>
