@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keyline Pattern Engine - Enzyme Plugin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="../index.html" class="nav-brand">
+            <img src="../images/enzyme_logo.png" alt="Enzyme Logo" class="logo-img">
+        </a>
+        <div class="nav-links">
+            <a href="../index.html#components">Components</a>
+            <a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank">GitHub</a>
+        </div>
+    </nav>
+
+    <main class="container doc-page">
+        <div class="doc-header" style="display: flex; align-items: center;">
+            <div>
+                <h1>Keyline Pattern Engine</h1>
+                <p class="doc-subtitle">Generates parametric plowing lines or swale networks by offsetting guide curves along a terrain mesh.</p>
+                <div class="doc-meta">
+                    <span class="badge leap">LEAP</span>
+                    <span>Nickname: <strong>Keyline</strong></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="doc-content">
+            <h2>Overview</h2>
+            <p>Generates parametric plowing lines or swale networks by offsetting guide curves along a terrain mesh.</p>
+            
+            <div class="io-grid">
+                <div class="io-col">
+                    <h3>Inputs (4)</h3>
+                    <ul>
+                        <li><strong>Terrain</strong> (Mesh): The base topography mesh</li>
+                        <li><strong>Guide Curves</strong> (Curve): The reference contours or keylines</li>
+                        <li><strong>Spacing</strong> (Number): Horizontal distance between plowing lines</li>
+                        <li><strong>Count</strong> (Integer): Number of parallel lines to generate per side</li>
+                    </ul>
+                </div>
+                <div class="io-col">
+                    <h3>Outputs (1)</h3>
+                    <ul>
+                        <li><strong>Keylines</strong> (Curve): Generated 3D swale/plow curves projected on terrain</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p><a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank" style="color: #a1a1aa; text-decoration: none; border-bottom: 1px solid #3f3f46; padding-bottom: 2px;">View on GitHub</a></p>
+    </footer>
+</body>
+</html>
