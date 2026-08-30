@@ -59,9 +59,9 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                Enzyme.Utils.AutoWireHelper.WirePanel(this, document, 0, "C:\\path\\to\\image.jpg", 300, -180, 150, 40);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 1, 100, 20, 330, -100);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 3, 1, 100, 20, 330, -60);
+                Enzyme.Utils.AutoWireHelper.WireFilePath(this, document, 0, "", 300, -180);
+                Enzyme.Utils.AutoWireHelper.WireIntegerSlider(this, document, 2, 1, 100, 20, 330, -100);
+                Enzyme.Utils.AutoWireHelper.WireIntegerSlider(this, document, 3, 1, 100, 20, 330, -60);
                 
                 var colors = new System.Drawing.Color[] {
                     System.Drawing.Color.FromArgb(20, 20, 20),
@@ -72,8 +72,8 @@ namespace Enzyme.Components
                 Enzyme.Utils.AutoWireHelper.WireMergeWithSwatches(this, document, 4, colors, 150, 20);
                 
                 Enzyme.Utils.AutoWireHelper.WireColorSwatch(this, document, 5, System.Drawing.Color.FromArgb(255, 0, 0), 210, 80);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 6, 0.0, 100.0, 30.0, 330, 120);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 7, 0.0, 100.0, 10.0, 330, 160);
+                Enzyme.Utils.AutoWireHelper.WireIntegerSlider(this, document, 6, 0, 100, 30, 330, 120);
+                Enzyme.Utils.AutoWireHelper.WireIntegerSlider(this, document, 7, 0, 100, 10, 330, 160);
                 Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 8, 0.0, 1.0, 0.94, 330, 200);
                 Enzyme.Utils.AutoWireHelper.WireButton(this, document, 9, 210, 240);
 
