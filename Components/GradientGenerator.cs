@@ -73,7 +73,7 @@ namespace Enzyme.Components
 
             DA.SetDataList(0, outColors);
             
-            Message = $"Steps: {steps}";
+            Message = $"Gradient Generator\n---\nInput Colors: {inColors.Count}\nSteps: {steps}";
         }
 
         private Color GetInterpolatedColor(double t, List<Color> palette)
