@@ -151,6 +151,7 @@ namespace Enzyme.Components
                 }
             }
 
+            Message = $"Keypoint Finder\n---\nSmoothing: {window}\nFound: {keypoints.Count}";
             DA.SetDataList(0, keypoints);
             DA.SetDataList(1, keylines);
         }

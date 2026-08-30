@@ -131,6 +131,8 @@ namespace Enzyme.Components
                 masterMesh.Append(m);
             }
 
+            string typeName = type == 0 ? "Bar Chart" : (type == 1 ? "Flat Dot" : "Sphere");
+            Message = $"Data Visualizer\n---\nType: {typeName}\nPoints: {pts.Count}";
             DA.SetData(0, masterMesh);
         }
 

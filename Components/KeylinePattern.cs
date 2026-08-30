@@ -100,6 +100,7 @@ namespace Enzyme.Components
                 }
             }
 
+            Message = $"Keyline Pattern\n---\nSpacing: {spacing}m\nCount: {count}\nGenerated: {keylines.Count}";
             DA.SetDataList(0, keylines);
         }
 

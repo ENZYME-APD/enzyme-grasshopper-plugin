@@ -147,6 +147,7 @@ namespace Enzyme.Components
                 topPoints.Add(new Point3d(p.X, p.Y, p.Z));
             }
 
+            Message = $"Hydro-DEM\n---\nThreshold: {threshold}\nStreams: {streams.Count}";
             DA.SetDataList(0, streams);
             DA.SetDataList(1, accumulation.ToList());
             DA.SetDataList(2, topPoints);
