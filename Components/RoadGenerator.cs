@@ -270,7 +270,17 @@ namespace Enzyme.Components
                 {
                     for (int i = 0; i < rMesh.Vertices.Count; i++)
                     {
-                        rMesh.Vertices[i] = new Point3f((float)boundaryPts[i].X, (float)boundaryPts[i].Y, (float)boundaryPts[i].Z);
+                        var nv = rMesh.Vertices[i];
+                        float bestZ = 0;
+                        float minDist = float.MaxValue;
+                        for (int j = 0; j < boundaryPts.Count; j++) {
+                            float dx = (float)boundaryPts[j].X - nv.X;
+                            float dy = (float)boundaryPts[j].Y - nv.Y;
+                            float dsq = dx*dx + dy*dy;
+                            if (dsq < minDist) { minDist = dsq; bestZ = (float)boundaryPts[j].Z; }
+                            if (minDist < 1e-5) break;
+                        }
+                        rMesh.Vertices[i] = new Point3f(nv.X, nv.Y, bestZ);
                     }
                     // Filter faces outside boundary (Delaunay creates convex hull)
                     var delFaces = new List<int>();
@@ -322,17 +332,29 @@ namespace Enzyme.Components
                 
                 if (newTerrain != null)
                 {
+                    // Solve_Mesh can reorder or drop duplicate vertices, so we can't assume 1:1 mapping with 'pts'.
+                    // Let's use a spatial hash or just a simple closest point to recover Z
                     for (int i = 0; i < newTerrain.Vertices.Count; i++) {
-                        newTerrain.Vertices[i] = new Point3f((float)pts[i].X, (float)pts[i].Y, (float)pts[i].Z);
+                        var nv = newTerrain.Vertices[i];
+                        float bestZ = 0;
+                        float minDist = float.MaxValue;
+                        for (int j = 0; j < pts.Count; j++) {
+                            float dx = (float)pts[j].X - nv.X;
+                            float dy = (float)pts[j].Y - nv.Y;
+                            float dsq = dx*dx + dy*dy;
+                            if (dsq < minDist) { minDist = dsq; bestZ = (float)pts[j].Z; }
+                            if (minDist < 1e-5) break;
+                        }
+                        newTerrain.Vertices[i] = new Point3f(nv.X, nv.Y, bestZ);
                     }
                     
                     var facesToDelete = new List<int>();
                     for (int i = 0; i < newTerrain.Faces.Count; i++)
                     {
                         var f = newTerrain.Faces[i];
-                        var pA = pts[f.A];
-                        var pB = pts[f.B];
-                        var pC = pts[f.C];
+                        var pA = newTerrain.Vertices[f.A];
+                        var pB = newTerrain.Vertices[f.B];
+                        var pC = newTerrain.Vertices[f.C];
                         if (pA.DistanceTo(pB) > 150 || pB.DistanceTo(pC) > 150 || pC.DistanceTo(pA) > 150)
                             facesToDelete.Add(i);
                     }
@@ -430,10 +452,14 @@ namespace Enzyme.Components
                 // Generate Arc at 'next' vertex
                 if (tEnd > 0.001)
                 {
-                    Point3d nextNext = p[(i + 2) % (isClosed ? count : count + 1)]; // Careful with open array
-                    if (isClosed || i + 2 < p.Length)
+                    Point3d nextNext = p[(i + 2) % (isClosed ? count : count + 1)];
+                    if (!isClosed && i + 2 < p.Length)
                     {
                         nextNext = p[i + 2];
+                    }
+                    if (isClosed)
+                    {
+                        nextNext = p[(i + 2) % count];
                         Vector3d nextEdge = nextNext - next;
                         nextEdge.Unitize();
                         Point3d p3 = next + nextEdge * tEnd; // Start of next segment
