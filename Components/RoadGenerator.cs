@@ -124,7 +124,6 @@ namespace Enzyme.Components
                 Curve crv = centerlines[k];
                 if (crv == null) continue;
 
-                // Robust Curve Processing: Convert to NURBS to eliminate PolyCurve seam failures
                 Curve nCrv = crv.ToNurbsCurve();
                 RoadData rd = new RoadData();
                 rd.IsClosed = nCrv.IsClosed;
@@ -134,14 +133,18 @@ namespace Enzyme.Components
                 double length = nCrv.GetLength();
                 int divs = Math.Max(2, (int)(length / subDist));
                 
-                double[] tParams = nCrv.DivideByCount(divs, true);
-                if (tParams == null || tParams.Length < 2) tParams = nCrv.DivideByCount(divs, false);
-                if (tParams == null || tParams.Length < 2) 
-                {
-                    tParams = new double[divs + 1];
-                    for (int i = 0; i <= divs; i++) {
-                        nCrv.LengthParameter((length * i) / divs, out double t);
+                // BULLETPROOF ARC-LENGTH DIVISION: No Chord-Jumping across hairpins
+                double[] tParams = new double[divs + 1];
+                double t0 = nCrv.Domain.T0;
+                double t1 = nCrv.Domain.T1;
+                tParams[0] = t0;
+                tParams[divs] = t1;
+                for (int i = 1; i < divs; i++) {
+                    double targetLen = (length * i) / divs;
+                    if (nCrv.LengthParameter(targetLen, out double t)) {
                         tParams[i] = t;
+                    } else {
+                        tParams[i] = t0 + (t1 - t0) * ((double)i / divs);
                     }
                 }
 
@@ -177,7 +180,7 @@ namespace Enzyme.Components
                     
                     rd.leftPts.Add(left);
                     rd.rightPts.Add(right);
-                    rd.asphaltCenters.Add(new Point3d(pt.X, pt.Y, 0));
+                    rd.asphaltCenters.Add(new Tuple<Point3d, int>(new Point3d(pt.X, pt.Y, 0), i));
 
                     double startOffset = -roadHalfWidth + (laneW / 2.0);
                     for (int j = 0; j < totalLanes; j++)
@@ -242,11 +245,11 @@ namespace Enzyme.Components
                                     rightBlend = hit >= 0 ? right + dir * hit : new Point3d(right.X, right.Y, zRightT);
                                 }
 
-                                rd.extraPoints.Add(pt);
-                                rd.extraPoints.Add(left);
-                                rd.extraPoints.Add(right);
-                                rd.extraPoints.Add(leftBlend);
-                                rd.extraPoints.Add(rightBlend);
+                                rd.extraPoints.Add(new Tuple<Point3d, int>(pt, i));
+                                rd.extraPoints.Add(new Tuple<Point3d, int>(left, i));
+                                rd.extraPoints.Add(new Tuple<Point3d, int>(right, i));
+                                rd.extraPoints.Add(new Tuple<Point3d, int>(leftBlend, i));
+                                rd.extraPoints.Add(new Tuple<Point3d, int>(rightBlend, i));
 
                                 double exclL = new Point3d(leftBlend.X, leftBlend.Y, 0).DistanceTo(new Point3d(pt.X, pt.Y, 0));
                                 double exclR = new Point3d(rightBlend.X, rightBlend.Y, 0).DistanceTo(new Point3d(pt.X, pt.Y, 0));
@@ -274,20 +277,25 @@ namespace Enzyme.Components
             
             List<Point3d> allCleanExtraPoints = new List<Point3d>();
             List<Tuple<Point3d, double>> allDaylightFootprints = new List<Tuple<Point3d, double>>();
+            
+            double localIndexThreshold = 30.0 / subDist; 
 
             for (int k = 0; k < roads.Count; k++)
             {
                 RoadData rd = roads[k];
                 allDaylightFootprints.AddRange(rd.daylightFootprints);
 
-                foreach (Point3d p in rd.extraPoints)
+                foreach (var ep in rd.extraPoints)
                 {
+                    Point3d p = ep.Item1;
+                    int current_i = ep.Item2;
                     Point3d p2D = new Point3d(p.X, p.Y, 0);
                     bool culled = false;
                     for (int j = 0; j < roads.Count; j++) {
-                        if (j == k) continue;
                         foreach (var center in roads[j].asphaltCenters) {
-                            if (p2D.DistanceTo(center) < totalHalfWidth + buffer) {
+                            if (j == k && Math.Abs(center.Item2 - current_i) < localIndexThreshold) continue; 
+                            
+                            if (p2D.DistanceTo(center.Item1) < totalHalfWidth + buffer) {
                                 culled = true; break;
                             }
                         }
@@ -296,7 +304,6 @@ namespace Enzyme.Components
                     if (!culled) allCleanExtraPoints.Add(p);
                 }
 
-                // Road Mesh Triangulation to prevent bowtie deletion
                 Mesh roadMesh = new Mesh();
                 for (int i = 0; i < rd.leftPts.Count; i++) {
                     roadMesh.Vertices.Add(rd.leftPts[i]);
@@ -328,7 +335,6 @@ namespace Enzyme.Components
                     Point3d[] tp1 = rd.terrProfiles[i];
                     Point3d[] tp2 = rd.terrProfiles[i + 1];
 
-                    // Skip gaps, but use 3.5x buffer to accommodate sharp curve outer edges
                     if (rp1[2].DistanceTo(rp2[2]) > subDist * 3.5) continue; 
 
                     bool isCut = rp1[2].Z < tp1[2].Z; 
@@ -348,7 +354,6 @@ namespace Enzyme.Components
 
                     if (colorize) for (int j = 0; j < 20; j++) target.VertexColors.Add(c);
 
-                    // Triangulate Top and Bottom faces to prevent bowtie self-intersection deletions
                     for (int j = 0; j < 4; j++) {
                         if (top1[j].DistanceTo(top1[j+1]) > 0.001) {
                             int A = bIdx + j, B = bIdx + j + 1, C = bIdx + j + 6, D = bIdx + j + 5;
@@ -482,8 +487,8 @@ namespace Enzyme.Components
             public List<List<Point3d>> allLanes = new List<List<Point3d>>();
             public List<Point3d[]> roadProfiles = new List<Point3d[]>();
             public List<Point3d[]> terrProfiles = new List<Point3d[]>();
-            public List<Point3d> extraPoints = new List<Point3d>();
-            public List<Point3d> asphaltCenters = new List<Point3d>();
+            public List<Tuple<Point3d, int>> extraPoints = new List<Tuple<Point3d, int>>();
+            public List<Tuple<Point3d, int>> asphaltCenters = new List<Tuple<Point3d, int>>();
             public List<Tuple<Point3d, double>> daylightFootprints = new List<Tuple<Point3d, double>>();
             public List<LineCurve> pillars = new List<LineCurve>();
             public bool IsClosed = false;
