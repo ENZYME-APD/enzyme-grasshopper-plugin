@@ -67,11 +67,11 @@ namespace Enzyme.Components
         {
             pManager.AddMeshParameter("Terrain", "T", "Modified terrain mesh", GH_ParamAccess.item);
             pManager.AddMeshParameter("Road Table", "R", "Asphalt surface mesh", GH_ParamAccess.list);
-            pManager.AddMeshParameter("Cut Volume", "C", "Excavated earth volume", GH_ParamAccess.list);
-            pManager.AddMeshParameter("Fill Volume", "F", "Added earth volume", GH_ParamAccess.list);
             pManager.AddCurveParameter("Lanes", "L", "Lane centerlines", GH_ParamAccess.list);
             pManager.AddCurveParameter("Railings", "B", "Road boundaries and shoulders", GH_ParamAccess.list);
             pManager.AddCurveParameter("Pillars", "P", "Bridge pillar lines", GH_ParamAccess.list);
+            pManager.AddMeshParameter("Cut Volume", "C", "Excavated earth volume", GH_ParamAccess.list);
+            pManager.AddMeshParameter("Fill Volume", "F", "Added earth volume", GH_ParamAccess.list);
         }
 
                 protected override void SolveInstance(IGH_DataAccess DA)
@@ -369,14 +369,14 @@ namespace Enzyme.Components
 
             DA.SetData(0, modTerrain);
             DA.SetDataList(1, roadMeshes);
-            DA.SetDataList(2, cutVols);
-            DA.SetDataList(3, fillVols);
-            DA.SetDataList(4, laneCurves);
-            DA.SetDataList(5, railingCurves);
-            DA.SetDataList(6, pillars);
+            DA.SetDataList(2, laneCurves);
+            DA.SetDataList(3, railingCurves);
+            DA.SetDataList(4, pillars);
+            DA.SetDataList(5, cutVols);
+            DA.SetDataList(6, fillVols);
             
             stopwatch.Stop();
-            Message = $"Road Generator\\n---\\nLanes: {totalLanes}\\nWidth: {totalHalfWidth*2}m\\nTime: {stopwatch.ElapsedMilliseconds} ms";
+            Message = $"Road Generator\n---\nLanes: {totalLanes}\nWidth: {totalHalfWidth*2}m\nTime: {stopwatch.ElapsedMilliseconds} ms";
         }
 
         public override Guid ComponentGuid
