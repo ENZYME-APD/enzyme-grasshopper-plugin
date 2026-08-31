@@ -149,7 +149,7 @@ namespace Enzyme.Components
                 }
 
                 double lastPillarDist = 0;
-                Vector3d prevTangent = Vector3d.XAxis;
+                Vector3d prevTangent = Vector3d.Unset;
 
                 for (int i = 0; i < tParams.Length; i++)
                 {
@@ -169,8 +169,17 @@ namespace Enzyme.Components
                     Point3d pt = nCrv.PointAt(t);
                     Vector3d tangent = nCrv.TangentAt(t);
                     tangent.Z = 0; 
-                    if (!tangent.Unitize()) tangent = prevTangent;
-                    else prevTangent = tangent;
+                    if (!tangent.Unitize()) {
+                        if (prevTangent != Vector3d.Unset) tangent = prevTangent;
+                        else tangent = Vector3d.XAxis;
+                    } else {
+                        // CRITICAL FIX: If the NURBS segment was joined backwards, the tangent will flip 180 degrees.
+                        // We strictly un-flip it to preserve continuous sweeping orientation!
+                        if (prevTangent != Vector3d.Unset && tangent * prevTangent < 0.0) {
+                            tangent = -tangent; 
+                        }
+                        prevTangent = tangent;
+                    }
                     
                     Vector3d normal = Vector3d.CrossProduct(tangent, Vector3d.ZAxis);
                     normal.Unitize();
