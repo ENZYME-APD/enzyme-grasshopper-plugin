@@ -125,6 +125,8 @@ namespace Enzyme.Components
 
             double totalCutM3 = 0.0;
             double totalFillM3 = 0.0;
+            
+            double buffer = subDist * 1.5; // Buffer to prevent spikes at the edge
 
             foreach (Curve crv in centerlines)
             {
@@ -147,13 +149,15 @@ namespace Enzyme.Components
 
                 for (int i = 0; i < tParams.Length; i++)
                 {
-                    if (crv.IsClosed && i == tParams.Length - 1 && roadProfiles.Count > 0)
+                    if (crv.IsClosed && i == tParams.Length - 1 && leftPts.Count > 0)
                     {
                         leftPts.Add(leftPts[0]);
                         rightPts.Add(rightPts[0]);
                         for(int j = 0; j < totalLanes; j++) allLanes[j].Add(allLanes[j][0]);
-                        roadProfiles.Add(roadProfiles[0]);
-                        terrProfiles.Add(terrProfiles[0]);
+                        if (roadProfiles.Count > 0) {
+                            roadProfiles.Add(roadProfiles[0]);
+                            terrProfiles.Add(terrProfiles[0]);
+                        }
                         continue;
                     }
 
@@ -184,69 +188,73 @@ namespace Enzyme.Components
                         
                         Ray3d rC = new Ray3d(new Point3d(pt.X, pt.Y, pt.Z + 10000), -Vector3d.ZAxis);
                         double tC = Rhino.Geometry.Intersect.Intersection.MeshRay(terrain, rC);
-                        if (tC >= 0.0) zTerrain = rC.PointAt(tC).Z;
+                        bool onTerrain = (tC >= 0.0);
+                        if (onTerrain) zTerrain = rC.PointAt(tC).Z;
 
-                        Ray3d rL = new Ray3d(new Point3d(left.X, left.Y, pt.Z + 10000), -Vector3d.ZAxis);
-                        double tL = Rhino.Geometry.Intersect.Intersection.MeshRay(terrain, rL);
-                        if (tL >= 0.0) zLeftT = rL.PointAt(tL).Z;
-
-                        Ray3d rR = new Ray3d(new Point3d(right.X, right.Y, pt.Z + 10000), -Vector3d.ZAxis);
-                        double tR = Rhino.Geometry.Intersect.Intersection.MeshRay(terrain, rR);
-                        if (tR >= 0.0) zRightT = rR.PointAt(tR).Z;
-
-                        double deltaZ = pt.Z - zTerrain;
-
-                        if (deltaZ > threshold)
+                        if (onTerrain)
                         {
-                            double currDist = length * ((double)i / divs);
-                            if (currDist - lastPillarDist >= pillarSep)
+                            Ray3d rL = new Ray3d(new Point3d(left.X, left.Y, pt.Z + 10000), -Vector3d.ZAxis);
+                            double tL = Rhino.Geometry.Intersect.Intersection.MeshRay(terrain, rL);
+                            if (tL >= 0.0) zLeftT = rL.PointAt(tL).Z;
+
+                            Ray3d rR = new Ray3d(new Point3d(right.X, right.Y, pt.Z + 10000), -Vector3d.ZAxis);
+                            double tR = Rhino.Geometry.Intersect.Intersection.MeshRay(terrain, rR);
+                            if (tR >= 0.0) zRightT = rR.PointAt(tR).Z;
+
+                            double deltaZ = pt.Z - zTerrain;
+
+                            if (deltaZ > threshold)
                             {
-                                pillars.Add(new LineCurve(pt, new Point3d(pt.X, pt.Y, zTerrain)));
-                                lastPillarDist = currDist;
+                                double currDist = length * ((double)i / divs);
+                                if (currDist - lastPillarDist >= pillarSep)
+                                {
+                                    pillars.Add(new LineCurve(pt, new Point3d(pt.X, pt.Y, zTerrain)));
+                                    lastPillarDist = currDist;
+                                }
+                                roadProfiles.Add(new Point3d[] { left, left, pt, right, right });
+                                terrProfiles.Add(new Point3d[] { left, left, pt, right, right });
                             }
-                            roadProfiles.Add(new Point3d[] { left, left, pt, right, right });
-                            terrProfiles.Add(new Point3d[] { left, left, pt, right, right });
-                        }
-                        else
-                        {
-                            Point3d leftBlend = left;
-                            if (zLeftT > left.Z + 0.1) {
-                                Vector3d dir = normal * Math.Cos(angleRad) + Vector3d.ZAxis * Math.Sin(angleRad);
-                                double hit = Rhino.Geometry.Intersect.Intersection.MeshRay(terrain, new Ray3d(left, dir));
-                                leftBlend = hit >= 0 ? left + dir * hit : left + dir * 20.0;
-                            } else if (zLeftT < left.Z - 0.1) {
-                                Vector3d dir = normal * Math.Cos(angleRad) - Vector3d.ZAxis * Math.Sin(angleRad);
-                                double hit = Rhino.Geometry.Intersect.Intersection.MeshRay(terrain, new Ray3d(left, dir));
-                                leftBlend = hit >= 0 ? left + dir * hit : left + dir * 20.0;
+                            else
+                            {
+                                Point3d leftBlend = left;
+                                if (zLeftT > left.Z + 0.1) {
+                                    Vector3d dir = normal * Math.Cos(angleRad) + Vector3d.ZAxis * Math.Sin(angleRad);
+                                    double hit = Rhino.Geometry.Intersect.Intersection.MeshRay(terrain, new Ray3d(left, dir));
+                                    leftBlend = hit >= 0 ? left + dir * hit : new Point3d(left.X, left.Y, zLeftT);
+                                } else if (zLeftT < left.Z - 0.1) {
+                                    Vector3d dir = normal * Math.Cos(angleRad) - Vector3d.ZAxis * Math.Sin(angleRad);
+                                    double hit = Rhino.Geometry.Intersect.Intersection.MeshRay(terrain, new Ray3d(left, dir));
+                                    leftBlend = hit >= 0 ? left + dir * hit : new Point3d(left.X, left.Y, zLeftT);
+                                }
+
+                                Point3d rightBlend = right;
+                                if (zRightT > right.Z + 0.1) {
+                                    Vector3d dir = -normal * Math.Cos(angleRad) + Vector3d.ZAxis * Math.Sin(angleRad);
+                                    double hit = Rhino.Geometry.Intersect.Intersection.MeshRay(terrain, new Ray3d(right, dir));
+                                    rightBlend = hit >= 0 ? right + dir * hit : new Point3d(right.X, right.Y, zRightT);
+                                } else if (zRightT < right.Z - 0.1) {
+                                    Vector3d dir = -normal * Math.Cos(angleRad) - Vector3d.ZAxis * Math.Sin(angleRad);
+                                    double hit = Rhino.Geometry.Intersect.Intersection.MeshRay(terrain, new Ray3d(right, dir));
+                                    rightBlend = hit >= 0 ? right + dir * hit : new Point3d(right.X, right.Y, zRightT);
+                                }
+
+                                extraPoints.Add(pt);
+                                extraPoints.Add(left);
+                                extraPoints.Add(right);
+                                extraPoints.Add(leftBlend);
+                                extraPoints.Add(rightBlend);
+
+                                double exclL = new Point3d(leftBlend.X, leftBlend.Y, 0).DistanceTo(new Point3d(pt.X, pt.Y, 0));
+                                double exclR = new Point3d(rightBlend.X, rightBlend.Y, 0).DistanceTo(new Point3d(pt.X, pt.Y, 0));
+                                exclNodes.Add(new ExclusionNode { Pt2D = new Point3d(pt.X, pt.Y, 0), Radius = Math.Max(exclL, exclR) + buffer });
+
+                                Point3d leftT = new Point3d(left.X, left.Y, zLeftT);
+                                Point3d rightT = new Point3d(right.X, right.Y, zRightT);
+                                Point3d ptT = new Point3d(pt.X, pt.Y, zTerrain);
+
+                                roadProfiles.Add(new Point3d[] { leftBlend, left, pt, right, rightBlend });
+                                terrProfiles.Add(new Point3d[] { leftBlend, leftT, ptT, rightT, rightBlend });
                             }
-
-                            Point3d rightBlend = right;
-                            if (zRightT > right.Z + 0.1) {
-                                Vector3d dir = -normal * Math.Cos(angleRad) + Vector3d.ZAxis * Math.Sin(angleRad);
-                                double hit = Rhino.Geometry.Intersect.Intersection.MeshRay(terrain, new Ray3d(right, dir));
-                                rightBlend = hit >= 0 ? right + dir * hit : right + dir * 20.0;
-                            } else if (zRightT < right.Z - 0.1) {
-                                Vector3d dir = -normal * Math.Cos(angleRad) - Vector3d.ZAxis * Math.Sin(angleRad);
-                                double hit = Rhino.Geometry.Intersect.Intersection.MeshRay(terrain, new Ray3d(right, dir));
-                                rightBlend = hit >= 0 ? right + dir * hit : right + dir * 20.0;
-                            }
-
-                            extraPoints.Add(pt);
-                            extraPoints.Add(left);
-                            extraPoints.Add(right);
-                            extraPoints.Add(leftBlend);
-                            extraPoints.Add(rightBlend);
-
-                            double exclL = new Point3d(leftBlend.X, leftBlend.Y, 0).DistanceTo(new Point3d(pt.X, pt.Y, 0));
-                            double exclR = new Point3d(rightBlend.X, rightBlend.Y, 0).DistanceTo(new Point3d(pt.X, pt.Y, 0));
-                            exclNodes.Add(new ExclusionNode { Pt2D = new Point3d(pt.X, pt.Y, 0), Radius = Math.Max(exclL, exclR) + 0.5 });
-
-                            Point3d leftT = new Point3d(left.X, left.Y, zLeftT);
-                            Point3d rightT = new Point3d(right.X, right.Y, zRightT);
-                            Point3d ptT = new Point3d(pt.X, pt.Y, zTerrain);
-
-                            roadProfiles.Add(new Point3d[] { leftBlend, left, pt, right, rightBlend });
-                            terrProfiles.Add(new Point3d[] { leftBlend, leftT, ptT, rightT, rightBlend });
                         }
                     }
                 }
@@ -260,8 +268,11 @@ namespace Enzyme.Components
                     int v0 = i * 2, v1 = i * 2 + 1, v2 = (i + 1) * 2, v3 = (i + 1) * 2 + 1;
                     roadMesh.Faces.AddFace(v0, v1, v3, v2);
                 }
+                roadMesh.Faces.CullDegenerateFaces();
+                roadMesh.Vertices.CullUnused();
+                roadMesh.Compact();
                 roadMesh.Normals.ComputeNormals();
-                roadMeshes.Add(roadMesh);
+                if (roadMesh.IsValid && roadMesh.Faces.Count > 0) roadMeshes.Add(roadMesh);
 
                 railingCurves.Add(new PolylineCurve(leftPts));
                 railingCurves.Add(new PolylineCurve(rightPts));
@@ -276,6 +287,8 @@ namespace Enzyme.Components
                     Point3d[] rp2 = roadProfiles[i + 1];
                     Point3d[] tp1 = terrProfiles[i];
                     Point3d[] tp2 = terrProfiles[i + 1];
+
+                    if (rp1[2].DistanceTo(rp2[2]) > subDist * 2.5) continue; // Skip gaps (e.g. off-terrain sections)
 
                     bool isCut = rp1[2].Z < tp1[2].Z; 
                     Mesh target = isCut ? cutMesh : fillMesh;
@@ -294,7 +307,6 @@ namespace Enzyme.Components
 
                     if (colorize) for (int j = 0; j < 20; j++) target.VertexColors.Add(c);
 
-                    // Add faces without side caps to avoid degenerate zero-area faces at blend edges
                     for (int j = 0; j < 4; j++) {
                         if (top1[j].DistanceTo(top1[j+1]) > 0.001)
                             target.Faces.AddFace(bIdx + j, bIdx + j + 1, bIdx + j + 6, bIdx + j + 5);
@@ -305,7 +317,6 @@ namespace Enzyme.Components
                             target.Faces.AddFace(bOff + j, bOff + j + 5, bOff + j + 6, bOff + j + 1);
                     }
                     
-                    // Cap Start and End of the ENTIRE curve if not closed
                     if (i == 0 && (!crv.IsClosed)) {
                         for (int j = 0; j < 4; j++) {
                            if (top1[j].DistanceTo(bot1[j]) > 0.001 || top1[j+1].DistanceTo(bot1[j+1]) > 0.001)
@@ -319,7 +330,6 @@ namespace Enzyme.Components
                         }
                     }
 
-                    // Compute Volume Increment
                     for (int j = 0; j < 4; j++) {
                         double vol1 = TriVolume(top1[j], top1[j+1], top2[j], bot1[j], bot1[j+1], bot2[j]);
                         double vol2 = TriVolume(top1[j+1], top2[j+1], top2[j], bot1[j+1], bot2[j+1], bot2[j]);
@@ -329,16 +339,20 @@ namespace Enzyme.Components
                 }
 
                 if (cutMesh.Faces.Count > 0) { 
+                    cutMesh.Faces.CullDegenerateFaces();
                     cutMesh.Vertices.CullUnused();
+                    cutMesh.Compact();
                     cutMesh.Weld(3.14159);
                     cutMesh.Normals.ComputeNormals(); 
-                    cutVols.Add(cutMesh); 
+                    if (cutMesh.IsValid) cutVols.Add(cutMesh); 
                 }
                 if (fillMesh.Faces.Count > 0) { 
+                    fillMesh.Faces.CullDegenerateFaces();
                     fillMesh.Vertices.CullUnused();
+                    fillMesh.Compact();
                     fillMesh.Weld(3.14159);
                     fillMesh.Normals.ComputeNormals(); 
-                    fillVols.Add(fillMesh); 
+                    if (fillMesh.IsValid) fillVols.Add(fillMesh); 
                 }
             }
 
@@ -347,7 +361,6 @@ namespace Enzyme.Components
             {
                 modTerrain = terrain.DuplicateMesh();
                 
-                // Fast deduplication
                 Rhino.Geometry.PointCloud pc = new Rhino.Geometry.PointCloud();
                 List<Point3d> cleanOrig = new List<Point3d>();
                 foreach (var op in terrain.Vertices.ToPoint3dArray())
@@ -393,10 +406,13 @@ namespace Enzyme.Components
                         facesToDelete.Add(i);
                 }
                 newTerrain.Faces.DeleteFaces(facesToDelete);
+                newTerrain.Faces.CullDegenerateFaces();
                 newTerrain.Vertices.CullUnused();
+                newTerrain.Compact();
                 newTerrain.Weld(3.14159);
                 newTerrain.Normals.ComputeNormals();
-                modTerrain = newTerrain;
+                if (newTerrain.IsValid) modTerrain = newTerrain;
+                else modTerrain = terrain; // Safe fallback
             }
             else { modTerrain = terrain; }
 
@@ -409,7 +425,7 @@ namespace Enzyme.Components
             DA.SetDataList(6, fillVols);
             
             stopwatch.Stop();
-            Message = $"Road Generator\n---\nLanes: {totalLanes}\nWidth: {totalHalfWidth*2:F1}m\nCut: {totalCutM3:N0} m3\nFill: {totalFillM3:N0} m3\nTime: {stopwatch.ElapsedMilliseconds} ms";
+            Message = $"Road Generator\nTime: {stopwatch.ElapsedMilliseconds} ms\n---\nLanes: {totalLanes}\nWidth: {totalHalfWidth*2:F1}m\n---\nCut: {totalCutM3:N0} m3\nFill: {totalFillM3:N0} m3";
         }
 
         private double TriVolume(Point3d t1, Point3d t2, Point3d t3, Point3d b1, Point3d b2, Point3d b3)
