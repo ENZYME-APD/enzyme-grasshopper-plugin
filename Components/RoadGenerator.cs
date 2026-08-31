@@ -5,12 +5,18 @@ using Grasshopper.Kernel;
 using Rhino.Geometry;
 using Rhino.Geometry.Intersect;
 using Grasshopper.Kernel.Geometry.Delaunay;
+using System.Diagnostics;
 using Grasshopper.Kernel.Geometry;
 
 namespace Enzyme.Components
 {
     public class RoadGenerator : GH_Component
     {
+        private struct ExclusionNode
+        {
+            public Point3d Pt2D;
+            public double Radius;
+        }
         public RoadGenerator()
           : base("Procedural Road Generator", "RoadGen",
               "Generates procedural roads, bridges, and terrain cuts/fills using a blazing fast 2.5D approach.",
@@ -30,7 +36,6 @@ namespace Enzyme.Components
             pManager.AddNumberParameter("Pillar Sep", "PS", "Distance between bridge pillars", GH_ParamAccess.item, 20.0);
             pManager.AddNumberParameter("Blend Angle", "A", "Embankment cut/fill slope angle (degrees)", GH_ParamAccess.item, 45.0);
             pManager.AddNumberParameter("Subdivide", "SD", "Resolution along the road for terrain modification", GH_ParamAccess.item, 2.0);
-            pManager.AddNumberParameter("Fillet", "F", "Corner fillet radius (auto-clamped for small segments)", GH_ParamAccess.item, 5.0);
             
             pManager[1].Optional = true;
         }
@@ -53,11 +58,10 @@ namespace Enzyme.Components
                 Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 7, 5.0, 100.0, 20.0, 330, 140);
                 Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 8, 10.0, 80.0, 45.0, 330, 180);
                 Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 9, 0.5, 10.0, 2.0, 330, 220);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 10, 0.0, 20.0, 5.0, 330, 260);
             }
         }
 
-        protected override void RegisterOutputParams(GH_OutputParamManager pManager)
+                protected override void RegisterOutputParams(GH_OutputParamManager pManager)
         {
             pManager.AddMeshParameter("Terrain", "T", "Modified terrain mesh", GH_ParamAccess.item);
             pManager.AddMeshParameter("Road Table", "R", "Asphalt surface mesh", GH_ParamAccess.list);
@@ -68,14 +72,10 @@ namespace Enzyme.Components
             pManager.AddCurveParameter("Pillars", "P", "Bridge pillar lines", GH_ParamAccess.list);
         }
 
-        private struct ExclusionNode
+                protected override void SolveInstance(IGH_DataAccess DA)
         {
-            public Point3d Pt2D;
-            public double Radius;
-        }
+            Stopwatch stopwatch = Stopwatch.StartNew();
 
-        protected override void SolveInstance(IGH_DataAccess DA)
-        {
             List<Curve> centerlines = new List<Curve>();
             if (!DA.GetDataList(0, centerlines) || centerlines.Count == 0) return;
 
@@ -83,7 +83,7 @@ namespace Enzyme.Components
             DA.GetData(1, ref terrain);
 
             int dirs = 2, lanes = 2;
-            double laneW = 3.5, shoulderW = 1.5, threshold = 5.0, pillarSep = 20.0, angle = 45.0, subDist = 2.0, filletRadius = 5.0;
+            double laneW = 3.5, shoulderW = 1.5, threshold = 5.0, pillarSep = 20.0, angle = 45.0, subDist = 2.0;
 
             DA.GetData(2, ref dirs);
             DA.GetData(3, ref lanes);
@@ -93,7 +93,6 @@ namespace Enzyme.Components
             DA.GetData(7, ref pillarSep);
             DA.GetData(8, ref angle);
             DA.GetData(9, ref subDist);
-            DA.GetData(10, ref filletRadius);
 
             double totalLanes = dirs * lanes;
             double roadHalfWidth = (totalLanes * laneW) / 2.0;
@@ -101,10 +100,12 @@ namespace Enzyme.Components
             double tanAngle = Math.Tan(angle * Math.PI / 180.0);
             if (tanAngle < 0.01) tanAngle = 0.01;
 
-            List<Curve> roadFootprints2D = new List<Curve>();
+            List<Mesh> roadMeshes = new List<Mesh>();
             List<Curve> laneCurves = new List<Curve>();
+            List<Curve> railingCurves = new List<Curve>();
             List<Curve> pillars = new List<Curve>();
-            
+            List<Mesh> volumes = new List<Mesh>();
+
             // For terrain modification
             List<Point3d> extraPoints = new List<Point3d>();
             List<ExclusionNode> exclNodes = new List<ExclusionNode>();
@@ -116,14 +117,13 @@ namespace Enzyme.Components
                 double length = crv.GetLength();
                 int divs = Math.Max(2, (int)(length / subDist));
                 double[] tParams = crv.DivideByCount(divs, true);
-                if (tParams == null) continue;
 
                 List<Point3d> leftPts = new List<Point3d>();
                 List<Point3d> rightPts = new List<Point3d>();
                 
                 // Track lane points
                 List<List<Point3d>> allLanes = new List<List<Point3d>>();
-                for(int i = 0; i < totalLanes; i++) allLanes.Add(new List<Point3d>());
+                for(int i=0; i<totalLanes; i++) allLanes.Add(new List<Point3d>());
 
                 double lastPillarDist = 0;
 
@@ -132,7 +132,7 @@ namespace Enzyme.Components
                     double t = tParams[i];
                     Point3d pt = crv.PointAt(t);
                     Vector3d tangent = crv.TangentAt(t);
-                    tangent.Z = 0; 
+                    tangent.Z = 0; // Flatten tangent to avoid banking for now
                     tangent.Unitize();
                     Vector3d normal = Vector3d.CrossProduct(tangent, Vector3d.ZAxis);
                     normal.Unitize();
@@ -140,23 +140,26 @@ namespace Enzyme.Components
                     Point3d left = pt + normal * totalHalfWidth;
                     Point3d right = pt - normal * totalHalfWidth;
                     
-                    leftPts.Add(new Point3d(left.X, left.Y, 0));
-                    rightPts.Add(new Point3d(right.X, right.Y, 0));
+                    leftPts.Add(left);
+                    rightPts.Add(right);
 
                     // Lanes
                     double startOffset = -roadHalfWidth + (laneW / 2.0);
-                    for(int j = 0; j < totalLanes; j++)
+                    for(int j=0; j<totalLanes; j++)
                     {
                         double offset = startOffset + j * laneW;
-                        allLanes[j].Add(pt - normal * offset);
+                        allLanes[j].Add(pt - normal * offset); // -normal to match left->right
                     }
 
                     // Terrain Analysis
                     if (terrain != null)
                     {
                         double zTerrain = pt.Z;
+                        // Fast Z cast
                         var pt2d = new Point3d(pt.X, pt.Y, 0);
+                        Point3d pOnMesh = terrain.ClosestPoint(pt); // simplified, assume top down
                         
+                        // Proper raycast
                         Ray3d ray = new Ray3d(new Point3d(pt.X, pt.Y, pt.Z + 10000), -Vector3d.ZAxis);
                         double rayT = Rhino.Geometry.Intersect.Intersection.MeshRay(terrain, ray);
                         if (rayT >= 0.0) zTerrain = ray.PointAt(rayT).Z;
@@ -166,6 +169,7 @@ namespace Enzyme.Components
                         if (deltaZ > threshold)
                         {
                             // BRIDGE
+                            // Check for pillar
                             double currDist = length * ((double)i / divs);
                             if (currDist - lastPillarDist >= pillarSep)
                             {
@@ -175,17 +179,21 @@ namespace Enzyme.Components
                         }
                         else
                         {
-                            // GROUND
-                            double horizontalBlend = Math.Abs(deltaZ) / tanAngle;
-                            exclNodes.Add(new ExclusionNode { Pt2D = new Point3d(pt.X, pt.Y, 0), Radius = totalHalfWidth + horizontalBlend + 0.5 });
-                            
+                            // GROUND (Cut or Fill)
                             extraPoints.Add(pt);
+                            extraPoints.Add(left);
+                            extraPoints.Add(right);
+                            
+                            // Blend points
+                            double horizontalBlend = Math.Abs(deltaZ) / tanAngle;
+                            
+                            exclNodes.Add(new ExclusionNode { Pt2D = new Point3d(pt.X, pt.Y, 0), Radius = totalHalfWidth + horizontalBlend + 0.5 });
                             
                             if (horizontalBlend > 0.1)
                             {
-                                Point3d leftBlend = pt + normal * (totalHalfWidth + horizontalBlend);
+                                Point3d leftBlend = left + normal * horizontalBlend;
                                 leftBlend.Z = zTerrain;
-                                Point3d rightBlend = pt - normal * (totalHalfWidth + horizontalBlend);
+                                Point3d rightBlend = right - normal * horizontalBlend;
                                 rightBlend.Z = zTerrain;
                                 extraPoints.Add(leftBlend);
                                 extraPoints.Add(rightBlend);
@@ -194,105 +202,30 @@ namespace Enzyme.Components
                     }
                 }
 
-                // 2D Footprint Polygon
-                var footPts = new List<Point3d>();
-                footPts.AddRange(leftPts);
-                rightPts.Reverse();
-                footPts.AddRange(rightPts);
-                footPts.Add(leftPts[0]); // Close
-                roadFootprints2D.Add(new PolylineCurve(footPts));
+                // Build Road Mesh
+                Mesh roadMesh = new Mesh();
+                for (int i = 0; i < leftPts.Count; i++)
+                {
+                    roadMesh.Vertices.Add(leftPts[i]);
+                    roadMesh.Vertices.Add(rightPts[i]);
+                }
+                for (int i = 0; i < leftPts.Count - 1; i++)
+                {
+                    int v0 = i * 2;
+                    int v1 = i * 2 + 1;
+                    int v2 = (i + 1) * 2;
+                    int v3 = (i + 1) * 2 + 1;
+                    roadMesh.Faces.AddFace(v0, v1, v3, v2);
+                }
+                roadMesh.Normals.ComputeNormals();
+                roadMeshes.Add(roadMesh);
+
+                railingCurves.Add(new PolylineCurve(leftPts));
+                railingCurves.Add(new PolylineCurve(rightPts));
 
                 foreach(var lanePts in allLanes)
                 {
                     laneCurves.Add(new PolylineCurve(lanePts));
-                }
-            }
-
-            // Boolean Union all 2D road footprints
-            Curve[] unioned = Curve.CreateBooleanUnion(roadFootprints2D, 0.01);
-            if (unioned == null || unioned.Length == 0) unioned = roadFootprints2D.ToArray();
-
-            List<Curve> railingCurves = new List<Curve>();
-            List<Mesh> roadMeshes = new List<Mesh>();
-
-            foreach (Curve crv in unioned)
-            {
-                // Safe Fillet Clipping System
-                Polyline poly;
-                Curve finalOutline = crv;
-                if (crv.TryGetPolyline(out poly) && filletRadius > 0.01)
-                {
-                    finalOutline = SafeFilletPolyline(poly, filletRadius);
-                }
-                railingCurves.Add(finalOutline);
-
-                // Triangulate interior of this merged polygon for the Road Table
-                // 1. Get Points along the boundary
-                var boundaryPts = new List<Point3d>();
-                double[] divT = finalOutline.DivideByLength(subDist, true);
-                if (divT != null)
-                {
-                    foreach (double t in divT) boundaryPts.Add(finalOutline.PointAt(t));
-                }
-                else
-                {
-                    if (finalOutline.TryGetPolyline(out poly)) boundaryPts.AddRange(poly);
-                }
-
-                // 2. Map Z-heights from centerlines
-                for (int i = 0; i < boundaryPts.Count; i++)
-                {
-                    boundaryPts[i] = Get3DPointFromCenterlines(boundaryPts[i], centerlines);
-                    extraPoints.Add(boundaryPts[i]); // Add road edge to terrain points
-                }
-
-                // 3. Simple Delaunay for the road table itself
-                var rNodes = new Node2List();
-                foreach (var p in boundaryPts) rNodes.Append(new Node2(p.X, p.Y));
-                
-                // Add centerline points inside this boundary to anchor the mesh
-                foreach (Curve c in centerlines) {
-                    var cPts = c.DivideByLength(subDist, true);
-                    if (cPts != null) {
-                        foreach (double t in cPts) {
-                            Point3d p = c.PointAt(t);
-                            if (finalOutline.Contains(p, Rhino.Geometry.Plane.WorldXY, 0.01) == PointContainment.Inside) {
-                                rNodes.Append(new Node2(p.X, p.Y));
-                                boundaryPts.Add(p);
-                            }
-                        }
-                    }
-                }
-
-                var rFaces = new List<Grasshopper.Kernel.Geometry.Delaunay.Face>();
-                Mesh rMesh = Grasshopper.Kernel.Geometry.Delaunay.Solver.Solve_Mesh(rNodes, 1e-6, ref rFaces);
-                if (rMesh != null)
-                {
-                    for (int i = 0; i < rMesh.Vertices.Count; i++)
-                    {
-                        var nv = rMesh.Vertices[i];
-                        float bestZ = 0;
-                        float minDist = float.MaxValue;
-                        for (int j = 0; j < boundaryPts.Count; j++) {
-                            float dx = (float)boundaryPts[j].X - nv.X;
-                            float dy = (float)boundaryPts[j].Y - nv.Y;
-                            float dsq = dx*dx + dy*dy;
-                            if (dsq < minDist) { minDist = dsq; bestZ = (float)boundaryPts[j].Z; }
-                            if (minDist < 1e-5) break;
-                        }
-                        rMesh.Vertices[i] = new Point3f(nv.X, nv.Y, bestZ);
-                    }
-                    // Filter faces outside boundary (Delaunay creates convex hull)
-                    var delFaces = new List<int>();
-                    for (int i = 0; i < rMesh.Faces.Count; i++)
-                    {
-                        var center = rMesh.Faces.GetFaceCenter(i);
-                        if (finalOutline.Contains(new Point3d(center.X, center.Y, 0), Rhino.Geometry.Plane.WorldXY, 0.01) == PointContainment.Outside)
-                            delFaces.Add(i);
-                    }
-                    rMesh.Faces.DeleteFaces(delFaces);
-                    rMesh.Normals.ComputeNormals();
-                    roadMeshes.Add(rMesh);
                 }
             }
 
@@ -301,9 +234,13 @@ namespace Enzyme.Components
             if (terrain != null && extraPoints.Count > 0)
             {
                 modTerrain = terrain.DuplicateMesh();
+                
+                // Very simple 2.5D integration for V1
+                // Add points to mesh, then Delaunay.
                 var pts = new List<Point3d>();
                 var origPts = terrain.Vertices.ToPoint3dArray();
                 
+                // Keep original points that are far enough from the road points
                 foreach (var op in origPts)
                 {
                     bool tooClose = false;
@@ -325,196 +262,52 @@ namespace Enzyme.Components
                 
                 pts.AddRange(extraPoints);
 
+                // Run Delaunay
                 var nodes = new Node2List();
-                foreach (var p in pts) nodes.Append(new Node2(p.X, p.Y));
                 var faces_placeholder = new List<Grasshopper.Kernel.Geometry.Delaunay.Face>();
+                foreach (var p in pts) nodes.Append(new Node2(p.X, p.Y));
                 Mesh newTerrain = Grasshopper.Kernel.Geometry.Delaunay.Solver.Solve_Mesh(nodes, 1e-6, ref faces_placeholder);
-                
-                if (newTerrain != null)
-                {
-                    // Solve_Mesh can reorder or drop duplicate vertices, so we can't assume 1:1 mapping with 'pts'.
-                    // Let's use a spatial hash or just a simple closest point to recover Z
-                    for (int i = 0; i < newTerrain.Vertices.Count; i++) {
-                        var nv = newTerrain.Vertices[i];
-                        float bestZ = 0;
-                        float minDist = float.MaxValue;
-                        for (int j = 0; j < pts.Count; j++) {
-                            float dx = (float)pts[j].X - nv.X;
-                            float dy = (float)pts[j].Y - nv.Y;
-                            float dsq = dx*dx + dy*dy;
-                            if (dsq < minDist) { minDist = dsq; bestZ = (float)pts[j].Z; }
-                            if (minDist < 1e-5) break;
-                        }
-                        newTerrain.Vertices[i] = new Point3f(nv.X, nv.Y, bestZ);
-                    }
-                    
-                    var facesToDelete = new List<int>();
-                    for (int i = 0; i < newTerrain.Faces.Count; i++)
-                    {
-                        var f = newTerrain.Faces[i];
-                        var pA = newTerrain.Vertices[f.A];
-                        var pB = newTerrain.Vertices[f.B];
-                        var pC = newTerrain.Vertices[f.C];
-                        if (pA.DistanceTo(pB) > 150 || pB.DistanceTo(pC) > 150 || pC.DistanceTo(pA) > 150)
-                            facesToDelete.Add(i);
-                    }
-                    newTerrain.Faces.DeleteFaces(facesToDelete);
-                    newTerrain.Normals.ComputeNormals();
-                    modTerrain = newTerrain;
+                // The above returns a mesh where Z is 0. We need to copy our Z values back.
+                for (int i = 0; i < newTerrain.Vertices.Count; i++) {
+                    newTerrain.Vertices[i] = new Rhino.Geometry.Point3f((float)pts[i].X, (float)pts[i].Y, (float)pts[i].Z);
                 }
+                
+                // Remove long boundary faces
+                var facesToDelete = new List<int>();
+                for (int i = 0; i < newTerrain.Faces.Count; i++)
+                {
+                    var f = newTerrain.Faces[i];
+                    var pA = pts[f.A];
+                    var pB = pts[f.B];
+                    var pC = pts[f.C];
+                    
+                    if (pA.DistanceTo(pB) > 150 || pB.DistanceTo(pC) > 150 || pC.DistanceTo(pA) > 150)
+                        facesToDelete.Add(i);
+                }
+                newTerrain.Faces.DeleteFaces(facesToDelete);
+                newTerrain.Normals.ComputeNormals();
+                modTerrain = newTerrain;
             }
             else
             {
                 modTerrain = terrain;
             }
 
-            List<Mesh> cutVols = new List<Mesh>();
-            List<Mesh> fillVols = new List<Mesh>();
-
-            DA.SetData(0, modTerrain);
+                        DA.SetData(0, modTerrain);
             DA.SetDataList(1, roadMeshes);
-            DA.SetDataList(2, cutVols); 
-            DA.SetDataList(3, fillVols); 
+            DA.SetDataList(2, volumes); // Cut volume placeholder
+            DA.SetDataList(3, volumes); // Fill volume placeholder
             DA.SetDataList(4, laneCurves);
             DA.SetDataList(5, railingCurves);
             DA.SetDataList(6, pillars);
             
-            Message = $"Road Generator\n---\nLanes: {totalLanes}\nWidth: {totalHalfWidth*2}m";
-        }
-
-                // Custom Clamped Filleting
-        private Curve SafeFilletPolyline(Polyline poly, double targetRadius)
-        {
-            if (poly.Count < 3) return new PolylineCurve(poly);
-            
-            bool isClosed = poly.IsClosed;
-            int count = isClosed ? poly.Count - 1 : poly.Count;
-            
-            PolyCurve pc = new PolyCurve();
-            
-            Point3d[] p = poly.ToArray();
-            Point3d[] newPts = new Point3d[count * 2]; // For segments and arcs
-            
-            // First, find the valid tangent distance for every corner
-            double[] maxT = new double[count];
-            for (int i = 0; i < count; i++)
-            {
-                if (!isClosed && (i == 0 || i == count - 1)) continue;
-                
-                Point3d prev = p[i == 0 ? count - 1 : i - 1];
-                Point3d curr = p[i];
-                Point3d next = p[i + 1]; // Works because p has count+1 if closed
-                
-                Vector3d vIn = prev - curr;
-                Vector3d vOut = next - curr;
-                double lenIn = vIn.Length;
-                double lenOut = vOut.Length;
-                
-                if (lenIn < 0.01 || lenOut < 0.01) { maxT[i] = 0; continue; }
-                
-                vIn.Unitize();
-                vOut.Unitize();
-                
-                double angle = Vector3d.VectorAngle(vIn, vOut);
-                if (angle < 0.01 || angle > Math.PI - 0.01) { maxT[i] = 0; continue; }
-                
-                double reqT = targetRadius / Math.Tan(angle / 2.0);
-                
-                // Segment length constraint (49% of shortest adjacent segment to leave room for the other corner)
-                double allowedT = Math.Min(lenIn, lenOut) * 0.49; 
-                maxT[i] = Math.Min(reqT, allowedT);
-            }
-            
-            // Build the segments and arcs
-            for (int i = 0; i < count; i++)
-            {
-                if (!isClosed && i == count - 1) break; // last point handled
-                
-                Point3d curr = p[i];
-                Point3d next = p[i + 1];
-                
-                double tStart = maxT[i];
-                double tEnd = maxT[(i + 1) % count];
-                
-                if (!isClosed && i == 0) tStart = 0;
-                if (!isClosed && i == count - 2) tEnd = 0;
-                
-                Vector3d edge = next - curr;
-                double edgeLen = edge.Length;
-                edge.Unitize();
-                
-                Point3d p1 = curr + edge * tStart;
-                Point3d p2 = next - edge * tEnd;
-                
-                if (p1.DistanceTo(p2) > 0.001)
-                    pc.Append(new LineCurve(p1, p2));
-                    
-                // Generate Arc at 'next' vertex
-                if (tEnd > 0.001)
-                {
-                    Point3d nextNext = p[(i + 2) % (isClosed ? count : count + 1)];
-                    if (!isClosed && i + 2 < p.Length)
-                    {
-                        nextNext = p[i + 2];
-                    }
-                    if (isClosed)
-                    {
-                        nextNext = p[(i + 2) % count];
-                        Vector3d nextEdge = nextNext - next;
-                        nextEdge.Unitize();
-                        Point3d p3 = next + nextEdge * tEnd; // Start of next segment
-                        
-                        // Create Arc from p2 to p3 tangent to segments
-                        // Simplest way is a 3-point arc. Midpoint can be found using bisector.
-                        Vector3d vIn = curr - next;
-                        Vector3d vOut = nextNext - next;
-                        vIn.Unitize(); vOut.Unitize();
-                        Vector3d bisector = (vIn + vOut) / 2.0;
-                        bisector.Unitize();
-                        
-                        // Distance to arc center: d = tEnd / sin(angle/2)
-                        // Distance from corner to arc midpoint: tEnd * tan(angle/4)
-                        double halfAngle = Vector3d.VectorAngle(vIn, vOut) / 2.0;
-                        double midDist = tEnd * Math.Tan(halfAngle / 2.0);
-                        Point3d pMid = next + bisector * midDist;
-                        
-                        Arc arc = new Arc(p2, pMid, p3);
-                        if (arc.IsValid) pc.Append(new ArcCurve(arc));
-                    }
-                }
-            }
-            
-            if (isClosed && pc.IsClosed == false && pc.SegmentCount > 0)
-            {
-                // Ensure it closes
-                Line l = new Line(pc.PointAtEnd, pc.PointAtStart);
-                if (l.Length > 0.001) pc.Append(new LineCurve(l));
-            }
-            
-            if (pc.SegmentCount > 0) return pc;
-            return new PolylineCurve(poly);
-        }
-        private Point3d Get3DPointFromCenterlines(Point3d p2D, List<Curve> centerlines)
-        {
-            double minD = double.MaxValue;
-            Point3d bestP = p2D;
-            foreach(var c in centerlines) {
-                double t;
-                if(c.ClosestPoint(p2D, out t)) {
-                    Point3d pt = c.PointAt(t);
-                    double d = new Point3d(pt.X, pt.Y, 0).DistanceTo(p2D);
-                    if (d < minD) {
-                        minD = d;
-                        bestP = new Point3d(p2D.X, p2D.Y, pt.Z);
-                    }
-                }
-            }
-            return bestP;
+            stopwatch.Stop();
+            Message = $"Road Generator\\n---\\nLanes: {totalLanes}\\nWidth: {totalHalfWidth*2}m\\nTime: {stopwatch.ElapsedMilliseconds} ms";
         }
 
         public override Guid ComponentGuid
         {
-            get { return new Guid("AA223344-5566-7788-99AA-BBCCDDEEFF11"); }
+            get { return new Guid("11223344-5566-7788-99AA-BBCCDDEEFF00"); }
         }
     }
 }
