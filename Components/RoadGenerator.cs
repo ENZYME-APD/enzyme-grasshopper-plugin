@@ -119,28 +119,34 @@ namespace Enzyme.Components
 
             List<RoadData> roads = new List<RoadData>();
 
-            // PASS 1: Sweep and compute all profiles using Arc-Length Parameterization
             for (int k = 0; k < centerlines.Count; k++)
             {
                 Curve crv = centerlines[k];
                 if (crv == null) continue;
 
+                // Robust Curve Processing: Convert to NURBS to eliminate PolyCurve seam failures
+                Curve nCrv = crv.ToNurbsCurve();
                 RoadData rd = new RoadData();
-                rd.IsClosed = crv.IsClosed;
+                rd.IsClosed = nCrv.IsClosed;
                 
                 for (int i = 0; i < totalLanes; i++) rd.allLanes.Add(new List<Point3d>());
 
-                double length = crv.GetLength();
+                double length = nCrv.GetLength();
                 int divs = Math.Max(2, (int)(length / subDist));
                 
-                // TRUE ARC-LENGTH SUBDIVISION: Guarantees perfectly equidistant points regardless of curve parametrization!
-                double[] tParams = new double[divs + 1];
-                for (int i = 0; i <= divs; i++) {
-                    crv.LengthParameter((length * i) / divs, out double t);
-                    tParams[i] = t;
+                double[] tParams = nCrv.DivideByCount(divs, true);
+                if (tParams == null || tParams.Length < 2) tParams = nCrv.DivideByCount(divs, false);
+                if (tParams == null || tParams.Length < 2) 
+                {
+                    tParams = new double[divs + 1];
+                    for (int i = 0; i <= divs; i++) {
+                        nCrv.LengthParameter((length * i) / divs, out double t);
+                        tParams[i] = t;
+                    }
                 }
 
                 double lastPillarDist = 0;
+                Vector3d prevTangent = Vector3d.XAxis;
 
                 for (int i = 0; i < tParams.Length; i++)
                 {
@@ -157,10 +163,12 @@ namespace Enzyme.Components
                     }
 
                     double t = tParams[i];
-                    Point3d pt = crv.PointAt(t);
-                    Vector3d tangent = crv.TangentAt(t);
+                    Point3d pt = nCrv.PointAt(t);
+                    Vector3d tangent = nCrv.TangentAt(t);
                     tangent.Z = 0; 
-                    if (!tangent.Unitize()) continue;
+                    if (!tangent.Unitize()) tangent = prevTangent;
+                    else prevTangent = tangent;
+                    
                     Vector3d normal = Vector3d.CrossProduct(tangent, Vector3d.ZAxis);
                     normal.Unitize();
 
@@ -267,13 +275,11 @@ namespace Enzyme.Components
             List<Point3d> allCleanExtraPoints = new List<Point3d>();
             List<Tuple<Point3d, double>> allDaylightFootprints = new List<Tuple<Point3d, double>>();
 
-            // PASS 2: Boolean Intersections and Mesh Generation
             for (int k = 0; k < roads.Count; k++)
             {
                 RoadData rd = roads[k];
                 allDaylightFootprints.AddRange(rd.daylightFootprints);
 
-                // Point-Cloud Boolean: Discard terrain modifier points that fall within the asphalt zone of ANY OTHER road.
                 foreach (Point3d p in rd.extraPoints)
                 {
                     Point3d p2D = new Point3d(p.X, p.Y, 0);
@@ -290,7 +296,7 @@ namespace Enzyme.Components
                     if (!culled) allCleanExtraPoints.Add(p);
                 }
 
-                // Road Mesh
+                // Road Mesh Triangulation to prevent bowtie deletion
                 Mesh roadMesh = new Mesh();
                 for (int i = 0; i < rd.leftPts.Count; i++) {
                     roadMesh.Vertices.Add(rd.leftPts[i]);
@@ -298,7 +304,8 @@ namespace Enzyme.Components
                 }
                 for (int i = 0; i < rd.leftPts.Count - 1; i++) {
                     int v0 = i * 2, v1 = i * 2 + 1, v2 = (i + 1) * 2, v3 = (i + 1) * 2 + 1;
-                    roadMesh.Faces.AddFace(v0, v1, v3, v2);
+                    roadMesh.Faces.AddFace(v0, v1, v3);
+                    roadMesh.Faces.AddFace(v0, v3, v2);
                 }
                 roadMesh.Faces.CullDegenerateFaces();
                 roadMesh.Vertices.CullUnused();
@@ -311,7 +318,6 @@ namespace Enzyme.Components
                 foreach(var lanePts in rd.allLanes) laneCurves.Add(new PolylineCurve(lanePts));
                 pillarsOut.AddRange(rd.pillars);
 
-                // Cut & Fill Meshes
                 Mesh cutMesh = new Mesh();
                 Mesh fillMesh = new Mesh();
                 
@@ -322,7 +328,8 @@ namespace Enzyme.Components
                     Point3d[] tp1 = rd.terrProfiles[i];
                     Point3d[] tp2 = rd.terrProfiles[i + 1];
 
-                    if (rp1[2].DistanceTo(rp2[2]) > subDist * 2.5) continue; 
+                    // Skip gaps, but use 3.5x buffer to accommodate sharp curve outer edges
+                    if (rp1[2].DistanceTo(rp2[2]) > subDist * 3.5) continue; 
 
                     bool isCut = rp1[2].Z < tp1[2].Z; 
                     Mesh target = isCut ? cutMesh : fillMesh;
@@ -341,26 +348,35 @@ namespace Enzyme.Components
 
                     if (colorize) for (int j = 0; j < 20; j++) target.VertexColors.Add(c);
 
+                    // Triangulate Top and Bottom faces to prevent bowtie self-intersection deletions
                     for (int j = 0; j < 4; j++) {
-                        if (top1[j].DistanceTo(top1[j+1]) > 0.001)
-                            target.Faces.AddFace(bIdx + j, bIdx + j + 1, bIdx + j + 6, bIdx + j + 5);
+                        if (top1[j].DistanceTo(top1[j+1]) > 0.001) {
+                            int A = bIdx + j, B = bIdx + j + 1, C = bIdx + j + 6, D = bIdx + j + 5;
+                            target.Faces.AddFace(A, B, C); target.Faces.AddFace(A, C, D);
+                        }
                     }
                     int bOff = bIdx + 10;
                     for (int j = 0; j < 4; j++) {
-                        if (bot1[j].DistanceTo(bot1[j+1]) > 0.001)
-                            target.Faces.AddFace(bOff + j, bOff + j + 5, bOff + j + 6, bOff + j + 1);
+                        if (bot1[j].DistanceTo(bot1[j+1]) > 0.001) {
+                            int A = bOff + j, B = bOff + j + 5, C = bOff + j + 6, D = bOff + j + 1;
+                            target.Faces.AddFace(A, B, C); target.Faces.AddFace(A, C, D);
+                        }
                     }
                     
                     if (i == 0 && (!rd.IsClosed)) {
                         for (int j = 0; j < 4; j++) {
-                           if (top1[j].DistanceTo(bot1[j]) > 0.001 || top1[j+1].DistanceTo(bot1[j+1]) > 0.001)
-                               target.Faces.AddFace(bIdx + j, bOff + j, bOff + j + 1, bIdx + j + 1);
+                           if (top1[j].DistanceTo(bot1[j]) > 0.001 || top1[j+1].DistanceTo(bot1[j+1]) > 0.001) {
+                               int A = bIdx + j, B = bOff + j, C = bOff + j + 1, D = bIdx + j + 1;
+                               target.Faces.AddFace(A, B, C); target.Faces.AddFace(A, C, D);
+                           }
                         }
                     }
                     if (i == rd.roadProfiles.Count - 2 && (!rd.IsClosed)) {
                         for (int j = 0; j < 4; j++) {
-                           if (top2[j].DistanceTo(bot2[j]) > 0.001 || top2[j+1].DistanceTo(bot2[j+1]) > 0.001)
-                               target.Faces.AddFace(bIdx + j + 5, bIdx + j + 6, bOff + j + 6, bOff + j + 5);
+                           if (top2[j].DistanceTo(bot2[j]) > 0.001 || top2[j+1].DistanceTo(bot2[j+1]) > 0.001) {
+                               int A = bIdx + j + 5, B = bIdx + j + 6, C = bOff + j + 6, D = bOff + j + 5;
+                               target.Faces.AddFace(A, B, C); target.Faces.AddFace(A, C, D);
+                           }
                         }
                     }
 
@@ -473,7 +489,7 @@ namespace Enzyme.Components
             public bool IsClosed = false;
         }
 
-private double TriVolume(Point3d t1, Point3d t2, Point3d t3, Point3d b1, Point3d b2, Point3d b3)
+        private double TriVolume(Point3d t1, Point3d t2, Point3d t3, Point3d b1, Point3d b2, Point3d b3)
         {
             double area2D = 0.5 * Math.Abs(t1.X*(t2.Y - t3.Y) + t2.X*(t3.Y - t1.Y) + t3.X*(t1.Y - t2.Y));
             double avgDz = ((t1.Z - b1.Z) + (t2.Z - b2.Z) + (t3.Z - b3.Z)) / 3.0;
