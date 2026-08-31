@@ -381,7 +381,7 @@ namespace Enzyme.Components
 
         public override Guid ComponentGuid
         {
-            get { return new Guid("11223344-5566-7788-99AA-BBCCDDEEFF00"); }
+            get { return new Guid("E5A7B8C9-1234-4ABC-9DEF-0123456789AB"); }
         }
     }
 }
