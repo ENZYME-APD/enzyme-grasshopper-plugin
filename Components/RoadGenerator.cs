@@ -11,6 +11,11 @@ namespace Enzyme.Components
 {
     public class RoadGenerator : GH_Component
     {
+        private struct ExclusionNode
+        {
+            public Point3d Pt2D;
+            public double Radius;
+        }
         public RoadGenerator()
           : base("Procedural Road Generator", "RoadGen",
               "Generates procedural roads, bridges, and terrain cuts/fills using a blazing fast 2.5D approach.",
@@ -100,6 +105,7 @@ namespace Enzyme.Components
 
             // For terrain modification
             List<Point3d> extraPoints = new List<Point3d>();
+            List<ExclusionNode> exclNodes = new List<ExclusionNode>();
 
             foreach (Curve crv in centerlines)
             {
@@ -177,6 +183,9 @@ namespace Enzyme.Components
                             
                             // Blend points
                             double horizontalBlend = Math.Abs(deltaZ) / tanAngle;
+                            
+                            exclNodes.Add(new ExclusionNode { Pt2D = new Point3d(pt.X, pt.Y, 0), Radius = totalHalfWidth + horizontalBlend + 0.5 });
+                            
                             if (horizontalBlend > 0.1)
                             {
                                 Point3d leftBlend = left + normal * horizontalBlend;
@@ -232,15 +241,17 @@ namespace Enzyme.Components
                 foreach (var op in origPts)
                 {
                     bool tooClose = false;
-                    // Simple distance check (can be slow for huge meshes, but okay for moderate)
-                    // Optimised: we only check Z if XY is close
-                    for (int i=0; i<extraPoints.Count; i+=5) // sparse check
+                    Point3d op2D = new Point3d(op.X, op.Y, 0);
+                    
+                    foreach (var node in exclNodes)
                     {
-                        var ep = extraPoints[i];
-                        if (Math.Abs(op.X - ep.X) < totalHalfWidth * 2 && Math.Abs(op.Y - ep.Y) < totalHalfWidth * 2)
+                        if (Math.Abs(op2D.X - node.Pt2D.X) < node.Radius && Math.Abs(op2D.Y - node.Pt2D.Y) < node.Radius)
                         {
-                            tooClose = true;
-                            break;
+                            if (op2D.DistanceTo(node.Pt2D) < node.Radius)
+                            {
+                                tooClose = true;
+                                break;
+                            }
                         }
                     }
                     if (!tooClose) pts.Add(op);
