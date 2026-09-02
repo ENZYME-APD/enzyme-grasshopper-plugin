@@ -23,7 +23,7 @@ namespace Enzyme.Components
         {
             get
             {
-                return IconLoader.Load("tile_gen_icon.png");
+                return IconLoader.Load("GridPattern.png");
             }
         }
 
