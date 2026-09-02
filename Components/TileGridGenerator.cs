@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Diagnostics; // stopwatch
-using System.Linq; // for Enumerable
+using System.Diagnostics;
+using System.Linq;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
 using Rhino.Geometry.Intersect;
-using Enzyme; // for IconLoader
+using Enzyme;
 
 namespace Enzyme.Components
 {
@@ -23,16 +23,13 @@ namespace Enzyme.Components
         {
             get
             {
-                Bitmap icon = IconLoader.Load("tile_gen_icon.png");
-                if (icon == null)
-                    this.Message = "Icon missing";
-                return icon;
+                return IconLoader.Load("tile_gen_icon.png");
             }
         }
 
         public override Guid ComponentGuid => new Guid("3E7B9F2A-C4D8-4A1E-B5F3-8D2C6E0A9B4F");
 
-                public override void AddedToDocument(GH_Document document)
+        public override void AddedToDocument(GH_Document document)
         {
             base.AddedToDocument(document);
             if (this.Attributes == null) this.CreateAttributes();
@@ -43,6 +40,10 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
+                Enzyme.Utils.AutoWireHelper.WireValueList(this, document, 2, 
+                    new string[] { "Rectangular", "Offset Rectangular", "Hexagonal", "Triangular" }, 
+                    new string[] { "\"rectangular\"", "\"offset_rectangular\"", "\"hexagonal\"", "\"triangular\"" }, 
+                    330, -60);
                 Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 3, 0.0, 2.0, 1.0, 330, -20);
                 Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 4, 0.0, 2.0, 1.0, 330, 20);
                 Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 3, "curve", 220, -45);
@@ -92,74 +93,54 @@ namespace Enzyme.Components
                 return;
             }
 
-            // Create transforms between world and local coordinates
+            List<Curve> allTiles = new List<Curve>();
+            List<int> panelStatus = new List<int>();
+            int fullCount = 0;
+            int trimCount = 0;
+            List<Curve> fullTiles = new List<Curve>();
+            List<Curve> trimmedTiles = new List<Curve>();
+
             Transform toLocal = Transform.PlaneToPlane(originPlane, Plane.WorldXY);
             Transform toWorld = Transform.PlaneToPlane(Plane.WorldXY, originPlane);
 
-            // Transform boundary to local coordinates for calculations
             Curve localBoundary = boundary.DuplicateCurve();
             localBoundary.Transform(toLocal);
 
-            // Get bounding box in local coordinates
             BoundingBox bbox = localBoundary.GetBoundingBox(true);
 
-            // --- Grid generation and trimming logic ---
-            // 1. Generate grid cells (rectangular, hex, triangle) in local plane coordinates
-            // 2. Transform cells to world coordinates
-            // 3. Test containment/intersection with boundary
-            // 4. Output all tiles, panel status, counts, and full tiles
-
-            // Generate grid cells based on grid type
-            List<GridCell> cells = GenerateCells(bbox, x_dim, y_dim, gridType);
-
-            // Process cells and determine which are inside, intersecting, or outside the boundary
-            var allTiles = new List<Curve>();
-            var panelStatus = new List<int>();
-            int fullCount = 0;
-            int trimCount = 0;
-            var fullTiles = new List<Curve>();
-            var trimmedTiles = new List<Curve>();
+            List<GridCell> cells = GenerateCells(bbox, x_dim, y_dim, gridType.ToLower());
 
             foreach (GridCell cell in cells)
             {
-                // Transform cell to world coordinates for intersection testing
                 cell.Transform(toWorld);
-
-                // Test if cell is fully inside, intersecting, or outside the boundary
                 List<Point3d> testPoints = cell.GetTestPoints();
-                bool allPointsInside = true;
 
-                foreach (Point3d pt in testPoints)
-                {
-                    if (PointContainmentTest(pt, localBoundary, originPlane) != PointContainment.Inside)
-                    {
-                        allPointsInside = false;
-                        break;
-                    }
-                }
+                bool[] pointsInside = testPoints.Select(pt => PointContainmentTest(pt, boundary, originPlane)).ToArray();
+                bool allInside = pointsInside.All(p => p);
+                bool anyInside = pointsInside.Any(p => p);
 
-                // Check for intersection
                 CurveIntersections intersections = Intersection.CurveCurve(cell.Curve, boundary, 0.001, 0.001);
                 bool hasIntersection = intersections != null && intersections.Count > 0;
 
-                if (allPointsInside)
+                if (allInside)
                 {
-                    // Cell is fully inside
                     allTiles.Add(cell.Curve);
                     fullTiles.Add(cell.Curve);
                     panelStatus.Add(0);
                     fullCount++;
                 }
-                else if (hasIntersection || testPoints.Exists(pt => PointContainmentTest(pt, localBoundary, originPlane) == PointContainment.Inside))
+                else if (anyInside || hasIntersection)
                 {
-                    // Cell intersects with boundary - trim it
-                    Curve[] trimmedCurves = Curve.CreateBooleanIntersection(cell.Curve, boundary, 0.001);
-                    if (trimmedCurves != null && trimmedCurves.Length > 0)
+                    Curve[] intersectCurves = Curve.CreateBooleanIntersection(cell.Curve, boundary, 0.001);
+                    if (intersectCurves != null && intersectCurves.Length > 0)
                     {
-                        allTiles.AddRange(trimmedCurves);
-                        trimmedTiles.AddRange(trimmedCurves);
-                        panelStatus.AddRange(Enumerable.Repeat(1, trimmedCurves.Length));
-                        trimCount += trimmedCurves.Length;
+                        foreach (Curve trimmedCurve in intersectCurves)
+                        {
+                            allTiles.Add(trimmedCurve);
+                            trimmedTiles.Add(trimmedCurve);
+                            panelStatus.Add(1);
+                            trimCount++;
+                        }
                     }
                 }
             }
@@ -167,7 +148,6 @@ namespace Enzyme.Components
             stopwatch.Stop();
             double executionTime = stopwatch.Elapsed.TotalSeconds;
 
-            // Example output (empty)
             DA.SetDataList(0, panelStatus);
             DA.SetData(1, fullCount);
             DA.SetData(2, trimCount);
@@ -175,7 +155,8 @@ namespace Enzyme.Components
             DA.SetDataList(4, fullTiles);
             DA.SetDataList(5, trimmedTiles);
 
-            Message = $"{gridType} Grid";
+            string capGridType = gridType.Length > 0 ? char.ToUpper(gridType[0]) + gridType.Substring(1).ToLower() : gridType;
+            Message = $"{capGridType} Grid";
             Message += $"\n{fullCount} complete | {trimCount} trimmed";
             Message += $"\nTime: {executionTime:F3}s";
         }
@@ -188,185 +169,150 @@ namespace Enzyme.Components
 
             public List<Point3d> GetTestPoints()
             {
-                var points = new List<Point3d>(Corners);
-                if (Center != null)
-                    points.Add(Center);
-                return points;
+                List<Point3d> pts = new List<Point3d>(Corners);
+                if (Center.IsValid) pts.Add(Center);
+                return pts;
             }
 
             public void Transform(Transform xform)
             {
-                if (Curve != null)
-                    Curve.Transform(xform);
-                if (Center != null)
-                    Center.Transform(xform);
+                if (Curve != null) Curve.Transform(xform);
+                Center = new Point3d(Center);
+                Point3d c = Center;
+                c.Transform(xform);
+                Center = c;
                 for (int i = 0; i < Corners.Count; i++)
                 {
-                    Corners[i].Transform(xform);
+                    Point3d p = Corners[i];
+                    p.Transform(xform);
+                    Corners[i] = p;
                 }
             }
         }
 
-        private List<GridCell> GenerateCells(
-            BoundingBox bbox,
-            double cellWidth,
-            double cellHeight,
-            string gridType
-        )
+        private List<GridCell> GenerateCells(BoundingBox bbox, double cellWidth, double cellHeight, string gridType)
         {
-            var cells = new List<GridCell>();
+            List<GridCell> cells = new List<GridCell>();
 
-            switch (gridType.ToLower())
+            if (gridType == "rectangular" || gridType == "offset_rectangular")
             {
-                case "rectangular":
-                case "offset_rectangular":
+                double x = Math.Floor(bbox.Min.X / cellWidth) * cellWidth;
+                while (x < bbox.Max.X)
                 {
-                    double x = Math.Floor(bbox.Min.X / cellWidth) * cellWidth;
-                    int rowIndex = 0;
-                    double yStart = Math.Floor(bbox.Min.Y / cellHeight) * cellHeight;
-                    while (x < bbox.Max.X)
-                    {
-                        rowIndex = 0;
-                        double y = yStart;
-                        while (y < bbox.Max.Y)
-                        {
-                            // Offset alternate rows for offset_rectangular
-                            double offset = (gridType.ToLower() == "offset_rectangular" && rowIndex % 2 == 1) ? cellWidth / 2 : 0;
-                            var cell = CreateRectangularCell(x + offset, y, cellWidth, cellHeight);
-                            cells.Add(cell);
-                            y += cellHeight;
-                            rowIndex++;
-                        }
-                        x += cellWidth;
-                    }
-                    break;
-                }
+                    double y = Math.Floor(bbox.Min.Y / cellHeight) * cellHeight;
+                    int rowIndex = (int)Math.Round((y - bbox.Min.Y) / cellHeight);
 
-                case "hexagonal":
-                {
-                    double hSpacing = cellWidth * 3 / 4;
-                    double vSpacing = cellWidth * Math.Sqrt(3) / 2;
-                    double x = Math.Floor(bbox.Min.X / hSpacing) * hSpacing;
-                    int rowIndex = 0;
-                    while (x < bbox.Max.X)
+                    while (y < bbox.Max.Y)
                     {
-                        double y = Math.Floor(bbox.Min.Y / vSpacing) * vSpacing;
-                        double offset = (rowIndex % 2 == 1) ? vSpacing / 2 : 0;
-                        while (y < bbox.Max.Y)
-                        {
-                            var cell = CreateHexagonalCell(x, y + offset, cellWidth);
-                            cells.Add(cell);
-                            y += vSpacing;
-                        }
+                        double offset = (gridType == "offset_rectangular" && rowIndex % 2 == 1) ? 0.5 * cellWidth : 0;
+                        cells.Add(CreateRectangularCell(x, y, offset, cellWidth, cellHeight));
+                        y += cellHeight;
                         rowIndex++;
-                        x += hSpacing;
                     }
-                    break;
+                    x += cellWidth;
                 }
-
-                case "triangular":
+            }
+            else if (gridType == "hexagonal")
+            {
+                double hSpacing = cellWidth * 3.0 / 4.0;
+                double vSpacing = cellWidth * Math.Sqrt(3) / 2.0;
+                double x = Math.Floor(bbox.Min.X / hSpacing) * hSpacing;
+                int rowCount = 0;
+                while (x < bbox.Max.X)
                 {
-                    double height = cellWidth * Math.Sqrt(3) / 2;
-                    double x = Math.Floor(bbox.Min.X / cellWidth) * cellWidth;
-                    double yStart = Math.Floor(bbox.Min.Y / height) * height;
-                    while (x < bbox.Max.X)
+                    double y = Math.Floor(bbox.Min.Y / vSpacing) * vSpacing;
+                    double offset = (rowCount % 2 != 0) ? vSpacing / 2.0 : 0;
+                    while (y < bbox.Max.Y)
                     {
-                        double y = yStart;
-                        int rowIndex = 0;
-                        while (y < bbox.Max.Y)
-                        {
-                            var cell = CreateTriangularCell(x, y, (rowIndex % 2 == 1), cellWidth, height);
-                            cells.Add(cell);
-                            cell = CreateTriangularCell(x + cellWidth / 2, y, (rowIndex % 2 == 0), cellWidth, height);
-                            cells.Add(cell);
-                            y += height;
-                            rowIndex++;
-                        }
-                        x += cellWidth;
+                        cells.Add(CreateHexagonalCell(x, y + offset, cellWidth));
+                        y += vSpacing;
                     }
-                    break;
+                    rowCount++;
+                    x += hSpacing;
+                }
+            }
+            else if (gridType == "triangular")
+            {
+                double height = cellWidth * Math.Sqrt(3) / 2.0;
+                double x = Math.Floor(bbox.Min.X / cellWidth) * cellWidth;
+                while (x < bbox.Max.X)
+                {
+                    double y = Math.Floor(bbox.Min.Y / height) * height;
+                    while (y < bbox.Max.Y)
+                    {
+                        cells.Add(CreateTriangularCell(x, y, false, cellWidth, height));
+                        cells.Add(CreateTriangularCell(x, y, true, cellWidth, height));
+                        y += height;
+                    }
+                    x += cellWidth;
                 }
             }
 
             return cells;
         }
 
-        private GridCell CreateRectangularCell(
-            double x,
-            double y,
-            double cellWidth,
-            double cellHeight
-        )
+        private GridCell CreateRectangularCell(double x, double y, double offset, double cellWidth, double cellHeight)
         {
-            var cell = new GridCell();
-            cell.Curve = new Rectangle3d(Plane.WorldXY, new Point3d(x, y, 0), new Point3d(x + cellWidth, y + cellHeight, 0)).ToNurbsCurve();
-            cell.Center = new Point3d(x + cellWidth / 2, y + cellHeight / 2, 0);
-            cell.Corners.Add(new Point3d(x, y, 0));
-            cell.Corners.Add(new Point3d(x + cellWidth, y, 0));
-            cell.Corners.Add(new Point3d(x + cellWidth, y + cellHeight, 0));
-            cell.Corners.Add(new Point3d(x, y + cellHeight, 0));
+            GridCell cell = new GridCell();
+            double adjustedX = x + offset;
+            cell.Curve = new Rectangle3d(Plane.WorldXY, new Point3d(adjustedX, y, 0), new Point3d(adjustedX + cellWidth, y + cellHeight, 0)).ToNurbsCurve();
+            cell.Center = new Point3d(adjustedX + cellWidth / 2, y + cellHeight / 2, 0);
+            cell.Corners = new List<Point3d> {
+                new Point3d(adjustedX, y, 0),
+                new Point3d(adjustedX + cellWidth, y, 0),
+                new Point3d(adjustedX + cellWidth, y + cellHeight, 0),
+                new Point3d(adjustedX, y + cellHeight, 0)
+            };
             return cell;
         }
 
-        private GridCell CreateHexagonalCell(
-            double x, // center
-            double y, // center
-            double cellWidth
-        )
+        private GridCell CreateHexagonalCell(double centerX, double centerY, double cellWidth)
         {
-            var cell = new GridCell();
-            double radius = cellWidth / 2;
+            GridCell cell = new GridCell();
+            double radius = cellWidth / 2.0;
+            List<Point3d> corners = new List<Point3d>();
             for (int i = 0; i < 6; i++)
             {
-                double angle = i * Math.PI / 3;
-                double cornerX = x + radius * Math.Cos(angle);
-                double cornerY = y + radius * Math.Sin(angle);
-                cell.Corners.Add(new Point3d(cornerX, cornerY, 0));
+                double angle = i * Math.PI / 3.0;
+                corners.Add(new Point3d(centerX + radius * Math.Cos(angle), centerY + radius * Math.Sin(angle), 0));
             }
-            cell.Center = new Point3d(x, y, 0);
-            cell.Corners.Add(cell.Corners[0]); // close the curve
-            cell.Curve = Curve.CreateInterpolatedCurve(cell.Corners, 1);
+            cell.Corners = corners;
+            cell.Center = new Point3d(centerX, centerY, 0);
+            
+            List<Point3d> crvPts = new List<Point3d>(corners);
+            crvPts.Add(corners[0]);
+            cell.Curve = Curve.CreateInterpolatedCurve(crvPts, 1);
             return cell;
         }
 
-        private GridCell CreateTriangularCell(
-            double x,
-            double y,
-            bool inverted,
-            double cellWidth,
-            double height
-        )
+        private GridCell CreateTriangularCell(double baseX, double baseY, bool inverted, double cellWidth, double height)
         {
-            var cell = new GridCell();
-            if (inverted)
+            GridCell cell = new GridCell();
+            List<Point3d> corners = new List<Point3d>();
+            if (!inverted)
             {
-                cell.Corners.Add(new Point3d(x, y, 0));
-                cell.Corners.Add(new Point3d(x + cellWidth, y, 0));
-                cell.Corners.Add(new Point3d(x + cellWidth / 2, y + height, 0));
+                corners.Add(new Point3d(baseX, baseY, 0));
+                corners.Add(new Point3d(baseX + cellWidth, baseY, 0));
+                corners.Add(new Point3d(baseX + cellWidth / 2.0, baseY + height, 0));
             }
             else
             {
-                cell.Corners.Add(new Point3d(x + cellWidth / 2, y, 0));
-                cell.Corners.Add(new Point3d(x + cellWidth, y + height, 0));
-                cell.Corners.Add(new Point3d(x, y + height, 0));
+                corners.Add(new Point3d(baseX + cellWidth / 2.0, baseY, 0));
+                corners.Add(new Point3d(baseX + cellWidth, baseY + height, 0));
+                corners.Add(new Point3d(baseX, baseY + height, 0));
             }
-            // Calc center as average of corner points
-            double centerX = (cell.Corners[0].X + cell.Corners[1].X + cell.Corners[2].X) / 3;
-            double centerY = (cell.Corners[0].Y + cell.Corners[1].Y + cell.Corners[2].Y) / 3;
-            cell.Center = new Point3d(centerX, centerY, 0);
-            cell.Corners.Add(cell.Corners[0]);
-            cell.Curve = Curve.CreateInterpolatedCurve(cell.Corners, 1);
+            cell.Corners = corners;
+            cell.Center = new Point3d(corners.Sum(p => p.X) / 3.0, corners.Sum(p => p.Y) / 3.0, 0);
+
+            List<Point3d> crvPts = new List<Point3d>(corners);
+            crvPts.Add(corners[0]);
+            cell.Curve = Curve.CreateInterpolatedCurve(crvPts, 1);
             return cell;
         }
 
-        private PointContainment PointContainmentTest(
-            Point3d point,
-            Curve curve,
-            Plane plane,
-            double tolerance = 0.001
-        )
+        private bool PointContainmentTest(Point3d point, Curve curve, Plane plane, double tolerance = 0.001)
         {
-            return curve.Contains(point, plane, tolerance);
+            return curve.Contains(point, plane, tolerance) == PointContainment.Inside;
         }
     }
 }
