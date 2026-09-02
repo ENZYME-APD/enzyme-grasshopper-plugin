@@ -134,7 +134,7 @@ namespace Enzyme.Components
             }
 
             Surface srf = null;
-            if (!DA.GetData(1, ref srf) || srf == null) return;
+            
 
             int u_divs = 20;
             DA.GetData(2, ref u_divs);
