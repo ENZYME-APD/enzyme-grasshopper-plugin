@@ -212,6 +212,6 @@ namespace Enzyme.Components
 
         protected override System.Drawing.Bitmap Icon => IconLoader.Load("FacadeDist.png");
 
-        public override GH_Exposure Exposure => GH_Exposure.secondary;
+        public override GH_Exposure Exposure => GH_Exposure.primary;
     }
 }

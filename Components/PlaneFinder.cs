@@ -10,7 +10,7 @@ namespace Enzyme.Components
         public PlaneFinder()
           : base("Surface Plane Finder", "plane_finder",
               "Finds a plane from a planar surface or brep face.",
-              "Enzyme", "Pattern")
+              "Enzyme", "Facade")
         {
         }
 
@@ -135,5 +135,7 @@ namespace Enzyme.Components
         {
             get { return new Guid("f6e9bc6f-cd1e-4581-9b19-c0202ad9d968"); }
         }
+        public override GH_Exposure Exposure => GH_Exposure.secondary;
+
     }
 }

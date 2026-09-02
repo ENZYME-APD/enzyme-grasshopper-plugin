@@ -9,7 +9,7 @@ namespace Enzyme.Components
         public VerticalProjectionComponent()
           : base("Vertical Projection", "VertProj",
               "Projects a point vertically (along world Z-axis) onto a given plane.",
-              "Enzyme", "Pattern")
+              "Enzyme", "Facade")
         {
         }
 
@@ -107,5 +107,7 @@ namespace Enzyme.Components
         {
             get { return new Guid("B95F5651-7667-4638-A3BA-F0121F247920"); }
         }
+        public override GH_Exposure Exposure => GH_Exposure.secondary;
+
     }
 }

@@ -15,7 +15,7 @@ namespace Enzyme.Components
         public TileGridGenerator()
             : base("Grid Pattern Generator and Trimmer", "GridPattern",
                 "Generates a grid pattern (rectangular, hexagonal, triangular) within a boundary and trims cells to fit.",
-                "Enzyme", "Pattern")
+                "Enzyme", "Facade")
         {
         }
 
@@ -28,7 +28,6 @@ namespace Enzyme.Components
         }
 
         public override Guid ComponentGuid => new Guid("3E7B9F2A-C4D8-4A1E-B5F3-8D2C6E0A9B4F");
-
         public override void AddedToDocument(GH_Document document)
         {
             base.AddedToDocument(document);
@@ -314,5 +313,7 @@ namespace Enzyme.Components
         {
             return curve.Contains(point, plane, tolerance) == PointContainment.Inside;
         }
+        public override GH_Exposure Exposure => GH_Exposure.secondary;
+
     }
 }
