@@ -37,7 +37,7 @@ namespace Enzyme.Components
             pManager.AddNumberParameter("Inset Factor", "I", "Inset factor (0.0-1.0)", GH_ParamAccess.item, 1.0);
             pManager.AddBooleanParameter("Bake", "B", "Bake trigger", GH_ParamAccess.item, false);
             pManager.AddTextParameter("Bake Name", "BN", "Bake group/layer name", GH_ParamAccess.item, "");
-            pManager.AddIntegerParameter("Rotate 90", "R90", "Rotate image by multiples of 90 degrees (1=90, 2=180, 3=270)", GH_ParamAccess.item, 0);
+            pManager.AddNumberParameter("Rotation", "Rot", "Rotate image map in degrees", GH_ParamAccess.item, 0.0);
 
             pManager[0].Optional = true;
             pManager[2].Optional = true;
@@ -100,23 +100,17 @@ namespace Enzyme.Components
             string imgPath = "";
             DA.GetData(0, ref imgPath);
             
-            int rotSteps = 0;
-            DA.GetData(10, ref rotSteps);
+            double rotDeg = 0.0;
+            DA.GetData(10, ref rotDeg);
 
             if (!string.IsNullOrEmpty(imgPath))
             {
-                if (imgPath != _cachedImagePath || rotSteps != _cachedRotation || _cachedBitmap == null)
+                if (imgPath != _cachedImagePath || _cachedBitmap == null)
                 {
                     try
                     {
                         _cachedBitmap = new System.Drawing.Bitmap(imgPath);
                         _cachedImagePath = imgPath;
-                        _cachedRotation = rotSteps;
-                        
-                        int r = ((rotSteps % 4) + 4) % 4; 
-                        if (r == 1) _cachedBitmap.RotateFlip(System.Drawing.RotateFlipType.Rotate90FlipNone);
-                        if (r == 2) _cachedBitmap.RotateFlip(System.Drawing.RotateFlipType.Rotate180FlipNone);
-                        if (r == 3) _cachedBitmap.RotateFlip(System.Drawing.RotateFlipType.Rotate270FlipNone);
                     }
                     catch (Exception ex)
                     {
@@ -243,6 +237,22 @@ namespace Enzyme.Components
                 {
                     Transform scale_transform = Transform.Scale(center_pt, i_factor);
                     polyline.Transform(scale_transform);
+                }
+
+                if (rotDeg != 0.0)
+                {
+                    double rad = rotDeg * Math.PI / 180.0;
+                    double cosA = Math.Cos(rad);
+                    double sinA = Math.Sin(rad);
+
+                    double cu = img_u - 0.5;
+                    double cv = img_v - 0.5;
+
+                    double ru = cu * cosA - cv * sinA;
+                    double rv = cu * sinA + cv * cosA;
+
+                    img_u = ru + 0.5;
+                    img_v = rv + 0.5;
                 }
 
                 int pxX = (int)Math.Max(0, Math.Min(_cachedBitmap.Width - 1, img_u * _cachedBitmap.Width));
