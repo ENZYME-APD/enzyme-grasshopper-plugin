@@ -59,6 +59,7 @@ namespace Enzyme.Components
             pManager.AddTextParameter("Grid Type", "Grid Type", "Grid type: rectangular, offset_rectangular, hexagonal, triangular", GH_ParamAccess.item, "rectangular");
             pManager.AddNumberParameter("Cell Width", "X Dim", "Cell width", GH_ParamAccess.item, 1.0);
             pManager.AddNumberParameter("Cell Height", "Y Dim", "Cell height", GH_ParamAccess.item, 1.0);
+            pManager.AddNumberParameter("Grout Width", "Grout", "Width of the grout joint between tiles. Default 0.", GH_ParamAccess.item, 0.0);
         }
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
@@ -78,7 +79,7 @@ namespace Enzyme.Components
 
             GeometryBase baseGeom = null;
             Point3d setoutPt = Point3d.Unset;
-            double x_dim = 1.0, y_dim = 1.0;
+            double x_dim = 1.0, y_dim = 1.0, grout = 0.0;
             string gridType = "rectangular";
 
             if (!DA.GetData(0, ref baseGeom)) return;
@@ -86,6 +87,8 @@ namespace Enzyme.Components
             DA.GetData(2, ref gridType);
             DA.GetData(3, ref x_dim);
             DA.GetData(4, ref y_dim);
+            DA.GetData(5, ref grout);
+            if (grout < 0) grout = 0;
 
             Curve boundary = null;
             Plane originPlane = Plane.WorldXY;
@@ -184,8 +187,9 @@ namespace Enzyme.Components
 
             BoundingBox bbox = localBoundary.GetBoundingBox(true);
 
-            List<GridCell> cells = GenerateCells(bbox, x_dim, y_dim, gridType.ToLower());
+            List<GridCell> cells = GenerateCells(bbox, x_dim, y_dim, gridType.ToLower(), grout);
 
+            cells.RemoveAll(c => c == null || c.Curve == null);
             foreach (GridCell cell in cells)
             {
                 cell.Transform(toWorld);
@@ -266,7 +270,7 @@ namespace Enzyme.Components
             }
         }
 
-        private List<GridCell> GenerateCells(BoundingBox bbox, double cellWidth, double cellHeight, string gridType)
+        private List<GridCell> GenerateCells(BoundingBox bbox, double cellWidth, double cellHeight, string gridType, double grout)
         {
             List<GridCell> cells = new List<GridCell>();
 
@@ -281,7 +285,7 @@ namespace Enzyme.Components
                     while (y < bbox.Max.Y)
                     {
                         double offset = (gridType == "offset_rectangular" && rowIndex % 2 == 1) ? 0.5 * cellWidth : 0;
-                        cells.Add(CreateRectangularCell(x, y, offset, cellWidth, cellHeight));
+                        cells.Add(CreateRectangularCell(x, y, offset, cellWidth, cellHeight, grout));
                         y += cellHeight;
                         rowIndex++;
                     }
@@ -300,7 +304,7 @@ namespace Enzyme.Components
                     double offset = (rowCount % 2 != 0) ? vSpacing / 2.0 : 0;
                     while (y < bbox.Max.Y)
                     {
-                        cells.Add(CreateHexagonalCell(x, y + offset, cellWidth));
+                        cells.Add(CreateHexagonalCell(x, y + offset, cellWidth, grout));
                         y += vSpacing;
                     }
                     rowCount++;
@@ -320,8 +324,8 @@ namespace Enzyme.Components
                     double x = startX + (row % 2 == 0 ? 0 : cellWidth / 2.0);
                     while (x < bbox.Max.X)
                     {
-                        cells.Add(CreateTriangularCell(x, y, false, cellWidth, height));
-                        cells.Add(CreateTriangularCell(x, y, true, cellWidth, height));
+                        cells.Add(CreateTriangularCell(x, y, false, cellWidth, height, grout));
+                        cells.Add(CreateTriangularCell(x, y, true, cellWidth, height, grout));
                         x += cellWidth;
                     }
                     y += height;
@@ -332,25 +336,35 @@ namespace Enzyme.Components
             return cells;
         }
 
-        private GridCell CreateRectangularCell(double x, double y, double offset, double cellWidth, double cellHeight)
+        private GridCell CreateRectangularCell(double x, double y, double offset, double cellWidth, double cellHeight, double grout)
         {
             GridCell cell = new GridCell();
-            double adjustedX = x + offset;
-            cell.Curve = new Rectangle3d(Plane.WorldXY, new Point3d(adjustedX, y, 0), new Point3d(adjustedX + cellWidth, y + cellHeight, 0)).ToNurbsCurve();
-            cell.Center = new Point3d(adjustedX + cellWidth / 2, y + cellHeight / 2, 0);
+            double halfGrout = grout / 2.0;
+            double adjustedX = x + offset + halfGrout;
+            double adjustedY = y + halfGrout;
+            double cw = cellWidth - grout;
+            double ch = cellHeight - grout;
+            
+            if (cw <= 0 || ch <= 0) return null; // cell fully eaten by grout
+            
+            cell.Curve = new Rectangle3d(Plane.WorldXY, new Point3d(adjustedX, adjustedY, 0), new Point3d(adjustedX + cw, adjustedY + ch, 0)).ToNurbsCurve();
+            cell.Center = new Point3d(adjustedX + cw / 2, adjustedY + ch / 2, 0);
             cell.Corners = new List<Point3d> {
-                new Point3d(adjustedX, y, 0),
-                new Point3d(adjustedX + cellWidth, y, 0),
-                new Point3d(adjustedX + cellWidth, y + cellHeight, 0),
-                new Point3d(adjustedX, y + cellHeight, 0)
+                new Point3d(adjustedX, adjustedY, 0),
+                new Point3d(adjustedX + cw, adjustedY, 0),
+                new Point3d(adjustedX + cw, adjustedY + ch, 0),
+                new Point3d(adjustedX, adjustedY + ch, 0)
             };
             return cell;
         }
 
-        private GridCell CreateHexagonalCell(double centerX, double centerY, double cellWidth)
+        private GridCell CreateHexagonalCell(double centerX, double centerY, double cellWidth, double grout)
         {
             GridCell cell = new GridCell();
             double radius = cellWidth / 2.0;
+            if (grout > 0) radius -= grout / Math.Sqrt(3.0);
+            if (radius <= 0) return null;
+            
             List<Point3d> corners = new List<Point3d>();
             for (int i = 0; i < 6; i++)
             {
@@ -366,7 +380,7 @@ namespace Enzyme.Components
             return cell;
         }
 
-        private GridCell CreateTriangularCell(double baseX, double baseY, bool inverted, double cellWidth, double height)
+        private GridCell CreateTriangularCell(double baseX, double baseY, bool inverted, double cellWidth, double height, double grout)
         {
             GridCell cell = new GridCell();
             List<Point3d> corners = new List<Point3d>();
@@ -382,8 +396,21 @@ namespace Enzyme.Components
                 corners.Add(new Point3d(baseX + cellWidth * 1.5, baseY + height, 0));
                 corners.Add(new Point3d(baseX + cellWidth, baseY, 0));
             }
+            Point3d centroid = new Point3d(corners.Sum(p => p.X) / 3.0, corners.Sum(p => p.Y) / 3.0, 0);
+            
+            if (grout > 0)
+            {
+                double r = height / 3.0;
+                double scale = 1.0 - (grout / 2.0) / r;
+                if (scale <= 0) return null;
+                for (int i = 0; i < corners.Count; i++)
+                {
+                    corners[i] = centroid + (corners[i] - centroid) * scale;
+                }
+            }
+            
             cell.Corners = corners;
-            cell.Center = new Point3d(corners.Sum(p => p.X) / 3.0, corners.Sum(p => p.Y) / 3.0, 0);
+            cell.Center = centroid;
 
             List<Point3d> crvPts = new List<Point3d>(corners);
             crvPts.Add(corners[0]);
