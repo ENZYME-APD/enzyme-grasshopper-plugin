@@ -98,6 +98,14 @@ namespace Enzyme.Components
             return Color.FromArgb(r, g, b);
         }
 
+        protected override System.Drawing.Bitmap Icon
+        {
+            get
+            {
+                return Enzyme.IconLoader.Load("Gradient Generator.png");
+            }
+        }
+
         public override Guid ComponentGuid
         {
             get { return new Guid("B5D2F6B2-82A1-4F9C-91B2-C3D4E5F6A7B8"); }
