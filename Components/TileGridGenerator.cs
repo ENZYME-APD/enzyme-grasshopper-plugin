@@ -62,7 +62,7 @@ namespace Enzyme.Components
             pManager.AddNumberParameter("Grout Width", "Grout", "Width of the grout joint between tiles. Default 0.", GH_ParamAccess.item, 0.0);
             pManager.AddVectorParameter("Direction", "Dir", "Optional vector to align the grid's X-axis. Projects to the base plane.", GH_ParamAccess.item);
             pManager[6].Optional = true;
-            pManager.AddNumberParameter("Rotation", "Rot", "Optional rotation angle (in radians) applied after alignment.", GH_ParamAccess.item, 0.0);
+            pManager.AddNumberParameter("Rotation", "Rot", "Optional rotation angle (in degrees) applied after alignment.", GH_ParamAccess.item, 0.0);
         }
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
@@ -191,7 +191,7 @@ namespace Enzyme.Components
 
             if (rot != 0.0)
             {
-                originPlane.Rotate(rot, originPlane.ZAxis);
+                originPlane.Rotate(rot * Math.PI / 180.0, originPlane.ZAxis);
             }
 
             List<Curve> allTiles = new List<Curve>();
