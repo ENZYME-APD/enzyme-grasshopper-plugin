@@ -1,0 +1,435 @@
+import re
+
+with open('Components/RoadGenerator.cs', 'r') as f:
+    content = f.read()
+
+start_idx = content.find("protected override void SolveInstance(IGH_DataAccess DA)")
+end_idx = content.find("private double TriVolume(", start_idx)
+
+new_solve = """protected override void SolveInstance(IGH_DataAccess DA)
+        {
+            Stopwatch stopwatch = Stopwatch.StartNew();
+
+            List<Curve> centerlines = new List<Curve>();
+            if (!DA.GetDataList(0, centerlines) || centerlines.Count == 0) return;
+
+            Mesh terrain = null;
+            DA.GetData(1, ref terrain);
+
+            int dirs = 2, lanes = 2;
+            double laneW = 3.5, shoulderW = 1.5, threshold = 5.0, pillarSep = 20.0, angle = 45.0, subDist = 2.0;
+            bool colorize = true;
+
+            DA.GetData(2, ref dirs);
+            DA.GetData(3, ref lanes);
+            DA.GetData(4, ref laneW);
+            DA.GetData(5, ref shoulderW);
+            DA.GetData(6, ref threshold);
+            DA.GetData(7, ref pillarSep);
+            DA.GetData(8, ref angle);
+            DA.GetData(9, ref subDist);
+            DA.GetData(10, ref colorize);
+
+            double totalLanes = dirs * lanes;
+            double roadHalfWidth = (totalLanes * laneW) / 2.0;
+            double totalHalfWidth = roadHalfWidth + shoulderW;
+            double angleRad = angle * Math.PI / 180.0;
+            if (angleRad < 0.01) angleRad = 0.01;
+            if (angleRad > 1.5) angleRad = 1.5;
+
+            double totalCutM3 = 0.0;
+            double totalFillM3 = 0.0;
+            double buffer = subDist * 1.5; 
+
+            List<RoadData> roads = new List<RoadData>();
+
+            for (int k = 0; k < centerlines.Count; k++)
+            {
+                Curve crv = centerlines[k];
+                if (crv == null) continue;
+
+                Curve nCrv = crv.ToNurbsCurve();
+                RoadData rd = new RoadData();
+                rd.IsClosed = nCrv.IsClosed;
+                
+                for (int i = 0; i < totalLanes; i++) rd.allLanes.Add(new List<Point3d>());
+
+                double length = nCrv.GetLength();
+                int divs = Math.Max(2, (int)(length / subDist));
+                
+                // BULLETPROOF ARC-LENGTH DIVISION: No Chord-Jumping across hairpins
+                double[] tParams = new double[divs + 1];
+                double t0 = nCrv.Domain.T0;
+                double t1 = nCrv.Domain.T1;
+                tParams[0] = t0;
+                tParams[divs] = t1;
+                for (int i = 1; i < divs; i++) {
+                    double targetLen = (length * i) / divs;
+                    if (nCrv.LengthParameter(targetLen, out double t)) {
+                        tParams[i] = t;
+                    } else {
+                        tParams[i] = t0 + (t1 - t0) * ((double)i / divs);
+                    }
+                }
+
+                double lastPillarDist = 0;
+                Vector3d prevTangent = Vector3d.XAxis;
+
+                for (int i = 0; i < tParams.Length; i++)
+                {
+                    if (rd.IsClosed && i == tParams.Length - 1 && rd.leftPts.Count > 0)
+                    {
+                        rd.leftPts.Add(rd.leftPts[0]);
+                        rd.rightPts.Add(rd.rightPts[0]);
+                        for (int j = 0; j < totalLanes; j++) rd.allLanes[j].Add(rd.allLanes[j][0]);
+                        if (rd.roadProfiles.Count > 0) {
+                            rd.roadProfiles.Add(rd.roadProfiles[0]);
+                            rd.terrProfiles.Add(rd.terrProfiles[0]);
+                        }
+                        continue;
+                    }
+
+                    double t = tParams[i];
+                    Point3d pt = nCrv.PointAt(t);
+                    Vector3d tangent = nCrv.TangentAt(t);
+                    tangent.Z = 0; 
+                    if (!tangent.Unitize()) tangent = prevTangent;
+                    else prevTangent = tangent;
+                    
+                    Vector3d normal = Vector3d.CrossProduct(tangent, Vector3d.ZAxis);
+                    normal.Unitize();
+
+                    Point3d left = pt + normal * totalHalfWidth;
+                    Point3d right = pt - normal * totalHalfWidth;
+                    
+                    rd.leftPts.Add(left);
+                    rd.rightPts.Add(right);
+                    rd.asphaltCenters.Add(new Tuple<Point3d, int>(new Point3d(pt.X, pt.Y, 0), i));
+
+                    double startOffset = -roadHalfWidth + (laneW / 2.0);
+                    for (int j = 0; j < totalLanes; j++)
+                    {
+                        double offset = startOffset + j * laneW;
+                        rd.allLanes[j].Add(pt - normal * offset); 
+                    }
+
+                    if (terrain != null)
+                    {
+                        double zTerrain = pt.Z, zLeftT = left.Z, zRightT = right.Z;
+                        
+                        Ray3d rC = new Ray3d(new Point3d(pt.X, pt.Y, pt.Z + 10000), -Vector3d.ZAxis);
+                        double tC = Rhino.Geometry.Intersect.Intersection.MeshRay(terrain, rC);
+                        bool onTerrain = (tC >= 0.0);
+                        if (onTerrain) zTerrain = rC.PointAt(tC).Z;
+
+                        if (onTerrain)
+                        {
+                            Ray3d rL = new Ray3d(new Point3d(left.X, left.Y, pt.Z + 10000), -Vector3d.ZAxis);
+                            double tL = Rhino.Geometry.Intersect.Intersection.MeshRay(terrain, rL);
+                            if (tL >= 0.0) zLeftT = rL.PointAt(tL).Z;
+
+                            Ray3d rR = new Ray3d(new Point3d(right.X, right.Y, pt.Z + 10000), -Vector3d.ZAxis);
+                            double tR = Rhino.Geometry.Intersect.Intersection.MeshRay(terrain, rR);
+                            if (tR >= 0.0) zRightT = rR.PointAt(tR).Z;
+
+                            double deltaZ = pt.Z - zTerrain;
+
+                            if (deltaZ > threshold)
+                            {
+                                double currDist = length * ((double)i / tParams.Length);
+                                if (currDist - lastPillarDist >= pillarSep)
+                                {
+                                    rd.pillars.Add(new LineCurve(pt, new Point3d(pt.X, pt.Y, zTerrain)));
+                                    lastPillarDist = currDist;
+                                }
+                                rd.roadProfiles.Add(new Point3d[] { left, left, pt, right, right });
+                                rd.terrProfiles.Add(new Point3d[] { left, left, pt, right, right });
+                            }
+                            else
+                            {
+                                Point3d leftBlend = left;
+                                if (zLeftT > left.Z + 0.1) {
+                                    Vector3d dir = normal * Math.Cos(angleRad) + Vector3d.ZAxis * Math.Sin(angleRad);
+                                    double hit = Rhino.Geometry.Intersect.Intersection.MeshRay(terrain, new Ray3d(left, dir));
+                                    leftBlend = hit >= 0 ? left + dir * hit : new Point3d(left.X, left.Y, zLeftT);
+                                } else if (zLeftT < left.Z - 0.1) {
+                                    Vector3d dir = normal * Math.Cos(angleRad) - Vector3d.ZAxis * Math.Sin(angleRad);
+                                    double hit = Rhino.Geometry.Intersect.Intersection.MeshRay(terrain, new Ray3d(left, dir));
+                                    leftBlend = hit >= 0 ? left + dir * hit : new Point3d(left.X, left.Y, zLeftT);
+                                }
+
+                                Point3d rightBlend = right;
+                                if (zRightT > right.Z + 0.1) {
+                                    Vector3d dir = -normal * Math.Cos(angleRad) + Vector3d.ZAxis * Math.Sin(angleRad);
+                                    double hit = Rhino.Geometry.Intersect.Intersection.MeshRay(terrain, new Ray3d(right, dir));
+                                    rightBlend = hit >= 0 ? right + dir * hit : new Point3d(right.X, right.Y, zRightT);
+                                } else if (zRightT < right.Z - 0.1) {
+                                    Vector3d dir = -normal * Math.Cos(angleRad) - Vector3d.ZAxis * Math.Sin(angleRad);
+                                    double hit = Rhino.Geometry.Intersect.Intersection.MeshRay(terrain, new Ray3d(right, dir));
+                                    rightBlend = hit >= 0 ? right + dir * hit : new Point3d(right.X, right.Y, zRightT);
+                                }
+
+                                rd.extraPoints.Add(new Tuple<Point3d, int>(pt, i));
+                                rd.extraPoints.Add(new Tuple<Point3d, int>(left, i));
+                                rd.extraPoints.Add(new Tuple<Point3d, int>(right, i));
+                                rd.extraPoints.Add(new Tuple<Point3d, int>(leftBlend, i));
+                                rd.extraPoints.Add(new Tuple<Point3d, int>(rightBlend, i));
+
+                                double exclL = new Point3d(leftBlend.X, leftBlend.Y, 0).DistanceTo(new Point3d(pt.X, pt.Y, 0));
+                                double exclR = new Point3d(rightBlend.X, rightBlend.Y, 0).DistanceTo(new Point3d(pt.X, pt.Y, 0));
+                                rd.daylightFootprints.Add(new Tuple<Point3d, double>(new Point3d(pt.X, pt.Y, 0), Math.Max(exclL, exclR) + buffer));
+
+                                Point3d leftT = new Point3d(left.X, left.Y, zLeftT);
+                                Point3d rightT = new Point3d(right.X, right.Y, zRightT);
+                                Point3d ptT = new Point3d(pt.X, pt.Y, zTerrain);
+
+                                rd.roadProfiles.Add(new Point3d[] { leftBlend, left, pt, right, rightBlend });
+                                rd.terrProfiles.Add(new Point3d[] { leftBlend, leftT, ptT, rightT, rightBlend });
+                            }
+                        }
+                    }
+                }
+                roads.Add(rd);
+            }
+
+            List<Curve> laneCurves = new List<Curve>();
+            List<Curve> pillarsOut = new List<Curve>();
+            List<Curve> railingCurves = new List<Curve>();
+            List<Mesh> roadMeshes = new List<Mesh>();
+            List<Mesh> cutVols = new List<Mesh>();
+            List<Mesh> fillVols = new List<Mesh>();
+            
+            List<Point3d> allCleanExtraPoints = new List<Point3d>();
+            List<Tuple<Point3d, double>> allDaylightFootprints = new List<Tuple<Point3d, double>>();
+            
+            double localIndexThreshold = 30.0 / subDist; 
+
+            for (int k = 0; k < roads.Count; k++)
+            {
+                RoadData rd = roads[k];
+                allDaylightFootprints.AddRange(rd.daylightFootprints);
+
+                foreach (var ep in rd.extraPoints)
+                {
+                    Point3d p = ep.Item1;
+                    int current_i = ep.Item2;
+                    Point3d p2D = new Point3d(p.X, p.Y, 0);
+                    bool culled = false;
+                    for (int j = 0; j < roads.Count; j++) {
+                        foreach (var center in roads[j].asphaltCenters) {
+                            if (j == k && Math.Abs(center.Item2 - current_i) < localIndexThreshold) continue; 
+                            
+                            if (p2D.DistanceTo(center.Item1) < totalHalfWidth + buffer) {
+                                culled = true; break;
+                            }
+                        }
+                        if (culled) break;
+                    }
+                    if (!culled) allCleanExtraPoints.Add(p);
+                }
+
+                Mesh roadMesh = new Mesh();
+                for (int i = 0; i < rd.leftPts.Count; i++) {
+                    roadMesh.Vertices.Add(rd.leftPts[i]);
+                    roadMesh.Vertices.Add(rd.rightPts[i]);
+                }
+                for (int i = 0; i < rd.leftPts.Count - 1; i++) {
+                    int v0 = i * 2, v1 = i * 2 + 1, v2 = (i + 1) * 2, v3 = (i + 1) * 2 + 1;
+                    roadMesh.Faces.AddFace(v0, v1, v3);
+                    roadMesh.Faces.AddFace(v0, v3, v2);
+                }
+                roadMesh.Faces.CullDegenerateFaces();
+                roadMesh.Vertices.CullUnused();
+                roadMesh.Compact();
+                roadMesh.Normals.ComputeNormals();
+                if (roadMesh.IsValid && roadMesh.Faces.Count > 0) roadMeshes.Add(roadMesh);
+
+                railingCurves.Add(new PolylineCurve(rd.leftPts));
+                railingCurves.Add(new PolylineCurve(rd.rightPts));
+                foreach(var lanePts in rd.allLanes) laneCurves.Add(new PolylineCurve(lanePts));
+                pillarsOut.AddRange(rd.pillars);
+
+                Mesh cutMesh = new Mesh();
+                Mesh fillMesh = new Mesh();
+                
+                for (int i = 0; i < rd.roadProfiles.Count - 1; i++)
+                {
+                    Point3d[] rp1 = rd.roadProfiles[i];
+                    Point3d[] rp2 = rd.roadProfiles[i + 1];
+                    Point3d[] tp1 = rd.terrProfiles[i];
+                    Point3d[] tp2 = rd.terrProfiles[i + 1];
+
+                    if (rp1[2].DistanceTo(rp2[2]) > subDist * 3.5) continue; 
+
+                    bool isCut = rp1[2].Z < tp1[2].Z; 
+                    Mesh target = isCut ? cutMesh : fillMesh;
+                    System.Drawing.Color c = isCut ? System.Drawing.Color.Red : System.Drawing.Color.Blue;
+                    
+                    int bIdx = target.Vertices.Count;
+                    Point3d[] top1 = isCut ? tp1 : rp1;
+                    Point3d[] top2 = isCut ? tp2 : rp2;
+                    Point3d[] bot1 = isCut ? rp1 : tp1;
+                    Point3d[] bot2 = isCut ? rp2 : tp2;
+
+                    for(int j=0; j<5; j++) target.Vertices.Add(top1[j]);
+                    for(int j=0; j<5; j++) target.Vertices.Add(top2[j]);
+                    for(int j=0; j<5; j++) target.Vertices.Add(bot1[j]);
+                    for(int j=0; j<5; j++) target.Vertices.Add(bot2[j]);
+
+                    if (colorize) for (int j = 0; j < 20; j++) target.VertexColors.Add(c);
+
+                    for (int j = 0; j < 4; j++) {
+                        if (top1[j].DistanceTo(top1[j+1]) > 0.001) {
+                            int A = bIdx + j, B = bIdx + j + 1, C = bIdx + j + 6, D = bIdx + j + 5;
+                            target.Faces.AddFace(A, B, C); target.Faces.AddFace(A, C, D);
+                        }
+                    }
+                    int bOff = bIdx + 10;
+                    for (int j = 0; j < 4; j++) {
+                        if (bot1[j].DistanceTo(bot1[j+1]) > 0.001) {
+                            int A = bOff + j, B = bOff + j + 5, C = bOff + j + 6, D = bOff + j + 1;
+                            target.Faces.AddFace(A, B, C); target.Faces.AddFace(A, C, D);
+                        }
+                    }
+                    
+                    if (i == 0 && (!rd.IsClosed)) {
+                        for (int j = 0; j < 4; j++) {
+                           if (top1[j].DistanceTo(bot1[j]) > 0.001 || top1[j+1].DistanceTo(bot1[j+1]) > 0.001) {
+                               int A = bIdx + j, B = bOff + j, C = bOff + j + 1, D = bIdx + j + 1;
+                               target.Faces.AddFace(A, B, C); target.Faces.AddFace(A, C, D);
+                           }
+                        }
+                    }
+                    if (i == rd.roadProfiles.Count - 2 && (!rd.IsClosed)) {
+                        for (int j = 0; j < 4; j++) {
+                           if (top2[j].DistanceTo(bot2[j]) > 0.001 || top2[j+1].DistanceTo(bot2[j+1]) > 0.001) {
+                               int A = bIdx + j + 5, B = bIdx + j + 6, C = bOff + j + 6, D = bOff + j + 5;
+                               target.Faces.AddFace(A, B, C); target.Faces.AddFace(A, C, D);
+                           }
+                        }
+                    }
+
+                    for (int j = 0; j < 4; j++) {
+                        double vol1 = TriVolume(top1[j], top1[j+1], top2[j], bot1[j], bot1[j+1], bot2[j]);
+                        double vol2 = TriVolume(top1[j+1], top2[j+1], top2[j], bot1[j+1], bot2[j+1], bot2[j]);
+                        if (isCut) totalCutM3 += vol1 + vol2;
+                        else totalFillM3 += vol1 + vol2;
+                    }
+                }
+
+                if (cutMesh.Faces.Count > 0) { 
+                    cutMesh.Faces.CullDegenerateFaces();
+                    cutMesh.Vertices.CullUnused();
+                    cutMesh.Compact();
+                    cutMesh.Weld(3.14159);
+                    cutMesh.Normals.ComputeNormals(); 
+                    if (cutMesh.IsValid) cutVols.Add(cutMesh); 
+                }
+                if (fillMesh.Faces.Count > 0) { 
+                    fillMesh.Faces.CullDegenerateFaces();
+                    fillMesh.Vertices.CullUnused();
+                    fillMesh.Compact();
+                    fillMesh.Weld(3.14159);
+                    fillMesh.Normals.ComputeNormals(); 
+                    if (fillMesh.IsValid) fillVols.Add(fillMesh); 
+                }
+            }
+
+            Mesh modTerrain = null;
+            if (terrain != null && allCleanExtraPoints.Count > 0)
+            {
+                modTerrain = terrain.DuplicateMesh();
+                
+                Rhino.Geometry.PointCloud pc = new Rhino.Geometry.PointCloud();
+                List<Point3d> cleanOrig = new List<Point3d>();
+                foreach (var op in terrain.Vertices.ToPoint3dArray())
+                {
+                    bool tooClose = false;
+                    Point3d op2D = new Point3d(op.X, op.Y, 0);
+                    foreach (var f in allDaylightFootprints)
+                    {
+                        if (op2D.DistanceTo(f.Item1) < f.Item2) { tooClose = true; break; }
+                    }
+                    if (!tooClose) {
+                        pc.Add(op);
+                        cleanOrig.Add(op);
+                    }
+                }
+                
+                foreach(var ep in allCleanExtraPoints) {
+                    pc.Add(ep);
+                    cleanOrig.Add(ep);
+                }
+
+                var nodes = new Node2List();
+                var faces_placeholder = new List<Grasshopper.Kernel.Geometry.Delaunay.Face>();
+                foreach (var p in cleanOrig) nodes.Append(new Node2(p.X, p.Y));
+                
+                Mesh newTerrain = Grasshopper.Kernel.Geometry.Delaunay.Solver.Solve_Mesh(nodes, 1e-6, ref faces_placeholder);
+                
+                for (int i = 0; i < newTerrain.Vertices.Count; i++) {
+                    newTerrain.Vertices[i] = new Rhino.Geometry.Point3f((float)cleanOrig[i].X, (float)cleanOrig[i].Y, (float)cleanOrig[i].Z);
+                }
+                
+                var facesToDelete = new List<int>();
+                for (int i = 0; i < newTerrain.Faces.Count; i++)
+                {
+                    var f = newTerrain.Faces[i];
+                    var pA = cleanOrig[f.A];
+                    var pB = cleanOrig[f.B];
+                    var pC = cleanOrig[f.C];
+                    if (pA.DistanceTo(pB) > 150 || pB.DistanceTo(pC) > 150 || pC.DistanceTo(pA) > 150)
+                        facesToDelete.Add(i);
+                }
+                newTerrain.Faces.DeleteFaces(facesToDelete);
+                newTerrain.Faces.CullDegenerateFaces();
+                newTerrain.Vertices.CullUnused();
+                newTerrain.Compact();
+                newTerrain.Weld(3.14159);
+                newTerrain.Normals.ComputeNormals();
+                if (newTerrain.IsValid) modTerrain = newTerrain;
+                else modTerrain = terrain; 
+            }
+            else { modTerrain = terrain; }
+
+            DA.SetData(0, modTerrain);
+            DA.SetDataList(1, roadMeshes);
+            DA.SetDataList(2, laneCurves);
+            DA.SetDataList(3, railingCurves);
+            DA.SetDataList(4, pillarsOut);
+            DA.SetDataList(5, cutVols);
+            DA.SetDataList(6, fillVols);
+            
+            stopwatch.Stop();
+            Message = $"Road Generator\\nTime: {stopwatch.ElapsedMilliseconds} ms\\n---\\nLanes: {totalLanes}\\nWidth: {totalHalfWidth*2:F1}m\\n---\\nCut: {totalCutM3:N0} m3\\nFill: {totalFillM3:N0} m3";
+        }
+"""
+
+content = content[:start_idx] + new_solve + content[end_idx:]
+
+# Need to update RoadData class to accept Tuple<Point3d, int>
+road_data_class = """
+        private class RoadData
+        {
+            public List<Point3d> leftPts = new List<Point3d>();
+            public List<Point3d> rightPts = new List<Point3d>();
+            public List<List<Point3d>> allLanes = new List<List<Point3d>>();
+            public List<Point3d[]> roadProfiles = new List<Point3d[]>();
+            public List<Point3d[]> terrProfiles = new List<Point3d[]>();
+            public List<Tuple<Point3d, int>> extraPoints = new List<Tuple<Point3d, int>>();
+            public List<Tuple<Point3d, int>> asphaltCenters = new List<Tuple<Point3d, int>>();
+            public List<Tuple<Point3d, double>> daylightFootprints = new List<Tuple<Point3d, double>>();
+            public List<LineCurve> pillars = new List<LineCurve>();
+            public bool IsClosed = false;
+        }
+
+        private double TriVolume("""
+
+# Replace the old RoadData class with the new one
+rd_start = content.find("private class RoadData")
+if rd_start != -1:
+    rd_end = content.find("private double TriVolume(", rd_start)
+    content = content[:rd_start] + road_data_class + content[rd_end + len("private double TriVolume("):]
+
+with open('Components/RoadGenerator.cs', 'w') as f:
+    f.write(content)
