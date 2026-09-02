@@ -46,13 +46,13 @@ namespace Enzyme.Components
                 Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 0, "mesh", 220, -120);
                 Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 1, 220, -50, 180, 50);
                 Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 2, 220, 20, 180, 50);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 3, "mesh", 220, 90);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 3, "curve", 220, 90);
             }
         }
 
         protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
-            pManager.AddCurveParameter("polylines", "P", "Tree of polylines", GH_ParamAccess.tree);
+            pManager.AddCurveParameter("Grid Cells", "Cells", "Tree of grid cells", GH_ParamAccess.tree);
             pManager.AddColourParameter("gradient_colors", "C", "List of gradient colors", GH_ParamAccess.list);
             pManager.AddColourParameter("accent_color", "AC", "Accent color", GH_ParamAccess.item, Color.Empty);
             pManager.AddIntegerParameter("axis", "A", "Axis (0=X, 1=Y, 2=Z)", GH_ParamAccess.item, 2);
@@ -445,7 +445,7 @@ namespace Enzyme.Components
         {
             get
             {
-                return IconLoader.Load("ColorMeshTiles.png");
+                return IconLoader.Load("Pixel Gradient.png");
             }
         }
 
