@@ -60,6 +60,9 @@ namespace Enzyme.Components
             pManager.AddNumberParameter("Cell Width", "X Dim", "Cell width", GH_ParamAccess.item, 1.0);
             pManager.AddNumberParameter("Cell Height", "Y Dim", "Cell height", GH_ParamAccess.item, 1.0);
             pManager.AddNumberParameter("Grout Width", "Grout", "Width of the grout joint between tiles. Default 0.", GH_ParamAccess.item, 0.0);
+            pManager.AddVectorParameter("Direction", "Dir", "Optional vector to align the grid's X-axis. Projects to the base plane.", GH_ParamAccess.item);
+            pManager[6].Optional = true;
+            pManager.AddNumberParameter("Rotation", "Rot", "Optional rotation angle (in radians) applied after alignment.", GH_ParamAccess.item, 0.0);
         }
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
@@ -79,8 +82,9 @@ namespace Enzyme.Components
 
             GeometryBase baseGeom = null;
             Point3d setoutPt = Point3d.Unset;
-            double x_dim = 1.0, y_dim = 1.0, grout = 0.0;
+            double x_dim = 1.0, y_dim = 1.0, grout = 0.0, rot = 0.0;
             string gridType = "rectangular";
+            Rhino.Geometry.Vector3d dir = Rhino.Geometry.Vector3d.Unset;
 
             if (!DA.GetData(0, ref baseGeom)) return;
             DA.GetData(1, ref setoutPt);
@@ -88,6 +92,8 @@ namespace Enzyme.Components
             DA.GetData(3, ref x_dim);
             DA.GetData(4, ref y_dim);
             DA.GetData(5, ref grout);
+            DA.GetData(6, ref dir);
+            DA.GetData(7, ref rot);
             if (grout < 0) grout = 0;
 
             Curve boundary = null;
@@ -170,6 +176,22 @@ namespace Enzyme.Components
             {
                 AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Could not extract a valid boundary.");
                 return;
+            }
+
+            if (dir.IsValid && !dir.IsZero)
+            {
+                Rhino.Geometry.Vector3d projDir = originPlane.ClosestPoint(originPlane.Origin + dir) - originPlane.Origin;
+                if (projDir.Length > 1e-6)
+                {
+                    projDir.Unitize();
+                    Rhino.Geometry.Vector3d yAxis = Rhino.Geometry.Vector3d.CrossProduct(originPlane.ZAxis, projDir);
+                    originPlane = new Plane(originPlane.Origin, projDir, yAxis);
+                }
+            }
+
+            if (rot != 0.0)
+            {
+                originPlane.Rotate(rot, originPlane.ZAxis);
             }
 
             List<Curve> allTiles = new List<Curve>();
@@ -278,13 +300,18 @@ namespace Enzyme.Components
             {
                 double pitchX = cellWidth + grout;
                 double pitchY = cellHeight + grout;
-                double x = Math.Floor(bbox.Min.X / pitchX) * pitchX;
-                while (x < bbox.Max.X)
+                double startX = Math.Floor((bbox.Min.X - pitchX) / pitchX) * pitchX;
+                double endX = bbox.Max.X + pitchX;
+                double startY = Math.Floor((bbox.Min.Y - pitchY) / pitchY) * pitchY;
+                double endY = bbox.Max.Y + pitchY;
+                
+                double x = startX;
+                while (x <= endX)
                 {
-                    double y = Math.Floor(bbox.Min.Y / pitchY) * pitchY;
-                    int rowIndex = (int)Math.Round((y - bbox.Min.Y) / pitchY);
+                    double y = startY;
+                    int rowIndex = (int)Math.Round((y - startY) / pitchY);
 
-                    while (y < bbox.Max.Y)
+                    while (y <= endY)
                     {
                         double offset = (gridType == "offset_rectangular" && rowIndex % 2 == 1) ? 0.5 * pitchX : 0;
                         cells.Add(CreateRectangularCell(x, y, offset, pitchX, pitchY, grout));
@@ -317,15 +344,17 @@ namespace Enzyme.Components
             {
                 double pitchW = cellWidth + Math.Sqrt(3.0) * grout;
                 double pitchH = pitchW * Math.Sqrt(3) / 2.0;
-                double startY = Math.Floor(bbox.Min.Y / pitchH) * pitchH;
-                double startX = Math.Floor(bbox.Min.X / pitchW) * pitchW - pitchW;
+                double startY = Math.Floor((bbox.Min.Y - pitchH) / pitchH) * pitchH;
+                double endY = bbox.Max.Y + pitchH;
+                double startX = Math.Floor((bbox.Min.X - pitchW) / pitchW) * pitchW;
+                double endX = bbox.Max.X + pitchW;
                 
                 double y = startY;
                 int row = 0;
-                while (y < bbox.Max.Y)
+                while (y <= endY)
                 {
                     double x = startX + (row % 2 == 0 ? 0 : pitchW / 2.0);
-                    while (x < bbox.Max.X)
+                    while (x <= endX)
                     {
                         cells.Add(CreateTriangularCell(x, y, false, pitchW, pitchH, grout));
                         cells.Add(CreateTriangularCell(x, y, true, pitchW, pitchH, grout));
