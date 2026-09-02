@@ -51,10 +51,11 @@ namespace Enzyme.Components
             }
         }
 
-        protected override void RegisterInputParams(GH_InputParamManager pManager)
+                protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
-            pManager.AddCurveParameter("Boundary", "Boundary", "Closed boundary curve", GH_ParamAccess.item);
-            pManager.AddPlaneParameter("Origin Plane", "Plane", "Grid base plane", GH_ParamAccess.item, Plane.WorldXY);
+            pManager.AddGeometryParameter("Base Geometry", "Base", "Planar Surface, Brep, or closed Curve to fill.", GH_ParamAccess.item);
+            pManager.AddPointParameter("Setout Point", "Setout", "Optional origin point for the grid alignment. If not supplied, the centroid is used.", GH_ParamAccess.item);
+            pManager[1].Optional = true;
             pManager.AddTextParameter("Grid Type", "Grid Type", "Grid type: rectangular, offset_rectangular, hexagonal, triangular", GH_ParamAccess.item, "rectangular");
             pManager.AddNumberParameter("Cell Width", "X Dim", "Cell width", GH_ParamAccess.item, 1.0);
             pManager.AddNumberParameter("Cell Height", "Y Dim", "Cell height", GH_ParamAccess.item, 1.0);
@@ -75,20 +76,96 @@ namespace Enzyme.Components
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            Curve boundary = null;
+            GeometryBase baseGeom = null;
+            Point3d setoutPt = Point3d.Unset;
             double x_dim = 1.0, y_dim = 1.0;
             string gridType = "rectangular";
-            Plane originPlane = Plane.WorldXY;
 
-            if (!DA.GetData(0, ref boundary)) return;
-            DA.GetData(1, ref originPlane);
+            if (!DA.GetData(0, ref baseGeom)) return;
+            DA.GetData(1, ref setoutPt);
             DA.GetData(2, ref gridType);
             DA.GetData(3, ref x_dim);
             DA.GetData(4, ref y_dim);
 
-            if (boundary == null || !boundary.IsClosed)
+            Curve boundary = null;
+            Plane originPlane = Plane.WorldXY;
+
+            if (baseGeom is Curve crv)
             {
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Boundary must be a closed curve.");
+                boundary = crv;
+                if (!boundary.IsClosed)
+                {
+                    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Base curve must be closed.");
+                    return;
+                }
+                if (!boundary.TryGetPlane(out originPlane))
+                {
+                    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Base curve must be planar.");
+                    return;
+                }
+                
+                var amp = Rhino.Geometry.AreaMassProperties.Compute(boundary);
+                Point3d centroid = amp != null ? amp.Centroid : boundary.PointAtStart;
+                originPlane.Origin = centroid;
+                if (setoutPt.IsValid) originPlane.Origin = originPlane.ClosestPoint(setoutPt);
+            }
+            else if (baseGeom is Surface srf)
+            {
+                if (!srf.IsPlanar())
+                {
+                    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Base surface must be planar.");
+                    return;
+                }
+                var brep = Brep.CreateFromSurface(srf);
+                Curve[] naked = brep.DuplicateNakedEdgeCurves(true, false);
+                if (naked != null && naked.Length > 0)
+                {
+                    Curve[] joined = Curve.JoinCurves(naked);
+                    if (joined != null && joined.Length > 0) boundary = joined[0];
+                }
+                
+                double u = srf.Domain(0).Mid;
+                double v = srf.Domain(1).Mid;
+                Vector3d normal = srf.NormalAt(u, v);
+                
+                var amp = Rhino.Geometry.AreaMassProperties.Compute(brep);
+                Point3d centroid = amp != null ? amp.Centroid : srf.PointAt(u, v);
+                originPlane = new Plane(centroid, normal);
+                if (setoutPt.IsValid) originPlane.Origin = originPlane.ClosestPoint(setoutPt);
+            }
+            else if (baseGeom is Brep b)
+            {
+                if (b.Faces.Count != 1 || !b.Faces[0].IsPlanar())
+                {
+                    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Base Brep must be a single planar face.");
+                    return;
+                }
+                Curve[] naked = b.DuplicateNakedEdgeCurves(true, false);
+                if (naked != null && naked.Length > 0)
+                {
+                    Curve[] joined = Curve.JoinCurves(naked);
+                    if (joined != null && joined.Length > 0) boundary = joined[0];
+                }
+                
+                Surface bsrf = b.Faces[0].UnderlyingSurface();
+                double u = bsrf.Domain(0).Mid;
+                double v = bsrf.Domain(1).Mid;
+                Vector3d normal = bsrf.NormalAt(u, v);
+                
+                var amp = Rhino.Geometry.AreaMassProperties.Compute(b);
+                Point3d centroid = amp != null ? amp.Centroid : bsrf.PointAt(u, v);
+                originPlane = new Plane(centroid, normal);
+                if (setoutPt.IsValid) originPlane.Origin = originPlane.ClosestPoint(setoutPt);
+            }
+            else
+            {
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Base Geometry must be a Curve, Surface, or Brep.");
+                return;
+            }
+
+            if (boundary == null)
+            {
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Could not extract a valid boundary.");
                 return;
             }
 
