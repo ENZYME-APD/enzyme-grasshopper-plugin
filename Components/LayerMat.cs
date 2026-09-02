@@ -16,7 +16,7 @@ namespace Enzyme.Components
         public LayerMat()
           : base("Assign Layer Materials", "LAYERMAT",
               "Assigns render materials to layers and auto-populates connected Value Lists.",
-              "Enzyme", "Utilities")
+              Enzyme.Utils.TabInfo.TabName, "Utilities")
         {
         }
 

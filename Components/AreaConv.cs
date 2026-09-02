@@ -12,7 +12,7 @@ namespace Enzyme.Components
         public AreaConv()
           : base("Area Converter", "AreaConv",
               "Converts between Square Meters and Square Feet while maintaining Data Trees.",
-              "Enzyme", "Utilities")
+              Enzyme.Utils.TabInfo.TabName, "Utilities")
         {
         }
 

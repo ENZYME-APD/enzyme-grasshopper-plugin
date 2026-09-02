@@ -16,7 +16,7 @@ namespace Enzyme.Components
         public Clearance()
           : base("Masterplan Clearance Engine", "Clearance",
               "Calculates topological (Delaunay) or proximity-based clearances between tower outlines with dynamic categorization.",
-              "Enzyme", "Utilities")
+              Enzyme.Utils.TabInfo.TabName, "Utilities")
         {
         }
 

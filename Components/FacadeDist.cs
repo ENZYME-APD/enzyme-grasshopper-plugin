@@ -15,7 +15,7 @@ namespace Enzyme.Components
         public FacadeDist()
           : base("Facade Module Distributor", "FACADE_DIST",
               "Dynamically streams procedural facade modules with high-performance hot-reloading.",
-              "Enzyme", "Facade")
+              Enzyme.Utils.TabInfo.TabName, "Facade")
         {
         }
 

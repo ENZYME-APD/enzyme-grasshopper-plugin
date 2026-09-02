@@ -11,7 +11,7 @@ namespace Enzyme.Components
         public HydroDEM()
           : base("Hydro-DEM Engine", "HydroDEM",
               "Calculates Flow Direction and Flow Accumulation on a terrain mesh to extract stream networks.",
-              "Enzyme", "LEAP")
+              Enzyme.Utils.TabInfo.TabName, "LEAP")
         {
         }
 

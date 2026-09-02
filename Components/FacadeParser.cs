@@ -17,7 +17,7 @@ namespace Enzyme.Components
         public FacadeParserComponent()
           : base("Facade JSON Parser", "Facade_Parser",
               "Parses Facade JSON data into Curves, Heights, and Programs.",
-              "Enzyme", "Masterplan (Beta)")
+              Enzyme.Utils.TabInfo.TabName, "Masterplan (Beta)")
         {
         }
 

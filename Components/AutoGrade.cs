@@ -10,7 +10,7 @@ namespace Enzyme.Components
         public AutoGrade()
           : base("Auto-Grade Road", "AutoGrade",
               "Procedurally drapes and slope-constrains a 2D centerline into a smooth 3D road profile.",
-              "Enzyme", "Masterplan")
+              Enzyme.Utils.TabInfo.TabName, "Masterplan")
         {
         }
 

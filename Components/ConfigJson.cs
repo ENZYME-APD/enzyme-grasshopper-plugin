@@ -11,7 +11,7 @@ namespace Enzyme.Components
         public ConfigJsonComponent()
           : base("Master JSON Config Builder", "ConfigJSON",
               "Generates Target and Palette JSONs from 3 parallel lists.",
-              "Enzyme", "Masterplan (Beta)")
+              Enzyme.Utils.TabInfo.TabName, "Masterplan (Beta)")
         {
         }
 

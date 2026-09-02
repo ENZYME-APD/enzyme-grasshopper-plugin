@@ -12,7 +12,7 @@ namespace Enzyme.Components
         public TShuffle()
           : base("Tree Shuffler", "T-Shuffle",
               "Shuffles items from a pool into an existing tree structure",
-              "Enzyme", "Utilities")
+              Enzyme.Utils.TabInfo.TabName, "Utilities")
         {
         }
 

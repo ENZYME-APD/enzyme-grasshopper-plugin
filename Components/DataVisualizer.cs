@@ -14,7 +14,7 @@ namespace Enzyme.Components
         public DataVisualizer()
           : base("Data Visualizer", "DataVis",
               "Visualizes points and data values as a fast gradient mesh (Bars, Dots, or Spheres).",
-              "Enzyme", "LEAP")
+              Enzyme.Utils.TabInfo.TabName, "LEAP")
         {
         }
 

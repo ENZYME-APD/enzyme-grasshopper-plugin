@@ -15,7 +15,7 @@ namespace Enzyme.Components
         public MasterplanEngineComponent()
           : base("JSON MP Engine V2", "MP ENGINE",
               "A high-performance topological coordinator. Evaluates spatial intersections, identifies setbacks/roofs, and broadcasts lightweight JSON architectures.",
-              "Enzyme", "Masterplan (Beta)")
+              Enzyme.Utils.TabInfo.TabName, "Masterplan (Beta)")
         {
         }
 

@@ -10,7 +10,7 @@ namespace Enzyme.Components
         public MeshColorReset()
           : base("Reset Mesh Colors", "Mesh-C-Reset",
               "Strips all vertex colors from a mesh, allowing Custom Preview to override its color natively.",
-              "Enzyme", "Utilities")
+              Enzyme.Utils.TabInfo.TabName, "Utilities")
         {
         }
 

@@ -1,5 +1,7 @@
 using System;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
@@ -12,10 +14,56 @@ namespace Enzyme.Components
 {
     public class WindEngine : GH_Component
     {
+        // --- Tunable model constants (previously unnamed magic numbers) ---
+        // Wake length is expressed as a multiple of the obstructing building's height,
+        // following simplified urban-wind wake-length rules of thumb (~6-8x obstacle height
+        // for the visually-significant near-wake, well short of the full ~10-15x recovery
+        // distance). Also hard-capped per solve against the site's own extents (see
+        // WAKE_RANGE_DOMAIN_FRACTION) so a tall/placeholder building mesh can't blow the
+        // wake out past the whole analysis grid and drown out terrain-driven variation.
+        private const double WAKE_LENGTH_TO_HEIGHT_RATIO = 8.0;
+        private const double WAKE_RANGE_DOMAIN_FRACTION = 0.35;
+        private const double WAKE_MIN_INTENSITY = 0.12;
+
+        // Corner/channeling search & influence radii are expressed as multiples of the
+        // analysis GridSpacing (a real spatial dimension), not of wind speed.
+        private const double CORNER_SEARCH_RADIUS_SPACING_MULTIPLIER = 5.0;
+        private const double CORNER_INFLUENCE_RADIUS_SPACING_MULTIPLIER = 2.5;
+        private const double CORNER_TANGENCY_THRESHOLD = 0.35;
+        private const double CORNER_SPEED_BOOST_COEFFICIENT = 0.45;
+
+        private const double SLOPE_SPEEDUP_COEFFICIENT = 0.35;
+
+        private const int STREAMLINE_SEED_ROW_STRIDE = 2;
+        private const int STREAMLINE_MAX_STEPS = 50;
+        private const double STREAMLINE_STEP_SIZE = 0.2;
+        private const double STREAMLINE_STEP_ACCEPT_SPACING_MULTIPLIER = 2.0;
+
+        // "Comfort" here is a quick single-direction, single-threshold read, not a
+        // validated Lawson/NEN8100-style wind comfort criterion.
+        private const double COMFORT_SPEED_THRESHOLD_MS = 5.0;
+
+        // --- Cache of the last raycast-heavy grid solve, so pure re-coloring or
+        // re-height changes (CustomColors / HeatmapHeight) don't re-run the expensive
+        // terrain/building raycasting. ---
+        private string _cachedFingerprint;
+        private Point3d[] _cachedGridPoints;
+        private Vector3d[] _cachedDirs;
+        private double[] _cachedSpeeds;
+        private bool[] _cachedSolid;
+        private bool[] _cachedValid;
+        private int _cachedUCount;
+        private BoundingBox _cachedBBox;
+        private double _cachedSpacing;
+        private double _cachedMinSpeed;
+        private double _cachedMaxSpeed;
+        private int _cachedActiveSensorCount;
+        private int _cachedComfortableCount;
+
         public WindEngine()
             : base("Urban Wind Vector Engine", "WindEngine",
                 "Simulates urban wind fields using terrain-parallel raycasting. Outputs a perfectly flat, crisp XY pixel-screen heatmap at a custom elevation.",
-                "Enzyme", "Terrain")
+                Enzyme.Utils.TabInfo.TabName, "Terrain")
         {
         }
 
@@ -45,12 +93,17 @@ namespace Enzyme.Components
                 Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 5, 0.0, 3.0, 1.5, 330, 0);
                 Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 6, 0.0, 10.0, 5.0, 330, 40);
                 Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 8, 0.0, 3.0, 1.5, 330, 80);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 9, 0.0, 20.0, WAKE_LENGTH_TO_HEIGHT_RATIO, 330, 120);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 10, 0.0, 1.0, SLOPE_SPEEDUP_COEFFICIENT, 330, 160);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 11, 0.0, 1.0, CORNER_TANGENCY_THRESHOLD, 330, 200);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 12, 0.0, 2.0, CORNER_SPEED_BOOST_COEFFICIENT, 330, 240);
                 Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 0, System.Drawing.Color.FromArgb(230, 230, 230), 220, -143);
                 Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 1, "line", 220, -68);
                 Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 3, "curve", 220, -23);
                 Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 4, 220, 11, 180, 22);
                 Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 5, "point", 220, 67);
                 Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 6, System.Drawing.Color.FromArgb(230, 230, 230), 220, 112);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 7, "number", 220, 157);
             }
         }
 
@@ -68,6 +121,14 @@ namespace Enzyme.Components
             pManager[7].Optional = true;
             pManager.AddNumberParameter("HeatmapHeight", "HeatmapHeight", "Z-axis elevation to project the flat heatmap", GH_ParamAccess.item);
             pManager[8].Optional = true;
+            pManager.AddNumberParameter("WakeLengthRatio", "WakeRatio", "Wake length as a multiple of the obstructing building's height (typical near-wake range 6-8x)", GH_ParamAccess.item, WAKE_LENGTH_TO_HEIGHT_RATIO);
+            pManager[9].Optional = true;
+            pManager.AddNumberParameter("SlopeSpeedup", "SlopeSpeedup", "Coefficient controlling how much upward terrain slope accelerates wind (0 = no slope effect)", GH_ParamAccess.item, SLOPE_SPEEDUP_COEFFICIENT);
+            pManager[10].Optional = true;
+            pManager.AddNumberParameter("CornerTangency", "CornerTangency", "How tangent (0-1) wind must be to a wall before corner-channeling kicks in; lower = stricter", GH_ParamAccess.item, CORNER_TANGENCY_THRESHOLD);
+            pManager[11].Optional = true;
+            pManager.AddNumberParameter("CornerBoost", "CornerBoost", "Speed boost coefficient applied when wind channels around a building corner", GH_ParamAccess.item, CORNER_SPEED_BOOST_COEFFICIENT);
+            pManager[12].Optional = true;
         }
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
@@ -79,6 +140,46 @@ namespace Enzyme.Components
             pManager.AddTextParameter("VelocityData", "VelocityData", "Raw velocity values formatted", GH_ParamAccess.list);
             pManager.AddPointParameter("TagPoints", "TagPoints", "Anchor coordinates for Text Tag", GH_ParamAccess.list);
             pManager.AddMeshParameter("PlainMesh", "PlainMesh", "Original topography mesh without vertex colors", GH_ParamAccess.item);
+            pManager.AddNumberParameter("VelocityValues", "VelocityValues", "Raw unformatted velocity values, aligned with WindVectors", GH_ParamAccess.list);
+        }
+
+        private static double PlanarDistanceToBBox(Point3d pt, BoundingBox bbox)
+        {
+            double dx = Math.Max(Math.Max(bbox.Min.X - pt.X, pt.X - bbox.Max.X), 0.0);
+            double dy = Math.Max(Math.Max(bbox.Min.Y - pt.Y, pt.Y - bbox.Max.Y), 0.0);
+            return Math.Sqrt(dx * dx + dy * dy);
+        }
+
+        // Cheap O(n) shape checksum (sum + sum-of-squares of vertex coordinates).
+        // Counts/bounding-box alone aren't enough to detect a reshape (e.g. dragging
+        // terrain grips) that keeps the same vertex count and overall extents.
+        private static string MeshShapeChecksum(Mesh m)
+        {
+            if (m == null) return "null";
+            var verts = m.Vertices;
+            double sum = 0.0, sumSq = 0.0;
+            for (int i = 0; i < verts.Count; i++)
+            {
+                var v = verts[i];
+                sum += v.X + v.Y + v.Z;
+                sumSq += (double)v.X * v.X + (double)v.Y * v.Y + (double)v.Z * v.Z;
+            }
+            return verts.Count + ":" + m.Faces.Count + ":" + sum.ToString("R") + ":" + sumSq.ToString("R");
+        }
+
+        private static string BuildFingerprint(Mesh terrain, List<Mesh> buildings, Vector3d windDir, double speed, double height, double spacing,
+            double wakeRatio, double slopeCoeff, double cornerTangency, double cornerBoost)
+        {
+            var sb = new StringBuilder();
+            sb.Append(MeshShapeChecksum(terrain)).Append('|');
+            sb.Append(buildings.Count).Append('|');
+            foreach (var b in buildings)
+            {
+                sb.Append(MeshShapeChecksum(b)).Append('|');
+            }
+            sb.Append(windDir.ToString()).Append('|').Append(speed).Append('|').Append(height).Append('|').Append(spacing)
+              .Append('|').Append(wakeRatio).Append('|').Append(slopeCoeff).Append('|').Append(cornerTangency).Append('|').Append(cornerBoost);
+            return sb.ToString();
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
@@ -110,179 +211,315 @@ namespace Enzyme.Components
             double heatmapHeight = 0.0;
             bool hasHeatmapHeight = DA.GetData(8, ref heatmapHeight);
 
+            double wakeRatio = WAKE_LENGTH_TO_HEIGHT_RATIO;
+            DA.GetData(9, ref wakeRatio);
+
+            double slopeCoeff = SLOPE_SPEEDUP_COEFFICIENT;
+            DA.GetData(10, ref slopeCoeff);
+
+            double cornerTangency = CORNER_TANGENCY_THRESHOLD;
+            DA.GetData(11, ref cornerTangency);
+
+            double cornerBoost = CORNER_SPEED_BOOST_COEFFICIENT;
+            DA.GetData(12, ref cornerBoost);
+
             System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
 
             Mesh heatmapMesh = new Mesh();
             List<Line> vectorLines = new List<Line>();
             List<Color> vectorColorList = new List<Color>();
-            List<Color> meshColorList = new List<Color>(); 
+            List<Color> meshColorList = new List<Color>();
             List<PolylineCurve> computedStreamlines = new List<PolylineCurve>();
             List<string> velocityTextData = new List<string>();
+            List<double> velocityRawData = new List<double>();
             List<Point3d> tagAnchorPoints = new List<Point3d>();
 
-            double minObservedSpeed = double.MaxValue;
-            double maxObservedSpeed = double.MinValue;
-            int comfortablePointCount = 0;
-            int activeSensorCount = 0;
+            bool usedCache = false;
 
             if (execute && terrain != null && baseWindDir.IsValid && speed > 0 && spacing > 0)
             {
                 baseWindDir.Unitize();
-                BoundingBox bbox = terrain.GetBoundingBox(true);
-                
-                List<Point3d> gridPoints = new List<Point3d>();
-                List<Vector3d> topoDirs = new List<Vector3d>();
-                List<double> baselineSpeeds = new List<double>();
-                List<bool> solidMasks = new List<bool>();
 
-                terrain.FaceNormals.ComputeFaceNormals();
-
-                double currentX = bbox.Min.X;
-                while (currentX <= bbox.Max.X)
+                string fingerprint = BuildFingerprint(terrain, buildings, baseWindDir, speed, height, spacing, wakeRatio, slopeCoeff, cornerTangency, cornerBoost);
+                if (fingerprint == _cachedFingerprint && _cachedGridPoints != null)
                 {
-                    double currentY = bbox.Min.Y;
-                    while (currentY <= bbox.Max.Y)
-                    {
-                        Point3d rayStart = new Point3d(currentX, currentY, bbox.Max.Z + 10.0);
-                        Ray3d downRay = new Ray3d(rayStart, -Vector3d.ZAxis);
-                        double hit = Rhino.Geometry.Intersect.Intersection.MeshRay(terrain, downRay);
-                        
-                        if (hit >= 0.0)
-                        {
-                            Point3d exactSurfacePt = downRay.PointAt(hit);
-                            Point3d pt = exactSurfacePt + new Vector3d(0, 0, height);
-                            gridPoints.Add(pt);
+                    usedCache = true;
+                }
 
-                            Vector3d terrainNormal = Vector3d.ZAxis; 
-                            MeshPoint mp = terrain.ClosestMeshPoint(exactSurfacePt, 0.1);
-                            if (mp != null)
+                Point3d[] gridPoints;
+                Vector3d[] finalDirs;
+                double[] finalSpeeds;
+                bool[] solidMasks;
+                bool[] validMasks;
+                int uCount;
+                BoundingBox bbox;
+                double minObservedSpeed, maxObservedSpeed;
+                int activeSensorCount, comfortablePointCount;
+
+                if (usedCache)
+                {
+                    gridPoints = _cachedGridPoints;
+                    finalDirs = _cachedDirs;
+                    finalSpeeds = _cachedSpeeds;
+                    solidMasks = _cachedSolid;
+                    validMasks = _cachedValid;
+                    uCount = _cachedUCount;
+                    bbox = _cachedBBox;
+                    spacing = _cachedSpacing;
+                    minObservedSpeed = _cachedMinSpeed;
+                    maxObservedSpeed = _cachedMaxSpeed;
+                    activeSensorCount = _cachedActiveSensorCount;
+                    comfortablePointCount = _cachedComfortableCount;
+                }
+                else
+                {
+                    bbox = terrain.GetBoundingBox(true);
+                    terrain.FaceNormals.ComputeFaceNormals();
+
+                    // --- Step 1: baseline grid, terrain-parallel deflection (sequential; single raycast per point) ---
+                    // Grid is built from integer cell indices (not accumulated floating-point steps),
+                    // so cell (ix,iy) always lands exactly on bbox.Min + (ix,iy)*spacing - no drift,
+                    // and the same math can be used later to look a world position back up by cell.
+                    uCount = (int)Math.Floor((bbox.Max.X - bbox.Min.X) / spacing) + 1;
+                    int vCount = (int)Math.Floor((bbox.Max.Y - bbox.Min.Y) / spacing) + 1;
+                    int cellCount = uCount * vCount;
+
+                    gridPoints = new Point3d[cellCount];
+                    finalDirs = new Vector3d[cellCount];
+                    finalSpeeds = new double[cellCount];
+                    solidMasks = new bool[cellCount];
+                    validMasks = new bool[cellCount];
+
+                    for (int ix = 0; ix < uCount; ix++)
+                    {
+                        double currentX = bbox.Min.X + ix * spacing;
+                        for (int iy = 0; iy < vCount; iy++)
+                        {
+                            double currentY = bbox.Min.Y + iy * spacing;
+                            int cellIdx = ix * vCount + iy;
+
+                            Point3d rayStart = new Point3d(currentX, currentY, bbox.Max.Z + 10.0);
+                            Ray3d downRay = new Ray3d(rayStart, -Vector3d.ZAxis);
+                            double hit = Rhino.Geometry.Intersect.Intersection.MeshRay(terrain, downRay);
+
+                            if (hit >= 0.0)
                             {
-                                terrainNormal = new Vector3d(terrain.FaceNormals[mp.FaceIndex]);
-                            }
-                            terrainNormal.Unitize();
-                            
-                            Vector3d slopedWindDir = baseWindDir - (terrainNormal * (baseWindDir * terrainNormal));
-                            
-                            double localSpeed = speed;
-                            if (slopedWindDir.Length > 0.001)
-                            {
-                                slopedWindDir.Unitize();
-                                localSpeed *= (1.0 + (slopedWindDir.Z * 0.35)); 
+                                Point3d exactSurfacePt = downRay.PointAt(hit);
+                                Point3d pt = exactSurfacePt + new Vector3d(0, 0, height);
+
+                                Vector3d terrainNormal = Vector3d.ZAxis;
+                                MeshPoint mp = terrain.ClosestMeshPoint(exactSurfacePt, 0.1);
+                                if (mp != null)
+                                {
+                                    terrainNormal = new Vector3d(terrain.FaceNormals[mp.FaceIndex]);
+                                }
+                                terrainNormal.Unitize();
+
+                                Vector3d slopedWindDir = baseWindDir - (terrainNormal * (baseWindDir * terrainNormal));
+
+                                double localSpeed = speed;
+                                if (slopedWindDir.Length > 0.001)
+                                {
+                                    slopedWindDir.Unitize();
+                                    localSpeed *= (1.0 + (slopedWindDir.Z * slopeCoeff));
+                                }
+                                else
+                                {
+                                    slopedWindDir = baseWindDir;
+                                }
+
+                                gridPoints[cellIdx] = pt;
+                                finalDirs[cellIdx] = slopedWindDir;
+                                finalSpeeds[cellIdx] = localSpeed;
+                                validMasks[cellIdx] = true;
                             }
                             else
                             {
-                                slopedWindDir = baseWindDir;
+                                // No terrain under this cell - e.g. a falloff/cliff edge where the mesh
+                                // doesn't fully cover its own rectangular bbox footprint. Do NOT fabricate
+                                // a flat fallback point here: that used to create a physically nonsensical
+                                // elevation jump against terrain-following neighbors, which is what was
+                                // dragging vectors/streamlines off into empty space at terrain edges.
+                                // Leave this cell explicitly invalid and excluded downstream.
+                                gridPoints[cellIdx] = new Point3d(currentX, currentY, bbox.Min.Z);
+                                finalDirs[cellIdx] = Vector3d.Zero;
+                                finalSpeeds[cellIdx] = 0.0;
+                                validMasks[cellIdx] = false;
+                            }
+                        }
+                    }
+
+                    // Hard cap on wake length: a fraction of the site's own footprint diagonal,
+                    // so a tall/placeholder building mesh can never blow the wake out past the
+                    // analysis grid and swamp terrain-driven variation.
+                    double domainDiagonal = Math.Sqrt(
+                        (bbox.Max.X - bbox.Min.X) * (bbox.Max.X - bbox.Min.X) +
+                        (bbox.Max.Y - bbox.Min.Y) * (bbox.Max.Y - bbox.Min.Y));
+                    double maxWakeRange = Math.Max(domainDiagonal * WAKE_RANGE_DOMAIN_FRACTION, spacing * 4.0);
+
+                    // --- Precompute per-building bounding boxes / heights / max reach, for cheap AABB pruning ---
+                    int buildingCount = buildings.Count;
+                    BoundingBox[] buildingBBoxes = new BoundingBox[buildingCount];
+                    double[] buildingHeights = new double[buildingCount];
+                    double[] buildingMaxReach = new double[buildingCount];
+                    for (int b = 0; b < buildingCount; b++)
+                    {
+                        Mesh bld = buildings[b];
+                        if (bld == null) continue;
+                        BoundingBox bb = bld.GetBoundingBox(true);
+                        buildingBBoxes[b] = bb;
+                        double h = Math.Max(bb.Max.Z - bb.Min.Z, 0.01);
+                        buildingHeights[b] = h;
+                        double wakeReach = Math.Min(h * wakeRatio, maxWakeRange);
+                        buildingMaxReach[b] = Math.Max(wakeReach, spacing * CORNER_SEARCH_RADIUS_SPACING_MULTIPLIER);
+                    }
+
+                    // --- Step 2: occlusion + wake + corner-channeling (parallel; each index owns its own slot) ---
+                    Parallel.For(0, gridPoints.Length, i =>
+                    {
+                        if (!validMasks[i]) return; // no terrain here (edge/falloff) - excluded from physics entirely
+
+                        Point3d pt = gridPoints[i];
+                        Vector3d localDir = finalDirs[i];
+                        double localSpeed = finalSpeeds[i];
+
+                        bool isInsideSolid = false;
+                        for (int b = 0; b < buildingCount; b++)
+                        {
+                            Mesh building = buildings[b];
+                            if (building == null) continue;
+                            if (PlanarDistanceToBBox(pt, buildingBBoxes[b]) > 0.01) continue; // must be within bbox footprint to be inside the mesh
+                            if (building.IsPointInside(pt, 0.01, false))
+                            {
+                                isInsideSolid = true;
+                                break;
+                            }
+                        }
+
+                        solidMasks[i] = isInsideSolid;
+
+                        if (isInsideSolid)
+                        {
+                            localSpeed = 0.0;
+                            localDir = Vector3d.Zero;
+                        }
+                        else
+                        {
+                            Ray3d backRay = new Ray3d(pt, -localDir);
+                            double closestHit = double.MaxValue;
+                            int closestBuildingIdx = -1;
+
+                            for (int b = 0; b < buildingCount; b++)
+                            {
+                                Mesh building = buildings[b];
+                                if (building == null) continue;
+                                if (PlanarDistanceToBBox(pt, buildingBBoxes[b]) > buildingMaxReach[b]) continue;
+
+                                double t = Rhino.Geometry.Intersect.Intersection.MeshRay(building, backRay);
+                                if (t >= 0.0 && t < closestHit)
+                                {
+                                    closestHit = t;
+                                    closestBuildingIdx = b;
+                                }
                             }
 
-                            topoDirs.Add(slopedWindDir);
-                            baselineSpeeds.Add(localSpeed);
-                        }
-                        else
-                        {
-                            Point3d pt = new Point3d(currentX, currentY, bbox.Min.Z + height);
-                            gridPoints.Add(pt);
-                            topoDirs.Add(baseWindDir);
-                            baselineSpeeds.Add(speed);
-                        }
-                        currentY += spacing;
-                    }
-                    currentX += spacing;
-                }
+                            double wakeRange = closestBuildingIdx >= 0
+                                ? Math.Min(buildingHeights[closestBuildingIdx] * wakeRatio, maxWakeRange)
+                                : 0.0;
 
-                double maxShadowRange = speed * 8.0;
-
-                for (int i = 0; i < gridPoints.Count; i++)
-                {
-                    Point3d pt = gridPoints[i];
-                    Vector3d localDir = topoDirs[i];
-                    double localSpeed = baselineSpeeds[i];
-
-                    bool isInsideSolid = false;
-                    foreach (Mesh building in buildings)
-                    {
-                        if (building != null && building.IsPointInside(pt, 0.01, false))
-                        {
-                            isInsideSolid = true;
-                            break;
-                        }
-                    }
-
-                    solidMasks.Add(isInsideSolid);
-
-                    if (isInsideSolid)
-                    {
-                        localSpeed = 0.0;
-                        localDir = Vector3d.Zero;
-                    }
-                    else
-                    {
-                        activeSensorCount++;
-
-                        Ray3d backRay = new Ray3d(pt, -localDir);
-                        double closestHit = double.MaxValue;
-
-                        foreach (Mesh building in buildings)
-                        {
-                            if (building == null) continue;
-                            double t = Rhino.Geometry.Intersect.Intersection.MeshRay(building, backRay);
-                            if (t >= 0.0 && t < closestHit) closestHit = t;
-                        }
-
-                        if (closestHit < maxShadowRange)
-                        {
-                            double wakeIntensity = closestHit / maxShadowRange;
-                            localSpeed *= Math.Max(0.12, wakeIntensity * wakeIntensity); 
-                        }
-                        else
-                        {
-                            foreach (Mesh building in buildings)
+                            if (closestBuildingIdx >= 0 && closestHit < wakeRange)
                             {
-                                if (building == null) continue;
-                                Point3d closestPt;
-                                Vector3d normal;
-                                int faceIdx = building.ClosestPoint(pt, out closestPt, out normal, speed * 2.5);
+                                double wakeIntensity = closestHit / wakeRange;
+                                localSpeed *= Math.Max(WAKE_MIN_INTENSITY, wakeIntensity * wakeIntensity);
+                            }
+                            else
+                            {
+                                double searchRadius = spacing * CORNER_SEARCH_RADIUS_SPACING_MULTIPLIER;
+                                double infRadius = spacing * CORNER_INFLUENCE_RADIUS_SPACING_MULTIPLIER;
 
-                                if (faceIdx >= 0 && closestPt.IsValid)
+                                for (int b = 0; b < buildingCount; b++)
                                 {
-                                    double dist = pt.DistanceTo(closestPt);
-                                    double infRadius = spacing * 2.5;
+                                    Mesh building = buildings[b];
+                                    if (building == null) continue;
+                                    if (PlanarDistanceToBBox(pt, buildingBBoxes[b]) > buildingMaxReach[b]) continue;
 
-                                    if (dist < infRadius && dist > 0.001)
+                                    Point3d closestPt;
+                                    Vector3d normal;
+                                    int faceIdx = building.ClosestPoint(pt, out closestPt, out normal, searchRadius);
+
+                                    if (faceIdx >= 0 && closestPt.IsValid)
                                     {
-                                        normal.Unitize();
-                                        if (Math.Abs(normal * localDir) < 0.35) 
-                                        {
-                                            double blend = 1.0 - (dist / infRadius);
-                                            Vector3d bypass = Vector3d.CrossProduct(normal, new Vector3d(0, 0, 1));
-                                            if ((bypass * localDir) < 0) bypass = -bypass; 
-                                            bypass.Unitize();
+                                        double dist = pt.DistanceTo(closestPt);
 
-                                            localDir = (localDir * (1.0 - blend)) + (bypass * blend);
-                                            localDir.Unitize();
-                                            localSpeed *= (1.0 + (0.45 * blend)); 
+                                        if (dist < infRadius && dist > 0.001)
+                                        {
+                                            normal.Unitize();
+                                            if (Math.Abs(normal * localDir) < cornerTangency)
+                                            {
+                                                double blend = 1.0 - (dist / infRadius);
+                                                Vector3d bypass = Vector3d.CrossProduct(normal, new Vector3d(0, 0, 1));
+                                                if ((bypass * localDir) < 0) bypass = -bypass;
+                                                bypass.Unitize();
+
+                                                localDir = (localDir * (1.0 - blend)) + (bypass * blend);
+                                                localDir.Unitize();
+                                                localSpeed *= (1.0 + (cornerBoost * blend));
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
 
-                        if (localSpeed < minObservedSpeed) minObservedSpeed = localSpeed;
-                        if (localSpeed > maxObservedSpeed) maxObservedSpeed = localSpeed;
-                        if (localSpeed <= 5.0) comfortablePointCount++;
+                        finalDirs[i] = localDir;
+                        finalSpeeds[i] = localSpeed;
+                    });
+
+                    // --- Step 3: cheap sequential aggregation (min/max/counts) ---
+                    minObservedSpeed = double.MaxValue;
+                    maxObservedSpeed = double.MinValue;
+                    activeSensorCount = 0;
+                    comfortablePointCount = 0;
+                    for (int i = 0; i < gridPoints.Length; i++)
+                    {
+                        if (!validMasks[i] || solidMasks[i]) continue;
+                        activeSensorCount++;
+                        double s = finalSpeeds[i];
+                        if (s < minObservedSpeed) minObservedSpeed = s;
+                        if (s > maxObservedSpeed) maxObservedSpeed = s;
+                        if (s <= COMFORT_SPEED_THRESHOLD_MS) comfortablePointCount++;
                     }
 
-                    topoDirs[i] = localDir;
-                    baselineSpeeds[i] = localSpeed;
+                    _cachedFingerprint = fingerprint;
+                    _cachedGridPoints = gridPoints;
+                    _cachedDirs = finalDirs;
+                    _cachedSpeeds = finalSpeeds;
+                    _cachedSolid = solidMasks;
+                    _cachedValid = validMasks;
+                    _cachedUCount = uCount;
+                    _cachedBBox = bbox;
+                    _cachedSpacing = spacing;
+                    _cachedMinSpeed = minObservedSpeed;
+                    _cachedMaxSpeed = maxObservedSpeed;
+                    _cachedActiveSensorCount = activeSensorCount;
+                    _cachedComfortableCount = comfortablePointCount;
                 }
 
                 double speedRange = maxObservedSpeed - minObservedSpeed;
                 if (speedRange < 0.01) speedRange = 1.0;
 
-                for (int i = 0; i < gridPoints.Count; i++)
+                // --- Step 4: color mapping + vector/tag outputs (cheap, always recomputed so CustomColors changes are instant) ---
+                for (int i = 0; i < gridPoints.Length; i++)
                 {
+                    if (!validMasks[i])
+                    {
+                        meshColorList.Add(Color.Empty); // placeholder to keep index alignment with gridPoints; tile skipped below
+                        continue;
+                    }
+
                     Point3d pt = gridPoints[i];
-                    Vector3d localDir = topoDirs[i];
-                    double localSpeed = baselineSpeeds[i];
+                    Vector3d localDir = finalDirs[i];
+                    double localSpeed = finalSpeeds[i];
                     bool isInsideSolid = solidMasks[i];
 
                     double intensity = (localSpeed - minObservedSpeed) / speedRange;
@@ -291,7 +528,7 @@ namespace Enzyme.Components
 
                     if (isInsideSolid)
                     {
-                        mappedColor = Color.FromArgb(255, 12, 22, 52); 
+                        mappedColor = Color.FromArgb(255, 12, 22, 52);
                     }
                     else if (userColors.Count >= 2)
                     {
@@ -319,33 +556,36 @@ namespace Enzyme.Components
                         int b = (int)(120 * (1.0 - intensity) + 255 * intensity);
                         mappedColor = Color.FromArgb(255, r, g, b);
                     }
-                    
+
                     meshColorList.Add(mappedColor);
 
                     if (localSpeed > 0.01)
                     {
                         vectorLines.Add(new Line(pt, localDir * (localSpeed * 0.5)));
                         velocityTextData.Add(localSpeed.ToString("F1"));
+                        velocityRawData.Add(localSpeed);
                         tagAnchorPoints.Add(pt);
-                        vectorColorList.Add(mappedColor); 
+                        vectorColorList.Add(mappedColor);
                     }
                 }
 
                 double halfGrid = spacing * 0.5;
-                
+
                 double flatZ = bbox.Min.Z;
                 if (hasHeatmapHeight)
                 {
                     flatZ = heatmapHeight;
                 }
 
-                for (int i = 0; i < gridPoints.Count; i++)
+                for (int i = 0; i < gridPoints.Length; i++)
                 {
+                    if (!validMasks[i]) continue; // no terrain here - leave the heatmap tile out rather than fake-flat
+
                     Point3d centerPt = gridPoints[i];
                     Color tileColor = meshColorList[i];
 
                     int vIndex = heatmapMesh.Vertices.Count;
-                    
+
                     heatmapMesh.Vertices.Add(new Point3d(centerPt.X - halfGrid, centerPt.Y - halfGrid, flatZ));
                     heatmapMesh.Vertices.Add(new Point3d(centerPt.X + halfGrid, centerPt.Y - halfGrid, flatZ));
                     heatmapMesh.Vertices.Add(new Point3d(centerPt.X + halfGrid, centerPt.Y + halfGrid, flatZ));
@@ -358,41 +598,70 @@ namespace Enzyme.Components
 
                     heatmapMesh.Faces.AddFace(vIndex, vIndex + 1, vIndex + 2, vIndex + 3);
                 }
-                
-                int uCount = (int)Math.Ceiling((bbox.Max.X - bbox.Min.X) / spacing) + 1;
-                for (int i = 0; i < gridPoints.Count; i += uCount * 2) 
+
+                // --- Step 5: streamlines, O(1) grid-indexed lookup instead of brute-force nearest neighbor ---
+                Dictionary<(int, int), int> cellLookup = new Dictionary<(int, int), int>(gridPoints.Length);
+                for (int i = 0; i < gridPoints.Length; i++)
                 {
-                    if (solidMasks[i]) continue; 
+                    if (!validMasks[i]) continue; // never route streamlines onto/through a cell with no real terrain
+                    int cx = (int)Math.Round((gridPoints[i].X - bbox.Min.X) / spacing);
+                    int cy = (int)Math.Round((gridPoints[i].Y - bbox.Min.Y) / spacing);
+                    cellLookup[(cx, cy)] = i;
+                }
+
+                Func<Point3d, int> findNearestGridIndex = (Point3d p) =>
+                {
+                    int cx = (int)Math.Round((p.X - bbox.Min.X) / spacing);
+                    int cy = (int)Math.Round((p.Y - bbox.Min.Y) / spacing);
+
+                    int bestIdx = -1;
+                    double bestDist = double.MaxValue;
+                    // exact cell plus 1-ring neighborhood, in case the particle drifted
+                    // between lattice cells; still O(1) instead of O(N).
+                    for (int dx = -1; dx <= 1; dx++)
+                    {
+                        for (int dy = -1; dy <= 1; dy++)
+                        {
+                            int idx;
+                            if (cellLookup.TryGetValue((cx + dx, cy + dy), out idx))
+                            {
+                                double d = p.DistanceTo(gridPoints[idx]);
+                                if (d < bestDist)
+                                {
+                                    bestDist = d;
+                                    bestIdx = idx;
+                                }
+                            }
+                        }
+                    }
+                    return bestIdx;
+                };
+
+                for (int i = 0; i < gridPoints.Length; i += uCount * STREAMLINE_SEED_ROW_STRIDE)
+                {
+                    if (!validMasks[i] || solidMasks[i]) continue;
 
                     List<Point3d> pathVertices = new List<Point3d>();
                     Point3d trackingParticle = gridPoints[i];
                     pathVertices.Add(trackingParticle);
 
-                    for (int step = 0; step < 50; step++) 
+                    for (int step = 0; step < STREAMLINE_MAX_STEPS; step++)
                     {
-                        int closestIdx = -1;
-                        double minDist = double.MaxValue;
-                        for (int k = 0; k < gridPoints.Count; k++)
-                        {
-                            double d = trackingParticle.DistanceTo(gridPoints[k]);
-                            if (d < minDist)
-                            {
-                                minDist = d;
-                                closestIdx = k;
-                            }
-                        }
+                        int closestIdx = findNearestGridIndex(trackingParticle);
 
-                        if (closestIdx != -1 && minDist < spacing * 2.0 && !solidMasks[closestIdx])
+                        if (closestIdx != -1
+                            && trackingParticle.DistanceTo(gridPoints[closestIdx]) < spacing * STREAMLINE_STEP_ACCEPT_SPACING_MULTIPLIER
+                            && !solidMasks[closestIdx])
                         {
-                            Vector3d stepVec = topoDirs[closestIdx];
-                            if (stepVec.Length < 0.05) break; 
+                            Vector3d stepVec = finalDirs[closestIdx];
+                            if (stepVec.Length < 0.05) break;
 
-                            trackingParticle += stepVec * 0.2; 
+                            trackingParticle += stepVec * STREAMLINE_STEP_SIZE;
                             pathVertices.Add(trackingParticle);
                         }
                         else
                         {
-                            break; 
+                            break;
                         }
                     }
 
@@ -409,6 +678,7 @@ namespace Enzyme.Components
             DA.SetDataList(3, computedStreamlines);
             DA.SetDataList(4, velocityTextData);
             DA.SetDataList(5, tagAnchorPoints);
+            DA.SetDataList(7, velocityRawData);
 
             if (terrain != null)
             {
@@ -420,8 +690,11 @@ namespace Enzyme.Components
             sw.Stop();
             if (execute)
             {
-                double finalComfortPercent = activeSensorCount > 0 ? ((double)comfortablePointCount / activeSensorCount) * 100.0 : 0.0;
-                Message = $"{this.NickName}\nTime: {sw.ElapsedMilliseconds} ms\n---\n● Min Speed: {(minObservedSpeed == double.MaxValue ? 0.0 : minObservedSpeed):F1} m/s\n○ Max Speed: {(maxObservedSpeed == double.MinValue ? 0.0 : maxObservedSpeed):F1} m/s\n● Comfort: {finalComfortPercent:F1}% (≤ 5.0 m/s)";
+                double reportedMin = _cachedMinSpeed == double.MaxValue ? 0.0 : _cachedMinSpeed;
+                double reportedMax = _cachedMaxSpeed == double.MinValue ? 0.0 : _cachedMaxSpeed;
+                double finalComfortPercent = _cachedActiveSensorCount > 0 ? ((double)_cachedComfortableCount / _cachedActiveSensorCount) * 100.0 : 0.0;
+                string cacheNote = usedCache ? " (cached grid)" : "";
+                Message = $"{this.NickName}\nTime: {sw.ElapsedMilliseconds} ms{cacheNote}\n---\n● Min Speed: {reportedMin:F1} m/s\n○ Max Speed: {reportedMax:F1} m/s\n● Comfort: {finalComfortPercent:F1}% (≤ {COMFORT_SPEED_THRESHOLD_MS:F1} m/s, single direction)";
             }
             else
             {

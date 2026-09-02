@@ -15,7 +15,7 @@ namespace Enzyme.Components
         public TileGridGenerator()
             : base("Grid Pattern Generator and Trimmer", "GridPattern",
                 "Generates a grid pattern (rectangular, hexagonal, triangular) within a boundary and trims cells to fit.",
-                "Enzyme", "Pattern")
+                Enzyme.Utils.TabInfo.TabName, "Pattern")
         {
         }
 

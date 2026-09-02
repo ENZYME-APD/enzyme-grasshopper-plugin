@@ -16,7 +16,7 @@ namespace Enzyme.Components
         public ColorMeshTiles()
           : base("ColorMeshTiles", "ColorMeshTiles",
               "BIM-ready Idempotent Engine. Consolidates Mega-Meshes per surface and binds them into Rhino Groups.",
-              "Enzyme", "Facade")
+              Enzyme.Utils.TabInfo.TabName, "Facade")
         {
         }
 

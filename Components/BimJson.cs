@@ -16,7 +16,7 @@ namespace Enzyme.Components
         public BimJsonComponent()
           : base("BIM Attribute Serializer", "BIM_JSON",
               "Serializes referenced Rhino curves via Attribute User Text.",
-              "Enzyme", "Masterplan (Beta)")
+              Enzyme.Utils.TabInfo.TabName, "Masterplan (Beta)")
         {
         }
 

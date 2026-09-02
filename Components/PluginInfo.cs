@@ -12,7 +12,7 @@ namespace Enzyme.Components
         public PluginInfo()
           : base("Enzyme Version Info", "EnzVer",
               "Outputs the current version and build date of the Enzyme plugin.",
-              "Enzyme", "Utilities")
+              Enzyme.Utils.TabInfo.TabName, "Utilities")
         {
         }
 

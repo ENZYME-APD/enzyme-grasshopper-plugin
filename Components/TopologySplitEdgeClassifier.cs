@@ -16,7 +16,7 @@ namespace Enzyme.Components
         public TopologySplitEdgeClassifier()
           : base("Topology Split Edge Classifier", "TSEC",
               "Clusters disjoint zones via R-Tree adjacency, splits boundaries at intersections, and classifies edge topology.",
-              "Enzyme", "Utilities")
+              Enzyme.Utils.TabInfo.TabName, "Utilities")
         {
         }
 

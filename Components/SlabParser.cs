@@ -16,7 +16,7 @@ namespace Enzyme.Components
         public SlabParserComponent()
           : base("Slab JSON Parser", "Slab_Parser",
               "Parses Slab JSON data.",
-              "Enzyme", "Masterplan (Beta)")
+              Enzyme.Utils.TabInfo.TabName, "Masterplan (Beta)")
         {
         }
 

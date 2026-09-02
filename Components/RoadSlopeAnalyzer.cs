@@ -11,7 +11,7 @@ namespace Enzyme.Components
         public RoadSlopeAnalyzer()
             : base("Road Slope Analyzer", "RoadSlope",
                 "Analyzes road slopes by projecting 2D curves onto a terrain mesh",
-                "Enzyme", "Terrain")
+                Enzyme.Utils.TabInfo.TabName, "Terrain")
         {
         }
 

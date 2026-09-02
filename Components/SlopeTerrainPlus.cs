@@ -16,7 +16,7 @@ namespace Enzyme.Components
         public SlopeTerrainPlus()
             : base("Slope Terrain Plus", "SlopeMesh+",
                 "Ultra-fast mesh slope analyzer using raw C# sequential array processing and safe UI automation.",
-                "Enzyme", "Terrain")
+                Enzyme.Utils.TabInfo.TabName, "Terrain")
         {
         }
 

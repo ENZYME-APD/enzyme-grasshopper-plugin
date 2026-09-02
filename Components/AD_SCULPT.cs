@@ -15,7 +15,7 @@ namespace Enzyme.Components
         public AD_SCULPT()
           : base("Adapter: The Sculptor", "AD_SCULPT",
               "Adapter: The Sculptor (Method 1) - V2 (Rationalized)",
-              "Enzyme", "Masterplan (Beta)")
+              Enzyme.Utils.TabInfo.TabName, "Masterplan (Beta)")
         {
         }
 

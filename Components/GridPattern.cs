@@ -14,7 +14,7 @@ namespace Enzyme.Components
         public GridPattern()
           : base("Grid Pattern Generator and Trimmer", "GridPattern",
               "",
-              "Enzyme", "Pattern")
+              Enzyme.Utils.TabInfo.TabName, "Pattern")
         {
         }
 

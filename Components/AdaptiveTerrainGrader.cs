@@ -14,7 +14,7 @@ namespace Enzyme.Components
         public AdaptiveTerrainGrader()
             : base("Adaptive Terrain Grader", "TERRAIN GRADER",
                 "Generates adaptive grading meshes, volumes, and crisp cut/fill colors.",
-                "Enzyme", "Terrain")
+                Enzyme.Utils.TabInfo.TabName, "Terrain")
         {
         }
 

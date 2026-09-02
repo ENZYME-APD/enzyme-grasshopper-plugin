@@ -10,7 +10,7 @@ namespace Enzyme.Components
         public FilletRulesComponent()
           : base("Fillet Rule Configurator", "Fillet_Rules",
               "Compiles Grasshopper lists into a Fillet Rules JSON.",
-              "Enzyme", "Masterplan (Beta)")
+              Enzyme.Utils.TabInfo.TabName, "Masterplan (Beta)")
         {
         }
 

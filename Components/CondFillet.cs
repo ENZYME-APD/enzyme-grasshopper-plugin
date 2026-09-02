@@ -14,7 +14,7 @@ namespace Enzyme.Components
         public CondFilletComponent()
           : base("Conditional Fillet", "CondFillet",
               "Standard fillet components apply a single radius to an entire curve, which fails if any segment is too short. This \"smart\" solver evaluates and fillets a curve corner by corner.",
-              "Enzyme", "Utilities")
+              Enzyme.Utils.TabInfo.TabName, "Utilities")
         {
         }
 

@@ -14,7 +14,7 @@ namespace Enzyme.Components
         public AD_CAKE()
           : base("Adapter: The Sliced Cake", "AD_CAKE",
               "Audits pre-modeled 1-floor-high Breps. Extracts base contours and heights, heals small modeling gaps using a tolerance, and outputs the Universal Data Format for the MP Engine.",
-              "Enzyme", "Masterplan (Beta)")
+              Enzyme.Utils.TabInfo.TabName, "Masterplan (Beta)")
         {
         }
 

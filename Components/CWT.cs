@@ -18,7 +18,7 @@ namespace Enzyme.Components
         public CWTComponent()
           : base("CWT", "CWT",
               "CWT",
-              "Enzyme", "Facade")
+              Enzyme.Utils.TabInfo.TabName, "Facade")
         {
         }
 

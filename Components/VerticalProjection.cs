@@ -9,7 +9,7 @@ namespace Enzyme.Components
         public VerticalProjectionComponent()
           : base("Vertical Projection", "VertProj",
               "Projects a point vertically (along world Z-axis) onto a given plane.",
-              "Enzyme", "Pattern")
+              Enzyme.Utils.TabInfo.TabName, "Pattern")
         {
         }
 

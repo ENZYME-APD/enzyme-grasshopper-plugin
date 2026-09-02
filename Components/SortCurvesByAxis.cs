@@ -14,7 +14,7 @@ namespace Enzyme.Components
         public SortCurvesByAxis()
           : base("Sort Curves By Axis", "SortAxis",
               "Sorts a tree of curves based on their bounding box center along a specific axis.",
-              "Enzyme", "Utilities")
+              Enzyme.Utils.TabInfo.TabName, "Utilities")
         {
         }
 

@@ -14,7 +14,7 @@ namespace Enzyme.Components
         public PolylineHealerComponent()
           : base("Polyline Healer", "P-Heal",
               "Heals polylines by extending segments and creating boolean regions.",
-              "Enzyme", "Utilities")
+              Enzyme.Utils.TabInfo.TabName, "Utilities")
         {
         }
 

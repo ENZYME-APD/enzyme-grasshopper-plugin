@@ -16,7 +16,7 @@ namespace Enzyme.Components
         public ModSpandrelComponent()
           : base("Facade Module: Spandrels", "Mod_Spandrel",
               "Generates solid horizontal spandrel bands, vision glass, and variable-depth mullions.",
-              "Enzyme", "Masterplan (Beta)")
+              Enzyme.Utils.TabInfo.TabName, "Masterplan (Beta)")
         {
         }
 

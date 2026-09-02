@@ -10,7 +10,7 @@ namespace Enzyme.Components
         public GradientGenerator()
           : base("Gradient Generator", "GradientGen",
               "Creates an interpolated color gradient based on a list of input colors and a number of steps.",
-              "Enzyme", "Utilities")
+              Enzyme.Utils.TabInfo.TabName, "Utilities")
         {
         }
 

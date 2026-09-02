@@ -17,6 +17,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>portable</DebugType>
     <Optimize>false</Optimize>
+    <AssemblyName>HT-ENZ-enzyme</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <OutputPath>bin\Release\</OutputPath>
@@ -39,7 +40,7 @@
   <ItemGroup>
     <None Include="manifest.yml" />
   </ItemGroup>
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(Configuration)' == 'Release'">
     <Exec Command="if [ -d &quot;$(Rhino7GrasshopperLibPath)&quot; ]; then cp &quot;$(TargetPath)&quot; &quot;$(Rhino7GrasshopperLibPath)&quot;; fi" Condition="'$(OS)' != 'Windows_NT'" />
     <Exec Command="if [ -d &quot;$(Rhino8GrasshopperLibPath)&quot; ]; then cp &quot;$(TargetPath)&quot; &quot;$(Rhino8GrasshopperLibPath)&quot;; fi" Condition="'$(OS)' != 'Windows_NT'" />
   </Target>

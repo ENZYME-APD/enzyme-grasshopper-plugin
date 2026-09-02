@@ -11,7 +11,7 @@ namespace Enzyme.Components
         public KeylinePattern()
           : base("Keyline Pattern Engine", "Keyline",
               "Generates parametric plowing lines or swale networks by offsetting guide curves along a terrain mesh.",
-              "Enzyme", "LEAP")
+              Enzyme.Utils.TabInfo.TabName, "LEAP")
         {
         }
 

@@ -16,7 +16,7 @@ namespace Enzyme.Components
         public RailParserComponent()
           : base("Railing JSON Parser", "Rail_Parser",
               "Parses railing curves from JSON.",
-              "Enzyme", "Masterplan (Beta)")
+              Enzyme.Utils.TabInfo.TabName, "Masterplan (Beta)")
         {
         }
 

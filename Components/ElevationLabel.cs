@@ -17,7 +17,7 @@ namespace Enzyme.Terrain
         public ElevationLabel()
           : base("Elevation Labeler Pro", "ELEV_LABEL",
               "Custom text/elevation labels with radial rotation and auto-sync.",
-              "Enzyme", "Terrain")
+              Enzyme.Utils.TabInfo.TabName, "Terrain")
         {
         }
 

@@ -11,7 +11,7 @@ namespace Enzyme.Components
         public CWP()
           : base("CWProfile", "CWP",
               "Creates a CWProfile polyline",
-              "Enzyme", "Facade")
+              Enzyme.Utils.TabInfo.TabName, "Facade")
         {
         }
 

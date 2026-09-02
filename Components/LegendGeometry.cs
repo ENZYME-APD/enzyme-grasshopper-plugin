@@ -12,7 +12,7 @@ namespace Enzyme.Components
         public LegendGeometry()
             : base("Legend Geometry", "Legend",
                 "Creates a legend of colors with geometric representation",
-                "Enzyme", "Terrain")
+                Enzyme.Utils.TabInfo.TabName, "Terrain")
         {
         }
 

@@ -11,7 +11,7 @@ namespace Enzyme.Components
         public KeypointFinder()
           : base("Keypoint Finder", "Keypoint",
               "Analyzes stream slopes to find the inflection point (Keypoint) and extracts the Master Keyline contour.",
-              "Enzyme", "LEAP")
+              Enzyme.Utils.TabInfo.TabName, "LEAP")
         {
         }
 

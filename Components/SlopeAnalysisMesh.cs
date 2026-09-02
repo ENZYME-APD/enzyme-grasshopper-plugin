@@ -13,7 +13,7 @@ namespace Enzyme.Components
         public SlopeAnalysisMesh()
             : base("Slope Analysis Mesh", "SlopeAnalysis",
                 "Analyzes a mesh topography and provides a colored mesh displaying the areas with slopes over the threshold",
-                "Enzyme", "Terrain")
+                Enzyme.Utils.TabInfo.TabName, "Terrain")
         {
         }
 

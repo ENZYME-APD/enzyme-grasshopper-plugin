@@ -12,7 +12,7 @@ namespace Enzyme.Components
         public JsonInspectComponent()
           : base("JSON Metadata Inspector", "JSON_Inspect",
               "Extracts all unique filter keys from any MP Engine JSON.",
-              "Enzyme", "Masterplan (Beta)")
+              Enzyme.Utils.TabInfo.TabName, "Masterplan (Beta)")
         {
         }
 

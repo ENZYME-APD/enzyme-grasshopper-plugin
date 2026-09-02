@@ -10,7 +10,7 @@ namespace Enzyme.Components
         public GlobalFloodEngine()
             : base("Global Volumetric Flood Engine", "GlobalFlood",
                 "Simulates rainfall accumulation pooling into local valleys and depressions.",
-                "Enzyme", "Terrain")
+                Enzyme.Utils.TabInfo.TabName, "Terrain")
         {
         }
 

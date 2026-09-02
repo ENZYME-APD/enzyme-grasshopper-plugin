@@ -18,7 +18,7 @@ namespace Enzyme.Terrain
         public MeshHeightAnalysis()
           : base("Mesh Terrain Analyzer", "Terrain",
               "Analyzes mesh extremes, unrolls sections bi-directionally, and generates 3D/2D metadata labels.",
-              "Enzyme", "Terrain")
+              Enzyme.Utils.TabInfo.TabName, "Terrain")
         {
         }
 

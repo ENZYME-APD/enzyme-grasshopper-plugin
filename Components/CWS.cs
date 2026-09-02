@@ -15,7 +15,7 @@ namespace Enzyme.Components
         public CWSComponent()
           : base("CurtainWallSystem", "CWS",
               "Generates a detailed LOD 300 curtain wall system from base curves.",
-              "Enzyme", "Facade")
+              Enzyme.Utils.TabInfo.TabName, "Facade")
         {
         }
 

@@ -13,7 +13,7 @@ namespace Enzyme.Components
         public HeightMapAnalysisMesh()
             : base("Height Map Analysis Mesh", "HeightMap",
                 "Analyzes a mesh topography and provides a colored mesh displaying height distribution",
-                "Enzyme", "Terrain")
+                Enzyme.Utils.TabInfo.TabName, "Terrain")
         {
         }
 

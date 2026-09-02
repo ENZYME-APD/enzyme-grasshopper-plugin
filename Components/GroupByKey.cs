@@ -15,7 +15,7 @@ namespace Enzyme.Components
         public GroupByKey()
             : base("GroupByKey", "GrpByKey",
                 "Groups a list of values by a corresponding list of keys",
-                "Enzyme", "Utilities")
+                Enzyme.Utils.TabInfo.TabName, "Utilities")
         {
             Trace.WriteLine("GroupByKey constructor called");
         }

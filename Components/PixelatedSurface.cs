@@ -21,7 +21,7 @@ namespace Enzyme.Components
         public PixelatedSurface()
           : base("Pixelated Surface", "PixelSurf",
               "Creates a tiled surface that pixelates an image with a posterized color palette.",
-              "Enzyme", "Facade")
+              Enzyme.Utils.TabInfo.TabName, "Facade")
         {
         }
 

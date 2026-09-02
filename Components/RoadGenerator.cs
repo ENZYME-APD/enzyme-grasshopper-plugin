@@ -20,7 +20,7 @@ namespace Enzyme.Components
         public RoadGenerator()
           : base("Procedural Road Generator", "RoadGen",
               "Generates procedural roads, bridges, and terrain cuts/fills using a blazing fast 2.5D approach.",
-              "Enzyme", "Masterplan")
+              Enzyme.Utils.TabInfo.TabName, "Masterplan")
         {
         }
 

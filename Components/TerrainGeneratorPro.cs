@@ -19,7 +19,7 @@ namespace Enzyme.Components
         public TerrainGeneratorPro()
             : base("Terrain Generator Pro", "TRN-P",
                 "Generates topography with noise-masked procedural forest scattering and strict elevation limits.",
-                "Enzyme", "Terrain")
+                Enzyme.Utils.TabInfo.TabName, "Terrain")
         {
         }
 

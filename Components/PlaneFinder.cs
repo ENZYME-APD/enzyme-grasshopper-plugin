@@ -10,7 +10,7 @@ namespace Enzyme.Components
         public PlaneFinder()
           : base("Surface Plane Finder", "plane_finder",
               "Finds a plane from a planar surface or brep face.",
-              "Enzyme", "Pattern")
+              Enzyme.Utils.TabInfo.TabName, "Pattern")
         {
         }
 

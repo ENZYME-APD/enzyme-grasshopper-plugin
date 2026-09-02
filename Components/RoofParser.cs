@@ -14,7 +14,7 @@ namespace Enzyme.Components
     public class RoofParserComponent : GH_Component
     {
         public RoofParserComponent()
-          : base("Roof JSON Parser", "Roof_Parser", "Parses roof data from JSON", "Enzyme", "Masterplan (Beta)")
+          : base("Roof JSON Parser", "Roof_Parser", "Parses roof data from JSON", Enzyme.Utils.TabInfo.TabName, "Masterplan (Beta)")
         {
         }
 

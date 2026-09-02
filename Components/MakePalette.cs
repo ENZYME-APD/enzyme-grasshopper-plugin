@@ -11,7 +11,7 @@ namespace Enzyme.Components
         public MakePalette()
           : base("JSON Palette Builder", "MakePalette",
               "Zips strings and GH Colors into a JSON dictionary.",
-              "Enzyme", "Masterplan (Beta)")
+              Enzyme.Utils.TabInfo.TabName, "Masterplan (Beta)")
         {
         }
 

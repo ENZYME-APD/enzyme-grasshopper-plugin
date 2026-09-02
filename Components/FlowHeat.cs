@@ -16,7 +16,7 @@ namespace Enzyme.Components
         public FlowHeat()
           : base("Flow Accumulation Heatmap", "FlowHeat",
               "Generates a flow accumulation heatmap by evaluating water paths against mesh vertices.",
-              "Enzyme", "Terrain")
+              Enzyme.Utils.TabInfo.TabName, "Terrain")
         {
         }
 

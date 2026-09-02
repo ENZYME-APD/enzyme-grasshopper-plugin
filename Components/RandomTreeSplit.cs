@@ -12,7 +12,7 @@ namespace Enzyme.Components
         public RandomTreeSplit()
           : base("RandomTreeSplit", "RandomTreeSplit",
               "RandomTreeSplit",
-              "Enzyme", "Utilities")
+              Enzyme.Utils.TabInfo.TabName, "Utilities")
         {
         }
 

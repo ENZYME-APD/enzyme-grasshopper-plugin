@@ -15,7 +15,7 @@ namespace Enzyme.Terrain
         public WaterFlow()
           : base("Auto-Grid Raindrop Flow Engine", "WaterFlow",
               "Generates a parametric grid, projects it to the terrain, and simulates downhill flow paths.",
-              "Enzyme", "Terrain")
+              Enzyme.Utils.TabInfo.TabName, "Terrain")
         {
         }
 
