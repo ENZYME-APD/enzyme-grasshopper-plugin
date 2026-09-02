@@ -13,7 +13,7 @@ namespace Enzyme.Components
     public class TileGridGenerator : GH_Component
     {
         public TileGridGenerator()
-            : base("Grid Pattern Generator and Trimmer", "GridPattern",
+            : base("Tile Pattern", "TilePat",
                 "Generates a grid pattern (rectangular, hexagonal, triangular) within a boundary and trims cells to fit.",
                 "Enzyme", "Facade")
         {
@@ -258,9 +258,11 @@ namespace Enzyme.Components
             DA.SetDataList(5, trimmedTiles);
 
             string capGridType = gridType.Length > 0 ? char.ToUpper(gridType[0]) + gridType.Substring(1).ToLower() : gridType;
-            Message = $"{capGridType} Grid";
-            Message += $"\n{fullCount} complete | {trimCount} trimmed";
+            Message = "TILE PATTERN";
             Message += $"\nTime: {executionTime:F3}s";
+            Message += "\n---";
+            Message += $"\n{capGridType} Grid";
+            Message += $"\n{fullCount} complete | {trimCount} trimmed";
         }
 
         private class GridCell

@@ -19,7 +19,7 @@ namespace Enzyme.Components
         private int _cachedRotation = 0;
 
         public PixelatedSurface()
-          : base("Pixelated Surface", "PixelSurf",
+          : base("Pixel Image", "PixImg",
               "Creates a tiled surface that pixelates an image with a posterized color palette.",
               "Enzyme", "Facade")
         {
@@ -349,8 +349,111 @@ namespace Enzyme.Components
             string bake_status = "";
             if (run_bake)
             {
-                // Note: Bake logic was omitted, returning simple status
-                bake_status = "\nBake: COMPLETED";
+                var doc = Rhino.RhinoDoc.ActiveDoc;
+                if (doc != null)
+                {
+                    int items_replaced = 0;
+                    if (!string.IsNullOrEmpty(bake_name))
+                    {
+                        var existing_objs = doc.Objects.FindByUserString("ElefrontBakeName", bake_name, false);
+                        if (existing_objs != null && existing_objs.Length > 0)
+                        {
+                            foreach (var obj in existing_objs)
+                            {
+                                doc.Objects.Delete(obj.Id, true);
+                                items_replaced++;
+                            }
+                        }
+                    }
+
+                    for (int i = 0; i < out_mesh_tree.Branches.Count; i++)
+                    {
+                        GH_Path path = out_mesh_tree.Paths[i];
+                        var branch_meshes = out_mesh_tree.Branches[i];
+                        var branch_colors = out_cols_tree.Branches[i];
+                        var branch_tags = out_tags_tree.Branches[i];
+
+                        string branch_id = path.ToString().Replace("{", "").Replace("}", "").Replace(";", "_");
+                        string group_name = !string.IsNullOrEmpty(bake_name) ? $"SurfaceGroup_{bake_name}_{branch_id}" : $"SurfaceGroup_{branch_id}";
+                        int group_idx = -1;
+
+                        foreach (var g in doc.Groups)
+                        {
+                            if (g != null && g.Name == group_name)
+                            {
+                                group_idx = g.Index;
+                                break;
+                            }
+                        }
+
+                        if (group_idx < 0)
+                        {
+                            group_idx = doc.Groups.Add(group_name);
+                        }
+
+                        for (int j = 0; j < branch_meshes.Count; j++)
+                        {
+                            Rhino.Geometry.Mesh f_mesh = branch_meshes[j].Value;
+                            System.Drawing.Color f_color = branch_colors[j].Value;
+                            string f_tag = branch_tags[j].Value;
+
+                            string parent_name = "Tiles";
+                            int parent_idx = doc.Layers.Find(parent_name, true);
+                            if (parent_idx < 0)
+                            {
+                                var parent_layer = new Rhino.DocObjects.Layer();
+                                parent_layer.Name = parent_name;
+                                parent_idx = doc.Layers.Add(parent_layer);
+                            }
+
+                            string layer_name = $"HexFacade_{f_tag.Replace(" ", "")}";
+                            int layer_idx = -1;
+                            
+                            foreach(var l in doc.Layers)
+                            {
+                                if (l.Name == layer_name && l.ParentLayerId == doc.Layers[parent_idx].Id)
+                                {
+                                    layer_idx = l.Index;
+                                    break;
+                                }
+                            }
+
+                            if (layer_idx < 0)
+                            {
+                                var new_layer = new Rhino.DocObjects.Layer();
+                                new_layer.Name = layer_name;
+                                new_layer.Color = f_color;
+                                new_layer.ParentLayerId = doc.Layers[parent_idx].Id;
+
+                                var new_mat = new Rhino.DocObjects.Material();
+                                new_mat.DiffuseColor = f_color;
+                                new_mat.Name = $"Mat_{layer_name}";
+
+                                int mat_idx = doc.Materials.Add(new_mat);
+                                new_layer.RenderMaterialIndex = mat_idx;
+                                layer_idx = doc.Layers.Add(new_layer);
+                            }
+
+                            var attr = new Rhino.DocObjects.ObjectAttributes();
+                            attr.LayerIndex = layer_idx;
+                            attr.ColorSource = Rhino.DocObjects.ObjectColorSource.ColorFromLayer;
+                            attr.MaterialSource = Rhino.DocObjects.ObjectMaterialSource.MaterialFromLayer;
+
+                            if (!string.IsNullOrEmpty(bake_name))
+                            {
+                                attr.SetUserString("ElefrontBakeName", bake_name);
+                            }
+                            attr.SetUserString("Surface_Path", path.ToString());
+                            attr.SetUserString("Surface_ID", branch_id);
+                            attr.SetUserString("Material_Tag", f_tag);
+
+                            attr.AddToGroup(group_idx);
+                            doc.Objects.AddMesh(f_mesh, attr);
+                        }
+                    }
+                    string status_text = items_replaced == 0 ? "BAKED" : $"REPLACED ({items_replaced})";
+                    bake_status = $"\n[ {status_text} TO RHINO ]";
+                }
             }
 
             DA.SetDataTree(0, out_mesh_tree);
@@ -361,6 +464,7 @@ namespace Enzyme.Components
             t_start.Stop();
             
             List<string> ui_lines = new List<string>();
+            ui_lines.Add("PIXEL IMAGE");
             ui_lines.Add($"Time: {t_start.ElapsedMilliseconds:F2} ms");
             ui_lines.Add("---");
             for (int i = 0; i < palette.Count; i++)

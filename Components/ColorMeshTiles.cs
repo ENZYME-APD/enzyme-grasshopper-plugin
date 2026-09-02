@@ -14,7 +14,7 @@ namespace Enzyme.Components
     public class ColorMeshTiles : GH_Component
     {
         public ColorMeshTiles()
-          : base("ColorMeshTiles", "ColorMeshTiles",
+          : base("Pixel Gradient", "PixGrad",
               "BIM-ready Idempotent Engine. Consolidates Mega-Meshes per surface and binds them into Rhino Groups.",
               "Enzyme", "Facade")
         {
@@ -351,14 +351,33 @@ namespace Enzyme.Components
                             Color f_color = branch_colors[j].Value;
                             string f_tag = branch_tags[j].Value;
 
+                            string parent_name = "Tiles";
+                            int parent_idx = doc.Layers.Find(parent_name, true);
+                            if (parent_idx < 0)
+                            {
+                                var parent_layer = new Rhino.DocObjects.Layer();
+                                parent_layer.Name = parent_name;
+                                parent_idx = doc.Layers.Add(parent_layer);
+                            }
+
                             string layer_name = $"HexFacade_{f_tag.Replace(" ", "")}";
-                            int layer_idx = doc.Layers.Find(layer_name, true);
+                            int layer_idx = -1;
+                            
+                            foreach(var l in doc.Layers)
+                            {
+                                if (l.Name == layer_name && l.ParentLayerId == doc.Layers[parent_idx].Id)
+                                {
+                                    layer_idx = l.Index;
+                                    break;
+                                }
+                            }
 
                             if (layer_idx < 0)
                             {
                                 var new_layer = new Rhino.DocObjects.Layer();
                                 new_layer.Name = layer_name;
                                 new_layer.Color = f_color;
+                                new_layer.ParentLayerId = doc.Layers[parent_idx].Id;
 
                                 var new_mat = new Rhino.DocObjects.Material();
                                 new_mat.DiffuseColor = f_color;
@@ -399,7 +418,7 @@ namespace Enzyme.Components
 
             List<string> ui_lines = new List<string>
             {
-                "COLORED MESH TILES",
+                "PIXEL GRADIENT",
                 $"Time: {execution_ms:F2} ms",
                 "---"
             };
