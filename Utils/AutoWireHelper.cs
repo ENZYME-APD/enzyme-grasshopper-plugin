@@ -218,6 +218,68 @@ namespace Enzyme.Utils
             doc.AddObject(param, false);
             param.AddSource(comp.Params.Output[paramIndex]);
         }
+        public static void WireHumanCurvePreview(GH_Component comp, GH_Document doc, int paramIndex, System.Drawing.Color color, double thickness, int offsetX, int offsetY)
+        {
+            if (paramIndex >= comp.Params.Output.Count) return;
+            if (comp.Params.Output[paramIndex].Recipients.Count > 0) return;
+
+            IGH_ObjectProxy proxy = null;
+            foreach (var p in Grasshopper.Instances.ComponentServer.ObjectProxies)
+            {
+                if (p.Desc.Name.Equals("Custom Preview Lineweights", System.StringComparison.OrdinalIgnoreCase) || 
+                    p.Desc.Name.Equals("Lineweight Preview", System.StringComparison.OrdinalIgnoreCase))
+                {
+                    proxy = p;
+                    break;
+                }
+            }
+
+            if (proxy == null)
+            {
+                // Fallback to native
+                WireCurvePreview(comp, doc, paramIndex, color, thickness, offsetX, offsetY);
+                return;
+            }
+
+            var preview = proxy.CreateInstance() as IGH_Component;
+            if (preview == null)
+            {
+                WireCurvePreview(comp, doc, paramIndex, color, thickness, offsetX, offsetY);
+                return;
+            }
+
+            preview.CreateAttributes();
+            System.Drawing.PointF compPivot = comp.Attributes.Pivot;
+            preview.Attributes.Pivot = new System.Drawing.PointF(compPivot.X + offsetX, compPivot.Y + offsetY);
+
+            Grasshopper.Kernel.Special.GH_ColourSwatch swatch = new Grasshopper.Kernel.Special.GH_ColourSwatch();
+            swatch.CreateAttributes();
+            swatch.SwatchColour = color;
+            swatch.Attributes.Pivot = new System.Drawing.PointF(preview.Attributes.Pivot.X - 100, preview.Attributes.Pivot.Y - 25);
+            
+            Grasshopper.Kernel.Special.GH_NumberSlider slider = new Grasshopper.Kernel.Special.GH_NumberSlider();
+            slider.CreateAttributes();
+            slider.Slider.Minimum = 0.0m;
+            slider.Slider.Maximum = 2.0m;
+            slider.Slider.Value = (decimal)thickness;
+            slider.Attributes.Pivot = new System.Drawing.PointF(preview.Attributes.Pivot.X - 180, preview.Attributes.Pivot.Y + 15);
+
+            Grasshopper.Kernel.Special.GH_BooleanToggle toggle = new Grasshopper.Kernel.Special.GH_BooleanToggle();
+            toggle.CreateAttributes();
+            toggle.Value = false;
+            toggle.Attributes.Pivot = new System.Drawing.PointF(preview.Attributes.Pivot.X - 140, preview.Attributes.Pivot.Y + 45);
+
+            doc.AddObject(preview, false);
+            doc.AddObject(swatch, false);
+            doc.AddObject(slider, false);
+            doc.AddObject(toggle, false);
+            
+            if (preview.Params.Input.Count > 0) preview.Params.Input[0].AddSource(comp.Params.Output[paramIndex]);
+            if (preview.Params.Input.Count > 1) preview.Params.Input[1].AddSource(swatch);
+            if (preview.Params.Input.Count > 2) preview.Params.Input[2].AddSource(slider);
+            if (preview.Params.Input.Count > 3) preview.Params.Input[3].AddSource(toggle);
+        }
+
         public static void WireCurvePreview(GH_Component comp, GH_Document doc, int paramIndex, System.Drawing.Color color, double thickness, int offsetX, int offsetY)
         {
             if (paramIndex >= comp.Params.Output.Count) return;
