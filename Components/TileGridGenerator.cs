@@ -233,17 +233,22 @@ namespace Enzyme.Components
             else if (gridType == "triangular")
             {
                 double height = cellWidth * Math.Sqrt(3) / 2.0;
-                double x = Math.Floor(bbox.Min.X / cellWidth) * cellWidth;
-                while (x < bbox.Max.X)
+                double startY = Math.Floor(bbox.Min.Y / height) * height;
+                double startX = Math.Floor(bbox.Min.X / cellWidth) * cellWidth - cellWidth;
+                
+                double y = startY;
+                int row = 0;
+                while (y < bbox.Max.Y)
                 {
-                    double y = Math.Floor(bbox.Min.Y / height) * height;
-                    while (y < bbox.Max.Y)
+                    double x = startX + (row % 2 == 0 ? 0 : cellWidth / 2.0);
+                    while (x < bbox.Max.X)
                     {
                         cells.Add(CreateTriangularCell(x, y, false, cellWidth, height));
                         cells.Add(CreateTriangularCell(x, y, true, cellWidth, height));
-                        y += height;
+                        x += cellWidth;
                     }
-                    x += cellWidth;
+                    y += height;
+                    row++;
                 }
             }
 
@@ -280,7 +285,7 @@ namespace Enzyme.Components
             
             List<Point3d> crvPts = new List<Point3d>(corners);
             crvPts.Add(corners[0]);
-            cell.Curve = Curve.CreateInterpolatedCurve(crvPts, 1);
+            cell.Curve = new PolylineCurve(crvPts);
             return cell;
         }
 
@@ -296,16 +301,16 @@ namespace Enzyme.Components
             }
             else
             {
-                corners.Add(new Point3d(baseX + cellWidth / 2.0, baseY, 0));
-                corners.Add(new Point3d(baseX + cellWidth, baseY + height, 0));
-                corners.Add(new Point3d(baseX, baseY + height, 0));
+                corners.Add(new Point3d(baseX + cellWidth / 2.0, baseY + height, 0));
+                corners.Add(new Point3d(baseX + cellWidth * 1.5, baseY + height, 0));
+                corners.Add(new Point3d(baseX + cellWidth, baseY, 0));
             }
             cell.Corners = corners;
             cell.Center = new Point3d(corners.Sum(p => p.X) / 3.0, corners.Sum(p => p.Y) / 3.0, 0);
 
             List<Point3d> crvPts = new List<Point3d>(corners);
             crvPts.Add(corners[0]);
-            cell.Curve = Curve.CreateInterpolatedCurve(crvPts, 1);
+            cell.Curve = new PolylineCurve(crvPts);
             return cell;
         }
 
