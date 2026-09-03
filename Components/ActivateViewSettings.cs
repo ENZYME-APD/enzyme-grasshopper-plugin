@@ -239,7 +239,7 @@ namespace Enzyme.Components
 
         protected override System.Drawing.Bitmap Icon
         {
-            get { return Enzyme.IconLoader.Load("ExportNamedViews.png"); }
+            get { return Enzyme.IconLoader.Load("ActivateViewSettings.png"); }
         }
 
         public override Guid ComponentGuid
