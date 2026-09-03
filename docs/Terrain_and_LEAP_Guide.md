@@ -52,9 +52,9 @@ This guide covers the remaining components in the Terrain and LEAP toolsets, exp
 ---
 
 ## TERRAIN GENERATOR PRO
-**How it works:** Takes raw input data (points, curves, or GIS contour lines) and triangulates a clean, unified, watertight 3D mesh.
+**How it works:** A procedural terrain generator developed specifically to test different analysis components across a wide variety of topographic conditions.
 
-**Interpretation & Importance:** The foundational step for all digital site analysis. It converts messy, disconnected surveyor data into a usable computational surface for grading, water, and slope analysis.
+**Interpretation & Importance:** Generates synthetic, highly controllable terrains (ridges, valleys, noise). This allows designers to rigorously test and calibrate drainage, slope, and wind analysis tools before applying them to real-world GIS data.
 
 ---
 
