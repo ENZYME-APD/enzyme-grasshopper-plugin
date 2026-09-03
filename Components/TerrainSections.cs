@@ -360,41 +360,86 @@ namespace Enzyme.Components
                         }
                     }
 
-                    string parent_name = "TerrainSections";
-                    int parent_idx = doc.Layers.Find(parent_name, true);
+                    string parent_name = "Site Sections";
+                    int parent_idx = -1;
+                    foreach (var layer in doc.Layers) { if (layer.Name == parent_name && layer.ParentLayerId == System.Guid.Empty) { parent_idx = layer.Index; break; } }
                     if (parent_idx < 0)
                     {
                         var parent_layer = new Rhino.DocObjects.Layer();
                         parent_layer.Name = parent_name;
                         parent_idx = doc.Layers.Add(parent_layer);
                     }
+                    var parentId = doc.Layers[parent_idx].Id;
+                    
+                    string layer3d_name = "Terrain Sections";
+                    int layer3d_idx = -1;
+                    foreach (var layer in doc.Layers) { if (layer.Name == layer3d_name && layer.ParentLayerId == parentId) { layer3d_idx = layer.Index; break; } }
+                    if (layer3d_idx < 0)
+                    {
+                        var layer3d = new Rhino.DocObjects.Layer();
+                        layer3d.Name = layer3d_name;
+                        layer3d.ParentLayerId = parentId;
+                        layer3d_idx = doc.Layers.Add(layer3d);
+                    }
+                    
+                    string layer2d_name = "Unrolled Sections";
+                    int layer2d_idx = -1;
+                    foreach (var layer in doc.Layers) { if (layer.Name == layer2d_name && layer.ParentLayerId == parentId) { layer2d_idx = layer.Index; break; } }
+                    if (layer2d_idx < 0)
+                    {
+                        var layer2d = new Rhino.DocObjects.Layer();
+                        layer2d.Name = layer2d_name;
+                        layer2d.ParentLayerId = parentId;
+                        layer2d_idx = doc.Layers.Add(layer2d);
+                    }
                     
                     var groupIndex = doc.Groups.Add(bakeName);
 
+                    // Bake 3D sections
                     for (int i = 0; i < sectionOutlinesX.Branches.Count; i++)
                     {
-                        var branch = sectionOutlinesX.Branches[i];
-                        foreach (var ghCrv in branch)
+                        foreach (var ghCrv in sectionOutlinesX.Branches[i])
                         {
-                            var crv = ghCrv.Value;
                             var attr = new Rhino.DocObjects.ObjectAttributes();
-                            attr.LayerIndex = parent_idx;
+                            attr.LayerIndex = layer3d_idx;
                             if (!string.IsNullOrEmpty(bakeName)) attr.SetUserString("ElefrontBakeName", bakeName);
                             attr.AddToGroup(groupIndex);
-                            doc.Objects.AddCurve(crv, attr);
+                            doc.Objects.AddCurve(ghCrv.Value, attr);
                         }
                     }
                     for (int i = 0; i < sectionOutlinesY.Branches.Count; i++)
                     {
-                        var branch = sectionOutlinesY.Branches[i];
-                        foreach (var ghCrv in branch)
+                        foreach (var ghCrv in sectionOutlinesY.Branches[i])
                         {
-                            var crv = ghCrv.Value;
                             var attr = new Rhino.DocObjects.ObjectAttributes();
-                            attr.LayerIndex = parent_idx;
+                            attr.LayerIndex = layer3d_idx;
                             if (!string.IsNullOrEmpty(bakeName)) attr.SetUserString("ElefrontBakeName", bakeName);
                             attr.AddToGroup(groupIndex);
-                            doc.Objects.AddCurve(crv, attr);
+                            doc.Objects.AddCurve(ghCrv.Value, attr);
+                        }
+                    }
+                    
+                    // Bake 2D sections
+                    for (int i = 0; i < flatSectionsX.Branches.Count; i++)
+                    {
+                        foreach (var ghCrv in flatSectionsX.Branches[i])
+                        {
+                            var attr = new Rhino.DocObjects.ObjectAttributes();
+                            attr.LayerIndex = layer2d_idx;
+                            if (!string.IsNullOrEmpty(bakeName)) attr.SetUserString("ElefrontBakeName", bakeName);
+                            attr.AddToGroup(groupIndex);
+                            doc.Objects.AddCurve(ghCrv.Value, attr);
+                        }
+                    }
+                    for (int i = 0; i < flatSectionsY.Branches.Count; i++)
+                    {
+                        foreach (var ghCrv in flatSectionsY.Branches[i])
+                        {
+                            var attr = new Rhino.DocObjects.ObjectAttributes();
+                            attr.LayerIndex = layer2d_idx;
+                            if (!string.IsNullOrEmpty(bakeName)) attr.SetUserString("ElefrontBakeName", bakeName);
+                            attr.AddToGroup(groupIndex);
+                            doc.Objects.AddCurve(ghCrv.Value, attr);
                         }
                     }
                 }
