@@ -131,16 +131,31 @@ namespace Enzyme.Components
             int totalSectionsX = 0;
             int totalSectionsY = 0;
 
-            BoundingBox globalBB = BoundingBox.Empty;
+            BoundingBox globalRotBB = BoundingBox.Empty;
+            Transform xformToRot = Transform.ChangeBasis(Rhino.Geometry.Plane.WorldXY, rotPlane);
             foreach (var path in targetMeshes.Paths)
             {
                 foreach (var obj in targetMeshes.get_Branch(path))
                 {
                     var ghMesh = obj as GH_Mesh;
                     if (ghMesh != null && ghMesh.Value != null && ghMesh.Value.IsValid)
-                        globalBB.Union(ghMesh.Value.GetBoundingBox(true));
+                    {
+                        var m = ghMesh.Value.DuplicateMesh();
+                        m.Transform(xformToRot);
+                        globalRotBB.Union(m.GetBoundingBox(true));
+                    }
                 }
             }
+            
+            Rhino.Geometry.Vector3d layoutX = rotPlane.XAxis;
+            layoutX.Z = 0;
+            if (layoutX.Length < 1e-6) layoutX = Rhino.Geometry.Vector3d.XAxis;
+            layoutX.Unitize();
+            Rhino.Geometry.Vector3d layoutY = Rhino.Geometry.Vector3d.CrossProduct(Rhino.Geometry.Vector3d.ZAxis, layoutX);
+            Rhino.Geometry.Point3d layoutOrigin = new Rhino.Geometry.Point3d(rotPlane.Origin.X, rotPlane.Origin.Y, 0);
+            Rhino.Geometry.Plane layoutPlane = new Rhino.Geometry.Plane(layoutOrigin, layoutX, layoutY);
+            Rhino.Geometry.Transform finalLayoutXform = Rhino.Geometry.Transform.PlaneToPlane(Rhino.Geometry.Plane.WorldXY, layoutPlane);
+            
 
             for (int pathIdx = 0; pathIdx < targetMeshes.Paths.Count; pathIdx++)
             {
@@ -160,9 +175,9 @@ namespace Enzyme.Components
                         double lenX = localBox.X.Length;
                         double lenY = localBox.Y.Length;
                         
-                        double padding = globalBB.IsValid ? globalBB.Diagonal.Length * 0.05 : 10.0;
-                        double cursorYXSecs = globalBB.IsValid ? globalBB.Max.Y + padding : padding;
-                        double cursorXYSecs = globalBB.IsValid ? globalBB.Max.X + padding : padding;
+                        double padding = globalRotBB.IsValid ? globalRotBB.Diagonal.Length * 0.05 : 10.0;
+                        double cursorYXSecs = globalRotBB.IsValid ? globalRotBB.Max.Y + padding : padding;
+                        double cursorXYSecs = globalRotBB.IsValid ? globalRotBB.Max.X + padding : padding;
 
                         if (sectionsX > 0)
                         {
@@ -214,17 +229,18 @@ namespace Enzyme.Components
                                         
                                         if (layoutFlat)
                                         {
-                                            var xformMove = Transform.Translation(new Vector3d(globalBB.Min.X - bbFlat.Min.X, cursorYXSecs - bbFlat.Min.Y, 0));
+                                            var xformMove = Transform.Translation(new Vector3d(globalRotBB.Min.X - bbFlat.Min.X, cursorYXSecs - bbFlat.Min.Y, 0));
                                             foreach (var flatCrv in flatCrvs)
                                             {
                                                 flatCrv.Transform(xformMove);
+                                                flatCrv.Transform(finalLayoutXform);
                                                 flatSectionsX.Append(new GH_Curve(flatCrv), currentPath);
                                             }
 
                                             Point3d ptStartFlat = new Point3d(ptStart3D);
                                             Point3d ptEndFlat = new Point3d(ptEnd3D);
-                                            ptStartFlat.Transform(xformToWorld); ptStartFlat.Transform(xformMove);
-                                            ptEndFlat.Transform(xformToWorld); ptEndFlat.Transform(xformMove);
+                                            ptStartFlat.Transform(xformToWorld); ptStartFlat.Transform(xformMove); ptStartFlat.Transform(finalLayoutXform);
+                                            ptEndFlat.Transform(xformToWorld); ptEndFlat.Transform(xformMove); ptEndFlat.Transform(finalLayoutXform);
                                             
                                             labelTextFlat.Append(new GH_String(secId), currentPath);
                                             labelTextFlat.Append(new GH_String(secId), currentPath);
@@ -294,17 +310,18 @@ namespace Enzyme.Components
 
                                         if (layoutFlat)
                                         {
-                                            var xformMove = Transform.Translation(new Vector3d(cursorXYSecs - bbFlat.Min.X, globalBB.Min.Y - bbFlat.Min.Y, 0));
+                                            var xformMove = Transform.Translation(new Vector3d(cursorXYSecs - bbFlat.Min.X, globalRotBB.Min.Y - bbFlat.Min.Y, 0));
                                             foreach (var flatCrv in flatCrvs)
                                             {
                                                 flatCrv.Transform(xformMove);
+                                                flatCrv.Transform(finalLayoutXform);
                                                 flatSectionsY.Append(new GH_Curve(flatCrv), currentPath);
                                             }
 
                                             Point3d ptStartFlat = new Point3d(ptStart3D);
                                             Point3d ptEndFlat = new Point3d(ptEnd3D);
-                                            ptStartFlat.Transform(xformToWorld); ptStartFlat.Transform(xformMove);
-                                            ptEndFlat.Transform(xformToWorld); ptEndFlat.Transform(xformMove);
+                                            ptStartFlat.Transform(xformToWorld); ptStartFlat.Transform(xformMove); ptStartFlat.Transform(finalLayoutXform);
+                                            ptEndFlat.Transform(xformToWorld); ptEndFlat.Transform(xformMove); ptEndFlat.Transform(finalLayoutXform);
 
                                             labelTextFlat.Append(new GH_String(secId), currentPath);
                                             labelTextFlat.Append(new GH_String(secId), currentPath);
