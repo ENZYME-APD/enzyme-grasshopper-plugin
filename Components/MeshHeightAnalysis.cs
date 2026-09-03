@@ -38,24 +38,12 @@ namespace Enzyme.Terrain
                 Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 4, false, 210, -60);
                 Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 5, false, 210, -20);
                 Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 6, true, 210, 20);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 8, 0.0, 10.0, 5, 330, 60);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 9, 0.0, 10.0, 4, 330, 100);
-                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 10, false, 210, 140);
                 Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 0, 220, -341, 180, 22);
                 Enzyme.Utils.AutoWireHelper.WirePointDisplay(this, document, 1, System.Drawing.Color.Blue, 10.0, 350, -285);
                 Enzyme.Utils.AutoWireHelper.WirePointDisplay(this, document, 3, System.Drawing.Color.Blue, 5.0, 350, -240);
                 Enzyme.Utils.AutoWireHelper.WirePointDisplay(this, document, 5, System.Drawing.Color.Red, 10.0, 350, -195);
                 Enzyme.Utils.AutoWireHelper.WirePointDisplay(this, document, 7, System.Drawing.Color.Red, 5.0, 350, -150);
                 Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 9, "mesh", 220, -105);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 10, "curve", 220, -30);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 11, "curve", 220, 15);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 12, "curve", 220, 60);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 13, "curve", 220, 105);
-                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 14, 220, 139, 180, 22);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 15, "point", 220, 195);
-                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 16, 220, 229, 180, 22);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 17, "point", 220, 285);
-                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 18, 220, 319, 180, 22);
             }
         }
 
@@ -83,15 +71,6 @@ namespace Enzyme.Terrain
             pManager.AddPointParameter("GlobalMinPoint", "GMI", "Absolute lowest point on the mesh.", GH_ParamAccess.tree);
             pManager.AddNumberParameter("GlobalMinElevation", "GMIE", "Absolute lowest Z-value.", GH_ParamAccess.tree);
             pManager.AddMeshParameter("HeatmapMeshes", "HM", "The vertex-colored duplicate mesh.", GH_ParamAccess.tree);
-            pManager.AddCurveParameter("SectionOutlinesX", "SOX", "3D Polylines running parallel to the X-axis.", GH_ParamAccess.tree);
-            pManager.AddCurveParameter("SectionOutlinesY", "SOY", "3D Polylines running parallel to the Y-axis.", GH_ParamAccess.tree);
-            pManager.AddCurveParameter("FlatSectionsX", "FSX", "2D X-Sections stacked downwards (-Y direction).", GH_ParamAccess.tree);
-            pManager.AddCurveParameter("FlatSectionsY", "FSY", "2D Y-Sections stacked leftwards (-X direction).", GH_ParamAccess.tree);
-            pManager.AddTextParameter("LabelText3D", "LT3D", "Text strings for 3D section labels.", GH_ParamAccess.tree);
-            pManager.AddPointParameter("LabelPoints3D", "LP3D", "Points for 3D section labels.", GH_ParamAccess.tree);
-            pManager.AddTextParameter("LabelTextFlat", "LTF", "Text strings for the flattened section layout.", GH_ParamAccess.tree);
-            pManager.AddPointParameter("LabelPointsFlat", "LPF", "Points for the flattened section layout.", GH_ParamAccess.tree);
-                        pManager.AddTextParameter("SectionMetadata", "SM", "Dictionary keys containing spatial transform & ID data.", GH_ParamAccess.tree);
             pManager.AddGenericParameter("Color Legend", "Color Legend", "JSON Legend Data", GH_ParamAccess.item);
         }
 
