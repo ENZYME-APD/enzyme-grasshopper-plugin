@@ -401,7 +401,7 @@ namespace Enzyme.Components
 
         protected override System.Drawing.Bitmap Icon
         {
-            get { return IconLoader.Load("TERRAIN SECTIONS.png"); }
+            get { return IconLoader.Load("TerrainSections.png"); }
         }
 
         public override Guid ComponentGuid
