@@ -276,6 +276,14 @@ namespace Enzyme.Components
                 "INTERPRETATION & IMPORTANCE:\n" +
                 "Automates the tedious task of exporting presentation images. Ensures that every iteration of your Grasshopper definition can be instantly batch-exported into standard, perfectly aligned viewpoints for reports and presentations.";
             DA.SetData(1, info);
+
+            sw.Stop();
+            string viewText = viewNames != null && viewNames.Count > 0 ? (viewNames.Count == 1 ? viewNames[0] : $"{viewNames.Count} Views") : "ALL VIEWS";
+            if (!run) viewText = "WAITING...";
+            string lsText = string.IsNullOrEmpty(layerState) ? "ACTIVE" : layerState.ToUpper();
+            string dsText = string.IsNullOrEmpty(displayStyle) ? "ACTIVE" : displayStyle.ToUpper();
+            
+            this.Message = $"EXPORT NAMED VIEWS\nTime: {sw.ElapsedMilliseconds} ms\n---\nVIEW: {viewText}\nLAYER: {lsText}\nSTYLE: {dsText}";
         }
 
         // Add right-click menu option to auto-fill value list
