@@ -13,7 +13,7 @@ namespace Enzyme.Terrain
     public class WaterFlow : GH_Component
     {
         public WaterFlow()
-          : base("Auto-Grid Raindrop Flow Engine", "WaterFlow",
+          : base("Raindrop Flow Engine", "WaterFlow",
               "Generates a parametric grid, projects it to the terrain, and simulates downhill flow paths.",
               "Enzyme", "Terrain")
         {

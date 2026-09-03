@@ -8,7 +8,7 @@ namespace Enzyme.Components
     public class GlobalFloodEngine : GH_Component
     {
         public GlobalFloodEngine()
-            : base("Global Volumetric Flood Engine", "GlobalFlood",
+            : base("Global Flood Engine", "GlobalFlood",
                 "Simulates rainfall accumulation pooling into local valleys and depressions.",
                 "Enzyme", "Terrain")
         {
@@ -27,6 +27,7 @@ namespace Enzyme.Components
             pManager.AddMeshParameter("FloodMesh", "FM", "Flooded terrain heatmap mesh", GH_ParamAccess.item);
             pManager.AddNumberParameter("WaterDepths", "WD", "Water depths at each vertex in meters", GH_ParamAccess.list);
             pManager.AddPointParameter("AnalysisPoints", "Pts", "Points corresponding to the water depth values", GH_ParamAccess.list);
+            pManager.AddTextParameter("Info", "I", "Component information and interpretation", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
@@ -155,6 +156,15 @@ namespace Enzyme.Components
             DA.SetData(0, outMesh);
             DA.SetDataList(1, finalDepths);
             DA.SetDataList(2, analysisPoints);
+
+            string info = 
+                "GLOBAL FLOOD ENGINE\n" +
+                "===================\n\n" +
+                "HOW IT WORKS:\n" +
+                "Simulates ponding (accumulation volume). You input a rain intensity and duration, and the engine calculates how much water falls on the site and fills local depressions, outputting exact water depths.\n\n" +
+                "INTERPRETATION & IMPORTANCE:\n" +
+                "Essential for flood risk assessment. Reveals trapped water areas, calculates retention pond volumes, and shows submerged regions during storms. It shows the 'destination' of water.";
+            DA.SetData(3, info);
 
             sw.Stop();
             Message = $"{this.NickName}\nTime: {sw.ElapsedMilliseconds} ms\n---\n● Flooded: {floodedVertexCount} | ○ Dry: {numVertices - floodedVertexCount}";
