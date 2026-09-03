@@ -55,6 +55,7 @@ namespace Enzyme.Components
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            var sw = System.Diagnostics.Stopwatch.StartNew();
             bool run = false;
             DA.GetData("Run", ref run);
 
@@ -379,6 +380,11 @@ namespace Enzyme.Components
             OnPingDocument().AddObject(vl, false);
             this.Params.Input[5].AddSource(vl);
             vl.ExpireSolution(true);
+        }
+
+        protected override System.Drawing.Bitmap Icon
+        {
+            get { return Enzyme.IconLoader.Load("ExportNamedViews.png"); }
         }
 
         public override Guid ComponentGuid
