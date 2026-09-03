@@ -19,7 +19,7 @@ namespace Enzyme.Components
         {
         }
 
-        public override void AddedToDocument(GH_Document document)
+                public override void AddedToDocument(GH_Document document)
         {
             base.AddedToDocument(document);
             if (this.Attributes == null) this.CreateAttributes();
@@ -33,13 +33,36 @@ namespace Enzyme.Components
                 Enzyme.Utils.AutoWireHelper.WireInputParam(this, document, 0, "mesh", 180, -120);
                 Enzyme.Utils.AutoWireHelper.WireIntegerSlider(this, document, 2, 0, 50, 5, 330, -40);
                 Enzyme.Utils.AutoWireHelper.WireIntegerSlider(this, document, 3, 0, 50, 5, 330, 0);
-                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 4, false, 210, 40);
-                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 5, false, 210, 80);
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 4, true, 210, 40);
+                Enzyme.Utils.AutoWireHelper.WireButton(this, document, 5, 210, 80);
+                                var pnl = new Grasshopper.Kernel.Special.GH_Panel();
+                pnl.CreateAttributes();
+                pnl.Attributes.Pivot = new System.Drawing.PointF(this.Attributes.Pivot.X - 210, this.Attributes.Pivot.Y + 120);
+                pnl.Attributes.Bounds = new System.Drawing.RectangleF(pnl.Attributes.Pivot.X, pnl.Attributes.Pivot.Y, 100, 30);
+                pnl.UserText = "TerrainSections";
+                document.AddObject(pnl, false);
+                this.Params.Input[6].AddSource(pnl);
                 
-                Enzyme.Utils.AutoWireHelper.WireHumanCurvePreview(this, document, 0, System.Drawing.Color.Gray, 0.35, 300, -80);
-                Enzyme.Utils.AutoWireHelper.WireHumanCurvePreview(this, document, 1, System.Drawing.Color.Black, 0.35, 300, 40);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 2, "curve", 300, 160);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 3, "curve", 300, 200);
+                // Spawn Curve Parameters and hook them to outputs 0 and 1, then hook Custom Preview Lineweights
+                var outCrv0 = new Grasshopper.Kernel.Parameters.Param_Curve();
+                outCrv0.CreateAttributes();
+                outCrv0.Attributes.Pivot = new System.Drawing.PointF(this.Attributes.Pivot.X + 250, this.Attributes.Pivot.Y - 80);
+                document.AddObject(outCrv0, false);
+                outCrv0.AddSource(this.Params.Output[0]);
+                
+                var outCrv1 = new Grasshopper.Kernel.Parameters.Param_Curve();
+                outCrv1.CreateAttributes();
+                outCrv1.Attributes.Pivot = new System.Drawing.PointF(this.Attributes.Pivot.X + 250, this.Attributes.Pivot.Y - 20);
+                document.AddObject(outCrv1, false);
+                outCrv1.AddSource(this.Params.Output[1]);
+                
+                // Now attach Human component to those curve parameters
+                Enzyme.Utils.AutoWireHelper.WireHumanCurvePreviewToParam(outCrv0, document, System.Drawing.Color.Black, 0.35, 200, 0);
+                Enzyme.Utils.AutoWireHelper.WireHumanCurvePreviewToParam(outCrv1, document, System.Drawing.Color.Black, 0.35, 200, 40);
+
+                // For FlatSections, wire Curve parameters
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 4, "curve", 250, 100);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 5, "curve", 250, 140);
             }
         }
 
@@ -60,10 +83,10 @@ namespace Enzyme.Components
         {
             pManager.AddCurveParameter("SectionOutlinesX", "SOX", "3D Polylines running parallel to the X-axis.", GH_ParamAccess.tree);
             pManager.AddCurveParameter("SectionOutlinesY", "SOY", "3D Polylines running parallel to the Y-axis.", GH_ParamAccess.tree);
-            pManager.AddCurveParameter("FlatSectionsX", "FSX", "2D X-Sections stacked downwards (-Y direction).", GH_ParamAccess.tree);
-            pManager.AddCurveParameter("FlatSectionsY", "FSY", "2D Y-Sections stacked leftwards (-X direction).", GH_ParamAccess.tree);
             pManager.AddTextParameter("LabelText3D", "LT3D", "Text strings for 3D section labels.", GH_ParamAccess.tree);
             pManager.AddPointParameter("LabelPoints3D", "LP3D", "Points for 3D section labels.", GH_ParamAccess.tree);
+            pManager.AddCurveParameter("FlatSectionsX", "FSX", "2D X-Sections stacked downwards (-Y direction).", GH_ParamAccess.tree);
+            pManager.AddCurveParameter("FlatSectionsY", "FSY", "2D Y-Sections stacked leftwards (-X direction).", GH_ParamAccess.tree);
             pManager.AddTextParameter("LabelTextFlat", "LTF", "Text strings for the flattened section layout.", GH_ParamAccess.tree);
             pManager.AddPointParameter("LabelPointsFlat", "LPF", "Points for the flattened section layout.", GH_ParamAccess.tree);
             pManager.AddTextParameter("SectionMetadata", "SM", "Dictionary keys containing spatial transform & ID data.", GH_ParamAccess.tree);
@@ -108,6 +131,17 @@ namespace Enzyme.Components
             int totalSectionsX = 0;
             int totalSectionsY = 0;
 
+            BoundingBox globalBB = BoundingBox.Empty;
+            foreach (var path in targetMeshes.Paths)
+            {
+                foreach (var obj in targetMeshes.get_Branch(path))
+                {
+                    var ghMesh = obj as GH_Mesh;
+                    if (ghMesh != null && ghMesh.Value != null && ghMesh.Value.IsValid)
+                        globalBB.Union(ghMesh.Value.GetBoundingBox(true));
+                }
+            }
+
             for (int pathIdx = 0; pathIdx < targetMeshes.Paths.Count; pathIdx++)
             {
                 GH_Path currentPath = targetMeshes.Paths[pathIdx];
@@ -120,15 +154,15 @@ namespace Enzyme.Components
 
                     if (sectionsX > 0 || sectionsY > 0)
                     {
-                        BoundingBox globalBB = mesh.GetBoundingBox(true);
                         Box localBox;
                         mesh.GetBoundingBox(rotPlane, out localBox);
 
                         double lenX = localBox.X.Length;
                         double lenY = localBox.Y.Length;
                         
-                        double cursorXSecs = globalBB.Max.Y + 20.0;
-                        double cursorXYSecs = globalBB.Min.X - 20.0;
+                        double padding = globalBB.IsValid ? globalBB.Diagonal.Length * 0.05 : 10.0;
+                        double cursorYXSecs = globalBB.IsValid ? globalBB.Min.Y - padding : -padding;
+                        double cursorXYSecs = globalBB.IsValid ? globalBB.Min.X - padding : -padding;
 
                         if (sectionsX > 0)
                         {
@@ -180,7 +214,7 @@ namespace Enzyme.Components
                                         
                                         if (layoutFlat)
                                         {
-                                            var xformMove = Transform.Translation(new Vector3d(globalBB.Min.X - bbFlat.Min.X, cursorXSecs - bbFlat.Max.Y, 0));
+                                            var xformMove = Transform.Translation(new Vector3d(globalBB.Min.X - bbFlat.Min.X, cursorYXSecs - bbFlat.Max.Y, 0));
                                             foreach (var flatCrv in flatCrvs)
                                             {
                                                 flatCrv.Transform(xformMove);
@@ -200,8 +234,8 @@ namespace Enzyme.Components
                                             string meta = $"{{\"id\": \"{secId}\", \"plane_origin\": \"{origin}\", \"direction\": \"X_Section\"}}";
                                             sectionMetadata.Append(new GH_String(meta), currentPath);
                                             
-                                            double padding = 10.0;
-                                            cursorXSecs -= ((bbFlat.Max.Y - bbFlat.Min.Y) + padding);
+                                            
+                                            cursorYXSecs -= ((bbFlat.Max.Y - bbFlat.Min.Y) + globalBB.Diagonal.Length * 0.05);
                                         }
                                     }
                                 }
@@ -226,7 +260,7 @@ namespace Enzyme.Components
 
                                     List<Curve> flatCrvs = new List<Curve>();
                                     List<Curve> validCrvs = new List<Curve>();
-                                    double padding = 10.0;
+                                    
 
                                     foreach (var pl in ySecs)
                                     {
@@ -279,7 +313,7 @@ namespace Enzyme.Components
                                             string meta = $"{{\"id\": \"{secId}\", \"plane_origin\": \"{origin}\", \"direction\": \"Y_Section\"}}";
                                             sectionMetadata.Append(new GH_String(meta), currentPath);
 
-                                            cursorXYSecs -= ((bbFlat.Max.X - bbFlat.Min.X) + padding);
+                                            cursorXYSecs -= ((bbFlat.Max.X - bbFlat.Min.X) + globalBB.Diagonal.Length * 0.05);
                                         }
                                     }
                                 }
@@ -350,10 +384,10 @@ namespace Enzyme.Components
 
             DA.SetDataTree(0, sectionOutlinesX);
             DA.SetDataTree(1, sectionOutlinesY);
-            DA.SetDataTree(2, flatSectionsX);
-            DA.SetDataTree(3, flatSectionsY);
-            DA.SetDataTree(4, labelText3D);
-            DA.SetDataTree(5, labelPoints3D);
+            DA.SetDataTree(2, labelText3D);
+            DA.SetDataTree(3, labelPoints3D);
+            DA.SetDataTree(4, flatSectionsX);
+            DA.SetDataTree(5, flatSectionsY);
             DA.SetDataTree(6, labelTextFlat);
             DA.SetDataTree(7, labelPointsFlat);
             DA.SetDataTree(8, sectionMetadata);
