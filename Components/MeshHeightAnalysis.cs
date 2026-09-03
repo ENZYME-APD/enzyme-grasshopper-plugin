@@ -69,10 +69,6 @@ namespace Enzyme.Terrain
             pManager.AddBooleanParameter("CullGlobals", "CG", "Toggle to remove the absolute highest/lowest points.", GH_ParamAccess.item, false);
             pManager.AddBooleanParameter("AvoidBoundaries", "AB", "Toggle to ignore naked edge vertices.", GH_ParamAccess.item, false);
             pManager.AddBooleanParameter("EnableHeatmap", "EH", "Toggle to compute and output the vertex heatmap mesh.", GH_ParamAccess.item, true);
-            pManager.AddPlaneParameter("RotationPlane", "RP", "Orientation plane for the bounding box sectioning.", GH_ParamAccess.item, Plane.WorldXY);
-            pManager.AddIntegerParameter("SectionsX", "SX", "Number of sections running parallel to the X-axis.", GH_ParamAccess.item, 0);
-            pManager.AddIntegerParameter("SectionsY", "SY", "Number of sections running parallel to the Y-axis.", GH_ParamAccess.item, 0);
-            pManager.AddBooleanParameter("LayoutFlat", "LF", "Toggle to generate 2D XY print layouts next to the mesh.", GH_ParamAccess.item, false);
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
@@ -101,6 +97,7 @@ namespace Enzyme.Terrain
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            var t_start = System.Diagnostics.Stopwatch.StartNew();
             GH_Structure<GH_Mesh> targetMeshes = new GH_Structure<GH_Mesh>();
             if (!DA.GetDataTree(0, out targetMeshes)) return;
 
@@ -122,17 +119,7 @@ namespace Enzyme.Terrain
             bool enableHeatmap = true;
             DA.GetData(6, ref enableHeatmap);
 
-            Plane secPlane = Plane.WorldXY;
-            DA.GetData(7, ref secPlane);
 
-            int secCountX = 0;
-            DA.GetData(8, ref secCountX);
-
-            int secCountY = 0;
-            DA.GetData(9, ref secCountY);
-
-            bool layoutFlat = false;
-            DA.GetData(10, ref layoutFlat);
 
             var localPeaks = new GH_Structure<GH_Point>();
             var peakElevations = new GH_Structure<GH_Number>();
@@ -238,24 +225,13 @@ namespace Enzyme.Terrain
                     var foundPeaks = new List<Tuple<int, double, Point3d>>();
                     var foundValleys = new List<Tuple<int, double, Point3d>>();
 
-                    double bMinX = double.MaxValue, bMaxX = double.MinValue;
-                    double bMinY = double.MaxValue, bMaxY = double.MinValue;
+
 
                     for (int vIdx = 0; vIdx < topology.Count; vIdx++)
                     {
                         Point3d pt = new Point3d(topology[vIdx]);
 
-                        if (secCountX > 0 || secCountY > 0)
-                        {
-                            double u, v;
-                            if (secPlane.ClosestParameter(pt, out u, out v))
-                            {
-                                if (u < bMinX) bMinX = u;
-                                if (u > bMaxX) bMaxX = u;
-                                if (v < bMinY) bMinY = v;
-                                if (v > bMaxY) bMaxY = v;
-                            }
-                        }
+
 
                         if (avoidBounds && isNakedEdge[vIdx]) continue;
 
@@ -353,207 +329,10 @@ namespace Enzyme.Terrain
                     }
 
                     // X Sections
-                    if (secCountX > 0 && (bMaxY - bMinY) > 1e-5)
-                    {
-                        List<double> yVals = new List<double>();
-                        if (secCountX == 1) yVals.Add((bMinY + bMaxY) * 0.5);
-                        else
-                        {
-                            for (int i = 0; i < secCountX; i++)
-                                yVals.Add(bMinY + i * ((bMaxY - bMinY) / (secCountX - 1)));
-                        }
-
-                        for (int i = 0; i < yVals.Count; i++)
-                        {
-                            string secId = $"SecX_{i + 1:D2}";
-                            Point3d origin = secPlane.PointAt(0, yVals[i], 0);
-                            Plane cutPlaneXDir = new Plane(origin, secPlane.XAxis, secPlane.ZAxis);
-                            Polyline[] polys = Intersection.MeshPlane(mesh, cutPlaneXDir);
-
-                            if (polys != null && polys.Length > 0)
-                            {
-                                List<PolylineCurve> validCrvs = new List<PolylineCurve>();
-                                foreach (var p in polys)
-                                {
-                                    if (p.IsValid && p.Count > 1)
-                                    {
-                                        var crv = new PolylineCurve(p);
-                                        Vector3d vec = crv.PointAtEnd - crv.PointAtStart;
-                                        if (vec * secPlane.XAxis < 0) crv.Reverse();
-                                        validCrvs.Add(crv);
-                                    }
-                                }
-
-                                if (validCrvs.Count > 0)
-                                {
-                                    validCrvs.Sort((c1, c2) =>
-                                    {
-                                        double u1, v1; secPlane.ClosestParameter(c1.PointAtStart, out u1, out v1);
-                                        double u2, v2; secPlane.ClosestParameter(c2.PointAtStart, out u2, out v2);
-                                        return u1.CompareTo(u2);
-                                    });
-
-                                    BoundingBox bbFlat = BoundingBox.Empty;
-                                    List<Curve> flatCrvs = new List<Curve>();
-                                    var xformToWorld = Transform.PlaneToPlane(cutPlaneXDir, Plane.WorldXY);
-
-                                    foreach (var crv in validCrvs)
-                                    {
-                                        sectionOutlinesX.Append(new GH_Curve(crv), currentPath);
-                                        totalSectionsX++;
-
-                                        if (layoutFlat)
-                                        {
-                                            Curve flatCrv = crv.DuplicateCurve();
-                                            flatCrv.Transform(xformToWorld);
-                                            bbFlat.Union(flatCrv.GetBoundingBox(true));
-                                            flatCrvs.Add(flatCrv);
-                                        }
-                                    }
-
-                                    var firstCrv = validCrvs[0];
-                                    var lastCrv = validCrvs[validCrvs.Count - 1];
-                                    Point3d ptStart3D = firstCrv.PointAtStart - cutPlaneXDir.XAxis * 2.0;
-                                    Point3d ptEnd3D = lastCrv.PointAtEnd + cutPlaneXDir.XAxis * 2.0;
-
-                                    labelText3D.Append(new GH_String(secId), currentPath);
-                                    labelText3D.Append(new GH_String(secId), currentPath);
-                                    labelPoints3D.Append(new GH_Point(ptStart3D), currentPath);
-                                    labelPoints3D.Append(new GH_Point(ptEnd3D), currentPath);
-
-                                    if (layoutFlat)
-                                    {
-                                        var xformMove = Transform.Translation(new Vector3d(globalBB.Min.X - bbFlat.Min.X, cursorYXSecs - bbFlat.Max.Y, 0));
-                                        foreach (var flatCrv in flatCrvs)
-                                        {
-                                            flatCrv.Transform(xformMove);
-                                            flatSectionsX.Append(new GH_Curve(flatCrv), currentPath);
-                                        }
-
-                                        Point3d ptStartFlat = new Point3d(ptStart3D);
-                                        Point3d ptEndFlat = new Point3d(ptEnd3D);
-                                        ptStartFlat.Transform(xformToWorld); ptStartFlat.Transform(xformMove);
-                                        ptEndFlat.Transform(xformToWorld); ptEndFlat.Transform(xformMove);
-
-                                        labelTextFlat.Append(new GH_String(secId), currentPath);
-                                        labelTextFlat.Append(new GH_String(secId), currentPath);
-                                        labelPointsFlat.Append(new GH_Point(ptStartFlat), currentPath);
-                                        labelPointsFlat.Append(new GH_Point(ptEndFlat), currentPath);
-
-                                        string meta = $"{{\"id\": \"{secId}\", \"plane_origin\": \"{origin}\", \"direction\": \"X_Section\"}}";
-                                        sectionMetadata.Append(new GH_String(meta), currentPath);
-
-                                        cursorYXSecs -= ((bbFlat.Max.Y - bbFlat.Min.Y) + padding);
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    // Y Sections
-                    if (secCountY > 0 && (bMaxX - bMinX) > 1e-5)
-                    {
-                        Plane targetPlaneY = Plane.WorldXY;
-                        targetPlaneY.Rotate(Math.PI / 2, Vector3d.ZAxis);
-
-                        List<double> xVals = new List<double>();
-                        if (secCountY == 1) xVals.Add((bMinX + bMaxX) * 0.5);
-                        else
-                        {
-                            for (int i = 0; i < secCountY; i++)
-                                xVals.Add(bMinX + i * ((bMaxX - bMinX) / (secCountY - 1)));
-                        }
-
-                        for (int i = 0; i < xVals.Count; i++)
-                        {
-                            string secId = $"SecY_{i + 1:D2}";
-                            Point3d origin = secPlane.PointAt(xVals[i], 0, 0);
-                            Plane cutPlaneYDir = new Plane(origin, secPlane.YAxis, secPlane.ZAxis);
-                            Polyline[] polys = Intersection.MeshPlane(mesh, cutPlaneYDir);
-
-                            if (polys != null && polys.Length > 0)
-                            {
-                                List<PolylineCurve> validCrvs = new List<PolylineCurve>();
-                                foreach (var p in polys)
-                                {
-                                    if (p.IsValid && p.Count > 1)
-                                    {
-                                        var crv = new PolylineCurve(p);
-                                        Vector3d vec = crv.PointAtEnd - crv.PointAtStart;
-                                        if (vec * secPlane.YAxis < 0) crv.Reverse();
-                                        validCrvs.Add(crv);
-                                    }
-                                }
-
-                                if (validCrvs.Count > 0)
-                                {
-                                    validCrvs.Sort((c1, c2) =>
-                                    {
-                                        double u1, v1; secPlane.ClosestParameter(c1.PointAtStart, out u1, out v1);
-                                        double u2, v2; secPlane.ClosestParameter(c2.PointAtStart, out u2, out v2);
-                                        return v1.CompareTo(v2);
-                                    });
-
-                                    BoundingBox bbFlat = BoundingBox.Empty;
-                                    List<Curve> flatCrvs = new List<Curve>();
-                                    var xformToWorld = Transform.PlaneToPlane(cutPlaneYDir, targetPlaneY);
-
-                                    foreach (var crv in validCrvs)
-                                    {
-                                        sectionOutlinesY.Append(new GH_Curve(crv), currentPath);
-                                        totalSectionsY++;
-
-                                        if (layoutFlat)
-                                        {
-                                            Curve flatCrv = crv.DuplicateCurve();
-                                            flatCrv.Transform(xformToWorld);
-                                            bbFlat.Union(flatCrv.GetBoundingBox(true));
-                                            flatCrvs.Add(flatCrv);
-                                        }
-                                    }
-
-                                    var firstCrv = validCrvs[0];
-                                    var lastCrv = validCrvs[validCrvs.Count - 1];
-                                    Point3d ptStart3D = firstCrv.PointAtStart - cutPlaneYDir.XAxis * 2.0;
-                                    Point3d ptEnd3D = lastCrv.PointAtEnd + cutPlaneYDir.XAxis * 2.0;
-
-                                    labelText3D.Append(new GH_String(secId), currentPath);
-                                    labelText3D.Append(new GH_String(secId), currentPath);
-                                    labelPoints3D.Append(new GH_Point(ptStart3D), currentPath);
-                                    labelPoints3D.Append(new GH_Point(ptEnd3D), currentPath);
-
-                                    if (layoutFlat)
-                                    {
-                                        var xformMove = Transform.Translation(new Vector3d(cursorXYSecs - bbFlat.Max.X, globalBB.Min.Y - bbFlat.Min.Y, 0));
-                                        foreach (var flatCrv in flatCrvs)
-                                        {
-                                            flatCrv.Transform(xformMove);
-                                            flatSectionsY.Append(new GH_Curve(flatCrv), currentPath);
-                                        }
-
-                                        Point3d ptStartFlat = new Point3d(ptStart3D);
-                                        Point3d ptEndFlat = new Point3d(ptEnd3D);
-                                        ptStartFlat.Transform(xformToWorld); ptStartFlat.Transform(xformMove);
-                                        ptEndFlat.Transform(xformToWorld); ptEndFlat.Transform(xformMove);
-
-                                        labelTextFlat.Append(new GH_String(secId), currentPath);
-                                        labelTextFlat.Append(new GH_String(secId), currentPath);
-                                        labelPointsFlat.Append(new GH_Point(ptStartFlat), currentPath);
-                                        labelPointsFlat.Append(new GH_Point(ptEndFlat), currentPath);
-
-                                        string meta = $"{{\"id\": \"{secId}\", \"plane_origin\": \"{origin}\", \"direction\": \"Y_Section\"}}";
-                                        sectionMetadata.Append(new GH_String(meta), currentPath);
-
-                                        cursorXYSecs -= ((bbFlat.Max.X - bbFlat.Min.X) + padding);
-                                    }
-                                }
-                            }
-                        }
-                    }
                 }
             }
 
-            string instructions = "Analyzes mesh extremes, unrolls sections bi-directionally, and generates 3D/2D metadata labels.";
+            string instructions = "Analyzes mesh extremes and generates topo heatmaps.";
             DA.SetData(0, instructions);
             DA.SetDataTree(1, localPeaks);
             DA.SetDataTree(2, peakElevations);
@@ -564,15 +343,6 @@ namespace Enzyme.Terrain
             DA.SetDataTree(7, globalMinPoint);
             DA.SetDataTree(8, globalMinElevation);
             DA.SetDataTree(9, heatmapMeshes);
-            DA.SetDataTree(10, sectionOutlinesX);
-            DA.SetDataTree(11, sectionOutlinesY);
-            DA.SetDataTree(12, flatSectionsX);
-            DA.SetDataTree(13, flatSectionsY);
-            DA.SetDataTree(14, labelText3D);
-            DA.SetDataTree(15, labelPoints3D);
-            DA.SetDataTree(16, labelTextFlat);
-            DA.SetDataTree(17, labelPointsFlat);
-                        DA.SetDataTree(18, sectionMetadata);
 
             if (enableHeatmap && totalVerticesCount > 0)
             {
@@ -588,14 +358,21 @@ namespace Enzyme.Terrain
                     ["Labels"] = new JArray($"{globalTerrainZMin:F1}m", $"{globalTerrainZMax:F1}m"),
                     ["SubLabels"] = new JArray($"Relief: {(globalTerrainZMax - globalTerrainZMin):F1}m")
                 };
-                DA.SetData(19, legendObj.ToString());
+                DA.SetData(10, legendObj.ToString());
             }
 
             double terrainRelief = totalVerticesCount > 0 ? Math.Round(globalTerrainZMax - globalTerrainZMin, 2) : 0.0;
             double meanElevation = totalVerticesCount > 0 ? Math.Round(totalZSum / totalVerticesCount, 2) : 0.0;
-            string layoutStatus = layoutFlat ? "ON (Bi-Directional Unroll)" : "OFF";
             
-            Message = $"TERRAIN ANALYZER\n---\nArea: {Math.Round(totalTerrainArea, 2)}\nRelief (ΔZ): {terrainRelief}\nAvg Elev: {meanElevation}\n● Peaks: {totalPeaksFound} | ○ Valleys: {totalValleysFound}\n≡ Sections X: {totalSectionsX} | Y: {totalSectionsY}\n[] XY Layout: {layoutStatus}";
+            Message = "TERRAIN ANALYZER\n";
+            Message += $"Time: {t_start.ElapsedMilliseconds:F2} ms\n";
+            Message += "---\n";
+            Message += $"Area: {Math.Round(totalTerrainArea, 2)}\n";
+            Message += $"Relief (ΔZ): {terrainRelief}\n";
+            Message += $"Avg Elev: {meanElevation}\n";
+            Message += $"Max Height: {Math.Round(globalTerrainZMax, 2)}\n";
+            Message += $"Min Height: {Math.Round(globalTerrainZMin, 2)}\n";
+            Message += $"Peaks: {totalPeaksFound} | Valleys: {totalValleysFound}";
         }
 
         private HashSet<int> GetTopoNeighbors(MeshTopologyVertexList topology, int startIdx, int steps)
