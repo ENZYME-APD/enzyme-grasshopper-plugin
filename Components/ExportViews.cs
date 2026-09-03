@@ -28,6 +28,8 @@ namespace Enzyme.Components
             
             pManager.AddIntegerParameter("Width", "W", "Image width in pixels.", GH_ParamAccess.item, 1920);
             pManager.AddIntegerParameter("Height", "H", "Image height in pixels.", GH_ParamAccess.item, 1080);
+            pManager.AddNumberParameter("Scale", "S", "Scale multiplier for the final resolution (e.g. 2 for double size).", GH_ParamAccess.item, 1.0);
+            pManager.AddIntegerParameter("DPI", "DPI", "Print DPI metadata embedded into the image.", GH_ParamAccess.item, 300);
             
             pManager.AddBooleanParameter("Grid", "G", "Show Grid.", GH_ParamAccess.item, false);
             pManager.AddBooleanParameter("World Axes", "WA", "Show World Axes.", GH_ParamAccess.item, false);
@@ -63,6 +65,12 @@ namespace Enzyme.Components
 
             int height = 1080;
             DA.GetData("Height", ref height);
+
+            double scale = 1.0;
+            DA.GetData("Scale", ref scale);
+
+            int dpi = 300;
+            DA.GetData("DPI", ref dpi);
 
             bool grid = false;
             DA.GetData("Grid", ref grid);
@@ -130,8 +138,8 @@ namespace Enzyme.Components
 
                         var capture = new Rhino.Display.ViewCapture
                         {
-                            Width = width,
-                            Height = height,
+                            Width = (int)(width * scale),
+                            Height = (int)(height * scale),
                             TransparentBackground = transparent,
                             DrawGrid = grid,
                             DrawAxes = worldAxes,
@@ -154,6 +162,7 @@ namespace Enzyme.Components
                                 string filename = string.IsNullOrEmpty(prefix) ? $"{safeName}.png" : $"{prefix}_{safeName}.png";
                                 string path = Path.Combine(directory, filename);
                                 
+                                bitmap.SetResolution(dpi, dpi);
                                 bitmap.Save(path, System.Drawing.Imaging.ImageFormat.Png);
                                 savedFiles.Add(path);
                                 bitmap.Dispose();
