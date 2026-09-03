@@ -92,7 +92,7 @@ namespace Enzyme.Components
             {
                 AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Invalid mesh input");
                 return;
-                            DA.SetData(3, "SLOPE ANALYSIS MESH\n" + "\n" + "HOW IT WORKS:\n" + "Evaluates the normal vector of every mesh face against the global Z-axis to calculate the steepness (in degrees or percentage), mapping the results as a color gradient.\n\n" + "INTERPRETATION & IMPORTANCE:\n" + "Crucial for identifying buildable vs. non-buildable zones. Helps quickly spot areas too steep for roads (e.g., >15%) or areas flat enough for building pads (e.g., <5%).");
+                            
             }
 
             // Create a copy of the mesh to work with
@@ -119,6 +119,7 @@ namespace Enzyme.Components
             Message = $"Mode: {mode}";
             Message += $"\n{Math.Round(percentOverThreshold, 2)}% over {Math.Round(threshold, 2)} threshold";
             Message += $"\nTime: {executionTime:F3}s";
+                    DA.SetData(3, "SLOPE ANALYSIS MESH\n" + "\n" + "HOW IT WORKS:\n" + "Evaluates the normal vector of every mesh face against the global Z-axis to calculate the steepness (in degrees or percentage), mapping the results as a color gradient.\n\n" + "INTERPRETATION & IMPORTANCE:\n" + "Crucial for identifying buildable vs. non-buildable zones. Helps quickly spot areas too steep for roads (e.g., >15%) or areas flat enough for building pads (e.g., <5%).");
         }
 
         private Rhino.Geometry.Mesh AnalyzeMeshSlopes(Rhino.Geometry.Mesh mesh, Color startColor, Color endColor, double threshold, bool binaryMode, out double percentOverThreshold)

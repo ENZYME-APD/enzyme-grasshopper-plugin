@@ -95,7 +95,7 @@ namespace Enzyme.Components
             {
                 AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "No curves provided");
                 return;
-                            DA.SetData(6, "ROAD SLOPE ANALYZER\n" + "\n" + "HOW IT WORKS:\n" + "Evaluates curves representing road centerlines against the terrain, calculating the longitudinal slope at discrete intervals along the path.\n\n" + "INTERPRETATION & IMPORTANCE:\n" + "Ensures road networks comply with accessibility and vehicular safety standards (e.g., keeping grades under 8-10%). Prevents designing impossible infrastructure on steep sites.");
+                            
             }
 
             if (terrain == null || !terrain.IsValid)
@@ -127,6 +127,7 @@ namespace Enzyme.Components
             Message = $"Compliant: {result.CompliancePercentage}%";
             Message += $"\nNon-compliant: {Math.Round(100 - result.CompliancePercentage, 1)}%";
             Message += $"\nTime: {executionTime:F3}s";
+                    DA.SetData(6, "ROAD SLOPE ANALYZER\n" + "\n" + "HOW IT WORKS:\n" + "Evaluates curves representing road centerlines against the terrain, calculating the longitudinal slope at discrete intervals along the path.\n\n" + "INTERPRETATION & IMPORTANCE:\n" + "Ensures road networks comply with accessibility and vehicular safety standards (e.g., keeping grades under 8-10%). Prevents designing impossible infrastructure on steep sites.");
         }
 
         private RoadAnalysisResult AnalyzeRoadSlopes(
