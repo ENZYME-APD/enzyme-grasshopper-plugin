@@ -68,6 +68,7 @@ namespace Enzyme.Components
             pManager.AddNumberParameter("Compliance Percentage", "Compliance Percentage", "Percentage of compliant/non-compliant segments", GH_ParamAccess.item);
             pManager.AddPointParameter("Projected Points", "Projected Points", "Points projected onto terrain", GH_ParamAccess.list);
             pManager.AddLineParameter("Projection Lines", "Projection Lines", "Lines showing projection from original to terrain", GH_ParamAccess.list);
+                    pManager.AddTextParameter("Info", "I", "Component information and interpretation", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
@@ -94,6 +95,7 @@ namespace Enzyme.Components
             {
                 AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "No curves provided");
                 return;
+                            DA.SetData(6, "ROAD SLOPE ANALYZER\n" + "\n" + "HOW IT WORKS:\n" + "Evaluates curves representing road centerlines against the terrain, calculating the longitudinal slope at discrete intervals along the path.\n\n" + "INTERPRETATION & IMPORTANCE:\n" + "Ensures road networks comply with accessibility and vehicular safety standards (e.g., keeping grades under 8-10%). Prevents designing impossible infrastructure on steep sites.");
             }
 
             if (terrain == null || !terrain.IsValid)

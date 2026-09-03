@@ -65,6 +65,7 @@ namespace Enzyme.Components
             pManager.AddMeshParameter("Slope Mesh", "Slope Mesh", "Colored mesh showing slope analysis", GH_ParamAccess.item);
             pManager.AddGenericParameter("Color Legend", "Color Legend", "Legend of colors and their corresponding percentages", GH_ParamAccess.item);
             pManager.AddNumberParameter("Percent Over Threshold", "Percent Over Threshold", "Percentage of faces over the slope threshold", GH_ParamAccess.item);
+                    pManager.AddTextParameter("Info", "I", "Component information and interpretation", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
@@ -91,6 +92,7 @@ namespace Enzyme.Components
             {
                 AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Invalid mesh input");
                 return;
+                            DA.SetData(3, "SLOPE ANALYSIS MESH\n" + "\n" + "HOW IT WORKS:\n" + "Evaluates the normal vector of every mesh face against the global Z-axis to calculate the steepness (in degrees or percentage), mapping the results as a color gradient.\n\n" + "INTERPRETATION & IMPORTANCE:\n" + "Crucial for identifying buildable vs. non-buildable zones. Helps quickly spot areas too steep for roads (e.g., >15%) or areas flat enough for building pads (e.g., <5%).");
             }
 
             // Create a copy of the mesh to work with

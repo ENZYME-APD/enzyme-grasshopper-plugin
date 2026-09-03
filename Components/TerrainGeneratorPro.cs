@@ -106,6 +106,7 @@ namespace Enzyme.Components
             pManager.AddCurveParameter("NormContours", "NormContours", "Standard contour lines", GH_ParamAccess.list);
             pManager.AddCurveParameter("MainContours", "MainContours", "Major interval contour lines", GH_ParamAccess.list);
             pManager.AddPointParameter("Trees", "Trees", "Scattered point coordinates for trees", GH_ParamAccess.list);
+                    pManager.AddTextParameter("Info", "I", "Component information and interpretation", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
@@ -119,6 +120,7 @@ namespace Enzyme.Components
             {
                 AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Boundary must be a closed curve.");
                 return;
+                            DA.SetData(4, "TERRAIN GENERATOR PRO\n" + "\n" + "HOW IT WORKS:\n" + "Takes raw input data (points, curves, or GIS contour lines) and triangulates a clean, unified, watertight 3D mesh.\n\n" + "INTERPRETATION & IMPORTANCE:\n" + "The foundational step for all digital site analysis. It converts messy, disconnected surveyor data into a usable computational surface for grading, water, and slope analysis.");
             }
 
             double max_h = 100.0, min_h = 0.0, c_step = 1.0, m_step = 5.0, slope_angle = 30.0, tree_msk = 0.0, tree_dns = 0.0, tree_zmin = 0.15, tree_zmax = 0.85;

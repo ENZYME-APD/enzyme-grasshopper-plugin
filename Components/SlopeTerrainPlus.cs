@@ -68,6 +68,7 @@ namespace Enzyme.Components
             pManager.AddTextParameter("LegendValues", "LegendValues", "Legend Values", GH_ParamAccess.list);
             pManager.AddNumberParameter("OverThresholdRatio", "OverThresholdRatio", "Ratio of faces over threshold", GH_ParamAccess.list);
             pManager.AddGenericParameter("Color Legend", "Color Legend", "JSON Legend Data", GH_ParamAccess.item);
+                    pManager.AddTextParameter("Info", "I", "Component information and interpretation", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
@@ -92,6 +93,7 @@ namespace Enzyme.Components
                             if (ghDoc != null) {
                                 ghDoc.ScheduleSolution(5, d => {
                                     vl.ExpireSolution(false);
+                                                                    DA.SetData(5, "SLOPE TERRAIN PLUS\n" + "\n" + "HOW IT WORKS:\n" + "An advanced version of the slope analyzer that not only maps steepness but also extracts vector arrows pointing downhill for every face.\n\n" + "INTERPRETATION & IMPORTANCE:\n" + "Combines slope severity with flow direction. Perfect for understanding not just how steep a hill is, but exactly which way the land naturally drains or faces (aspect analysis).");
                                 });
                             }
                         }

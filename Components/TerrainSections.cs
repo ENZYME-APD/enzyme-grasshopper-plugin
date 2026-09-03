@@ -90,6 +90,7 @@ namespace Enzyme.Components
             pManager.AddTextParameter("LabelTextFlat", "LTF", "Text strings for the flattened section layout.", GH_ParamAccess.tree);
             pManager.AddPointParameter("LabelPointsFlat", "LPF", "Points for the flattened section layout.", GH_ParamAccess.tree);
             pManager.AddTextParameter("SectionMetadata", "SM", "Dictionary keys containing spatial transform & ID data.", GH_ParamAccess.tree);
+                    pManager.AddTextParameter("Info", "I", "Component information and interpretation", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
@@ -143,6 +144,7 @@ namespace Enzyme.Components
                         var m = ghMesh.Value.DuplicateMesh();
                         m.Transform(xformToRot);
                         globalRotBB.Union(m.GetBoundingBox(true));
+                                            DA.SetData(9, "TERRAIN SECTIONS\n" + "\n" + "HOW IT WORKS:\n" + "Slices the 3D terrain mesh using a configurable grid of X and Y planes, extracting both 3D contours 'in-place' and cleanly unrolled 2D flat profiles.\n\n" + "INTERPRETATION & IMPORTANCE:\n" + "Standard architectural deliverable. Allows designers and engineers to understand the topographic profile across the entire site, which is vital for designing stepped foundations and underground structures.");
                     }
                 }
             }

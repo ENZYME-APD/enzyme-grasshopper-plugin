@@ -59,6 +59,7 @@ namespace Enzyme.Components
         {
             pManager.AddMeshParameter("Height Mesh", "Height Mesh", "Colored mesh showing height distribution", GH_ParamAccess.item);
             pManager.AddGenericParameter("Color Legend", "Color Legend", "Legend of colors and their corresponding heights", GH_ParamAccess.item);
+                    pManager.AddTextParameter("Info", "I", "Component information and interpretation", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
@@ -81,6 +82,7 @@ namespace Enzyme.Components
             {
                 AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Invalid mesh input");
                 return;
+                            DA.SetData(2, "HEIGHT MAP ANALYSIS\n" + "\n" + "HOW IT WORKS:\n" + "Sorts all mesh vertices by their Z-elevation and maps them to a customizable color gradient from the lowest to the highest point.\n\n" + "INTERPRETATION & IMPORTANCE:\n" + "Provides a quick, intuitive read of the site's macro-topography. Helps in zoning the site (e.g., placing critical infrastructure above the flood plain or historical high-water marks).");
             }
 
             if (colors.Count < 2)

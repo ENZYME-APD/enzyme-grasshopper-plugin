@@ -120,6 +120,7 @@ public override Guid ComponentGuid => new Guid("C3D9F4E6-B8A2-4C7D-A0F3-D6E5B7C8
             pManager.AddTextParameter("Legend Labels", "Labels", "Text labels for legend", GH_ParamAccess.list);
             pManager.AddPointParameter("Label Positions", "Label Positions", "Positions for text labels", GH_ParamAccess.list);
             pManager.AddColourParameter("Legend Colors", "Legend Colors", "Colors for legend elements", GH_ParamAccess.list);
+                    pManager.AddTextParameter("Info", "I", "Component information and interpretation", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
@@ -139,6 +140,7 @@ public override Guid ComponentGuid => new Guid("C3D9F4E6-B8A2-4C7D-A0F3-D6E5B7C8
             {
                 AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Invalid legend data input");
                 return;
+                            DA.SetData(4, "LEGEND GEOMETRY\n" + "\n" + "HOW IT WORKS:\n" + "Reads the domains and color gradients from the analysis components (Slope, Height, Flow) and bakes a scaled 3D legend into the Rhino scene.\n\n" + "INTERPRETATION & IMPORTANCE:\n" + "Ensures that visual diagrams are scientifically readable. Without a legend, a heatmap is just pretty colors with it, it becomes an actionable data map.");
             }
 
             // Process the legend data and create geometry

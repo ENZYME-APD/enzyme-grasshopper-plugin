@@ -71,6 +71,7 @@ namespace Enzyme.Components
             pManager.AddNumberParameter("FillVolume", "FillVolume", "Total Fill (Positive Z)", GH_ParamAccess.item);
             pManager.AddCurveParameter("Contours", "Contours", "1m Interval Curves", GH_ParamAccess.list);
             pManager.AddCurveParameter("MainContours", "MainContours", "5m Interval Curves", GH_ParamAccess.list);
+                    pManager.AddTextParameter("Info", "I", "Component information and interpretation", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
@@ -105,6 +106,7 @@ namespace Enzyme.Components
             {
                 AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "INVALID MESH");
                 return;
+                            DA.SetData(6, "ADAPTIVE TERRAIN GRADER\n" + "\n" + "HOW IT WORKS:\n" + "Calculates localized cut-and-fill operations by projecting building pads or roads onto the terrain mesh. It adapts the mesh topology to create flat plateaus and sloped retaining embankments.\n\n" + "INTERPRETATION & IMPORTANCE:\n" + "Essential for calculating earthworks (cut/fill volumes) early in the design phase. It shows how much soil must be moved to accommodate the masterplan, directly impacting project cost and environmental disruption.");
             }
 
             System.Diagnostics.Stopwatch timer = System.Diagnostics.Stopwatch.StartNew();
