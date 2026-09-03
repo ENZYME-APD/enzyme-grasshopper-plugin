@@ -25,6 +25,8 @@ namespace Enzyme.Components
             pManager.AddTextParameter("Views", "V", "Names of the views to export. If empty, exports ALL named views.", GH_ParamAccess.list);
             pManager.AddTextParameter("Directory", "Dir", "Folder path to save the images.", GH_ParamAccess.item);
             pManager.AddTextParameter("Prefix", "P", "Prefix for the output filenames (optional).", GH_ParamAccess.item, "");
+            pManager.AddTextParameter("Suffix", "Suf", "Suffix for the output filenames (optional).", GH_ParamAccess.item, "");
+            pManager.AddTextParameter("Format", "Fmt", "Image format: png, jpg, bmp, tiff.", GH_ParamAccess.item, "png");
             
             pManager.AddIntegerParameter("Width", "W", "Image width in pixels.", GH_ParamAccess.item, 1920);
             pManager.AddIntegerParameter("Height", "H", "Image height in pixels.", GH_ParamAccess.item, 1080);
@@ -40,8 +42,8 @@ namespace Enzyme.Components
             pManager.AddTextParameter("Layer State", "LS", "Optional. Name of the saved Layer State to restore. Leaves active if empty.", GH_ParamAccess.item, "");
 
             pManager[1].Optional = true; // Views can be empty
-            pManager[12].Optional = true;
-            pManager[13].Optional = true;
+            pManager[14].Optional = true; // Display Style
+            pManager[15].Optional = true; // Layer State
             pManager[2].Optional = true; // Directory can be empty (defaults to desktop or rhino file dir)
         }
 
@@ -64,6 +66,12 @@ namespace Enzyme.Components
 
             string prefix = "";
             DA.GetData("Prefix", ref prefix);
+
+            string suffix = "";
+            DA.GetData("Suffix", ref suffix);
+
+            string formatStr = "png";
+            DA.GetData("Format", ref formatStr);
 
             int width = 1920;
             DA.GetData("Width", ref width);
@@ -212,11 +220,23 @@ namespace Enzyme.Components
                             if (bitmap != null)
                             {
                                 string safeName = string.Join("_", nv.Name.Split(Path.GetInvalidFileNameChars()));
-                                string filename = string.IsNullOrEmpty(prefix) ? $"{safeName}.png" : $"{prefix}_{safeName}.png";
+                                
+                                string f = formatStr.ToLower().Trim();
+                                System.Drawing.Imaging.ImageFormat imgFormat = System.Drawing.Imaging.ImageFormat.Png;
+                                string ext = "png";
+                                
+                                if (f == "jpg" || f == "jpeg") { imgFormat = System.Drawing.Imaging.ImageFormat.Jpeg; ext = "jpg"; }
+                                else if (f == "bmp") { imgFormat = System.Drawing.Imaging.ImageFormat.Bmp; ext = "bmp"; }
+                                else if (f == "tif" || f == "tiff") { imgFormat = System.Drawing.Imaging.ImageFormat.Tiff; ext = "tif"; }
+                                
+                                string pre = string.IsNullOrEmpty(prefix) ? "" : prefix + "_";
+                                string suf = string.IsNullOrEmpty(suffix) ? "" : "_" + suffix;
+                                
+                                string filename = $"{pre}{safeName}{suf}.{ext}";
                                 string path = Path.Combine(directory, filename);
                                 
                                 bitmap.SetResolution(dpi, dpi);
-                                bitmap.Save(path, System.Drawing.Imaging.ImageFormat.Png);
+                                bitmap.Save(path, imgFormat);
                                 savedFiles.Add(path);
                                 bitmap.Dispose();
                             }
@@ -264,6 +284,7 @@ namespace Enzyme.Components
             GH_DocumentObject.Menu_AppendItem(menu, "Auto-create View List", Menu_AutoCreateViewList_Clicked);
             GH_DocumentObject.Menu_AppendItem(menu, "Auto-create Display Style List", Menu_AutoCreateDisplayStyleList_Clicked);
             GH_DocumentObject.Menu_AppendItem(menu, "Auto-create Layer State List", Menu_AutoCreateLayerStateList_Clicked);
+            GH_DocumentObject.Menu_AppendItem(menu, "Auto-create Format List", Menu_AutoCreateFormatList_Clicked);
         }
 
         private void Menu_AutoCreateViewList_Clicked(object sender, EventArgs e)
@@ -313,7 +334,7 @@ namespace Enzyme.Components
             }
 
             OnPingDocument().AddObject(vl, false);
-            this.Params.Input[12].AddSource(vl);
+            this.Params.Input[14].AddSource(vl);
             vl.ExpireSolution(true);
         }
 
@@ -339,7 +360,24 @@ namespace Enzyme.Components
             }
 
             OnPingDocument().AddObject(vl, false);
-            this.Params.Input[13].AddSource(vl);
+            this.Params.Input[15].AddSource(vl);
+            vl.ExpireSolution(true);
+        }
+
+        private void Menu_AutoCreateFormatList_Clicked(object sender, EventArgs e)
+        {
+            GH_ValueList vl = new GH_ValueList();
+            vl.CreateAttributes();
+            vl.Attributes.Pivot = new System.Drawing.PointF(this.Attributes.Pivot.X - 200, this.Attributes.Pivot.Y + 70);
+            vl.ListItems.Clear();
+
+            vl.ListItems.Add(new GH_ValueListItem("PNG", "\"png\""));
+            vl.ListItems.Add(new GH_ValueListItem("JPG", "\"jpg\""));
+            vl.ListItems.Add(new GH_ValueListItem("BMP", "\"bmp\""));
+            vl.ListItems.Add(new GH_ValueListItem("TIFF", "\"tif\""));
+
+            OnPingDocument().AddObject(vl, false);
+            this.Params.Input[5].AddSource(vl);
             vl.ExpireSolution(true);
         }
 
