@@ -35,8 +35,13 @@ namespace Enzyme.Components
             pManager.AddBooleanParameter("World Axes", "WA", "Show World Axes.", GH_ParamAccess.item, false);
             pManager.AddBooleanParameter("CPlane Axes", "CA", "Show CPlane Axes.", GH_ParamAccess.item, false);
             pManager.AddBooleanParameter("Transparent", "T", "Transparent background (PNG only).", GH_ParamAccess.item, false);
+            
+            pManager.AddTextParameter("Display Style", "DS", "Optional. Name of the Display Mode (e.g., 'Rendered'). Leaves active if empty.", GH_ParamAccess.item, "");
+            pManager.AddTextParameter("Layer State", "LS", "Optional. Name of the saved Layer State to restore. Leaves active if empty.", GH_ParamAccess.item, "");
 
             pManager[1].Optional = true; // Views can be empty
+            pManager[12].Optional = true;
+            pManager[13].Optional = true;
             pManager[2].Optional = true; // Directory can be empty (defaults to desktop or rhino file dir)
         }
 
@@ -83,6 +88,12 @@ namespace Enzyme.Components
 
             bool transparent = false;
             DA.GetData("Transparent", ref transparent);
+
+            string displayStyle = "";
+            DA.GetData("Display Style", ref displayStyle);
+
+            string layerState = "";
+            DA.GetData("Layer State", ref layerState);
 
             var doc = RhinoDoc.ActiveDoc;
             if (doc == null) return;
@@ -145,6 +156,48 @@ namespace Enzyme.Components
                             DrawAxes = worldAxes,
                             DrawGridAxes = cplaneAxes
                         };
+                        
+                        // Handle Display Style
+                        var originalDisplayMode = activeView.ActiveViewport.DisplayMode;
+                        if (!string.IsNullOrEmpty(displayStyle))
+                        {
+                            var modes = Rhino.Display.DisplayModeDescription.GetDisplayModes();
+                            foreach (var mode in modes)
+                            {
+                                if (mode.EnglishName.Equals(displayStyle, StringComparison.OrdinalIgnoreCase))
+                                {
+                                    activeView.ActiveViewport.DisplayMode = mode;
+                                    break;
+                                }
+                            }
+                        }
+
+                        // Handle Layer State
+                        string tempLayerState = "Enzyme_Temp_" + Guid.NewGuid().ToString();
+                        bool layerStateChanged = false;
+                        if (!string.IsNullOrEmpty(layerState))
+                        {
+                            var names = doc.NamedLayerStates.Names;
+                            bool found = false;
+                            foreach(var n in names)
+                            {
+                                if (n.Equals(layerState, StringComparison.OrdinalIgnoreCase))
+                                {
+                                    found = true;
+                                    break;
+                                }
+                            }
+                            if (found)
+                            {
+                                doc.NamedLayerStates.Save(tempLayerState);
+                                doc.NamedLayerStates.Restore(layerState, Rhino.DocObjects.Tables.RestoreLayerProperties.All);
+                                layerStateChanged = true;
+                            }
+                            else
+                            {
+                                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Layer State '{layerState}' not found.");
+                            }
+                        }
 
                         foreach (var nv in viewsToExport)
                         {
@@ -173,6 +226,20 @@ namespace Enzyme.Components
                         }
                         
                         // Ensure it's fully restored
+                        
+                        // Revert display mode if changed
+                        if (activeView.ActiveViewport.DisplayMode.Id != originalDisplayMode.Id)
+                        {
+                            activeView.ActiveViewport.DisplayMode = originalDisplayMode;
+                        }
+
+                        // Revert layer state if changed
+                        if (layerStateChanged)
+                        {
+                            doc.NamedLayerStates.Restore(tempLayerState, Rhino.DocObjects.Tables.RestoreLayerProperties.All);
+                            doc.NamedLayerStates.Delete(tempLayerState);
+                        }
+
                         activeView.Redraw();
                     }
                 }
@@ -195,6 +262,8 @@ namespace Enzyme.Components
         {
             base.AppendAdditionalMenuItems(menu);
             GH_DocumentObject.Menu_AppendItem(menu, "Auto-create View List", Menu_AutoCreateViewList_Clicked);
+            GH_DocumentObject.Menu_AppendItem(menu, "Auto-create Display Style List", Menu_AutoCreateDisplayStyleList_Clicked);
+            GH_DocumentObject.Menu_AppendItem(menu, "Auto-create Layer State List", Menu_AutoCreateLayerStateList_Clicked);
         }
 
         private void Menu_AutoCreateViewList_Clicked(object sender, EventArgs e)
@@ -225,6 +294,52 @@ namespace Enzyme.Components
 
             // Wire it to the "Views" input (Index 1)
             this.Params.Input[1].AddSource(vl);
+            vl.ExpireSolution(true);
+        }
+
+        private void Menu_AutoCreateDisplayStyleList_Clicked(object sender, EventArgs e)
+        {
+            var modes = Rhino.Display.DisplayModeDescription.GetDisplayModes();
+            if (modes.Length == 0) return;
+
+            GH_ValueList vl = new GH_ValueList();
+            vl.CreateAttributes();
+            vl.Attributes.Pivot = new PointF(this.Attributes.Pivot.X - 200, this.Attributes.Pivot.Y + 10);
+            vl.ListItems.Clear();
+
+            foreach (var mode in modes)
+            {
+                vl.ListItems.Add(new GH_ValueListItem(mode.EnglishName, $"\"{mode.EnglishName}\""));
+            }
+
+            OnPingDocument().AddObject(vl, false);
+            this.Params.Input[12].AddSource(vl);
+            vl.ExpireSolution(true);
+        }
+
+        private void Menu_AutoCreateLayerStateList_Clicked(object sender, EventArgs e)
+        {
+            var doc = RhinoDoc.ActiveDoc;
+            if (doc == null) return;
+            var names = doc.NamedLayerStates.Names;
+            if (names.Length == 0)
+            {
+                RhinoApp.WriteLine("No saved layer states found.");
+                return;
+            }
+
+            GH_ValueList vl = new GH_ValueList();
+            vl.CreateAttributes();
+            vl.Attributes.Pivot = new PointF(this.Attributes.Pivot.X - 200, this.Attributes.Pivot.Y + 40);
+            vl.ListItems.Clear();
+
+            foreach (string n in names)
+            {
+                vl.ListItems.Add(new GH_ValueListItem(n, $"\"{n}\""));
+            }
+
+            OnPingDocument().AddObject(vl, false);
+            this.Params.Input[13].AddSource(vl);
             vl.ExpireSolution(true);
         }
 
