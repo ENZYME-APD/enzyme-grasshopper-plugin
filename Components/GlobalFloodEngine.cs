@@ -26,6 +26,7 @@ namespace Enzyme.Components
         {
             pManager.AddMeshParameter("FloodMesh", "FM", "Flooded terrain heatmap mesh", GH_ParamAccess.item);
             pManager.AddNumberParameter("WaterDepths", "WD", "Water depths at each vertex in meters", GH_ParamAccess.list);
+            pManager.AddPointParameter("AnalysisPoints", "Pts", "Points corresponding to the water depth values", GH_ParamAccess.list);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
@@ -112,6 +113,7 @@ namespace Enzyme.Components
 
             // Map back to mesh vertices and colorize
             List<double> finalDepths = new List<double>(numVertices);
+            List<Point3d> analysisPoints = new List<Point3d>(numVertices);
             int floodedVertexCount = 0;
             double maxDepth = 0.0;
 
@@ -120,6 +122,11 @@ namespace Enzyme.Components
                 int topIdx = outMesh.TopologyVertices.TopologyVertexIndex(i);
                 double depth = topWaterDepth[topIdx];
                 finalDepths.Add(depth);
+                
+                // Add the actual point
+                var pt = outMesh.Vertices[i];
+                analysisPoints.Add(new Point3d(pt.X, pt.Y, pt.Z));
+                
                 if (depth > maxDepth) maxDepth = depth;
             }
 
@@ -147,6 +154,7 @@ namespace Enzyme.Components
 
             DA.SetData(0, outMesh);
             DA.SetDataList(1, finalDepths);
+            DA.SetDataList(2, analysisPoints);
 
             sw.Stop();
             Message = $"{this.NickName}\nTime: {sw.ElapsedMilliseconds} ms\n---\n● Flooded: {floodedVertexCount} | ○ Dry: {numVertices - floodedVertexCount}";
