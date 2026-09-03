@@ -3,6 +3,7 @@ version: $version
 authors:
   - Dushyant Basson
   - Jorge Beneitez
+  - Hendriko Teguh
 description: Enzyme Grasshopper plugin
 url: https://github.com/enzyme-apd/enzyme-grasshopper-plugin
 keywords:
