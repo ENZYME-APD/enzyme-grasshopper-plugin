@@ -161,16 +161,16 @@ namespace Enzyme.Components
                         double lenY = localBox.Y.Length;
                         
                         double padding = globalBB.IsValid ? globalBB.Diagonal.Length * 0.05 : 10.0;
-                        double cursorYXSecs = globalBB.IsValid ? globalBB.Min.Y - padding : -padding;
-                        double cursorXYSecs = globalBB.IsValid ? globalBB.Min.X - padding : -padding;
+                        double cursorYXSecs = globalBB.IsValid ? globalBB.Max.Y + padding : padding;
+                        double cursorXYSecs = globalBB.IsValid ? globalBB.Max.X + padding : padding;
 
                         if (sectionsX > 0)
                         {
-                            double stepX = lenX / (sectionsX + 1);
+                            double stepYForX = lenY / (sectionsX + 1);
                             for (int i = 1; i <= sectionsX; i++)
                             {
-                                Point3d origin = rotPlane.PointAt(localBox.X.Min + stepX * i, localBox.Y.Mid, localBox.Z.Mid);
-                                Plane cutPlane = new Plane(origin, rotPlane.YAxis, rotPlane.ZAxis);
+                                Point3d origin = rotPlane.PointAt(localBox.X.Mid, localBox.Y.Min + stepYForX * i, localBox.Z.Mid);
+                                Plane cutPlane = new Plane(origin, rotPlane.XAxis, rotPlane.ZAxis);
                                 
                                 Polyline[] xSecs = Rhino.Geometry.Intersect.Intersection.MeshPlane(mesh, cutPlane);
                                 if (xSecs != null && xSecs.Length > 0)
@@ -214,7 +214,7 @@ namespace Enzyme.Components
                                         
                                         if (layoutFlat)
                                         {
-                                            var xformMove = Transform.Translation(new Vector3d(globalBB.Min.X - bbFlat.Min.X, cursorYXSecs - bbFlat.Max.Y, 0));
+                                            var xformMove = Transform.Translation(new Vector3d(globalBB.Min.X - bbFlat.Min.X, cursorYXSecs - bbFlat.Min.Y, 0));
                                             foreach (var flatCrv in flatCrvs)
                                             {
                                                 flatCrv.Transform(xformMove);
@@ -235,7 +235,7 @@ namespace Enzyme.Components
                                             sectionMetadata.Append(new GH_String(meta), currentPath);
                                             
                                             
-                                            cursorYXSecs -= ((bbFlat.Max.Y - bbFlat.Min.Y) + globalBB.Diagonal.Length * 0.05);
+                                            cursorYXSecs += ((bbFlat.Max.Y - bbFlat.Min.Y) + padding);
                                         }
                                     }
                                 }
@@ -244,11 +244,11 @@ namespace Enzyme.Components
 
                         if (sectionsY > 0)
                         {
-                            double stepY = lenY / (sectionsY + 1);
+                            double stepXForY = lenX / (sectionsY + 1);
                             for (int i = 1; i <= sectionsY; i++)
                             {
-                                Point3d origin = rotPlane.PointAt(localBox.X.Mid, localBox.Y.Min + stepY * i, localBox.Z.Mid);
-                                Plane cutPlane = new Plane(origin, rotPlane.XAxis, rotPlane.ZAxis);
+                                Point3d origin = rotPlane.PointAt(localBox.X.Min + stepXForY * i, localBox.Y.Mid, localBox.Z.Mid);
+                                Plane cutPlane = new Plane(origin, rotPlane.YAxis, rotPlane.ZAxis);
                                 
                                 Polyline[] ySecs = Rhino.Geometry.Intersect.Intersection.MeshPlane(mesh, cutPlane);
                                 if (ySecs != null && ySecs.Length > 0)
@@ -256,8 +256,7 @@ namespace Enzyme.Components
                                     string secId = $"Y-SEC {i}";
                                     BoundingBox bbFlat = BoundingBox.Unset;
                                     Plane cutPlaneYDir = new Plane(origin, rotPlane.YAxis, rotPlane.ZAxis);
-                                    Plane targetPlaneY = Plane.WorldXY;
-                                    targetPlaneY.Rotate(Math.PI / 2, Rhino.Geometry.Vector3d.ZAxis);
+                                    Plane targetPlaneY = new Plane(Point3d.Origin, Rhino.Geometry.Vector3d.YAxis, Rhino.Geometry.Vector3d.XAxis);
                                     Transform xformToWorld = Transform.PlaneToPlane(cutPlaneYDir, targetPlaneY);
 
                                     List<Curve> flatCrvs = new List<Curve>();
@@ -295,7 +294,7 @@ namespace Enzyme.Components
 
                                         if (layoutFlat)
                                         {
-                                            var xformMove = Transform.Translation(new Vector3d(cursorXYSecs - bbFlat.Max.X, globalBB.Min.Y - bbFlat.Min.Y, 0));
+                                            var xformMove = Transform.Translation(new Vector3d(cursorXYSecs - bbFlat.Min.X, globalBB.Min.Y - bbFlat.Min.Y, 0));
                                             foreach (var flatCrv in flatCrvs)
                                             {
                                                 flatCrv.Transform(xformMove);
@@ -315,7 +314,7 @@ namespace Enzyme.Components
                                             string meta = $"{{\"id\": \"{secId}\", \"plane_origin\": \"{origin}\", \"direction\": \"Y_Section\"}}";
                                             sectionMetadata.Append(new GH_String(meta), currentPath);
 
-                                            cursorXYSecs -= ((bbFlat.Max.X - bbFlat.Min.X) + globalBB.Diagonal.Length * 0.05);
+                                            cursorXYSecs += ((bbFlat.Max.X - bbFlat.Min.X) + padding);
                                         }
                                     }
                                 }
