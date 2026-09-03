@@ -59,6 +59,28 @@ namespace Enzyme.Terrain
             pManager.AddBooleanParameter("EnableHeatmap", "EH", "Toggle to compute and output the vertex heatmap mesh.", GH_ParamAccess.item, true);
         }
 
+        public override bool Read(GH_IO.Serialization.GH_IReader reader)
+        {
+            bool result = base.Read(reader);
+            if (result)
+            {
+                // Force sync outputs 10 onwards to clean up legacy section outputs
+                while (Params.Output.Count > 10)
+                {
+                    Params.UnregisterOutputParameter(Params.Output[Params.Output.Count - 1], true);
+                }
+                
+                // Re-add the Color Legend parameter at index 10
+                var legendParam = new Grasshopper.Kernel.Parameters.Param_GenericObject();
+                legendParam.Name = "Color Legend";
+                legendParam.NickName = "Color Legend";
+                legendParam.Description = "JSON Legend Data";
+                legendParam.Access = GH_ParamAccess.item;
+                Params.RegisterOutputParam(legendParam);
+            }
+            return result;
+        }
+
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
             pManager.AddTextParameter("Instructions", "I", "Component documentation and usage manual.", GH_ParamAccess.item);

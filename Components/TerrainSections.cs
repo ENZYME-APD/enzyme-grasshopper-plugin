@@ -256,7 +256,9 @@ namespace Enzyme.Components
                                     string secId = $"Y-SEC {i}";
                                     BoundingBox bbFlat = BoundingBox.Unset;
                                     Plane cutPlaneYDir = new Plane(origin, rotPlane.YAxis, rotPlane.ZAxis);
-                                    Transform xformToWorld = Transform.PlaneToPlane(cutPlaneYDir, Plane.WorldXY);
+                                    Plane targetPlaneY = Plane.WorldXY;
+                                    targetPlaneY.Rotate(Math.PI / 2, Rhino.Geometry.Vector3d.ZAxis);
+                                    Transform xformToWorld = Transform.PlaneToPlane(cutPlaneYDir, targetPlaneY);
 
                                     List<Curve> flatCrvs = new List<Curve>();
                                     List<Curve> validCrvs = new List<Curve>();
@@ -399,7 +401,7 @@ namespace Enzyme.Components
 
         protected override System.Drawing.Bitmap Icon
         {
-            get { return null; }
+            get { return IconLoader.Load("TERRAIN SECTIONS.png"); }
         }
 
         public override Guid ComponentGuid
