@@ -24,6 +24,7 @@ namespace Enzyme.Components
         {
             pManager.AddIntegerParameter("Width", "W", "Width in pixels.", GH_ParamAccess.item);
             pManager.AddIntegerParameter("Height", "H", "Height in pixels.", GH_ParamAccess.item);
+            pManager.AddIntegerParameter("DPI", "DPI", "Pass-through DPI to wire into Export Views.", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
@@ -94,6 +95,7 @@ namespace Enzyme.Components
 
             DA.SetData(0, exactWidth);
             DA.SetData(1, exactHeight);
+            DA.SetData(2, dpi);
         }
 
         public override void AppendAdditionalMenuItems(System.Windows.Forms.ToolStripDropDown menu)
