@@ -65,7 +65,11 @@ namespace Enzyme.Components
         private const double SLOPE_SPEEDUP_COEFFICIENT = 0.35;
 
         private const int STREAMLINE_SEED_ROW_STRIDE = 2;
-        private const int STREAMLINE_MAX_STEPS = 50;
+        // Safety ceiling, not the intended stopping condition - a streamline is meant to stop
+        // naturally the moment it exits the valid analysis grid (findNearestGridIndex returns
+        // -1, i.e. it's genuinely left the mesh), goes solid, or its local speed dies out. This
+        // just prevents a pathological case (e.g. a near-zero-speed eddy) from looping forever.
+        private const int STREAMLINE_MAX_STEPS = 500;
         private const double STREAMLINE_STEP_SIZE = 0.2;
         private const double STREAMLINE_STEP_ACCEPT_SPACING_MULTIPLIER = 2.0;
 
@@ -111,6 +115,8 @@ namespace Enzyme.Components
                 Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 13, 0.0, 2.0, GAP_TUNNELING_BOOST_COEFFICIENT, 330, 280);
                 Enzyme.Utils.AutoWireHelper.WireIntegerSlider(this, document, 14, 1, ITERATIONS_MAX, 1, 330, 320);
                 Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 15, 0.0, 1.0, ITERATION_DAMPING_DEFAULT, 330, 360);
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 16, true, 330, 400);
+                Enzyme.Utils.AutoWireHelper.WireIntegerSlider(this, document, 18, 1, 1000, STREAMLINE_MAX_STEPS, 330, 440);
                 Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 0, System.Drawing.Color.FromArgb(230, 230, 230), 220, -143);
                 Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 1, "line", 220, -68);
                 Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 3, "curve", 220, -23);
@@ -133,7 +139,7 @@ namespace Enzyme.Components
             pManager.AddNumberParameter("GridSpacing", "GridSpacing", "Resolution size of pixel elements", GH_ParamAccess.item, 5.0);
             pManager.AddColourParameter("CustomColors", "CustomColors", "Custom color spectrum override", GH_ParamAccess.list);
             pManager[7].Optional = true;
-            pManager.AddNumberParameter("HeatmapHeight", "HeatmapHeight", "Z-axis elevation to project the flat heatmap", GH_ParamAccess.item);
+            pManager.AddNumberParameter("HeatmapHeight", "HeatmapOffset", "Z offset applied to the heatmap: added to the terrain bounding box top in Flat mode (DrapeHeatmap=false), or added to each point's own local terrain height in Drape mode (DrapeHeatmap=true)", GH_ParamAccess.item, 0.0);
             pManager[8].Optional = true;
             pManager.AddNumberParameter("WakeLengthRatio", "WakeRatio", "Wake length as a multiple of the obstructing building's height (typical near-wake range 6-8x)", GH_ParamAccess.item, WAKE_LENGTH_TO_HEIGHT_RATIO);
             pManager[9].Optional = true;
@@ -149,6 +155,12 @@ namespace Enzyme.Components
             pManager[14].Optional = true;
             pManager.AddNumberParameter("Damping", "Damping", "Blend factor (0-1) between a point's previous iteration and its newly computed one. Lower = slower, more stable convergence; 1.0 = no damping (replace outright each pass)", GH_ParamAccess.item, ITERATION_DAMPING_DEFAULT);
             pManager[15].Optional = true;
+            pManager.AddBooleanParameter("DrapeHeatmap", "Drape", "true = heatmap follows terrain relief, offset from each point's own local ground height. false = a single flat plane, offset from the terrain's bounding-box top", GH_ParamAccess.item, true);
+            pManager[16].Optional = true;
+            pManager.AddBoxParameter("SeedBox", "SeedBox", "Optional bounding box - every valid analysis grid point inside it is used as a streamline seed instead of the default sparse grid sampling", GH_ParamAccess.item);
+            pManager[17].Optional = true;
+            pManager.AddIntegerParameter("StreamlineMaxSteps", "MaxSteps", "Safety ceiling on streamline length. A streamline normally stops on its own once it exits the mesh, goes solid, or its speed dies out - this only guards against a pathological case looping forever", GH_ParamAccess.item, STREAMLINE_MAX_STEPS);
+            pManager[18].Optional = true;
         }
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
@@ -190,8 +202,8 @@ namespace Enzyme.Components
             List<Color> userColors = new List<Color>();
             DA.GetDataList(7, userColors);
 
-            double heatmapHeight = 0.0;
-            bool hasHeatmapHeight = DA.GetData(8, ref heatmapHeight);
+            double heatmapOffset = 0.0;
+            DA.GetData(8, ref heatmapOffset);
 
             double wakeRatio = WAKE_LENGTH_TO_HEIGHT_RATIO;
             DA.GetData(9, ref wakeRatio);
@@ -215,6 +227,16 @@ namespace Enzyme.Components
             double damping = ITERATION_DAMPING_DEFAULT;
             DA.GetData(15, ref damping);
             damping = Math.Max(0.01, Math.Min(1.0, damping));
+
+            bool drapeHeatmap = true;
+            DA.GetData(16, ref drapeHeatmap);
+
+            Box seedBox = Box.Unset;
+            bool hasSeedBox = DA.GetData(17, ref seedBox) && seedBox.IsValid;
+
+            int streamlineMaxSteps = STREAMLINE_MAX_STEPS;
+            DA.GetData(18, ref streamlineMaxSteps);
+            streamlineMaxSteps = Math.Max(1, streamlineMaxSteps);
 
             System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
 
@@ -639,11 +661,12 @@ namespace Enzyme.Components
 
                 double halfGrid = spacing * 0.5;
 
-                double flatZ = bbox.Min.Z;
-                if (hasHeatmapHeight)
-                {
-                    flatZ = heatmapHeight;
-                }
+                // Flat mode: one plane, offset from the terrain's own bounding-box top.
+                // Drape mode: each tile at its own point's local terrain height, offset the
+                // same way. gridPoints[i].Z already includes the AnalysisHeight pedestrian
+                // offset, so that's subtracted back out for Drape mode or the heatmap would
+                // float above the mesh instead of sitting on it.
+                double flatModeZ = bbox.Max.Z + heatmapOffset;
 
                 for (int i = 0; i < gridPoints.Length; i++)
                 {
@@ -652,12 +675,14 @@ namespace Enzyme.Components
                     Point3d centerPt = gridPoints[i];
                     Color tileColor = meshColorList[i];
 
+                    double tileZ = drapeHeatmap ? (centerPt.Z - height + heatmapOffset) : flatModeZ;
+
                     int vIndex = heatmapMesh.Vertices.Count;
 
-                    heatmapMesh.Vertices.Add(new Point3d(centerPt.X - halfGrid, centerPt.Y - halfGrid, flatZ));
-                    heatmapMesh.Vertices.Add(new Point3d(centerPt.X + halfGrid, centerPt.Y - halfGrid, flatZ));
-                    heatmapMesh.Vertices.Add(new Point3d(centerPt.X + halfGrid, centerPt.Y + halfGrid, flatZ));
-                    heatmapMesh.Vertices.Add(new Point3d(centerPt.X - halfGrid, centerPt.Y + halfGrid, flatZ));
+                    heatmapMesh.Vertices.Add(new Point3d(centerPt.X - halfGrid, centerPt.Y - halfGrid, tileZ));
+                    heatmapMesh.Vertices.Add(new Point3d(centerPt.X + halfGrid, centerPt.Y - halfGrid, tileZ));
+                    heatmapMesh.Vertices.Add(new Point3d(centerPt.X + halfGrid, centerPt.Y + halfGrid, tileZ));
+                    heatmapMesh.Vertices.Add(new Point3d(centerPt.X - halfGrid, centerPt.Y + halfGrid, tileZ));
 
                     heatmapMesh.VertexColors.Add(tileColor);
                     heatmapMesh.VertexColors.Add(tileColor);
@@ -714,15 +739,17 @@ namespace Enzyme.Components
                     return bestIdx;
                 };
 
-                for (int i = 0; i < gridPoints.Length; i += uCount * STREAMLINE_SEED_ROW_STRIDE)
+                // Traces one streamline from grid index seedIdx, stepping until it genuinely
+                // exits the mesh (findNearestGridIndex returns -1), goes solid, or its local
+                // speed dies out - streamlineMaxSteps is only a safety ceiling, not the
+                // intended stopping condition.
+                Action<int> traceStreamlineFrom = (seedIdx) =>
                 {
-                    if (!validMasks[i] || solidMasks[i]) continue;
-
                     List<Point3d> pathVertices = new List<Point3d>();
-                    Point3d trackingParticle = gridPoints[i];
+                    Point3d trackingParticle = gridPoints[seedIdx];
                     pathVertices.Add(trackingParticle);
 
-                    for (int step = 0; step < STREAMLINE_MAX_STEPS; step++)
+                    for (int step = 0; step < streamlineMaxSteps; step++)
                     {
                         int closestIdx = findNearestGridIndex(trackingParticle);
 
@@ -738,13 +765,33 @@ namespace Enzyme.Components
                         }
                         else
                         {
-                            break;
+                            break; // fell out of the mesh, hit solid, or stalled
                         }
                     }
 
                     if (pathVertices.Count > 1)
                     {
                         computedStreamlines.Add(new PolylineCurve(pathVertices));
+                    }
+                };
+
+                if (hasSeedBox)
+                {
+                    // Every valid, non-solid analysis point inside the box becomes its own seed,
+                    // instead of the default sparse every-other-row sampling.
+                    for (int i = 0; i < gridPoints.Length; i++)
+                    {
+                        if (!validMasks[i] || solidMasks[i]) continue;
+                        if (!seedBox.Contains(gridPoints[i], true)) continue;
+                        traceStreamlineFrom(i);
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < gridPoints.Length; i += uCount * STREAMLINE_SEED_ROW_STRIDE)
+                    {
+                        if (!validMasks[i] || solidMasks[i]) continue;
+                        traceStreamlineFrom(i);
                     }
                 }
             }
