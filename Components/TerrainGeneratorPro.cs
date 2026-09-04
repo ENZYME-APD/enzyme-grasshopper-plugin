@@ -45,23 +45,23 @@ namespace Enzyme.Components
             if (!hasSources)
             {
                 Enzyme.Utils.AutoWireHelper.WireInputParam(this, document, 0, "curve", 180, -440);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 1, 0.0, 200, 100.0, 330, -400);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 0.0, 2.0, 0.0, 330, -360);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 3, 0.0, 84, 42, 330, -320);
+                Enzyme.Utils.AutoWireHelper.WireSlider1Dec(this, document, 1, 0.0, 200.0, 100.0, 330, -400);
+                Enzyme.Utils.AutoWireHelper.WireSlider1Dec(this, document, 2, -100.0, 100.0, 0.0, 330, -360);
+                Enzyme.Utils.AutoWireHelper.WireSliderInt(this, document, 3, 0, 84, 42, 330, -320);
                 Enzyme.Utils.AutoWireHelper.WireMultilinePanel(this, document, 4, "150\n50\n20", 250, -280, 100, 60);
                 Enzyme.Utils.AutoWireHelper.WireMultilinePanel(this, document, 5, "1.0\n0.3\n0.1", 250, -210, 100, 60);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 6, 0.0, 2.0, 1.0, 330, -140);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 7, 0.0, 10.0, 5.0, 330, -100);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 9, 0.0, 200, 100, 330, -60);
+                Enzyme.Utils.AutoWireHelper.WireSliderInt(this, document, 6, 0, 10, 1, 330, -140);
+                Enzyme.Utils.AutoWireHelper.WireSliderInt(this, document, 7, 0, 50, 5, 330, -100);
+                Enzyme.Utils.AutoWireHelper.WireSliderInt(this, document, 9, 0, 200, 100, 330, -60);
                 Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 10, false, 210, -20);
                 Enzyme.Utils.AutoWireHelper.WireColorSwatch(this, document, 11, System.Drawing.Color.DarkGray, 210, 20);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 12, 0.0, 60, 30.0, 330, 60);
+                Enzyme.Utils.AutoWireHelper.WireSliderInt(this, document, 12, 0, 90, 30, 330, 60);
                 Enzyme.Utils.AutoWireHelper.WireValueList(this, document, 13, new string[]{"Realistic Soft Hills", "Ridged/Cellular Pattern"}, new string[]{"0", "1"}, 300, 100);
                 Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 14, false, 210, 140);
                 Enzyme.Utils.AutoWireHelper.WireColorSwatch(this, document, 15, System.Drawing.Color.DimGray, 210, 180);
                 Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 16, 0.0, 1.0, 0.0, 330, 220);
                 Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 17, 0.0, 1.0, 0.0, 330, 260);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 18, 0.0, 24690, 12345, 330, 300);
+                Enzyme.Utils.AutoWireHelper.WireSliderInt(this, document, 18, 0, 24690, 12345, 330, 300);
                 Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 19, 0.0, 1.0, 0.15, 330, 340);
                 Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 20, 0.0, 1.0, 0.85, 330, 380);
                 Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 0, "mesh", 300, -135);
