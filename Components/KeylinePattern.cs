@@ -9,7 +9,7 @@ namespace Enzyme.Components
     public class KeylinePattern : GH_Component
     {
         public KeylinePattern()
-          : base("Keyline Pattern Engine", "Keyline",
+          : base("Keyline Engine", "Keyline",
               "Generates parametric plowing lines or swale networks by offsetting guide curves along a terrain mesh.",
               "Enzyme", "LEAP")
         {

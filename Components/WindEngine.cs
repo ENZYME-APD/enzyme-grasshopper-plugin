@@ -79,6 +79,7 @@ namespace Enzyme.Components
             pManager.AddTextParameter("VelocityData", "VelocityData", "Raw velocity values formatted", GH_ParamAccess.list);
             pManager.AddPointParameter("TagPoints", "TagPoints", "Anchor coordinates for Text Tag", GH_ParamAccess.list);
             pManager.AddMeshParameter("PlainMesh", "PlainMesh", "Original topography mesh without vertex colors", GH_ParamAccess.item);
+                    pManager.AddTextParameter("Info", "I", "Component information and interpretation", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
@@ -158,6 +159,7 @@ namespace Enzyme.Components
                             if (mp != null)
                             {
                                 terrainNormal = new Vector3d(terrain.FaceNormals[mp.FaceIndex]);
+                                                            DA.SetData(7, "URBAN WIND ENGINE\n" + "\n" + "HOW IT WORKS:\n" + "Uses basic kinematic simulation to model wind vectors hitting topography and massing, generating deflected vector paths and speed multipliers.\n\n" + "INTERPRETATION & IMPORTANCE:\n" + "Identifies wind tunnels, sheltered zones, and high-velocity exposure areas. Crucial for designing comfortable pedestrian plazas and optimizing building orientation for natural ventilation.");
                             }
                             terrainNormal.Unitize();
                             

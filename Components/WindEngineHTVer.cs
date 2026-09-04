@@ -161,6 +161,7 @@ namespace Enzyme.Components
             pManager.AddPointParameter("TagPoints", "TagPoints", "Anchor coordinates for Text Tag", GH_ParamAccess.list);
             pManager.AddMeshParameter("PlainMesh", "PlainMesh", "Original topography mesh without vertex colors", GH_ParamAccess.item);
             pManager.AddNumberParameter("VelocityValues", "VelocityValues", "Raw unformatted velocity values, aligned with WindVectors", GH_ParamAccess.list);
+                    pManager.AddTextParameter("Info", "I", "Component information and interpretation", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
@@ -276,6 +277,7 @@ namespace Enzyme.Components
                                 if (mp != null)
                                 {
                                     terrainNormal = new Vector3d(terrain.FaceNormals[mp.FaceIndex]);
+                                                                    DA.SetData(8, "URBAN WIND ENGINE (HIGH-RES)\n" + "\n" + "HOW IT WORKS:\n" + "A higher-resolution version of the wind vector engine, providing denser grid analysis and more accurate deflection around complex urban geometry.\n\n" + "INTERPRETATION & IMPORTANCE:\n" + "Used in later design stages when exact massing is known, helping to fine-tune facade porosity and outdoor comfort strategies.");
                                 }
                                 terrainNormal.Unitize();
 

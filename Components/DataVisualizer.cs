@@ -65,6 +65,7 @@ namespace Enzyme.Components
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
         {
             pManager.AddMeshParameter("Visualization", "M", "A single joined mesh representing the data (for fast viewport rendering)", GH_ParamAccess.item);
+                    pManager.AddTextParameter("Info", "I", "Component information and interpretation", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
@@ -88,6 +89,7 @@ namespace Enzyme.Components
             if (!DA.GetDataList(5, thicknesses) || thicknesses.Count == 0)
             {
                 thicknesses.Add(0.5);
+                            DA.SetData(1, "LEAP DATA VISUALIZER\n" + "\n" + "HOW IT WORKS:\n" + "A generic visualization module that takes numerical data streams from LEAP components and maps them to charts, graphs, or colored geometry.\n\n" + "INTERPRETATION & IMPORTANCE:\n" + "Bridges the gap between raw spreadsheet data and spatial intuition. It allows designers to 'see' abstract ecological metrics directly overlaid on their 3D model.");
             }
 
             if (pts.Count == 0 || vals.Count == 0) return;

@@ -106,6 +106,7 @@ namespace Enzyme.Components
             pManager.AddCurveParameter("NormContours", "NormContours", "Standard contour lines", GH_ParamAccess.list);
             pManager.AddCurveParameter("MainContours", "MainContours", "Major interval contour lines", GH_ParamAccess.list);
             pManager.AddPointParameter("Trees", "Trees", "Scattered point coordinates for trees", GH_ParamAccess.list);
+                    pManager.AddTextParameter("Info", "I", "Component information and interpretation", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
@@ -119,6 +120,7 @@ namespace Enzyme.Components
             {
                 AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Boundary must be a closed curve.");
                 return;
+                            
             }
 
             double max_h = 100.0, min_h = 0.0, c_step = 1.0, m_step = 5.0, slope_angle = 30.0, tree_msk = 0.0, tree_dns = 0.0, tree_zmin = 0.15, tree_zmax = 0.85;
@@ -417,6 +419,7 @@ namespace Enzyme.Components
 
             double area = Rhino.Geometry.AreaMassProperties.Compute(boundary).Area;
             Message = $"{this.NickName}\nTime: {stopwatch.ElapsedMilliseconds} ms\nArea: {area:N0} m2\nTrees: {treesOut.Count}";
+                    DA.SetData(4, "TERRAIN GENERATOR PRO\n" + "\n" + "HOW IT WORKS:\n" + "A procedural terrain generator developed specifically to test different analysis components across a wide variety of topographic conditions.\n\n" + "INTERPRETATION & IMPORTANCE:\n" + "Generates synthetic, highly controllable terrains (ridges, valleys, noise). This allows designers to rigorously test and calibrate drainage, slope, and wind analysis tools before applying them to real-world GIS data.");
         }
 
         private double[] Hash2D(double x, double y, int seed)

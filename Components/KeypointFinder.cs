@@ -9,7 +9,7 @@ namespace Enzyme.Components
     public class KeypointFinder : GH_Component
     {
         public KeypointFinder()
-          : base("Keypoint Finder", "Keypoint",
+          : base("Keypoint Engine", "Keypoint",
               "Analyzes stream slopes to find the inflection point (Keypoint) and extracts the Master Keyline contour.",
               "Enzyme", "LEAP")
         {

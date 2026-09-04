@@ -94,6 +94,7 @@ namespace Enzyme.Terrain
             pManager.AddNumberParameter("GlobalMinElevation", "GMIE", "Absolute lowest Z-value.", GH_ParamAccess.tree);
             pManager.AddMeshParameter("HeatmapMeshes", "HM", "The vertex-colored duplicate mesh.", GH_ParamAccess.tree);
             pManager.AddGenericParameter("Color Legend", "Color Legend", "JSON Legend Data", GH_ParamAccess.item);
+                    pManager.AddTextParameter("Info", "I", "Component information and interpretation", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
@@ -160,6 +161,7 @@ namespace Enzyme.Terrain
                     if (ghMesh != null && ghMesh.Value != null && ghMesh.Value.IsValid)
                     {
                         globalBB.Union(ghMesh.Value.GetBoundingBox(true));
+                                            DA.SetData(11, "MESH HEIGHT ANALYSIS\n" + "\n" + "HOW IT WORKS:\n" + "Analyzes mesh elevations to generate detailed HUD metrics (average, min, max heights) and identifies localized peaks and valleys.\n\n" + "INTERPRETATION & IMPORTANCE:\n" + "Provides quantitative tabular data summarizing the site's verticality. Knowing the highest peaks and lowest basins is critical for locating water towers, telecom equipment, or drainage ponds.");
                     }
                 }
             }
