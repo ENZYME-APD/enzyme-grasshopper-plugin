@@ -256,6 +256,15 @@ namespace Enzyme.Components
             return m;
         }
 
+
+        protected override System.Drawing.Bitmap Icon
+        {
+            get
+            {
+                return Enzyme.IconLoader.Load("DataVisualizer.png");
+            }
+        }
+
         public override Guid ComponentGuid
         {
             get { return new Guid("11223344-5566-7788-99AA-BBCCDDEEFF00"); }
