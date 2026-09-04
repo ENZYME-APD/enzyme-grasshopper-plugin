@@ -93,6 +93,17 @@ jobs:
           echo "Pushing: $yak_filename"
           ./yak push "$yak_filename"
 
+      - name: Determine prerelease status
+        id: prerelease_check
+        run: |
+          version="${{ steps.get_version.outputs.version }}"
+          # Semver pre-release: a hyphen after the numeric core, e.g. 1.9.29-beta.1
+          if [[ "$version" == *-* ]]; then
+            echo "is_prerelease=true" >> $GITHUB_OUTPUT
+          else
+            echo "is_prerelease=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Create GitHub Release with .gha file
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
@@ -116,9 +127,9 @@ jobs:
           files: |
             bin/Release/net48/enzyme.gha
           draft: false
-          prerelease: false
+          prerelease: ${{ steps.prerelease_check.outputs.is_prerelease }}
           generate_release_notes: false
-          make_latest: true
+          make_latest: ${{ steps.prerelease_check.outputs.is_prerelease == 'false' }}
           fail_on_unmatched_files: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
