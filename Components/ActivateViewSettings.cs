@@ -55,9 +55,9 @@ namespace Enzyme.Components
 
             string info = "ACTIVATE VIEW SETTINGS\n======================\n\nHOW IT WORKS:\nUpdates the Rhino viewport to match the given View, Display Style, and Layer State. Leaving an input empty means that property will not change.\n\nINTERPRETATION & IMPORTANCE:\nAutomates viewport configuration, ensuring you can quickly switch presentation or working states without manually clicking through Rhino panels.";
 
-            string statusView = "UNCHANGED";
-            string statusStyle = "UNCHANGED";
-            string statusLayer = "UNCHANGED";
+            string statusView = string.IsNullOrEmpty(viewName) ? "UNCHANGED" : viewName.ToUpper();
+            string statusStyle = string.IsNullOrEmpty(displayStyle) ? "UNCHANGED" : displayStyle.ToUpper();
+            string statusLayer = string.IsNullOrEmpty(layerState) ? "UNCHANGED" : layerState.ToUpper();
 
             if (run)
             {
@@ -68,7 +68,6 @@ namespace Enzyme.Components
                     if (index >= 0)
                     {
                         doc.NamedViews.Restore(index, activeView.ActiveViewport);
-                        statusView = viewName.ToUpper();
                     }
                     else
                     {
@@ -87,7 +86,6 @@ namespace Enzyme.Components
                         if (mode.EnglishName.Equals(displayStyle, StringComparison.OrdinalIgnoreCase))
                         {
                             activeView.ActiveViewport.DisplayMode = mode;
-                            statusStyle = mode.EnglishName.ToUpper();
                             found = true;
                             break;
                         }
@@ -116,7 +114,6 @@ namespace Enzyme.Components
                     if (found)
                     {
                         doc.NamedLayerStates.Restore(layerState, Rhino.DocObjects.Tables.RestoreLayerProperties.All);
-                        statusLayer = layerState.ToUpper();
                     }
                     else
                     {
@@ -126,12 +123,6 @@ namespace Enzyme.Components
                 }
 
                 activeView.Redraw();
-            }
-            else
-            {
-                statusView = "WAITING...";
-                statusStyle = "WAITING...";
-                statusLayer = "WAITING...";
             }
 
             DA.SetData(0, info);
