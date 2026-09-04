@@ -582,6 +582,27 @@ namespace Enzyme.Utils
             component.Params.Input[paramIndex].AddSource(toggle);
         }
 
+                public static void WireSliderInt(GH_Component comp, GH_Document doc, int paramIndex, int min, int max, int val, int offsetX, int offsetY)
+        {
+            if (paramIndex >= comp.Params.Input.Count) return;
+            if (comp.Params.Input[paramIndex].SourceCount > 0) return;
+
+            var slider = new Grasshopper.Kernel.Special.GH_NumberSlider();
+            slider.CreateAttributes();
+            slider.Slider.Minimum = (decimal)min;
+            slider.Slider.Maximum = (decimal)max;
+            slider.Slider.Value = (decimal)val;
+            slider.Slider.Type = Grasshopper.GUI.Base.GH_SliderAccuracy.Integer;
+            slider.Slider.DecimalPlaces = 0;
+
+            float x = comp.Attributes.Pivot.X - offsetX;
+            float y = comp.Attributes.Pivot.Y + offsetY;
+            slider.Attributes.Pivot = new System.Drawing.PointF(x, y);
+            
+            doc.AddObject(slider, false);
+            comp.Params.Input[paramIndex].AddSource(slider);
+        }
+
         public static void WireSlider1Dec(GH_Component comp, GH_Document doc, int paramIndex, double min, double max, double val, int offsetX, int offsetY)
         {
             if (paramIndex >= comp.Params.Input.Count) return;
