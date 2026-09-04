@@ -29,6 +29,7 @@ namespace Enzyme.Components
                 "Maps wind-engine velocity samples onto apparent (\"feels like\") temperature and locates the best/worst comfort points, without requiring a regular grid.",
                 "Enzyme", "Terrain")
         {
+            this.Message = "ThermalComfort\n-- WAITING --";
         }
 
         public override GH_Exposure Exposure => GH_Exposure.secondary;
@@ -58,18 +59,24 @@ namespace Enzyme.Components
             }
         }
 
-        private void PerformAutoWire(GH_Document document)
+                private void PerformAutoWire(GH_Document document)
         {
-            Enzyme.Utils.AutoWireHelper.WireButton(this, document, 0, 210, -60);
-            Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 4, 0.0, 100.0, 50.0, 330, -20);
-            Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 5, -10.0, 45.0, 20.0, 330, 20);
-            Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 6, -10.0, 45.0, DEFAULT_IDEAL_TEMPERATURE, 330, 60);
-            Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 7, 0.0, 1.0, DEFAULT_COMFORT_TOLERANCE, 330, 100);
-            Enzyme.Utils.AutoWireHelper.WireGeneratedColorPalette(this, document, 8, 330, -220);
-            Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 0, "point", 220, -40);
-            Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 1, "point", 220, 20);
-            Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 2, System.Drawing.Color.FromArgb(230, 230, 230), 220, 80);
-            Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 3, "number", 220, 140);
+            Enzyme.Utils.AutoWireHelper.WireBooleanToggle(this, document, 0, false, 362, -159);
+            Enzyme.Utils.AutoWireHelper.WireInputParam(this, document, 1, "mesh", 252, -108);
+            Enzyme.Utils.AutoWireHelper.WireInputParam(this, document, 2, "data", 251, -74);
+            Enzyme.Utils.AutoWireHelper.WireInputParam(this, document, 3, "point", 252, -34);
+            
+            Enzyme.Utils.AutoWireHelper.WireSliderInt(this, document, 4, 0, 100, 50, 398, -11);
+            Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 5, -10.0, 45.0, 20.0, 416, 29);
+            Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 6, -10.0, 45.0, DEFAULT_IDEAL_TEMPERATURE, 439, 69);
+            Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 7, 0.0, 1.0, DEFAULT_COMFORT_TOLERANCE, 441, 109);
+            
+            Enzyme.Utils.AutoWireHelper.WireGeneratedColorPalette(this, document, 8, 313, 228);
+            
+            Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 0, "point", 189, -72);
+            Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 1, "point", 189, -36);
+            Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 2, "mesh", 188, 0);
+            Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 3, "number", 187, 36);
         }
 
         protected override void RegisterInputParams(GH_InputParamManager pManager)
