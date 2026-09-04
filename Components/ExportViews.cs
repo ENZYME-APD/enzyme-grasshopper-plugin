@@ -277,8 +277,8 @@ namespace Enzyme.Components
             DA.SetData(1, info);
 
             sw.Stop();
-            string viewText = viewNames != null && viewNames.Count > 0 ? (viewNames.Count == 1 ? viewNames[0] : $"{viewNames.Count} Views") : "ALL VIEWS";
-            if (!run) viewText = "WAITING...";
+            string viewText = viewNames != null && viewNames.Count > 0 ? (viewNames.Count == 1 ? viewNames[0].ToUpper() : $"{viewNames.Count} VIEWS") : "ALL VIEWS";
+            // if (!run) viewText = "WAITING...";
             string lsText = string.IsNullOrEmpty(layerState) ? "ACTIVE" : layerState.ToUpper();
             string dsText = string.IsNullOrEmpty(displayStyle) ? "ACTIVE" : displayStyle.ToUpper();
             
