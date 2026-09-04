@@ -32,7 +32,6 @@ namespace Enzyme.Components
             
             pManager.AddIntegerParameter("Width", "W", "Image width in pixels.", GH_ParamAccess.item, 1920);
             pManager.AddIntegerParameter("Height", "H", "Image height in pixels.", GH_ParamAccess.item, 1080);
-            pManager.AddNumberParameter("Scale", "S", "Scale multiplier for the final resolution (e.g. 2 for double size).", GH_ParamAccess.item, 1.0);
             pManager.AddIntegerParameter("DPI", "DPI", "Print DPI metadata embedded into the image.", GH_ParamAccess.item, 300);
             
             pManager.AddBooleanParameter("Grid", "G", "Show Grid.", GH_ParamAccess.item, false);
@@ -78,9 +77,6 @@ namespace Enzyme.Components
 
             int height = 1080;
             DA.GetData("Height", ref height);
-
-            double scale = 1.0;
-            DA.GetData("Scale", ref scale);
 
             int dpi = 300;
             DA.GetData("DPI", ref dpi);
@@ -157,8 +153,8 @@ namespace Enzyme.Components
 
                         var capture = new Rhino.Display.ViewCapture
                         {
-                            Width = (int)(width * scale),
-                            Height = (int)(height * scale),
+                            Width = width,
+                            Height = height,
                             TransparentBackground = transparent,
                             DrawGrid = grid,
                             DrawAxes = worldAxes,
@@ -299,10 +295,10 @@ namespace Enzyme.Components
             {
                 Enzyme.Utils.AutoWireHelper.WireButton(this, document, 0, 210, -180);
                 Enzyme.Utils.AutoWireHelper.WireFilePath(this, document, 4, "C:\\", 210, -60);
-                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 12, false, 210, 120);
-                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 13, false, 210, 150);
-                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 14, false, 210, 180);
-                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 15, true, 210, 210);
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 11, false, 210, 120);
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 12, false, 210, 150);
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 13, false, 210, 180);
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 14, true, 210, 210);
 
                 Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 1, 150, 0, 300, 300);
             }
