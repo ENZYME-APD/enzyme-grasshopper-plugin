@@ -122,7 +122,8 @@ namespace Enzyme.Components
                 if (WebButtonBounds.Contains(e.CanvasLocation))
                 {
                     try {
-                        System.Diagnostics.Process.Start("https://www.weareenzyme.com/");
+                        var psi = new System.Diagnostics.ProcessStartInfo("https://www.weareenzyme.com/") { UseShellExecute = true };
+                        System.Diagnostics.Process.Start(psi);
                     } catch {}
                     return GH_ObjectResponse.Handled;
                 }
@@ -137,7 +138,8 @@ namespace Enzyme.Components
                         {
                             url += $"&body={Uri.EscapeDataString(msg)}";
                         }
-                        System.Diagnostics.Process.Start(url);
+                        var psi = new System.Diagnostics.ProcessStartInfo(url) { UseShellExecute = true };
+                        System.Diagnostics.Process.Start(psi);
                     } catch {}
                     return GH_ObjectResponse.Handled;
                 }
