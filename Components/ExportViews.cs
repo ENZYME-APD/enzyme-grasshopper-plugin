@@ -23,6 +23,8 @@ namespace Enzyme.Components
         {
             pManager.AddBooleanParameter("Run", "R", "Set to true to export the views.", GH_ParamAccess.item, false);
             pManager.AddTextParameter("Views", "V", "Names of the views to export. If empty, exports ALL named views.", GH_ParamAccess.list);
+            pManager.AddTextParameter("Display Style", "DS", "Optional. Name of the Display Mode (e.g., 'Rendered'). Leaves active if empty.", GH_ParamAccess.item, "");
+            pManager.AddTextParameter("Layer State", "LS", "Optional. Name of the saved Layer State to restore. Leaves active if empty.", GH_ParamAccess.item, "");
             pManager.AddTextParameter("Directory", "Dir", "Folder path to save the images.", GH_ParamAccess.item);
             pManager.AddTextParameter("Prefix", "P", "Prefix for the output filenames (optional).", GH_ParamAccess.item, "");
             pManager.AddTextParameter("Suffix", "Suf", "Suffix for the output filenames (optional).", GH_ParamAccess.item, "");
@@ -37,14 +39,11 @@ namespace Enzyme.Components
             pManager.AddBooleanParameter("World Axes", "WA", "Show World Axes.", GH_ParamAccess.item, false);
             pManager.AddBooleanParameter("CPlane Axes", "CA", "Show CPlane Axes.", GH_ParamAccess.item, false);
             pManager.AddBooleanParameter("Transparent", "T", "Transparent background (PNG only).", GH_ParamAccess.item, false);
-            
-            pManager.AddTextParameter("Display Style", "DS", "Optional. Name of the Display Mode (e.g., 'Rendered'). Leaves active if empty.", GH_ParamAccess.item, "");
-            pManager.AddTextParameter("Layer State", "LS", "Optional. Name of the saved Layer State to restore. Leaves active if empty.", GH_ParamAccess.item, "");
 
             pManager[1].Optional = true; // Views can be empty
-            pManager[14].Optional = true; // Display Style
-            pManager[15].Optional = true; // Layer State
-            pManager[2].Optional = true; // Directory can be empty (defaults to desktop or rhino file dir)
+            pManager[2].Optional = true; // Display Style
+            pManager[3].Optional = true; // Layer State
+            pManager[4].Optional = true; // Directory can be empty
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
