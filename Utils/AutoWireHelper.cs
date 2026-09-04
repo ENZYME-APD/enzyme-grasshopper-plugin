@@ -239,6 +239,23 @@ namespace Enzyme.Utils
             comp.Params.Input[targetInputIndex].AddSource(gradientGen.Params.Output[0]);
         }
 
+        // Spawns a LegendGeometry component fed by comp's own JSON "Color Legend" output
+        // (see LegendGeometry.CreateLegendGeometry for the expected {Type, Title, Colors,
+        // Labels} schema). BasePoint/Scale are left on LegendGeometry's own defaults.
+        public static void WireLegendGeometry(GH_Component comp, GH_Document doc, int legendDataOutputIndex, int offsetX, int offsetY)
+        {
+            if (legendDataOutputIndex >= comp.Params.Output.Count) return;
+            if (comp.Params.Output[legendDataOutputIndex].Recipients.Count > 0) return;
+
+            var legend = new Enzyme.Components.LegendGeometry();
+            legend.CreateAttributes();
+            PointF pivot = comp.Attributes.Pivot;
+            legend.Attributes.Pivot = new PointF(pivot.X + offsetX, pivot.Y + offsetY);
+
+            doc.AddObject(legend, false);
+            legend.Params.Input[0].AddSource(comp.Params.Output[legendDataOutputIndex]);
+        }
+
         // Spawns a "Vector Display Ex" (native GH component) fed by a point-list source param
         // and a vector/line-list source param already on the canvas, plus a color swatch and a
         // width slider. Guards on the vector source param's Recipients rather than comp's own

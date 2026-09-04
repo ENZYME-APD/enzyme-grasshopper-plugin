@@ -7,6 +7,7 @@ using System.Drawing;
 using Rhino;
 using Rhino.Geometry;
 using Grasshopper.Kernel;
+using Newtonsoft.Json.Linq;
 using Enzyme;
 
 namespace Enzyme.Components
@@ -135,6 +136,7 @@ namespace Enzyme.Components
             Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 5, System.Drawing.Color.FromArgb(230, 230, 230), 220, 112);
             Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 6, "number", 220, 157);
             Enzyme.Utils.AutoWireHelper.WireVectorDisplayEx(document, tagPointsRelay, windVectorsRelay, System.Drawing.Color.Black, 2.0, 250, 0);
+            Enzyme.Utils.AutoWireHelper.WireLegendGeometry(this, document, 8, 220, 220);
         }
 
         public override void AppendAdditionalMenuItems(System.Windows.Forms.ToolStripDropDown menu)
@@ -251,6 +253,7 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
             pManager.AddMeshParameter("PlainMesh", "PlainMesh", "Original topography mesh without vertex colors", GH_ParamAccess.item);
             pManager.AddNumberParameter("VelocityValues", "VelocityValues", "Raw unformatted velocity values, aligned with WindVectors", GH_ParamAccess.list);
                     pManager.AddTextParameter("Info", "I", "Component information and interpretation", GH_ParamAccess.item);
+            pManager.AddTextParameter("LegendData", "LegendData", "JSON legend payload (min/max speed + the actual color ramp in use) - feed directly into the Legend Geometry component's Color Legend input", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
@@ -891,6 +894,41 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
                 + "A physically-refined wind analysis engine: occlusion, wake, corner-channeling and gap/tunneling are combined as independent multiplicative factors (rather than an either/or switch), and an optional multi-pass relaxation lets each point settle through sequential building interactions.\n\n"
                 + "INTERPRETATION & IMPORTANCE:\n"
                 + "Use once massing is known, to check pedestrian comfort, wake shadowing, and speed-up in narrow gaps between buildings before committing to facade or landscape design.");
+
+            {
+                // Legend payload for Legend Geometry's "Color Legend" input: reflects the
+                // actual min/max speed observed this solve, and the actual color ramp in
+                // use - the auto-wired GradientGenerator palette if CustomColors has 2+
+                // entries (shown as discrete Blocks, faithful to the real interpolation
+                // steps), otherwise the default 2-stop blue->pink gradient this component
+                // falls back to when CustomColors is empty.
+                double legendMin = minObservedSpeed == double.MaxValue ? 0.0 : minObservedSpeed;
+                double legendMax = maxObservedSpeed == double.MinValue ? 0.0 : maxObservedSpeed;
+
+                JObject legend = new JObject();
+                legend["Title"] = "Wind Speed (m/s)";
+                legend["Labels"] = new JArray($"{legendMin:F1}", $"{legendMax:F1}");
+
+                if (userColors.Count >= 2)
+                {
+                    legend["Type"] = "Blocks";
+                    JArray blockColors = new JArray();
+                    foreach (var c in userColors)
+                    {
+                        blockColors.Add(new JObject { ["R"] = c.R, ["G"] = c.G, ["B"] = c.B });
+                    }
+                    legend["Colors"] = blockColors;
+                }
+                else
+                {
+                    legend["Type"] = "Gradient";
+                    legend["Colors"] = new JArray(
+                        new JObject { ["R"] = 15, ["G"] = 45, ["B"] = 120 },
+                        new JObject { ["R"] = 255, ["G"] = 200, ["B"] = 255 });
+                }
+
+                DA.SetData(8, legend.ToString(Newtonsoft.Json.Formatting.None));
+            }
 
             sw.Stop();
             if (execute)
