@@ -301,6 +301,22 @@ namespace Enzyme.Components
                 Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 14, true, 210, 210);
 
                 Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 1, 150, 0, 300, 300);
+
+                // Autowire Document Size to Pixels component
+                var paperComp = new Enzyme.Components.PaperSizeToPixels();
+                paperComp.CreateAttributes();
+                
+                // Position it relatively
+                float px = this.Attributes.Pivot.X - 350;
+                float py = this.Attributes.Pivot.Y + 40;
+                paperComp.Attributes.Pivot = new System.Drawing.PointF(px, py);
+                
+                document.AddObject(paperComp, false);
+                
+                // Wire outputs of PaperSize to ExportViews
+                this.Params.Input[8].AddSource(paperComp.Params.Output[0]); // Width
+                this.Params.Input[9].AddSource(paperComp.Params.Output[1]); // Height
+                this.Params.Input[10].AddSource(paperComp.Params.Output[2]); // DPI
             }
         }
 
