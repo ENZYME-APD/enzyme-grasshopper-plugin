@@ -103,27 +103,102 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                Enzyme.Utils.AutoWireHelper.WireButton(this, document, 0, 210, -80);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 4, 0.0, 20, 10.0, 330, -40);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 5, 0.0, 3.0, 1.5, 330, 0);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 6, 0.0, 10.0, 5.0, 330, 40);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 8, 0.0, 3.0, 1.5, 330, 80);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 9, 0.0, 20.0, WAKE_LENGTH_TO_HEIGHT_RATIO, 330, 120);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 10, 0.0, 1.0, SLOPE_SPEEDUP_COEFFICIENT, 330, 160);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 11, 0.0, 1.0, CORNER_TANGENCY_THRESHOLD, 330, 200);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 12, 0.0, 2.0, CORNER_SPEED_BOOST_COEFFICIENT, 330, 240);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 13, 0.0, 2.0, GAP_TUNNELING_BOOST_COEFFICIENT, 330, 280);
-                Enzyme.Utils.AutoWireHelper.WireIntegerSlider(this, document, 14, 1, ITERATIONS_MAX, 1, 330, 320);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 15, 0.0, 1.0, ITERATION_DAMPING_DEFAULT, 330, 360);
-                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 16, true, 330, 400);
-                Enzyme.Utils.AutoWireHelper.WireIntegerSlider(this, document, 18, 1, 1000, STREAMLINE_MAX_STEPS, 330, 440);
-                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 0, System.Drawing.Color.FromArgb(230, 230, 230), 220, -143);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 1, "line", 220, -68);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 3, "curve", 220, -23);
-                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 4, 220, 11, 180, 22);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 5, "point", 220, 67);
-                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 6, System.Drawing.Color.FromArgb(230, 230, 230), 220, 112);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 7, "number", 220, 157);
+                PerformAutoWire(document);
+            }
+        }
+
+        // Every Wire* call below self-guards on SourceCount>0 per input, so calling this
+        // again later (e.g. from the right-click "Invoke Autowire" menu item) is safe and
+        // idempotent - it only fills in whichever inputs/outputs are currently unconnected,
+        // it won't touch or duplicate anything already wired.
+        private void PerformAutoWire(GH_Document document)
+        {
+            Enzyme.Utils.AutoWireHelper.WireButton(this, document, 0, 210, -80);
+            Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 4, 0.0, 20, 10.0, 330, -40);
+            Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 5, 0.0, 3.0, 1.5, 330, 0);
+            Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 6, 0.0, 10.0, 5.0, 330, 40);
+            Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 8, 0.0, 3.0, 1.5, 330, 80);
+            Enzyme.Utils.AutoWireHelper.WireGeneratedColorPalette(this, document, 7, 330, -180);
+            Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 9, 0.0, 20.0, WAKE_LENGTH_TO_HEIGHT_RATIO, 330, 120);
+            Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 10, 0.0, 1.0, SLOPE_SPEEDUP_COEFFICIENT, 330, 160);
+            Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 11, 0.0, 1.0, CORNER_TANGENCY_THRESHOLD, 330, 200);
+            Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 12, 0.0, 2.0, CORNER_SPEED_BOOST_COEFFICIENT, 330, 240);
+            Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 13, 0.0, 2.0, GAP_TUNNELING_BOOST_COEFFICIENT, 330, 280);
+            Enzyme.Utils.AutoWireHelper.WireIntegerSlider(this, document, 14, 1, ITERATIONS_MAX, 1, 330, 320);
+            Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 15, 0.0, 1.0, ITERATION_DAMPING_DEFAULT, 330, 360);
+            Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 16, true, 330, 400);
+            Enzyme.Utils.AutoWireHelper.WireIntegerSlider(this, document, 18, 1, 1000, STREAMLINE_MAX_STEPS, 330, 440);
+            Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 0, System.Drawing.Color.FromArgb(230, 230, 230), 220, -143);
+            Grasshopper.Kernel.IGH_Param windVectorsRelay = Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 1, "line", 220, -68);
+            Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 3, "curve", 220, -23);
+            Grasshopper.Kernel.IGH_Param tagPointsRelay = Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 4, "point", 220, 67);
+            Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 5, System.Drawing.Color.FromArgb(230, 230, 230), 220, 112);
+            Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 6, "number", 220, 157);
+            Enzyme.Utils.AutoWireHelper.WireVectorDisplayEx(document, tagPointsRelay, windVectorsRelay, System.Drawing.Color.Black, 2.0, 250, 0);
+        }
+
+        public override void AppendAdditionalMenuItems(System.Windows.Forms.ToolStripDropDown menu)
+        {
+            base.AppendAdditionalMenuItems(menu);
+            GH_DocumentObject.Menu_AppendItem(menu, "Reset to Default Constants", Menu_ResetToDefaults_Clicked);
+            GH_DocumentObject.Menu_AppendItem(menu, "Invoke Autowire (fill empty inputs/outputs)", Menu_InvokeAutowire_Clicked);
+        }
+
+        private void Menu_InvokeAutowire_Clicked(object sender, EventArgs e)
+        {
+            GH_Document doc = OnPingDocument();
+            if (doc == null) return;
+            PerformAutoWire(doc);
+            this.ExpireSolution(true);
+        }
+
+        // Resets every currently-connected auto-wired slider/toggle back to the constant
+        // defaults baked into this component - does not touch TerrainMesh/ContextBuildings/
+        // WindDirection/CustomColors/SeedBox, and does nothing to an input whose source isn't
+        // one of the auto-wired slider/toggle types (e.g. if it's fed by something custom).
+        private void Menu_ResetToDefaults_Clicked(object sender, EventArgs e)
+        {
+            ResetSliderSource(4, 10.0);                                    // WindSpeed
+            ResetSliderSource(5, 1.5);                                     // AnalysisHeight
+            ResetSliderSource(6, 5.0);                                     // GridSpacing
+            ResetSliderSource(9, WAKE_LENGTH_TO_HEIGHT_RATIO);             // WakeLengthRatio
+            ResetSliderSource(10, SLOPE_SPEEDUP_COEFFICIENT);              // SlopeSpeedup
+            ResetSliderSource(11, CORNER_TANGENCY_THRESHOLD);              // CornerTangency
+            ResetSliderSource(12, CORNER_SPEED_BOOST_COEFFICIENT);         // CornerBoost
+            ResetSliderSource(13, GAP_TUNNELING_BOOST_COEFFICIENT);        // GapBoost
+            ResetSliderSource(14, 1.0);                                    // Iterations
+            ResetSliderSource(15, ITERATION_DAMPING_DEFAULT);              // Damping
+            ResetToggleSource(16, true);                                   // DrapeHeatmap
+            ResetSliderSource(18, (double)STREAMLINE_MAX_STEPS);           // StreamlineMaxSteps
+
+            this.ExpireSolution(true);
+        }
+
+        private void ResetSliderSource(int paramIndex, double defaultValue)
+        {
+            if (paramIndex >= this.Params.Input.Count) return;
+            foreach (var source in this.Params.Input[paramIndex].Sources)
+            {
+                var slider = source as Grasshopper.Kernel.Special.GH_NumberSlider;
+                if (slider != null)
+                {
+                    slider.Slider.Value = (decimal)defaultValue;
+                    slider.ExpireSolution(true);
+                }
+            }
+        }
+
+        private void ResetToggleSource(int paramIndex, bool defaultValue)
+        {
+            if (paramIndex >= this.Params.Input.Count) return;
+            foreach (var source in this.Params.Input[paramIndex].Sources)
+            {
+                var toggle = source as Grasshopper.Kernel.Special.GH_BooleanToggle;
+                if (toggle != null)
+                {
+                    toggle.Value = defaultValue;
+                    toggle.ExpireSolution(true);
+                }
             }
         }
 
@@ -169,7 +244,6 @@ namespace Enzyme.Components
             pManager.AddLineParameter("WindVectors", "WindVectors", "Spatial direction markers", GH_ParamAccess.list);
             pManager.AddColourParameter("VectorColors", "VectorColors", "Velocity color map matching lines", GH_ParamAccess.list);
             pManager.AddCurveParameter("Streamlines", "Streamlines", "Continuous particle flow paths", GH_ParamAccess.list);
-            pManager.AddTextParameter("VelocityData", "VelocityData", "Raw velocity values formatted", GH_ParamAccess.list);
             pManager.AddPointParameter("TagPoints", "TagPoints", "Anchor coordinates for Text Tag", GH_ParamAccess.list);
             pManager.AddMeshParameter("PlainMesh", "PlainMesh", "Original topography mesh without vertex colors", GH_ParamAccess.item);
             pManager.AddNumberParameter("VelocityValues", "VelocityValues", "Raw unformatted velocity values, aligned with WindVectors", GH_ParamAccess.list);
@@ -245,7 +319,6 @@ namespace Enzyme.Components
             List<Color> vectorColorList = new List<Color>();
             List<Color> meshColorList = new List<Color>();
             List<PolylineCurve> computedStreamlines = new List<PolylineCurve>();
-            List<string> velocityTextData = new List<string>();
             List<double> velocityRawData = new List<double>();
             List<Point3d> tagAnchorPoints = new List<Point3d>();
 
@@ -652,7 +725,6 @@ namespace Enzyme.Components
                     if (localSpeed > 0.01)
                     {
                         vectorLines.Add(new Line(pt, localDir * (localSpeed * 0.5)));
-                        velocityTextData.Add(localSpeed.ToString("F1"));
                         velocityRawData.Add(localSpeed);
                         tagAnchorPoints.Add(pt);
                         vectorColorList.Add(mappedColor);
@@ -800,18 +872,17 @@ namespace Enzyme.Components
             DA.SetDataList(1, vectorLines);
             DA.SetDataList(2, vectorColorList);
             DA.SetDataList(3, computedStreamlines);
-            DA.SetDataList(4, velocityTextData);
-            DA.SetDataList(5, tagAnchorPoints);
-            DA.SetDataList(7, velocityRawData);
+            DA.SetDataList(4, tagAnchorPoints);
+            DA.SetDataList(6, velocityRawData);
 
             if (terrain != null)
             {
                 Mesh cleanMesh = terrain.DuplicateMesh();
                 cleanMesh.VertexColors.Clear();
-                DA.SetData(6, cleanMesh);
+                DA.SetData(5, cleanMesh);
             }
 
-            DA.SetData(8, "URBAN WIND VECTOR ENGINE HT (BETA)\n"
+            DA.SetData(7, "URBAN WIND VECTOR ENGINE HT (BETA)\n"
                 + "\n"
                 + "HOW IT WORKS:\n"
                 + "A physically-refined wind analysis engine: occlusion, wake, corner-channeling and gap/tunneling are combined as independent multiplicative factors (rather than an either/or switch), and an optional multi-pass relaxation lets each point settle through sequential building interactions.\n\n"

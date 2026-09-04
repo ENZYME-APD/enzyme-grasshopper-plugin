@@ -189,10 +189,12 @@ namespace Enzyme.Utils
             panel.AddSource(comp.Params.Output[paramIndex]);
         }
 
-        public static void WireOutputParam(GH_Component comp, GH_Document doc, int paramIndex, string paramType, int offsetX, int offsetY)
+        // Returns the created relay param (or null if skipped/unsupported type), so callers
+        // can chain further wiring off of it instead of re-deriving it later.
+        public static IGH_Param WireOutputParam(GH_Component comp, GH_Document doc, int paramIndex, string paramType, int offsetX, int offsetY)
         {
-            if (paramIndex >= comp.Params.Output.Count) return;
-            if (comp.Params.Output[paramIndex].Recipients.Count > 0) return;
+            if (paramIndex >= comp.Params.Output.Count) return null;
+            if (comp.Params.Output[paramIndex].Recipients.Count > 0) return null;
 
             IGH_Param param = null;
             switch(paramType.ToLower())
@@ -209,7 +211,7 @@ namespace Enzyme.Utils
                 case "generic": param = new Grasshopper.Kernel.Parameters.Param_GenericObject(); break;
                 case "line": param = new Grasshopper.Kernel.Parameters.Param_Line(); break;
             }
-            if (param == null) return;
+            if (param == null) return null;
 
             param.CreateAttributes();
             PointF pivot = comp.Attributes.Pivot;
@@ -217,6 +219,70 @@ namespace Enzyme.Utils
 
             doc.AddObject(param, false);
             param.AddSource(comp.Params.Output[paramIndex]);
+            return param;
+        }
+
+        // Spawns a GradientGenerator component (which self-wires its own Merge+swatches+Steps
+        // slider via its own AddedToDocument) and feeds its "Generated Colors" output into
+        // comp's input at targetInputIndex - e.g. a CustomColors palette input.
+        public static void WireGeneratedColorPalette(GH_Component comp, GH_Document doc, int targetInputIndex, int offsetX, int offsetY)
+        {
+            if (targetInputIndex >= comp.Params.Input.Count) return;
+            if (comp.Params.Input[targetInputIndex].SourceCount > 0) return;
+
+            var gradientGen = new Enzyme.Components.GradientGenerator();
+            gradientGen.CreateAttributes();
+            PointF pivot = comp.Attributes.Pivot;
+            gradientGen.Attributes.Pivot = new PointF(pivot.X - offsetX, pivot.Y + offsetY);
+
+            doc.AddObject(gradientGen, false); // triggers GradientGenerator's own AddedToDocument, self-wiring its Merge/swatches/Steps
+            comp.Params.Input[targetInputIndex].AddSource(gradientGen.Params.Output[0]);
+        }
+
+        // Spawns a "Vector Display Ex" (native GH component) fed by a point-list source param
+        // and a vector/line-list source param already on the canvas, plus a color swatch and a
+        // width slider. Guards on the vector source param's Recipients rather than comp's own
+        // output, since the source param passed in may itself already be a relay.
+        public static void WireVectorDisplayEx(GH_Document doc, IGH_Param pointSource, IGH_Param vectorSource, System.Drawing.Color color, double width, int offsetX, int offsetY)
+        {
+            if (pointSource == null || vectorSource == null) return;
+            if (vectorSource.Recipients.Count > 0) return;
+
+            var proxy = Grasshopper.Instances.ComponentServer.FindObjectByName("Vector Display Ex", true, true);
+            if (proxy == null) return;
+            var vecDisplay = proxy.CreateInstance() as IGH_Component;
+            if (vecDisplay == null || vecDisplay.Params.Input.Count < 2) return;
+
+            vecDisplay.CreateAttributes();
+            PointF pivot = vectorSource.Attributes.Pivot;
+            vecDisplay.Attributes.Pivot = new PointF(pivot.X + offsetX, pivot.Y + offsetY);
+
+            var swatch = new Grasshopper.Kernel.Special.GH_ColourSwatch();
+            swatch.CreateAttributes();
+            swatch.SwatchColour = color;
+            swatch.Attributes.Pivot = new PointF(vecDisplay.Attributes.Pivot.X - 60, vecDisplay.Attributes.Pivot.Y + 35);
+
+            doc.AddObject(vecDisplay, false);
+            doc.AddObject(swatch, false);
+
+            vecDisplay.Params.Input[0].AddSource(pointSource);
+            vecDisplay.Params.Input[1].AddSource(vectorSource);
+            if (vecDisplay.Params.Input.Count > 2)
+            {
+                vecDisplay.Params.Input[2].AddSource(swatch);
+            }
+            if (vecDisplay.Params.Input.Count > 3)
+            {
+                var widthSlider = new Grasshopper.Kernel.Special.GH_NumberSlider();
+                widthSlider.CreateAttributes();
+                widthSlider.Slider.Minimum = 0m;
+                widthSlider.Slider.Maximum = 10m;
+                widthSlider.Slider.Value = (decimal)width;
+                widthSlider.Slider.Type = Grasshopper.GUI.Base.GH_SliderAccuracy.Integer;
+                widthSlider.Attributes.Pivot = new PointF(vecDisplay.Attributes.Pivot.X - 60, vecDisplay.Attributes.Pivot.Y + 65);
+                doc.AddObject(widthSlider, false);
+                vecDisplay.Params.Input[3].AddSource(widthSlider);
+            }
         }
         public static void WireHumanCurvePreview(GH_Component comp, GH_Document doc, int paramIndex, System.Drawing.Color color, double thickness, int offsetX, int offsetY)
         {
