@@ -10,7 +10,7 @@ namespace Enzyme.Components
         public override GH_Exposure Exposure => GH_Exposure.septenary;
 
         public PluginInfo()
-          : base("Enzyme Version Info", "EnzVer",
+          : base("Plugin info", "EnzVer",
               "Outputs the current version and build date of the Enzyme plugin.",
               "Enzyme", "Info")
         {
@@ -76,7 +76,7 @@ namespace Enzyme.Components
             get
             {
                 try {
-                    return IconLoader.Load("enzyme_logo_24.png");
+                    return IconLoader.Load("PluginInfo.png");
                 } catch {
                     return null;
                 }
