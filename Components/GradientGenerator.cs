@@ -16,8 +16,8 @@ namespace Enzyme.Components
 
         protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
-            pManager.AddColourParameter("Colors", "C", "List of input colors to interpolate", GH_ParamAccess.list);
-            pManager.AddIntegerParameter("Steps", "N", "Number of output colors to generate", GH_ParamAccess.item, 10);
+            pManager.AddColourParameter("Colors", "Colors", "List of input colors to interpolate", GH_ParamAccess.list);
+            pManager.AddIntegerParameter("Steps", "Steps", "Number of output colors to generate", GH_ParamAccess.item, 10);
             
             pManager[0].Optional = true;
         }
@@ -46,7 +46,7 @@ namespace Enzyme.Components
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
         {
-            pManager.AddColourParameter("Generated Colors", "C", "The interpolated list of colors", GH_ParamAccess.list);
+            pManager.AddColourParameter("Generated Colors", "Colors", "The interpolated list of colors", GH_ParamAccess.list);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
