@@ -277,7 +277,6 @@ namespace Enzyme.Components
                                 if (mp != null)
                                 {
                                     terrainNormal = new Vector3d(terrain.FaceNormals[mp.FaceIndex]);
-                                                                    DA.SetData(8, "URBAN WIND ENGINE (HIGH-RES)\n" + "\n" + "HOW IT WORKS:\n" + "A higher-resolution version of the wind vector engine, providing denser grid analysis and more accurate deflection around complex urban geometry.\n\n" + "INTERPRETATION & IMPORTANCE:\n" + "Used in later design stages when exact massing is known, helping to fine-tune facade porosity and outdoor comfort strategies.");
                                 }
                                 terrainNormal.Unitize();
 
@@ -764,6 +763,13 @@ namespace Enzyme.Components
                 cleanMesh.VertexColors.Clear();
                 DA.SetData(6, cleanMesh);
             }
+
+            DA.SetData(8, "URBAN WIND VECTOR ENGINE HT (BETA)\n"
+                + "\n"
+                + "HOW IT WORKS:\n"
+                + "A physically-refined wind analysis engine: occlusion, wake, corner-channeling and gap/tunneling are combined as independent multiplicative factors (rather than an either/or switch), and an optional multi-pass relaxation lets each point settle through sequential building interactions.\n\n"
+                + "INTERPRETATION & IMPORTANCE:\n"
+                + "Use once massing is known, to check pedestrian comfort, wake shadowing, and speed-up in narrow gaps between buildings before committing to facade or landscape design.");
 
             sw.Stop();
             if (execute)
