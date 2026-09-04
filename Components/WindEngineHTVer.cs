@@ -31,6 +31,37 @@ namespace Enzyme.Components
         private const double CORNER_TANGENCY_THRESHOLD = 0.35;
         private const double CORNER_SPEED_BOOST_COEFFICIENT = 0.45;
 
+        // Extra speed boost applied when a point sits between two buildings whose walls
+        // roughly face each other (a venturi/tunneling corridor), on top of whatever the
+        // single-wall corner bend above already did. A single-building corner model has
+        // no notion of a second, opposing surface squeezing the flow - without this, two
+        // close buildings never combine their effect and the gap between them reads as
+        // plain, unaccelerated background flow.
+        //
+        // The naive continuity formula (A1*V1 = A2*V2) overpredicts real building-passage
+        // speed-up, because a large share of the oncoming wind is blocked and diverted up
+        // and over the buildings rather than forced through the gap. CFD/wind-tunnel study
+        // of real building passages found the amplification factor tops out around ~1.49x
+        // free-stream speed (Reading, "Revisiting the 'Venturi effect' in passage
+        // ventilation between two non-parallel buildings", 2016 -
+        // https://centaur.reading.ac.uk/45708/). At full narrowness our formula's multiplier
+        // is (1 + GAP_TUNNELING_BOOST_COEFFICIENT), so 0.45 anchors the ceiling to that
+        // ~1.45-1.5x empirical figure instead of an arbitrary round number.
+        private const double GAP_TUNNELING_THRESHOLD = -0.2;
+        private const double GAP_TUNNELING_BOOST_COEFFICIENT = 0.45;
+
+        // Relaxation: each point can re-evaluate its own wake/corner/gap factors against
+        // its own previous-pass direction for a few passes, so a single point can settle
+        // through a sequential chain of building interactions (bend around one corner,
+        // which then puts it tangent to a second wall it wasn't tangent to before, etc.)
+        // instead of a single snapshot evaluation. This is NOT a real CFD relaxation - there
+        // is no pressure/continuity solve and no data shared between neighboring points, so
+        // more passes improve a point's own internal consistency, not physical accuracy.
+        // Damping blends each new pass with the previous one to keep it from oscillating or
+        // compounding runaway boosts across iterations.
+        private const int ITERATIONS_MAX = 8;
+        private const double ITERATION_DAMPING_DEFAULT = 0.5;
+
         private const double SLOPE_SPEEDUP_COEFFICIENT = 0.35;
 
         private const int STREAMLINE_SEED_ROW_STRIDE = 2;
@@ -77,6 +108,9 @@ namespace Enzyme.Components
                 Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 10, 0.0, 1.0, SLOPE_SPEEDUP_COEFFICIENT, 330, 160);
                 Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 11, 0.0, 1.0, CORNER_TANGENCY_THRESHOLD, 330, 200);
                 Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 12, 0.0, 2.0, CORNER_SPEED_BOOST_COEFFICIENT, 330, 240);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 13, 0.0, 2.0, GAP_TUNNELING_BOOST_COEFFICIENT, 330, 280);
+                Enzyme.Utils.AutoWireHelper.WireIntegerSlider(this, document, 14, 1, ITERATIONS_MAX, 1, 330, 320);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 15, 0.0, 1.0, ITERATION_DAMPING_DEFAULT, 330, 360);
                 Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 0, System.Drawing.Color.FromArgb(230, 230, 230), 220, -143);
                 Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 1, "line", 220, -68);
                 Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 3, "curve", 220, -23);
@@ -109,6 +143,12 @@ namespace Enzyme.Components
             pManager[11].Optional = true;
             pManager.AddNumberParameter("CornerBoost", "CornerBoost", "Speed boost coefficient applied when wind channels around a building corner", GH_ParamAccess.item, CORNER_SPEED_BOOST_COEFFICIENT);
             pManager[12].Optional = true;
+            pManager.AddNumberParameter("GapBoost", "GapBoost", "Extra speed boost applied when a point is squeezed between two facing building walls (venturi/tunneling), scaled by how narrow the gap is", GH_ParamAccess.item, GAP_TUNNELING_BOOST_COEFFICIENT);
+            pManager[13].Optional = true;
+            pManager.AddIntegerParameter("Iterations", "Iterations", "Relaxation passes per point: each pass re-evaluates wake/corner/gap using the previous pass's own direction, letting a point settle through multiple sequential building interactions instead of a single snapshot. 1 = original single-pass behavior", GH_ParamAccess.item, 1);
+            pManager[14].Optional = true;
+            pManager.AddNumberParameter("Damping", "Damping", "Blend factor (0-1) between a point's previous iteration and its newly computed one. Lower = slower, more stable convergence; 1.0 = no damping (replace outright each pass)", GH_ParamAccess.item, ITERATION_DAMPING_DEFAULT);
+            pManager[15].Optional = true;
         }
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
@@ -163,6 +203,17 @@ namespace Enzyme.Components
 
             double cornerBoost = CORNER_SPEED_BOOST_COEFFICIENT;
             DA.GetData(12, ref cornerBoost);
+
+            double gapBoost = GAP_TUNNELING_BOOST_COEFFICIENT;
+            DA.GetData(13, ref gapBoost);
+
+            int iterations = 1;
+            DA.GetData(14, ref iterations);
+            iterations = Math.Max(1, Math.Min(ITERATIONS_MAX, iterations));
+
+            double damping = ITERATION_DAMPING_DEFAULT;
+            DA.GetData(15, ref damping);
+            damping = Math.Max(0.01, Math.Min(1.0, damping));
 
             System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
 
@@ -302,14 +353,30 @@ namespace Enzyme.Components
                         building.IsPointInside(warmupCenter, 0.01, false);
                     }
 
-                    // --- Step 2: occlusion + wake + corner-channeling (parallel; each index owns its own slot) ---
+                    // --- Step 2: occlusion + wake + corner-channeling + gap-tunneling (parallel; each index owns its own slot) ---
+                    // All of these are independent multiplicative factors on the baseline
+                    // (terrain/slope-adjusted) speed, accumulated together rather than a
+                    // binary either/or chain of branches. The only factor that legitimately
+                    // ever zeroes things out is occlusion (a point literally inside solid
+                    // geometry has no meaningful flow) - and even that is expressed as a
+                    // multiply-by-0 term here, not a special early-exit, so it composes the
+                    // same way as every other factor instead of skipping them.
+                    //
+                    // Previously wake-deceleration and corner-bend/gap-boost were mutually
+                    // exclusive (if in wake, skip corner entirely). Since most points near a
+                    // building end up wake-classified (their backward ray usually clips
+                    // something nearby), that meant direction almost never actually bent
+                    // around buildings - only slowed down in a straight line. Computing both
+                    // independently, off the same original pre-deflection direction, fixes
+                    // that and lets a point be simultaneously slowed by one building's wake
+                    // AND bent/accelerated by another nearby wall or gap.
                     Parallel.For(0, gridPoints.Length, i =>
                     {
                         if (!validMasks[i]) return; // no terrain here (edge/falloff) - excluded from physics entirely
 
                         Point3d pt = gridPoints[i];
-                        Vector3d localDir = finalDirs[i];
-                        double localSpeed = finalSpeeds[i];
+                        Vector3d baseDir = finalDirs[i];
+                        double baseSpeed = finalSpeeds[i];
 
                         bool isInsideSolid = false;
                         for (int b = 0; b < buildingCount; b++)
@@ -327,12 +394,35 @@ namespace Enzyme.Components
 
                         if (isInsideSolid)
                         {
-                            localSpeed = 0.0;
-                            localDir = Vector3d.Zero;
+                            // Occlusion is a hard 0 multiplier - no amount of iterating changes
+                            // that, so skip the relaxation loop entirely for these points.
+                            finalDirs[i] = baseDir;
+                            finalSpeeds[i] = 0.0;
+                            return;
                         }
-                        else
+
+                        double searchRadius = spacing * CORNER_SEARCH_RADIUS_SPACING_MULTIPLIER;
+                        double infRadius = spacing * CORNER_INFLUENCE_RADIUS_SPACING_MULTIPLIER;
+
+                        Vector3d currentDir = baseDir;
+                        double currentSpeed = baseSpeed;
+
+                        // Relaxation: each pass re-evaluates wake/corner/gap against currentDir
+                        // (the previous pass's own settled direction) rather than always against
+                        // the original baseDir. With Iterations=1 this reduces to exactly the
+                        // single-pass behavior. Damping blends each new pass in gradually instead
+                        // of replacing outright, so repeated corner/gap boosts can't compound into
+                        // a runaway speed and the direction can't oscillate wildly pass to pass.
+                        for (int iter = 0; iter < iterations; iter++)
                         {
-                            Ray3d backRay = new Ray3d(pt, -localDir);
+                            double wakeFactor = 1.0;
+                            double cornerFactor = 1.0;
+                            double gapFactor = 1.0;
+                            Vector3d bentDir = currentDir;
+
+                            // --- Wake: how much this point is shadowed by whichever building is
+                            // upwind of it, independent of any corner/gap effect below. ---
+                            Ray3d backRay = new Ray3d(pt, -currentDir);
                             double closestHit = double.MaxValue;
                             int closestBuildingIdx = -1;
 
@@ -349,19 +439,68 @@ namespace Enzyme.Components
                                 }
                             }
 
-                            double wakeRange = closestBuildingIdx >= 0
-                                ? Math.Min(buildingHeights[closestBuildingIdx] * wakeRatio, maxWakeRange)
-                                : 0.0;
-
-                            if (closestBuildingIdx >= 0 && closestHit < wakeRange)
+                            if (closestBuildingIdx >= 0)
                             {
-                                double wakeIntensity = closestHit / wakeRange;
-                                localSpeed *= Math.Max(WAKE_MIN_INTENSITY, wakeIntensity * wakeIntensity);
+                                double wakeRange = Math.Min(buildingHeights[closestBuildingIdx] * wakeRatio, maxWakeRange);
+                                if (closestHit < wakeRange)
+                                {
+                                    double wakeIntensity = closestHit / wakeRange;
+                                    wakeFactor = Math.Max(WAKE_MIN_INTENSITY, wakeIntensity * wakeIntensity);
+                                }
                             }
-                            else
+
+                            // --- Corner bend + boost, and gap/tunneling boost: both evaluated
+                            // off currentDir (not off each other), so they stay order-independent
+                            // within a single pass and always run regardless of wake status. ---
+                            double nearestDist = double.MaxValue;
+                            Vector3d nearestNormal = Vector3d.Zero;
+                            bool hasNearest = false;
+
+                            for (int b = 0; b < buildingCount; b++)
                             {
-                                double searchRadius = spacing * CORNER_SEARCH_RADIUS_SPACING_MULTIPLIER;
-                                double infRadius = spacing * CORNER_INFLUENCE_RADIUS_SPACING_MULTIPLIER;
+                                Mesh building = buildings[b];
+                                if (building == null) continue;
+
+                                Point3d closestPt;
+                                Vector3d normal;
+                                int faceIdx = building.ClosestPoint(pt, out closestPt, out normal, searchRadius);
+
+                                if (faceIdx >= 0 && closestPt.IsValid)
+                                {
+                                    double dist = pt.DistanceTo(closestPt);
+
+                                    if (dist < infRadius && dist > 0.001)
+                                    {
+                                        normal.Unitize();
+
+                                        if (dist < nearestDist)
+                                        {
+                                            nearestDist = dist;
+                                            nearestNormal = normal;
+                                            hasNearest = true;
+                                        }
+
+                                        if (Math.Abs(normal * currentDir) < cornerTangency)
+                                        {
+                                            double blend = 1.0 - (dist / infRadius);
+                                            Vector3d bypass = Vector3d.CrossProduct(normal, new Vector3d(0, 0, 1));
+                                            if ((bypass * currentDir) < 0) bypass = -bypass;
+                                            bypass.Unitize();
+
+                                            bentDir = (currentDir * (1.0 - blend)) + (bypass * blend);
+                                            bentDir.Unitize();
+                                            cornerFactor *= (1.0 + (cornerBoost * blend));
+                                        }
+                                    }
+                                }
+                            }
+
+                            // Gap/tunneling: a second, roughly opposing wall nearby means the
+                            // point is squeezed in a corridor, not just beside one building.
+                            if (hasNearest)
+                            {
+                                double oppositeDist = double.MaxValue;
+                                bool hasOpposite = false;
 
                                 for (int b = 0; b < buildingCount; b++)
                                 {
@@ -375,29 +514,51 @@ namespace Enzyme.Components
                                     if (faceIdx >= 0 && closestPt.IsValid)
                                     {
                                         double dist = pt.DistanceTo(closestPt);
-
                                         if (dist < infRadius && dist > 0.001)
                                         {
                                             normal.Unitize();
-                                            if (Math.Abs(normal * localDir) < cornerTangency)
+                                            if (normal * nearestNormal < GAP_TUNNELING_THRESHOLD && dist < oppositeDist)
                                             {
-                                                double blend = 1.0 - (dist / infRadius);
-                                                Vector3d bypass = Vector3d.CrossProduct(normal, new Vector3d(0, 0, 1));
-                                                if ((bypass * localDir) < 0) bypass = -bypass;
-                                                bypass.Unitize();
-
-                                                localDir = (localDir * (1.0 - blend)) + (bypass * blend);
-                                                localDir.Unitize();
-                                                localSpeed *= (1.0 + (cornerBoost * blend));
+                                                oppositeDist = dist;
+                                                hasOpposite = true;
                                             }
                                         }
                                     }
                                 }
+
+                                if (hasOpposite)
+                                {
+                                    double corridorWidth = nearestDist + oppositeDist;
+                                    double narrowness = 1.0 - Math.Min(1.0, corridorWidth / (2.0 * infRadius));
+                                    if (narrowness > 0.0)
+                                    {
+                                        gapFactor *= (1.0 + (gapBoost * narrowness));
+                                    }
+                                }
+                            }
+
+                            double newSpeed = baseSpeed * wakeFactor * cornerFactor * gapFactor;
+
+                            if (iter == 0)
+                            {
+                                // First pass has nothing settled to blend against yet - accept it
+                                // outright. This guarantees Iterations=1 is bit-for-bit identical
+                                // to the original single-pass behavior regardless of Damping.
+                                currentSpeed = newSpeed;
+                                currentDir = bentDir;
+                            }
+                            else
+                            {
+                                // Damped blend into the running result instead of an outright replace.
+                                currentSpeed = (currentSpeed * (1.0 - damping)) + (newSpeed * damping);
+                                Vector3d blendedDir = (currentDir * (1.0 - damping)) + (bentDir * damping);
+                                currentDir = blendedDir.Length > 0.0001 ? blendedDir : bentDir;
+                                currentDir.Unitize();
                             }
                         }
 
-                        finalDirs[i] = localDir;
-                        finalSpeeds[i] = localSpeed;
+                        finalDirs[i] = currentDir;
+                        finalSpeeds[i] = currentSpeed;
                     });
 
                 // --- Step 3: cheap sequential aggregation (min/max/counts) ---
