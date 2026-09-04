@@ -66,7 +66,10 @@ namespace Enzyme.Components
             }
         }
 
-        protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
+        
+        public override GH_Exposure Exposure => GH_Exposure.tertiary;
+
+protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddMeshParameter("TargetMeshes", "M", "The meshes to section.", GH_ParamAccess.tree);
             pManager.AddPlaneParameter("RotationPlane", "RP", "Orientation plane for the bounding box sectioning.", GH_ParamAccess.item, Plane.WorldXY);

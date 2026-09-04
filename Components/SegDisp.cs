@@ -13,7 +13,7 @@ namespace Enzyme.Components
         public SegDisp()
           : base("Curve Segment Dispatcher", "SegDisp",
               "Explodes curves into Lines and Arcs, extracting Radii, Centers, and visual Dimensions.",
-              "Enzyme", "Utilities")
+              "Enzyme", "Curve")
         {
         }
 

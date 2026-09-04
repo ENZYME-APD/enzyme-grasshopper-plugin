@@ -51,7 +51,10 @@ namespace Enzyme.Components
             }
         }
 
-        protected override void RegisterInputParams(GH_InputParamManager pManager)
+        
+        public override GH_Exposure Exposure => GH_Exposure.tertiary;
+
+protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
             pManager.AddCurveParameter("Curves", "Curves", "2D curves representing roads", GH_ParamAccess.list);
             pManager.AddMeshParameter("Terrain", "Terrain", "Terrain mesh for projection", GH_ParamAccess.item);

@@ -51,7 +51,10 @@ namespace Enzyme.Components
             }
         }
 
-        protected override void RegisterInputParams(GH_InputParamManager pManager)
+        
+        public override GH_Exposure Exposure => GH_Exposure.tertiary;
+
+protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
             pManager.AddMeshParameter("TargetMeshes", "TargetMeshes", "Meshes to analyze", GH_ParamAccess.list);
             pManager.AddNumberParameter("ThresholdValue", "ThresholdValue", "Threshold for slope analysis", GH_ParamAccess.item, 30.0);

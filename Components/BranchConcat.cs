@@ -12,7 +12,7 @@ namespace Enzyme.Components
         public BranchConcat()
           : base("Branch-Concat", "Branch-Concat",
               "Concatenates items in each branch into a single string.",
-              "Enzyme", "Utilities")
+              "Enzyme", "Data")
         {
         }
 

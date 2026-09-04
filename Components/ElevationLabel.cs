@@ -39,7 +39,10 @@ namespace Enzyme.Terrain
             }
         }
 
-        protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
+        
+        public override GH_Exposure Exposure => GH_Exposure.tertiary;
+
+protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddPointParameter("Points", "P", "Coordinates to label", GH_ParamAccess.tree);
             pManager.AddTextParameter("LabelText", "LT", "Optional text override", GH_ParamAccess.tree);

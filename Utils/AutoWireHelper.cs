@@ -544,7 +544,7 @@ namespace Enzyme.Utils
                 Grasshopper.Kernel.Special.GH_ColourSwatch swatch = new Grasshopper.Kernel.Special.GH_ColourSwatch();
                 swatch.CreateAttributes();
                 swatch.SwatchColour = colors[i];
-                swatch.Attributes.Pivot = new System.Drawing.PointF(merge.Attributes.Pivot.X - 120, merge.Attributes.Pivot.Y - (colors.Length * 24 / 2) + i * 24);
+                swatch.Attributes.Pivot = new System.Drawing.PointF(merge.Attributes.Pivot.X - 165, merge.Attributes.Pivot.Y - 63.3f + i * 24);
                 doc.AddObject(swatch, false);
                 merge.Params.Input[i].AddSource(swatch);
             }

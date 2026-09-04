@@ -39,8 +39,8 @@ namespace Enzyme.Components
                     Color.FromArgb(255, 200, 50),
                     Color.FromArgb(255, 50, 0)
                 };
-                Enzyme.Utils.AutoWireHelper.WireMergeWithSwatches(this, document, 0, defaultColors, 150, 20);
-                Enzyme.Utils.AutoWireHelper.WireIntegerSlider(this, document, 1, 2, 100, 10, 330, -50);
+                Enzyme.Utils.AutoWireHelper.WireMergeWithSwatches(this, document, 0, defaultColors, 121, -10);
+                Enzyme.Utils.AutoWireHelper.WireIntegerSlider(this, document, 1, 2, 100, 10, 247, 58);
             }
         }
 

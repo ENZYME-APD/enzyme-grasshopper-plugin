@@ -10,7 +10,7 @@ namespace Enzyme.Components
         public MeshColorReset()
           : base("Reset Mesh Colors", "Mesh-C-Reset",
               "Strips all vertex colors from a mesh, allowing Custom Preview to override its color natively.",
-              "Enzyme", "Utilities")
+              "Enzyme", "Terrain")
         {
         }
 
@@ -67,6 +67,6 @@ namespace Enzyme.Components
         }
 
         public override Guid ComponentGuid => new Guid("7d3f5b2c-6a4a-4e2b-a1b9-3f8c5b9f7d2a");
-        public override GH_Exposure Exposure => GH_Exposure.secondary;
+        public override GH_Exposure Exposure => GH_Exposure.quarternary;
     }
 }

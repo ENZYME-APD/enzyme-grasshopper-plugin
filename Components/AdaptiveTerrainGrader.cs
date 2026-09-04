@@ -51,7 +51,10 @@ namespace Enzyme.Components
             }
         }
 
-        protected override void RegisterInputParams(GH_InputParamManager pManager)
+        
+        public override GH_Exposure Exposure => GH_Exposure.tertiary;
+
+protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
             pManager.AddMeshParameter("Mesh", "Mesh", "Original Topography", GH_ParamAccess.item);
             pManager.AddCurveParameter("BoundaryCurves", "BoundaryCurves", "Closed pads (Optional)", GH_ParamAccess.list);

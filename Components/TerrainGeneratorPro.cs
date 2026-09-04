@@ -71,7 +71,10 @@ namespace Enzyme.Components
             }
         }
 
-        protected override void RegisterInputParams(GH_InputParamManager pManager)
+        
+        public override GH_Exposure Exposure => GH_Exposure.quarternary;
+
+protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
             pManager.AddCurveParameter("Boundary", "Boundary", "Closed boundary limits", GH_ParamAccess.item);
             pManager.AddNumberParameter("MaxHeight", "MaxHeight", "Maximum elevation in meters", GH_ParamAccess.item, 100.0);

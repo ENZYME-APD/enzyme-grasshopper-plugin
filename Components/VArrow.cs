@@ -12,7 +12,7 @@ namespace Enzyme.Components
         public VArrow()
           : base("Vector Arrow Generator", "V-Arrow",
               "Generates high-fidelity 2D arrow outlines and meshes from input lines with custom mode logic.",
-              "Enzyme", "Utilities")
+              "Enzyme", "MP Analysis")
         {
         }
 

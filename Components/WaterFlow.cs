@@ -38,7 +38,10 @@ namespace Enzyme.Terrain
             }
         }
 
-        protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
+        
+        public override GH_Exposure Exposure => GH_Exposure.primary;
+
+protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddMeshParameter("TerrainMesh", "TM", "The unified topological surface.", GH_ParamAccess.item);
             pManager.AddNumberParameter("GridSpacing", "GS", "The XY distance between starting raindrops.", GH_ParamAccess.item);

@@ -37,7 +37,10 @@ namespace Enzyme.Components
             }
         }
 
-        protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
+        
+        public override GH_Exposure Exposure => GH_Exposure.primary;
+
+protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddMeshParameter("TerrainMesh", "TM", "The unified topological surface.", GH_ParamAccess.item);
             pManager.AddCurveParameter("FlowPaths", "FP", "The flow lines generated from the Raindrop Engine.", GH_ParamAccess.tree);

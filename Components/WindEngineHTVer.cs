@@ -202,7 +202,10 @@ namespace Enzyme.Components
             }
         }
 
-        protected override void RegisterInputParams(GH_InputParamManager pManager)
+        
+        public override GH_Exposure Exposure => GH_Exposure.secondary;
+
+protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
             pManager.AddBooleanParameter("Run", "Run", "Global execution toggle switch", GH_ParamAccess.item, false);
             pManager.AddMeshParameter("TerrainMesh", "TerrainMesh", "The underlying site topography", GH_ParamAccess.item);

@@ -12,7 +12,7 @@ namespace Enzyme.Components
         public BranchSizeSplit()
           : base("BranchSizeSplit", "BranchSizeSplit",
               "Split branches based on their size",
-              "Enzyme", "Utilities")
+              "Enzyme", "Data")
         {
         }
 

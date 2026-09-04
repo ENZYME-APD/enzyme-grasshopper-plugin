@@ -107,7 +107,10 @@ public override Guid ComponentGuid => new Guid("C3D9F4E6-B8A2-4C7D-A0F3-D6E5B7C8
             }
         }
 
-        protected override void RegisterInputParams(GH_InputParamManager pManager)
+        
+        public override GH_Exposure Exposure => GH_Exposure.quarternary;
+
+protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
             pManager.AddGenericParameter("Color Legend", "Color Legend", "Legend data from analysis components", GH_ParamAccess.item);
             pManager.AddPointParameter("Base Point", "Base Point", "Base point for legend placement", GH_ParamAccess.item, new Rhino.Geometry.Point3d(0, 0, 0));

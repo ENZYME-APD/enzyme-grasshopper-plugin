@@ -14,7 +14,10 @@ namespace Enzyme.Components
         {
         }
 
-        protected override void RegisterInputParams(GH_InputParamManager pManager)
+        
+        public override GH_Exposure Exposure => GH_Exposure.primary;
+
+protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
             pManager.AddMeshParameter("TerrainMesh", "TM", "Input Terrain Mesh", GH_ParamAccess.item);
             pManager.AddNumberParameter("Rainfall", "RF", "Rainfall intensity in Liters/m2/hour (mm/h)", GH_ParamAccess.item, 50.0);
