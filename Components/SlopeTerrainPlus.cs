@@ -252,27 +252,43 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
                 
                 double avgRatio = 0;
                 foreach (var r in out_ratios) avgRatio += r;
-                if (out_ratios.Count > 0) avgRatio = (avgRatio / out_ratios.Count) * 100.0;
+                if (out_ratios.Count > 0) avgRatio = (avgRatio / out_ratios.Count);
+                
+                double total_pct_over = global_total_faces > 0 ? ((double)global_over_count / global_total_faces * 100.0) : 0.0;
                 
                 var legendObj = new JObject
                 {
-                    ["Type"] = is_binary ? "Blocks" : "Gradient",
-                    ["Title"] = $"Slope Terrain (Thresh: {deg:F1}°)",
+                    ["Type"] = is_binary ? "Discrete" : "Gradient",
+                    ["Title"] = $"TERRAIN SLOPE (>{deg:F1}°)",
                     ["Colors"] = jColors,
-                    ["Labels"] = jLabels,
-                    ["SubLabels"] = new JArray($"{avgRatio:F1}% over threshold")
+                    ["Labels"] = jLabels
                 };
-                DA.SetData(4, legendObj.ToString());
+
+                JArray jmetrics = new JArray();
+                jmetrics.Add(new JObject { ["Name"] = "Total Area Over", ["Value"] = $"{total_pct_over:F1}%" });
+                jmetrics.Add(new JObject { ["Name"] = "Avg Mesh Ratio", ["Value"] = $"{avgRatio:F1}%" });
+                legendObj["Metrics"] = jmetrics;
+
+                DA.SetData(4, legendObj.ToString(Newtonsoft.Json.Formatting.None));
             }
 
             perf_start.Stop();
             double exec_ms = perf_start.Elapsed.TotalMilliseconds;
 
-            double total_pct_over = global_total_faces > 0 ? ((double)global_over_count / global_total_faces * 100.0) : 0.0;
+            double final_pct_over = global_total_faces > 0 ? ((double)global_over_count / global_total_faces * 100.0) : 0.0;
             string mode_str = is_binary ? "Binary" : "Gradient";
             string conversion_str = $"{deg:F1}° | {pct:F1}% | 1:{ratio:F1}";
 
-            Message = $"{this.NickName}\nTime: {exec_ms:F1} ms\n---\nInput: {conversion_str}\n● {mode_str} | ○ Over: {total_pct_over:F1}%";
+            Message = $"{this.NickName}\nTime: {exec_ms:F1} ms\n---\nInput: {conversion_str}\n● {mode_str} | ○ Over: {final_pct_over:F1}%";
+            
+            DA.SetData(5, "TERRAIN SLOPE\n"
+                + "\n"
+                + "METHODOLOGY:\n"
+                + "Extracts face normals from the un-welded mesh via the cross-product of vertex edges. "
+                + "The Z-component of each normal (n.Z) provides the slope angle using acos(n.Z), converting to degrees or percentage. "
+                + "Faces are sorted and colored dynamically to identify areas exceeding maximum gradient thresholds.\n\n"
+                + "INTERPRETATION & IMPORTANCE:\n"
+                + "Highlights severity of topography and naturally draining facets. Critical for planning accessible paths, building foundations, and managing stormwater runoff without exceeding max legal grades.");
         }
     }
 }

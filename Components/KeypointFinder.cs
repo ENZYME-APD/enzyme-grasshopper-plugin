@@ -1,3 +1,4 @@
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using Grasshopper.Kernel;
@@ -42,6 +43,8 @@ namespace Enzyme.Components
         {
             pManager.AddPointParameter("Keypoints", "P", "The identified points of inflection (steep to flat)", GH_ParamAccess.list);
             pManager.AddCurveParameter("Master Keylines", "K", "The specific horizontal terrain contours passing through the Keypoints", GH_ParamAccess.list);
+            pManager.AddTextParameter("Info", "I", "Component information and methodology", GH_ParamAccess.item);
+            pManager.AddTextParameter("Dashboard JSON", "JSON", "Unified JSON payload containing legend and key analysis metrics for the Analysis Dashboard", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
@@ -152,6 +155,27 @@ namespace Enzyme.Components
             }
 
             Message = $"Keypoint Finder\n---\nSmoothing: {window}\nFound: {keypoints.Count}";
+            
+            JObject payload = new JObject();
+            payload["Title"] = "KEYPOINT FINDER";
+            payload["Type"] = "Discrete";
+            payload["Colors"] = new JArray(new JObject { ["R"] = 255, ["G"] = 50, ["B"] = 50 });
+            payload["Labels"] = new JArray("Keypoints");
+            
+            JArray metrics = new JArray();
+            metrics.Add(new JObject { ["Name"] = "Points Found", ["Value"] = keypoints.Count.ToString() });
+            payload["Metrics"] = metrics;
+            
+            DA.SetData(2, "KEYPOINT FINDER\n"
+                + "\n"
+                + "METHODOLOGY:\n"
+                + "Applies topographic curvature analysis along identified valley thalwegs (stream networks). "
+                + "It calculates the second derivative of elevation along the flow path to isolate the exact point of inflection—"
+                + "the geomorphic transition where a steep, convex valley head flattens into a concave valley floor.\n\n"
+                + "INTERPRETATION & IMPORTANCE:\n"
+                + "In P.A. Yeomans' Keyline Design, the Keypoint is the optimal location for capturing and storing water (dams), as it represents the highest workable contour where water can be gravity-fed away from the valley toward drier ridges.");
+            DA.SetData(3, payload.ToString(Newtonsoft.Json.Formatting.None));
+
             DA.SetDataList(0, keypoints);
             DA.SetDataList(1, keylines);
         }

@@ -23,11 +23,17 @@ namespace Enzyme.Components
 
         private bool _subscribed = false;
         
+        public class DashMetric {
+            public string Name;
+            public string Value;
+        }
+
         // Parsed Data
         private string _title = "";
         private string _legendType = "";
         private List<Color> _colors = new List<Color>();
         private List<string> _labels = new List<string>();
+        private List<DashMetric> _metrics = new List<DashMetric>();
 
         public AnalysisDashboard()
           : base("Analysis Dashboard", "AnaDash",
@@ -125,6 +131,19 @@ namespace Enzyme.Components
                             _labels.Add(token.ToString());
                     }
 
+                    _metrics.Clear();
+                    var jmetrics = parsed["Metrics"] as JArray;
+                    if (jmetrics != null)
+                    {
+                        foreach (var token in jmetrics)
+                        {
+                            _metrics.Add(new DashMetric {
+                                Name = token["Name"]?.ToString() ?? "",
+                                Value = token["Value"]?.ToString() ?? ""
+                            });
+                        }
+                    }
+
                     if (!_subscribed)
                     {
                         DisplayPipeline.DrawForeground += OnDrawForeground;
@@ -165,13 +184,18 @@ namespace Enzyme.Components
 
             int maxChars = _title.Length;
             foreach(var l in _labels) if(l.Length > maxChars) maxChars = l.Length;
+            foreach(var m in _metrics) {
+                int mLen = m.Name.Length + m.Value.Length + 4;
+                if (mLen > maxChars) maxChars = mLen;
+            }
             
             double totalTextW = maxChars * _size * 0.65;
-            double contentW = textOffsetX + totalTextW;
+            double contentW = Math.Max(textOffsetX + totalTextW, totalTextW);
             
             double titleH = _size * 1.5;
+            double metricsH = _metrics.Count > 0 ? (_metrics.Count * (_size * 1.5)) + (_size * 0.5) : 0;
             double totalColorsH = _colors.Count * colorBoxH + Math.Max(0, _colors.Count - 1) * gapY;
-            double contentH = titleH + totalColorsH + (_size * 0.5);
+            double contentH = titleH + metricsH + totalColorsH + (_size * 0.5);
 
             double boxW = contentW + padding * 2;
             double boxH = contentH + padding * 2;
@@ -191,6 +215,14 @@ namespace Enzyme.Components
             double curY = y + padding;
             e.Display.Draw2dText(_title.ToUpper(), _fontColor, new Point2d(x + padding, curY), false, (int)_size, _fontFace);
             curY += titleH + (_size * 0.5);
+
+            if (_metrics.Count > 0) {
+                foreach(var m in _metrics) {
+                    e.Display.Draw2dText(m.Name + ": " + m.Value, _fontColor, new Point2d(x + padding, curY), false, (int)_size, _fontFace);
+                    curY += _size * 1.5;
+                }
+                curY += _size * 0.5; // gap before legend
+            }
 
             for (int i = _colors.Count - 1; i >= 0; i--)
             {

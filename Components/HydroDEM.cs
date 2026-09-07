@@ -1,3 +1,4 @@
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -42,6 +43,8 @@ namespace Enzyme.Components
             pManager.AddCurveParameter("Streams", "S", "Extracted stream networks (Polylines)", GH_ParamAccess.list);
             pManager.AddIntegerParameter("Accumulation", "A", "Flow accumulation value per topology vertex", GH_ParamAccess.list);
             pManager.AddPointParameter("Topology Points", "P", "Topology vertices matching the accumulation list", GH_ParamAccess.list);
+            pManager.AddTextParameter("Info", "I", "Component information and methodology", GH_ParamAccess.item);
+            pManager.AddTextParameter("Dashboard JSON", "JSON", "Unified JSON payload containing legend and key analysis metrics for the Analysis Dashboard", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
@@ -148,6 +151,26 @@ namespace Enzyme.Components
             }
 
             Message = $"Hydro-DEM\n---\nThreshold: {threshold}\nStreams: {streams.Count}";
+            
+            JObject payload = new JObject();
+            payload["Title"] = "HYDRO DEM";
+            payload["Type"] = "Discrete";
+            payload["Colors"] = new JArray(new JObject { ["R"] = 0, ["G"] = 100, ["B"] = 255 });
+            payload["Labels"] = new JArray("Streams");
+            
+            JArray metrics = new JArray();
+            metrics.Add(new JObject { ["Name"] = "Stream Networks", ["Value"] = streams.Count.ToString() });
+            payload["Metrics"] = metrics;
+            
+            DA.SetData(3, "HYDROLOGICAL DEM\n"
+                + "\n"
+                + "METHODOLOGY:\n"
+                + "Uses the D8 flow routing algorithm. Each mesh vertex assesses its 8 immediate topological neighbors to find the steepest descent path. "
+                + "Rainfall (1 unit per vertex) is then accumulated down these natural gradients. Flow networks are generated where accumulation exceeds the specified threshold.\n\n"
+                + "INTERPRETATION & IMPORTANCE:\n"
+                + "Critical for predicting natural drainage, identifying flood-prone catchments, and optimizing agricultural water capture systems before detailed engineering begins.");
+            DA.SetData(4, payload.ToString(Newtonsoft.Json.Formatting.None));
+
             DA.SetDataList(0, streams);
             DA.SetDataList(1, accumulation.ToList());
             DA.SetDataList(2, topPoints);
