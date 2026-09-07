@@ -281,7 +281,7 @@ namespace Enzyme.Components
             base.DocumentContextChanged(document, context);
         }
 
-        protected override Bitmap Icon => Enzyme.IconLoader.Load("DASH.png");
+        protected override Bitmap Icon => Enzyme.IconLoader.Load("Analysis Dashboard.png");
 
         public override Guid ComponentGuid => new Guid("B5A3E1C2-88B1-4A55-9B2D-C1A4328FF1A9");
     }
