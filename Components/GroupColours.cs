@@ -91,7 +91,7 @@ namespace Enzyme.Components
                 }
             }
             
-            this.Message = "Case-insensitive\nMulti-separator";
+            this.Message = "Group Colours\nCase-insensitive\nMulti-separator";
         }
 
         public override void AddedToDocument(GH_Document document)
