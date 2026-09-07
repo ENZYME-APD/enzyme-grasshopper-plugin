@@ -15,7 +15,7 @@ namespace Enzyme.Terrain
     public class ElevationLabel : GH_Component
     {
         public ElevationLabel()
-          : base("Elevation Labeler Pro", "ELEV_LABEL",
+          : base("Elevation Label", "ElevLabel",
               "Custom text/elevation labels with radial rotation and auto-sync.",
               "Enzyme", "Terrain")
         {
@@ -403,7 +403,7 @@ Outputs:
 
             stopwatch.Stop();
             double elapsed = stopwatch.Elapsed.TotalMilliseconds;
-            Message = $"ELEV_LABEL\nTime: {elapsed:0.00} ms\n---\nBranches: {pointsTree.PathCount}\nTotal Items: {totalItems}\n● Baked Geo: {bakeCount}";
+            Message = $"ELEVATION LABEL\nTime: {elapsed:0.00} ms\n---\nBranches: {pointsTree.PathCount}\nTotal Items: {totalItems}\n● Baked Geo: {bakeCount}";
         }
 
         protected override System.Drawing.Bitmap Icon => IconLoader.Load("ELEV_LABEL.png");

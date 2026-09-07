@@ -25,7 +25,7 @@ namespace Enzyme.Components
         private const double DEFAULT_COMFORT_TOLERANCE = 0.1;
 
         public ThermalComfortAnalyzer()
-            : base("Thermal Comfort Analyzer", "ThermalComfort",
+            : base("Higrothermal Comfort", "HigroComfort",
                 "Maps wind-engine velocity samples onto apparent (\"feels like\") temperature and locates the best/worst comfort points, without requiring a regular grid.",
                 "Enzyme", "Terrain")
         {
@@ -303,7 +303,7 @@ namespace Enzyme.Components
             DA.SetData(2, comfortMesh);
             DA.SetDataList(3, comfortValues);
 
-            DA.SetData(4, "THERMAL COMFORT ANALYZER\n"
+            DA.SetData(4, "HIGROTHERMAL COMFORT\n"
                 + "\n"
                 + "HOW IT WORKS:\n"
                 + "Combines wind-engine velocity samples with a constant humidity and temperature into Apparent Temperature (Steadman 1994 / Australian BOM formula), then maps that back onto the terrain mesh's own vertices via nearest-point lookup - no separate grid or UVs required.\n\n"

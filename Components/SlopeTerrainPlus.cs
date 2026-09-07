@@ -14,7 +14,7 @@ namespace Enzyme.Components
     public class SlopeTerrainPlus : GH_Component
     {
         public SlopeTerrainPlus()
-            : base("Slope Terrain Plus", "SlopeMesh+",
+            : base("Terrain Slope", "TerrainSlope",
                 "Ultra-fast mesh slope analyzer using raw C# sequential array processing and safe UI automation.",
                 "Enzyme", "Terrain")
         {
@@ -96,7 +96,7 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
                             if (ghDoc != null) {
                                 ghDoc.ScheduleSolution(5, d => {
                                     vl.ExpireSolution(false);
-                                                                    DA.SetData(5, "SLOPE TERRAIN PLUS\n" + "\n" + "HOW IT WORKS:\n" + "An advanced version of the slope analyzer that not only maps steepness but also extracts vector arrows pointing downhill for every face.\n\n" + "INTERPRETATION & IMPORTANCE:\n" + "Combines slope severity with flow direction. Perfect for understanding not just how steep a hill is, but exactly which way the land naturally drains or faces (aspect analysis).");
+                                                                    DA.SetData(5, "TERRAIN SLOPE\n" + "\n" + "HOW IT WORKS:\n" + "An advanced version of the slope analyzer that not only maps steepness but also extracts vector arrows pointing downhill for every face.\n\n" + "INTERPRETATION & IMPORTANCE:\n" + "Combines slope severity with flow direction. Perfect for understanding not just how steep a hill is, but exactly which way the land naturally drains or faces (aspect analysis).");
                                 });
                             }
                         }

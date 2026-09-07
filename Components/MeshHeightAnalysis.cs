@@ -16,7 +16,7 @@ namespace Enzyme.Terrain
     public class MeshHeightAnalysis : GH_Component
     {
         public MeshHeightAnalysis()
-          : base("Mesh Terrain Analyzer", "Terrain",
+          : base("Terrain Height", "TerrainHeight",
               "Analyzes mesh extremes, unrolls sections bi-directionally, and generates 3D/2D metadata labels.",
               "Enzyme", "Terrain")
         {
@@ -164,7 +164,7 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
                     if (ghMesh != null && ghMesh.Value != null && ghMesh.Value.IsValid)
                     {
                         globalBB.Union(ghMesh.Value.GetBoundingBox(true));
-                                            DA.SetData(11, "MESH HEIGHT ANALYSIS\n" + "\n" + "HOW IT WORKS:\n" + "Analyzes mesh elevations to generate detailed HUD metrics (average, min, max heights) and identifies localized peaks and valleys.\n\n" + "INTERPRETATION & IMPORTANCE:\n" + "Provides quantitative tabular data summarizing the site's verticality. Knowing the highest peaks and lowest basins is critical for locating water towers, telecom equipment, or drainage ponds.");
+                                            DA.SetData(11, "TERRAIN HEIGHT ANALYSIS\n" + "\n" + "HOW IT WORKS:\n" + "Analyzes mesh elevations to generate detailed HUD metrics (average, min, max heights) and identifies localized peaks and valleys.\n\n" + "INTERPRETATION & IMPORTANCE:\n" + "Provides quantitative tabular data summarizing the site's verticality. Knowing the highest peaks and lowest basins is critical for locating water towers, telecom equipment, or drainage ponds.");
                     }
                 }
             }
@@ -370,7 +370,7 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
             double terrainRelief = totalVerticesCount > 0 ? Math.Round(globalTerrainZMax - globalTerrainZMin, 2) : 0.0;
             double meanElevation = totalVerticesCount > 0 ? Math.Round(totalZSum / totalVerticesCount, 2) : 0.0;
             
-            Message = "TERRAIN ANALYZER\n";
+            Message = "TERRAIN HEIGHT\n";
             Message += $"Time: {t_start.ElapsedMilliseconds:F2} ms\n";
             Message += "---\n";
             Message += $"Area: {Math.Round(totalTerrainArea, 2)}\n";
