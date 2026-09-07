@@ -27,6 +27,22 @@ namespace Enzyme.Components
         {
         }
 
+        private System.Diagnostics.Stopwatch _stopwatch;
+
+        protected override void BeforeSolveInstance()
+        {
+            base.BeforeSolveInstance();
+            _stopwatch = System.Diagnostics.Stopwatch.StartNew();
+        }
+
+        protected override void AfterSolveInstance()
+        {
+            base.AfterSolveInstance();
+            _stopwatch?.Stop();
+            long ms = _stopwatch != null ? _stopwatch.ElapsedMilliseconds : 0;
+            this.Message = $"SAVE NAMED VIEW\nTime: {ms} ms\n---\n{_lastAction}";
+        }
+
         protected override void SolveInstance(IGH_DataAccess DA)
         {
             string name = string.Empty;
@@ -39,7 +55,7 @@ namespace Enzyme.Components
 
             if (!save || string.IsNullOrWhiteSpace(name))
             {
-                this.Message = _lastAction;
+                if (string.IsNullOrWhiteSpace(_lastAction)) _lastAction = "Idle";
                 return;
             }
 
@@ -71,8 +87,6 @@ namespace Enzyme.Components
                 doc.NamedViews.Add(name, doc.Views.ActiveView.ActiveViewport.Id);
                 _lastAction = "Saved:\n" + name;
             }
-
-            this.Message = _lastAction;
         }
 
         protected override System.Drawing.Bitmap Icon => Enzyme.IconLoader.Load("SaveNamedViews.png");

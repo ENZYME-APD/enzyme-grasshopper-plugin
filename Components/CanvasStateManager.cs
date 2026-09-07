@@ -42,6 +42,23 @@ namespace Enzyme.Components
             pManager.AddTextParameter("Info", "I", "Status output", GH_ParamAccess.item);
         }
 
+        private System.Diagnostics.Stopwatch _stopwatch;
+        private string _lastAction = "Idle";
+
+        protected override void BeforeSolveInstance()
+        {
+            base.BeforeSolveInstance();
+            _stopwatch = System.Diagnostics.Stopwatch.StartNew();
+        }
+
+        protected override void AfterSolveInstance()
+        {
+            base.AfterSolveInstance();
+            _stopwatch?.Stop();
+            long ms = _stopwatch != null ? _stopwatch.ElapsedMilliseconds : 0;
+            this.Message = $"STATE MANAGER\nTime: {ms} ms\n---\nStatus: {_lastAction}\nSaved States: {_states.Count}";
+        }
+
         protected override void SolveInstance(IGH_DataAccess DA)
         {
             bool save = false, load = false;
@@ -86,7 +103,7 @@ namespace Enzyme.Components
                 }
                 _states[saveName] = currentState;
                 msg = "Saved state '" + saveName + "' with " + currentState.Count + " components.";
-                this.Message = "SAVED: " + saveName;
+                _lastAction = "SAVED: " + saveName;
             }
             _prevSave = save;
 
@@ -95,7 +112,7 @@ namespace Enzyme.Components
                 if (_states.TryGetValue(loadName, out var savedState))
                 {
                     msg = "Loaded state '" + loadName + "'.";
-                    this.Message = "LOADED: " + loadName;
+                    _lastAction = "LOADED: " + loadName;
                     
                     doc.ScheduleSolution(5, (d) => {
                         bool redraw = false;
@@ -135,7 +152,7 @@ namespace Enzyme.Components
                 else
                 {
                     msg = "State '" + loadName + "' not found!";
-                    this.Message = "NOT FOUND";
+                    _lastAction = "NOT FOUND: " + loadName;
                 }
             }
             _prevLoad = load;
