@@ -8,16 +8,22 @@ using GH_IO.Serialization;
 
 namespace Enzyme.Components
 {
+    public class NodeState
+    {
+        public bool Locked { get; set; }
+        public bool Hidden { get; set; }
+    }
+
     public class CanvasStateManager : GH_Component
     {
-        // StateName -> (ComponentGuid.ToString() -> isLocked)
-        private Dictionary<string, Dictionary<string, bool>> _states = new Dictionary<string, Dictionary<string, bool>>();
+        // StateName -> (ComponentGuid.ToString() -> NodeState)
+        private Dictionary<string, Dictionary<string, NodeState>> _states = new Dictionary<string, Dictionary<string, NodeState>>();
         private bool _prevSave = false;
         private bool _prevLoad = false;
 
         public CanvasStateManager()
           : base("Canvas State Manager", "StateMgr",
-              "Saves and restores the Enabled/Disabled (Locked) state of all components on the canvas.",
+              "Saves and restores the Enabled/Disabled (Locked) and Preview (Hidden) state of all components on the canvas.",
               "Enzyme", "Utilities")
         {
         }
@@ -53,12 +59,29 @@ namespace Enzyme.Components
 
             if (save && !_prevSave && !string.IsNullOrWhiteSpace(saveName))
             {
-                var currentState = new Dictionary<string, bool>();
+                var currentState = new Dictionary<string, NodeState>();
                 foreach (var obj in doc.Objects)
                 {
-                    if (obj is IGH_ActiveObject activeObj && obj.InstanceGuid != this.InstanceGuid)
+                    if (obj.InstanceGuid != this.InstanceGuid)
                     {
-                        currentState[obj.InstanceGuid.ToString()] = activeObj.Locked;
+                        var st = new NodeState();
+                        bool hasState = false;
+                        
+                        if (obj is IGH_ActiveObject act)
+                        {
+                            st.Locked = act.Locked;
+                            hasState = true;
+                        }
+                        if (obj is IGH_PreviewObject prv)
+                        {
+                            st.Hidden = prv.Hidden;
+                            hasState = true;
+                        }
+                        
+                        if (hasState)
+                        {
+                            currentState[obj.InstanceGuid.ToString()] = st;
+                        }
                     }
                 }
                 _states[saveName] = currentState;
@@ -75,20 +98,37 @@ namespace Enzyme.Components
                     this.Message = "LOADED: " + loadName;
                     
                     doc.ScheduleSolution(5, (d) => {
+                        bool redraw = false;
                         foreach (var obj in d.Objects)
                         {
-                            if (obj is IGH_ActiveObject activeObj && obj.InstanceGuid != this.InstanceGuid)
+                            if (obj.InstanceGuid != this.InstanceGuid)
                             {
                                 string guidStr = obj.InstanceGuid.ToString();
-                                if (savedState.TryGetValue(guidStr, out bool wasLocked))
+                                if (savedState.TryGetValue(guidStr, out NodeState wasState))
                                 {
-                                    if (activeObj.Locked != wasLocked)
+                                    bool changed = false;
+                                    if (obj is IGH_ActiveObject act && act.Locked != wasState.Locked)
                                     {
-                                        activeObj.Locked = wasLocked;
-                                        activeObj.ExpireSolution(false);
+                                        act.Locked = wasState.Locked;
+                                        changed = true;
+                                    }
+                                    if (obj is IGH_PreviewObject prv && prv.Hidden != wasState.Hidden)
+                                    {
+                                        prv.Hidden = wasState.Hidden;
+                                        changed = true;
+                                        redraw = true; // Preview changes require redraw
+                                    }
+                                    
+                                    if (changed && obj is IGH_ActiveObject act2)
+                                    {
+                                        act2.ExpireSolution(false);
                                     }
                                 }
                             }
+                        }
+                        if (redraw) {
+                            Grasshopper.Instances.ActiveCanvas?.Refresh();
+                            Rhino.RhinoDoc.ActiveDoc?.Views.Redraw();
                         }
                     });
                 }
@@ -122,10 +162,13 @@ namespace Enzyme.Components
                 if (reader.ItemExists("SavedCanvasStates"))
                 {
                     string json = reader.GetString("SavedCanvasStates");
-                    _states = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, bool>>>(json) ?? new Dictionary<string, Dictionary<string, bool>>();
+                    _states = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, NodeState>>>(json) ?? new Dictionary<string, Dictionary<string, NodeState>>();
                 }
             }
-            catch { }
+            catch 
+            { 
+                _states = new Dictionary<string, Dictionary<string, NodeState>>();
+            }
             return base.Read(reader);
         }
         
