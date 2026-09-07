@@ -75,6 +75,8 @@ namespace Enzyme.Components
             this.Message = _lastAction;
         }
 
+        protected override System.Drawing.Bitmap Icon => Enzyme.IconLoader.Load("SaveNamedViews.png");
+
         public override Guid ComponentGuid => new Guid("D4E5F6A1-B2C3-4D5E-6F7A-1B2C3D4E5F6A");
 
         public override void AddedToDocument(GH_Document document)
