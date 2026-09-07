@@ -16,9 +16,9 @@ namespace Enzyme.Components
 
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddColourParameter("Panel Default Color", "PanelColor", "Default color for panels", GH_ParamAccess.item, Color.FromArgb(255, 255, 250, 90));
-            pManager.AddColourParameter("Canvas Background Color", "CanvasBg", "Background color for the canvas", GH_ParamAccess.item, Color.FromArgb(255, 212, 208, 200));
-            pManager.AddColourParameter("Canvas Gridline Color", "GridColor", "Color for the canvas gridlines", GH_ParamAccess.item, Color.FromArgb(30, 0, 0, 0));
+            pManager.AddColourParameter("Panel Default Color", "PanelColor", "Default color for panels", GH_ParamAccess.item, Color.FromArgb(255, 255, 255, 255));
+            pManager.AddColourParameter("Canvas Background Color", "CanvasBg", "Background color for the canvas", GH_ParamAccess.item, Color.FromArgb(255, 222, 220, 220));
+            pManager.AddColourParameter("Canvas Gridline Color", "GridColor", "Color for the canvas gridlines", GH_ParamAccess.item, Color.FromArgb(255, 224, 175, 175));
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
@@ -48,11 +48,11 @@ namespace Enzyme.Components
         {
             base.AddedToDocument(document);
             if (this.Params.Input[0].SourceCount == 0)
-                Enzyme.Utils.AutoWireHelper.WireColorSwatch(this, document, 0, Color.FromArgb(255, 255, 250, 90), 120, -40);
+                Enzyme.Utils.AutoWireHelper.WireColorSwatch(this, document, 0, Color.FromArgb(255, 255, 255, 255), 120, -40);
             if (this.Params.Input[1].SourceCount == 0)
-                Enzyme.Utils.AutoWireHelper.WireColorSwatch(this, document, 1, Color.FromArgb(255, 212, 208, 200), 120, 0);
+                Enzyme.Utils.AutoWireHelper.WireColorSwatch(this, document, 1, Color.FromArgb(255, 222, 220, 220), 120, 0);
             if (this.Params.Input[2].SourceCount == 0)
-                Enzyme.Utils.AutoWireHelper.WireColorSwatch(this, document, 2, Color.FromArgb(30, 0, 0, 0), 120, 40);
+                Enzyme.Utils.AutoWireHelper.WireColorSwatch(this, document, 2, Color.FromArgb(255, 224, 175, 175), 120, 40);
         }
 
         public override Guid ComponentGuid => new Guid("B2C3D4E5-F6A1-4B2C-9D0E-F1A2B3C4D5E6");
