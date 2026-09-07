@@ -51,7 +51,7 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
         {
             pManager.AddMeshParameter("HeatmapMesh", "HM", "The colored terrain mesh displaying flow accumulation.", GH_ParamAccess.item);
             pManager.AddIntegerParameter("VertexCounts", "VC", "Raw accumulation data mapped 1-to-1 with mesh vertices.", GH_ParamAccess.tree);
-            pManager.AddTextParameter("Info", "I", "Component information and interpretation", GH_ParamAccess.item);
+            pManager.AddTextParameter("Info", "Info", "Component information and interpretation", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)

@@ -109,7 +109,7 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
             pManager.AddCurveParameter("NormContours", "NormContours", "Standard contour lines", GH_ParamAccess.list);
             pManager.AddCurveParameter("MainContours", "MainContours", "Major interval contour lines", GH_ParamAccess.list);
             pManager.AddPointParameter("Trees", "Trees", "Scattered point coordinates for trees", GH_ParamAccess.list);
-                    pManager.AddTextParameter("Info", "I", "Component information and interpretation", GH_ParamAccess.item);
+                    pManager.AddTextParameter("Info", "Info", "Component information and interpretation", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)

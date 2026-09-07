@@ -48,7 +48,7 @@ namespace Enzyme.Components
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
             pManager.AddTextParameter("Saved Files", "F", "Paths to the saved image files.", GH_ParamAccess.list);
-            pManager.AddTextParameter("Info", "I", "Component information and interpretation", GH_ParamAccess.item);
+            pManager.AddTextParameter("Info", "Info", "Component information and interpretation", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)

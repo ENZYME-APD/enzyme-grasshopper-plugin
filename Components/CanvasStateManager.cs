@@ -39,7 +39,7 @@ namespace Enzyme.Components
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
         {
             pManager.AddTextParameter("Available States", "States", "List of saved states", GH_ParamAccess.list);
-            pManager.AddTextParameter("Info", "I", "Status output", GH_ParamAccess.item);
+            pManager.AddTextParameter("Info", "Info", "Status output", GH_ParamAccess.item);
         }
 
         private System.Diagnostics.Stopwatch _stopwatch;

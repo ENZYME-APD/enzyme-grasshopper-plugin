@@ -74,7 +74,7 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
             pManager.AddNumberParameter("FillVolume", "FillVolume", "Total Fill (Positive Z)", GH_ParamAccess.item);
             pManager.AddCurveParameter("Contours", "Contours", "1m Interval Curves", GH_ParamAccess.list);
             pManager.AddCurveParameter("MainContours", "MainContours", "5m Interval Curves", GH_ParamAccess.list);
-                    pManager.AddTextParameter("Info", "I", "Component information and interpretation", GH_ParamAccess.item);
+                    pManager.AddTextParameter("Info", "Info", "Component information and interpretation", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)

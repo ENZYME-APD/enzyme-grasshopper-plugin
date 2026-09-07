@@ -45,7 +45,7 @@ namespace Enzyme.Components
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
         {
             pManager.AddCurveParameter("Keylines", "K", "Generated 3D swale/plow curves projected on terrain", GH_ParamAccess.list);
-            pManager.AddTextParameter("Info", "I", "Component information and methodology", GH_ParamAccess.item);
+            pManager.AddTextParameter("Info", "Info", "Component information and methodology", GH_ParamAccess.item);
             pManager.AddTextParameter("Dashboard JSON", "JSON", "Unified JSON payload containing legend and key analysis metrics for the Analysis Dashboard", GH_ParamAccess.item);
         }
 

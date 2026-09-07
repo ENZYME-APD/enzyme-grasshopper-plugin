@@ -100,7 +100,7 @@ namespace Enzyme.Components
             pManager.AddPointParameter("WorstComfortPoints", "Worst", "Point(s) with apparent temperature furthest from IdealTemperature, within ComfortTolerance of the single worst", GH_ParamAccess.list);
             pManager.AddMeshParameter("ComfortMesh", "ComfortMesh", "The input terrain mesh, vertex-colored by comfort deviation - same connectivity as TerrainMesh, no new grid/UVs", GH_ParamAccess.item);
             pManager.AddNumberParameter("ComfortValues", "ComfortValues", "Raw apparent temperature (deg C) per terrain vertex, aligned with ComfortMesh's vertex order", GH_ParamAccess.list);
-            pManager.AddTextParameter("Info", "I", "Component information and interpretation", GH_ParamAccess.item);
+            pManager.AddTextParameter("Info", "Info", "Component information and interpretation", GH_ParamAccess.item);
             pManager.AddTextParameter("Dashboard JSON", "JSON", "Unified JSON payload containing legend and key analysis metrics for the Analysis Dashboard", GH_ParamAccess.item);
         }
 

@@ -43,7 +43,7 @@ namespace Enzyme.Components
             pManager.AddCurveParameter("Streams", "S", "Extracted stream networks (Polylines)", GH_ParamAccess.list);
             pManager.AddIntegerParameter("Accumulation", "A", "Flow accumulation value per topology vertex", GH_ParamAccess.list);
             pManager.AddPointParameter("Topology Points", "P", "Topology vertices matching the accumulation list", GH_ParamAccess.list);
-            pManager.AddTextParameter("Info", "I", "Component information and methodology", GH_ParamAccess.item);
+            pManager.AddTextParameter("Info", "Info", "Component information and methodology", GH_ParamAccess.item);
             pManager.AddTextParameter("Dashboard JSON", "JSON", "Unified JSON payload containing legend and key analysis metrics for the Analysis Dashboard", GH_ParamAccess.item);
         }
 

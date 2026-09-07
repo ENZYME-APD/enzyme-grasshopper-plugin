@@ -123,7 +123,7 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
             pManager.AddTextParameter("Legend Labels", "Labels", "Text labels for legend", GH_ParamAccess.list);
             pManager.AddPointParameter("Label Positions", "Label Positions", "Positions for text labels", GH_ParamAccess.list);
             pManager.AddColourParameter("Legend Colors", "Legend Colors", "Colors for legend elements", GH_ParamAccess.list);
-                    pManager.AddTextParameter("Info", "I", "Component information and interpretation", GH_ParamAccess.item);
+                    pManager.AddTextParameter("Info", "Info", "Component information and interpretation", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)

@@ -71,8 +71,8 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
         {
             pManager.AddCurveParameter("LeaderLine", "LL", "Generated leader lines", GH_ParamAccess.tree);
             pManager.AddGenericParameter("Text", "T", "Generated text entities", GH_ParamAccess.tree);
-            pManager.AddTextParameter("Instructions", "I", "Contract constraints", GH_ParamAccess.item);
-                    pManager.AddTextParameter("Info", "I", "Component information and interpretation", GH_ParamAccess.item);
+            pManager.AddTextParameter("Instructions", "Instructions", "Contract constraints", GH_ParamAccess.item);
+                    pManager.AddTextParameter("Info", "Info", "Component information and interpretation", GH_ParamAccess.item);
         }
 
         private static readonly Dictionary<int, TextJustification> Justifications = new Dictionary<int, TextJustification>

@@ -71,7 +71,7 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
             pManager.AddTextParameter("LegendValues", "LegendValues", "Legend Values", GH_ParamAccess.list);
             pManager.AddNumberParameter("OverThresholdRatio", "OverThresholdRatio", "Ratio of faces over threshold", GH_ParamAccess.list);
             pManager.AddGenericParameter("Color Legend", "Color Legend", "JSON Legend Data", GH_ParamAccess.item);
-                    pManager.AddTextParameter("Info", "I", "Component information and interpretation", GH_ParamAccess.item);
+                    pManager.AddTextParameter("Info", "Info", "Component information and interpretation", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)

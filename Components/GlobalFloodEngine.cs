@@ -30,7 +30,7 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
             pManager.AddMeshParameter("FloodMesh", "FM", "Flooded terrain heatmap mesh", GH_ParamAccess.item);
             pManager.AddNumberParameter("WaterDepths", "WD", "Water depths at each vertex in meters", GH_ParamAccess.list);
             pManager.AddPointParameter("AnalysisPoints", "Pts", "Points corresponding to the water depth values", GH_ParamAccess.list);
-            pManager.AddTextParameter("Info", "I", "Component information and interpretation", GH_ParamAccess.item);
+            pManager.AddTextParameter("Info", "Info", "Component information and interpretation", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
