@@ -76,5 +76,23 @@ namespace Enzyme.Components
         }
 
         public override Guid ComponentGuid => new Guid("D4E5F6A1-B2C3-4D5E-6F7A-1B2C3D4E5F6A");
+
+        public override void AddedToDocument(GH_Document document)
+        {
+            base.AddedToDocument(document);
+
+            if (this.Params.Input[0].SourceCount == 0)
+            {
+                Enzyme.Utils.AutoWireHelper.WirePanel(this, document, 0, "", 160, -40, 120, 25);
+            }
+            if (this.Params.Input[1].SourceCount == 0)
+            {
+                Enzyme.Utils.AutoWireHelper.WireButton(this, document, 1, 120, 0);
+            }
+            if (this.Params.Input[2].SourceCount == 0)
+            {
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 2, true, 120, 40);
+            }
+        }
     }
 }
