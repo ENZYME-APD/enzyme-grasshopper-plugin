@@ -25,13 +25,14 @@ namespace Enzyme.Components
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
+            pManager.AddTextParameter("Available Views", "Views", "List of all named views currently saved in the Rhino document", GH_ParamAccess.list);
             pManager.AddTextParameter("Info", "Info", "Component information and methodology", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
             var sw = System.Diagnostics.Stopwatch.StartNew();
-            DA.SetData(0, "SAVE NAMED VIEW\n\nHOW IT WORKS:\nSaves the current active Rhino viewport as a Named View.\n\nINTERPRETATION & IMPORTANCE:\nAutomates viewpoint documentation so you don't have to manually save angles during parametric iterations.");
+            DA.SetData(1, "SAVE NAMED VIEW\n\nHOW IT WORKS:\nSaves the current active Rhino viewport as a Named View.\n\nINTERPRETATION & IMPORTANCE:\nAutomates viewpoint documentation so you don't have to manually save angles during parametric iterations.");
 
             try
             {
@@ -39,43 +40,56 @@ namespace Enzyme.Components
                 bool save = false;
                 bool overwrite = true;
 
-                if (!DA.GetData(0, ref name)) return;
-                if (!DA.GetData(1, ref save)) return;
+                DA.GetData(0, ref name);
+                DA.GetData(1, ref save);
                 DA.GetData(2, ref overwrite);
 
-                if (!save || string.IsNullOrWhiteSpace(name))
-                {
-                    if (string.IsNullOrWhiteSpace(_lastAction)) _lastAction = "Idle";
-                    return;
-                }
-
                 var doc = RhinoDoc.ActiveDoc;
-                if (doc == null || doc.Views.ActiveView == null)
-                {
-                    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "No active Rhino document or view found.");
-                    return;
-                }
 
-                int existingIndex = doc.NamedViews.FindByName(name);
-                if (existingIndex >= 0)
+                if (save && !string.IsNullOrWhiteSpace(name))
                 {
-                    if (overwrite)
+                    if (doc == null || doc.Views.ActiveView == null)
                     {
-                        // Update existing
-                        doc.NamedViews.Delete(existingIndex);
-                        doc.NamedViews.Add(name, doc.Views.ActiveView.ActiveViewport.Id);
-                        _lastAction = "Overwrote:\n" + name;
+                        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "No active Rhino document or view found.");
                     }
                     else
                     {
-                        AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"View '{name}' already exists and Overwrite is false.");
-                        _lastAction = "Skipped (Exists)";
+                        int existingIndex = doc.NamedViews.FindByName(name);
+                        if (existingIndex >= 0)
+                        {
+                            if (overwrite)
+                            {
+                                // Update existing
+                                doc.NamedViews.Delete(existingIndex);
+                                doc.NamedViews.Add(name, doc.Views.ActiveView.ActiveViewport.Id);
+                                _lastAction = "Overwrote:\n" + name;
+                            }
+                            else
+                            {
+                                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"View '{name}' already exists and Overwrite is false.");
+                                _lastAction = "Skipped (Exists)";
+                            }
+                        }
+                        else
+                        {
+                            doc.NamedViews.Add(name, doc.Views.ActiveView.ActiveViewport.Id);
+                            _lastAction = "Saved:\n" + name;
+                        }
                     }
                 }
                 else
                 {
-                    doc.NamedViews.Add(name, doc.Views.ActiveView.ActiveViewport.Id);
-                    _lastAction = "Saved:\n" + name;
+                    if (string.IsNullOrWhiteSpace(_lastAction)) _lastAction = "Idle";
+                }
+
+                if (doc != null)
+                {
+                    var viewsList = new System.Collections.Generic.List<string>();
+                    foreach (var view in doc.NamedViews)
+                    {
+                        viewsList.Add(view.Name);
+                    }
+                    DA.SetDataList(0, viewsList);
                 }
             }
             finally
