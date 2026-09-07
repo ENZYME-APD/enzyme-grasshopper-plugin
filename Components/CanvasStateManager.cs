@@ -71,30 +71,26 @@ namespace Enzyme.Components
             {
                 if (_states.TryGetValue(loadName, out var savedState))
                 {
-                    bool changedAny = false;
-                    foreach (var obj in doc.Objects)
-                    {
-                        if (obj is IGH_ActiveObject activeObj && obj.InstanceGuid != this.InstanceGuid)
-                        {
-                            string guidStr = obj.InstanceGuid.ToString();
-                            if (savedState.TryGetValue(guidStr, out bool wasLocked))
-                            {
-                                if (activeObj.Locked != wasLocked)
-                                {
-                                    activeObj.Locked = wasLocked;
-                                    changedAny = true;
-                                }
-                            }
-                        }
-                    }
-                    
                     msg = "Loaded state '" + loadName + "'.";
                     this.Message = "LOADED: " + loadName;
                     
-                    if (changedAny)
-                    {
-                        doc.ScheduleSolution(5, (d) => { });
-                    }
+                    doc.ScheduleSolution(5, (d) => {
+                        foreach (var obj in d.Objects)
+                        {
+                            if (obj is IGH_ActiveObject activeObj && obj.InstanceGuid != this.InstanceGuid)
+                            {
+                                string guidStr = obj.InstanceGuid.ToString();
+                                if (savedState.TryGetValue(guidStr, out bool wasLocked))
+                                {
+                                    if (activeObj.Locked != wasLocked)
+                                    {
+                                        activeObj.Locked = wasLocked;
+                                        activeObj.ExpireSolution(false);
+                                    }
+                                }
+                            }
+                        }
+                    });
                 }
                 else
                 {
