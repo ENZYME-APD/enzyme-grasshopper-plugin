@@ -43,11 +43,22 @@ namespace Enzyme.Components
             // Display component, no outputs needed typically.
         }
 
+        private System.Diagnostics.Stopwatch _stopwatch;
+
         protected override void BeforeSolveInstance()
         {
             base.BeforeSolveInstance();
             _tags.Clear();
-            this.Message = "Move Axis: " + (_moveAxis == 0 ? "X" : _moveAxis == 1 ? "Y" : "Z");
+            _stopwatch = System.Diagnostics.Stopwatch.StartNew();
+        }
+
+        protected override void AfterSolveInstance()
+        {
+            base.AfterSolveInstance();
+            _stopwatch?.Stop();
+            long ms = _stopwatch != null ? _stopwatch.ElapsedMilliseconds : 0;
+            string axisStr = _moveAxis == 0 ? "X" : _moveAxis == 1 ? "Y" : "Z";
+            this.Message = $"CUSTOM TEXT TAG\nTime: {ms} ms\n---\nMove Axis: {axisStr}\nTags Generated: {_tags.Count}";
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
@@ -182,7 +193,7 @@ namespace Enzyme.Components
             }
         }
 
-        protected override System.Drawing.Bitmap Icon => Enzyme.IconLoader.Load("type.png");
+        protected override System.Drawing.Bitmap Icon => Enzyme.IconLoader.Load("custom tex tag.png");
 
         public override Guid ComponentGuid => new Guid("D8B6F9A2-4E1C-458B-8D7F-E2A4B1C9F3D5");
     }
