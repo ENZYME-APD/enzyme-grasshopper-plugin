@@ -25,67 +25,63 @@ namespace Enzyme.Components
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-        }
-
-        private System.Diagnostics.Stopwatch _stopwatch;
-
-        protected override void BeforeSolveInstance()
-        {
-            base.BeforeSolveInstance();
-            _stopwatch = System.Diagnostics.Stopwatch.StartNew();
-        }
-
-        protected override void AfterSolveInstance()
-        {
-            base.AfterSolveInstance();
-            _stopwatch?.Stop();
-            long ms = _stopwatch != null ? _stopwatch.ElapsedMilliseconds : 0;
-            this.Message = $"SAVE NAMED VIEW\nTime: {ms} ms\n---\n{_lastAction}";
+            pManager.AddTextParameter("Info", "Info", "Component information and methodology", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            string name = string.Empty;
-            bool save = false;
-            bool overwrite = true;
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+            DA.SetData(0, "SAVE NAMED VIEW\n\nHOW IT WORKS:\nSaves the current active Rhino viewport as a Named View.\n\nINTERPRETATION & IMPORTANCE:\nAutomates viewpoint documentation so you don't have to manually save angles during parametric iterations.");
 
-            if (!DA.GetData(0, ref name)) return;
-            if (!DA.GetData(1, ref save)) return;
-            DA.GetData(2, ref overwrite);
-
-            if (!save || string.IsNullOrWhiteSpace(name))
+            try
             {
-                if (string.IsNullOrWhiteSpace(_lastAction)) _lastAction = "Idle";
-                return;
-            }
+                string name = string.Empty;
+                bool save = false;
+                bool overwrite = true;
 
-            var doc = RhinoDoc.ActiveDoc;
-            if (doc == null || doc.Views.ActiveView == null)
-            {
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "No active Rhino document or view found.");
-                return;
-            }
+                if (!DA.GetData(0, ref name)) return;
+                if (!DA.GetData(1, ref save)) return;
+                DA.GetData(2, ref overwrite);
 
-            int existingIndex = doc.NamedViews.FindByName(name);
-            if (existingIndex >= 0)
-            {
-                if (overwrite)
+                if (!save || string.IsNullOrWhiteSpace(name))
                 {
-                    // Update existing
-                    doc.NamedViews.Delete(existingIndex);
-                    doc.NamedViews.Add(name, doc.Views.ActiveView.ActiveViewport.Id);
-                    _lastAction = "Overwrote:\n" + name;
+                    if (string.IsNullOrWhiteSpace(_lastAction)) _lastAction = "Idle";
+                    return;
+                }
+
+                var doc = RhinoDoc.ActiveDoc;
+                if (doc == null || doc.Views.ActiveView == null)
+                {
+                    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "No active Rhino document or view found.");
+                    return;
+                }
+
+                int existingIndex = doc.NamedViews.FindByName(name);
+                if (existingIndex >= 0)
+                {
+                    if (overwrite)
+                    {
+                        // Update existing
+                        doc.NamedViews.Delete(existingIndex);
+                        doc.NamedViews.Add(name, doc.Views.ActiveView.ActiveViewport.Id);
+                        _lastAction = "Overwrote:\n" + name;
+                    }
+                    else
+                    {
+                        AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"View '{name}' already exists and Overwrite is false.");
+                        _lastAction = "Skipped (Exists)";
+                    }
                 }
                 else
                 {
-                    AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"View '{name}' already exists and Overwrite is false.");
-                    _lastAction = "Skipped (Exists)";
+                    doc.NamedViews.Add(name, doc.Views.ActiveView.ActiveViewport.Id);
+                    _lastAction = "Saved:\n" + name;
                 }
             }
-            else
+            finally
             {
-                doc.NamedViews.Add(name, doc.Views.ActiveView.ActiveViewport.Id);
-                _lastAction = "Saved:\n" + name;
+                sw.Stop();
+                this.Message = $"SAVE NAMED VIEW\nTime: {sw.ElapsedMilliseconds} ms\n---\n{_lastAction}";
             }
         }
 

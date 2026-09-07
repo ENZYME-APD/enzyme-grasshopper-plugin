@@ -42,25 +42,11 @@ namespace Enzyme.Components
             pManager.AddTextParameter("Info", "Info", "Status output", GH_ParamAccess.item);
         }
 
-        private System.Diagnostics.Stopwatch _stopwatch;
         private string _lastAction = "Idle";
-
-        protected override void BeforeSolveInstance()
-        {
-            base.BeforeSolveInstance();
-            _stopwatch = System.Diagnostics.Stopwatch.StartNew();
-        }
-
-        protected override void AfterSolveInstance()
-        {
-            base.AfterSolveInstance();
-            _stopwatch?.Stop();
-            long ms = _stopwatch != null ? _stopwatch.ElapsedMilliseconds : 0;
-            this.Message = $"STATE MANAGER\nTime: {ms} ms\n---\nStatus: {_lastAction}\nSaved States: {_states.Count}";
-        }
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            var sw = System.Diagnostics.Stopwatch.StartNew();
             bool save = false, load = false;
             string saveName = "", loadName = "";
 
@@ -158,7 +144,10 @@ namespace Enzyme.Components
             _prevLoad = load;
 
             DA.SetDataList(0, _states.Keys.ToList());
-            DA.SetData(1, msg);
+            DA.SetData(1, "CANVAS STATE MANAGER\n\nHOW IT WORKS:\nSaves and restores the Enabled/Disabled (Locked) and Preview (Hidden) states of all components on the canvas.\n\nINTERPRETATION & IMPORTANCE:\nAllows you to swap between different visualization or computation modes instantly.");
+
+            sw.Stop();
+            this.Message = $"STATE MANAGER\nTime: {sw.ElapsedMilliseconds} ms\n---\n{_lastAction}\nSaved: {_states.Count}";
         }
 
         public override bool Write(GH_IWriter writer)
