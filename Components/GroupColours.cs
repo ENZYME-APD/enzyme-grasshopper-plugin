@@ -57,8 +57,20 @@ namespace Enzyme.Components
                     {
                         if (string.Equals(key, names[i].Trim(), StringComparison.InvariantCultureIgnoreCase))
                         {
-                            Color c = i < colors.Count ? colors[i] : colors.LastOrDefault();
-                            group.Colour = c;
+                            Color c = defaultColor;
+                            if (colors.Count > 0) {
+                                c = i < colors.Count ? colors[i] : colors.Last();
+                            }
+                            
+                            // Ensure it's not totally transparent (Color.Empty)
+                            if (c.IsEmpty || c.A == 0) {
+                                c = Color.FromArgb(255, 100, 100, 100);
+                            }
+
+                            if (group.Colour.ToArgb() != c.ToArgb())
+                            {
+                                group.Colour = c;
+                            }
                             matched = true;
                             break;
                         }
@@ -66,7 +78,15 @@ namespace Enzyme.Components
 
                     if (!matched)
                     {
-                        group.Colour = defaultColor;
+                        Color c = defaultColor;
+                        if (c.IsEmpty || c.A == 0) {
+                            c = Color.FromArgb(255, 214, 206, 206);
+                        }
+
+                        if (group.Colour.ToArgb() != c.ToArgb())
+                        {
+                            group.Colour = c;
+                        }
                     }
                 }
             }
