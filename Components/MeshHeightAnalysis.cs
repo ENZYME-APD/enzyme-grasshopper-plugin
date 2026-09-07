@@ -164,7 +164,6 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
                     if (ghMesh != null && ghMesh.Value != null && ghMesh.Value.IsValid)
                     {
                         globalBB.Union(ghMesh.Value.GetBoundingBox(true));
-                                            DA.SetData(11, "TERRAIN HEIGHT ANALYSIS\n" + "\n" + "HOW IT WORKS:\n" + "Analyzes mesh elevations to generate detailed HUD metrics (average, min, max heights) and identifies localized peaks and valleys.\n\n" + "INTERPRETATION & IMPORTANCE:\n" + "Provides quantitative tabular data summarizing the site's verticality. Knowing the highest peaks and lowest basins is critical for locating water towers, telecom equipment, or drainage ponds.");
                     }
                 }
             }
@@ -364,7 +363,15 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
                     ["Labels"] = new JArray($"{globalTerrainZMin:F1}m", $"{globalTerrainZMax:F1}m"),
                     ["SubLabels"] = new JArray($"Relief: {(globalTerrainZMax - globalTerrainZMin):F1}m")
                 };
-                DA.SetData(10, legendObj.ToString());
+                if (this.Params.Output.Count > 10)
+                {
+                    DA.SetData(10, legendObj.ToString());
+                }
+            }
+
+            if (this.Params.Output.Count > 11)
+            {
+                DA.SetData(11, "TERRAIN HEIGHT ANALYSIS\n" + "\n" + "HOW IT WORKS:\n" + "Analyzes mesh elevations to generate detailed HUD metrics (average, min, max heights) and identifies localized peaks and valleys.\n\n" + "INTERPRETATION & IMPORTANCE:\n" + "Provides quantitative tabular data summarizing the site's verticality. Knowing the highest peaks and lowest basins is critical for locating water towers, telecom equipment, or drainage ponds.");
             }
 
             double terrainRelief = totalVerticesCount > 0 ? Math.Round(globalTerrainZMax - globalTerrainZMin, 2) : 0.0;
