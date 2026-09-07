@@ -234,7 +234,7 @@ namespace Enzyme.Components
                 {
                     labelStr = _labels[i];
                 }
-                else if (_legendType == "Gradient")
+                else if (_legendType == "Gradient" || _legendType == "Blocks")
                 {
                     if (i == _colors.Count - 1 && _labels.Count > 1) labelStr = _labels[_labels.Count - 1]; // max
                     else if (i == 0 && _labels.Count > 0) labelStr = _labels[0]; // min
