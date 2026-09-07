@@ -74,6 +74,17 @@ namespace Enzyme.Components
             this.Message = "Case-insensitive\nMulti-separator";
         }
 
+        public override void AddedToDocument(GH_Document document)
+        {
+            base.AddedToDocument(document);
+            if (this.Params.Input[0].SourceCount == 0)
+                Enzyme.Utils.AutoWireHelper.WirePanel(this, document, 0, "GroupA\nGroupB", 120, -40, 80, 40);
+            if (this.Params.Input[1].SourceCount == 0)
+                Enzyme.Utils.AutoWireHelper.WireColorSwatch(this, document, 1, Color.FromArgb(255, 100, 150, 255), 120, 0);
+            if (this.Params.Input[2].SourceCount == 0)
+                Enzyme.Utils.AutoWireHelper.WireColorSwatch(this, document, 2, Color.FromArgb(255, 214, 206, 206), 120, 40);
+        }
+
         public override Guid ComponentGuid => new Guid("A1B2C3D4-E5F6-4A1B-8C9D-E0F1A2B3C4D5");
     }
 }

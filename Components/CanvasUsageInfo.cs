@@ -135,6 +135,13 @@ namespace Enzyme.Components
             panel.ExpireSolution(true);
         }
 
+        public override void AddedToDocument(GH_Document document)
+        {
+            base.AddedToDocument(document);
+            if (this.Params.Input[0].SourceCount == 0)
+                Enzyme.Utils.AutoWireHelper.WireButton(this, document, 0, 80, 0);
+        }
+
         public override Guid ComponentGuid => new Guid("C3D4E5F6-A1B2-4C3D-0E1F-A2B3C4D5E6F7");
     }
 }

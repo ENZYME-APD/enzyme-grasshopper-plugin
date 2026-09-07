@@ -41,7 +41,18 @@ namespace Enzyme.Components
 
             Grasshopper.Instances.ActiveCanvas?.Refresh();
 
-            this.Message = "Love your style!";
+            this.Message = "Canvas Style\nLove your style!";
+        }
+
+        public override void AddedToDocument(GH_Document document)
+        {
+            base.AddedToDocument(document);
+            if (this.Params.Input[0].SourceCount == 0)
+                Enzyme.Utils.AutoWireHelper.WireColorSwatch(this, document, 0, Color.FromArgb(255, 255, 250, 90), 120, -40);
+            if (this.Params.Input[1].SourceCount == 0)
+                Enzyme.Utils.AutoWireHelper.WireColorSwatch(this, document, 1, Color.FromArgb(255, 212, 208, 200), 120, 0);
+            if (this.Params.Input[2].SourceCount == 0)
+                Enzyme.Utils.AutoWireHelper.WireColorSwatch(this, document, 2, Color.FromArgb(30, 0, 0, 0), 120, 40);
         }
 
         public override Guid ComponentGuid => new Guid("B2C3D4E5-F6A1-4B2C-9D0E-F1A2B3C4D5E6");
