@@ -24,10 +24,12 @@ namespace Enzyme.Components
             pManager.AddNumberParameter("StepSize", "StepSize", "Distance to move per integration step", GH_ParamAccess.item, 1.0);
             pManager.AddIntegerParameter("MaxSteps", "MaxSteps", "Maximum number of steps per streamline", GH_ParamAccess.item, 500);
             pManager.AddNumberParameter("SearchRadius", "SearchRadius", "Radius to search for blending local vectors", GH_ParamAccess.item, 6.0);
+            pManager.AddNumberParameter("MoveUp", "MoveUp", "Visual Z-offset to prevent clashing with the analysis mesh", GH_ParamAccess.item, 0.5);
             
             pManager[3].Optional = true;
             pManager[4].Optional = true;
             pManager[5].Optional = true;
+            pManager[6].Optional = true;
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
@@ -49,6 +51,7 @@ namespace Enzyme.Components
             double stepSize = 1.0; DA.GetData(3, ref stepSize);
             int maxSteps = 500; DA.GetData(4, ref maxSteps);
             double searchRadius = 6.0; DA.GetData(5, ref searchRadius);
+            double moveUp = 0.5; DA.GetData(6, ref moveUp);
 
             if (fPts.Count == 0 || fVecs.Count == 0 || fPts.Count != fVecs.Count)
             {
@@ -82,7 +85,7 @@ namespace Enzyme.Components
                     double speed = v.Length;
                     if (speed < 0.05) break; 
 
-                    current.Z = z;
+                    current.Z = z + moveUp;
                     if (step == 0) trace[0] = current; 
 
                     v.Unitize();
