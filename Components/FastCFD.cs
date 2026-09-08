@@ -24,7 +24,8 @@ namespace Enzyme.Components
         {
             pManager.AddMeshParameter("TerrainMesh", "TerrainMesh", "Input Terrain Mesh", GH_ParamAccess.item);
             pManager.AddMeshParameter("ContextMeshes", "ContextMeshes", "Buildings and context as closed meshes", GH_ParamAccess.list);
-            pManager.AddVectorParameter("WindVector", "WindVector", "Wind direction and speed (m/s)", GH_ParamAccess.item, new Vector3d(5, 5, 0));
+            pManager.AddVectorParameter("WindVector", "WindVector", "Wind direction", GH_ParamAccess.item, new Vector3d(1, 1, 0));
+            pManager.AddNumberParameter("WindSpeed", "WindSpeed", "Baseline wind velocity (m/s)", GH_ParamAccess.item, 10.0);
             pManager.AddNumberParameter("CellSize", "CellSize", "Resolution of the grid in meters.", GH_ParamAccess.item, 4.0);
             pManager.AddIntegerParameter("Iterations", "Iterations", "Simulation steps", GH_ParamAccess.item, 50);
             pManager.AddNumberParameter("AnalysisHeight", "AnalysisHeight", "Drape offset above terrain (m)", GH_ParamAccess.item, 1.5);
@@ -35,9 +36,9 @@ namespace Enzyme.Components
             pManager.AddColourParameter("Colors", "Colors", "Custom color spectrum override (min to max)", GH_ParamAccess.list);
             
             pManager[1].Optional = true;
-            pManager[7].Optional = true;
-            pManager[9].Optional = true;
+            pManager[8].Optional = true;
             pManager[10].Optional = true;
+            pManager[11].Optional = true;
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
@@ -59,33 +60,39 @@ namespace Enzyme.Components
             List<Mesh> contextMeshes = new List<Mesh>();
             DA.GetDataList(1, contextMeshes);
 
-            Vector3d windVector = new Vector3d(5, 5, 0);
-            if (!DA.GetData(2, ref windVector)) return;
+            Vector3d windDir = new Vector3d(1, 1, 0);
+            if (!DA.GetData(2, ref windDir)) return;
+
+            double windSpeed = 10.0;
+            if (!DA.GetData(3, ref windSpeed)) return;
+
+            if (!windDir.Unitize()) windDir = new Vector3d(1, 0, 0);
+            Vector3d windVector = windDir * windSpeed;
 
             double cellSize = 4.0;
-            if (!DA.GetData(3, ref cellSize)) return;
+            if (!DA.GetData(4, ref cellSize)) return;
             if (cellSize < 0.5) cellSize = 0.5;
 
             int iterations = 50;
-            if (!DA.GetData(4, ref iterations)) return;
+            if (!DA.GetData(5, ref iterations)) return;
 
             double analysisHeight = 1.5;
-            if (!DA.GetData(5, ref analysisHeight)) return;
+            if (!DA.GetData(6, ref analysisHeight)) return;
 
             double viscosity = 0.1;
-            if (!DA.GetData(6, ref viscosity)) return;
+            if (!DA.GetData(7, ref viscosity)) return;
 
             List<double> frictionList = new List<double>();
-            DA.GetDataList(7, frictionList);
+            DA.GetDataList(8, frictionList);
 
             double comfortThreshold = 5.0;
-            if (!DA.GetData(8, ref comfortThreshold)) return;
+            if (!DA.GetData(9, ref comfortThreshold)) return;
 
             Curve maskCurve = null;
-            DA.GetData(9, ref maskCurve);
+            DA.GetData(10, ref maskCurve);
 
             List<Color> customColors = new List<Color>();
-            DA.GetDataList(10, customColors);
+            DA.GetDataList(11, customColors);
 
             var sw = System.Diagnostics.Stopwatch.StartNew();
 
@@ -175,14 +182,13 @@ namespace Enzyme.Components
             float[] u0 = new float[totalCells];
             float[] v0 = new float[totalCells];
 
-            double wSpeed = windVector.Length + 0.01;
+            double wSpeed = windSpeed + 0.01;
             float dt = (float)(0.5 * cellSize / wSpeed);
             if (dt > 0.5f) dt = 0.5f;
 
             float windU = (float)windVector.X;
             float windV = (float)windVector.Y;
 
-            // INITIALIZE THE ENTIRE DOMAIN (Prevents the "Solid Blue" issue)
             for (int i = 1; i <= N; i++) {
                 for (int j = 1; j <= M; j++) {
                     if (!obstacles[IX(i, j, N)]) {
@@ -194,7 +200,6 @@ namespace Enzyme.Components
 
             for (int iter = 0; iter < iterations; iter++)
             {
-                // INJECT WIND AT BOUNDARIES CONTINUOUSLY
                 for (int j = 1; j <= M; j++) {
                     if (windU > 0) { u[IX(1, j, N)] = windU; v[IX(1, j, N)] = windV; obstacles[IX(1, j, N)] = false; }
                     if (windU < 0) { u[IX(N, j, N)] = windU; v[IX(N, j, N)] = windV; obstacles[IX(N, j, N)] = false; }
@@ -338,6 +343,8 @@ namespace Enzyme.Components
                 "Limitations (The 20% tradeoff):\n" +
                 "To remain insanely fast, this uses a 'Terrain-Following 2.5D Grid'. The grid drapes perfectly over the terrain topography. However, because it calculates a 2D sheet, it cannot simulate '3D Downdrafts' (wind hitting a skyscraper and plunging vertically down to the ground).\n\n" +
                 "VARIABLES:\n" +
+                "- WindVector: Defines the cardinal direction of the wind.\n" +
+                "- WindSpeed: Defines the baseline magnitude of the wind in m/s.\n" +
                 "- Viscosity: Simulates the turbulence/thickness of the air. Lower = more chaotic vortices. Higher = smoother laminar flow.\n" +
                 "- Friction: Simulates surface drag slowing down the wind at the boundary layer (e.g., concrete vs forest).\n" +
                 "- BoundaryMask: Crops the simulation domain to vastly improve calculation speed, and strictly isolates the output geometry and HUD statistics to the enclosed area.";
@@ -389,12 +396,13 @@ namespace Enzyme.Components
             float pivotX = this.Attributes.Pivot.X - 250;
             float pivotY = this.Attributes.Pivot.Y - 100;
 
-            CreateSlider(doc, "CellSize", 1.0, 20.0, 4.0, 3, pivotX, pivotY);
-            CreateSlider(doc, "Iterations", 10, 500, 50, 4, pivotX, pivotY + 30);
-            CreateSlider(doc, "AnalysisHeight", 0.0, 50.0, 1.5, 5, pivotX, pivotY + 60);
-            CreateSlider(doc, "Viscosity", 0.0, 1.0, 0.1, 6, pivotX, pivotY + 90);
-            CreateSlider(doc, "Friction", 0.0, 1.0, 0.1, 7, pivotX, pivotY + 120);
-            CreateSlider(doc, "ComfortThreshold", 1.0, 20.0, 5.0, 8, pivotX, pivotY + 150);
+            CreateSlider(doc, "WindSpeed", 1.0, 50.0, 10.0, 3, pivotX, pivotY);
+            CreateSlider(doc, "CellSize", 1.0, 20.0, 4.0, 4, pivotX, pivotY + 30);
+            CreateSlider(doc, "Iterations", 10, 500, 50, 5, pivotX, pivotY + 60);
+            CreateSlider(doc, "AnalysisHeight", 0.0, 50.0, 1.5, 6, pivotX, pivotY + 90);
+            CreateSlider(doc, "Viscosity", 0.0, 1.0, 0.1, 7, pivotX, pivotY + 120);
+            CreateSlider(doc, "Friction", 0.0, 1.0, 0.1, 8, pivotX, pivotY + 150);
+            CreateSlider(doc, "ComfortThreshold", 1.0, 20.0, 5.0, 9, pivotX, pivotY + 180);
 
             doc.NewSolution(false);
         }
