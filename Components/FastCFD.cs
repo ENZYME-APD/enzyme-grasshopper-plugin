@@ -353,7 +353,9 @@ namespace Enzyme.Components
                 "- WindSpeed: Defines the baseline magnitude of the wind in m/s.\n" +
                 "- Viscosity: Simulates the turbulence/thickness of the air. Lower = more chaotic vortices. Higher = smoother laminar flow.\n" +
                 "- Friction: Simulates surface drag slowing down the wind at the boundary layer (e.g., concrete vs forest).\n" +
-                "- BoundaryMask: Crops the simulation domain to vastly improve calculation speed, and strictly isolates the output geometry and HUD statistics to the enclosed area.";
+                "- BoundaryMask: Crops the simulation domain to vastly improve calculation speed, and strictly isolates the output geometry and HUD statistics to the enclosed area.\n\n" +
+                "BEST PRACTICES (GRID ALIGNMENT):\n" +
+                "Because this is an Eulerian (grid-based) solver, the mathematical grid anchors to the bounding box of your BoundaryMask (or Terrain if no mask is used). A tiny shift in the grid can cause cells to hit building corners differently, slightly altering turbulence (the Butterfly Effect). When comparing different design options, always plug in a consistent BoundaryMask to lock the grid coordinates in place!";
             
             DA.SetData(6, infoStr);
 
