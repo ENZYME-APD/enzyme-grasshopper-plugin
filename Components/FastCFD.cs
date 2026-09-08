@@ -119,6 +119,14 @@ namespace Enzyme.Components
             Mesh combinedContext = new Mesh();
             foreach (var m in contextMeshes) { if (m != null) combinedContext.Append(m); }
 
+            double rayStartZ = bbox.Max.Z;
+            if (combinedContext.IsValid && combinedContext.Faces.Count > 0)
+            {
+                BoundingBox cBox = combinedContext.GetBoundingBox(true);
+                if (cBox.Max.Z > rayStartZ) rayStartZ = cBox.Max.Z;
+            }
+            rayStartZ += 100.0;
+
             Point3d[] gridPoints = new Point3d[totalCells];
             bool[] obstacles = new bool[totalCells];
             float[] frictionMap = new float[totalCells];
@@ -143,7 +151,7 @@ namespace Enzyme.Components
                     frictionMap[idx] = (float)Math.Max(0.0, Math.Min(1.0, fVal));
                     vIdxCounter++;
 
-                    Ray3d rayDown = new Ray3d(new Point3d(x, y, bbox.Max.Z + 100), new Vector3d(0, 0, -1));
+                    Ray3d rayDown = new Ray3d(new Point3d(x, y, rayStartZ), new Vector3d(0, 0, -1));
                     double terrainT = Rhino.Geometry.Intersect.Intersection.MeshRay(terrainMesh, rayDown);
                     
                     if (terrainT >= 0.0)
