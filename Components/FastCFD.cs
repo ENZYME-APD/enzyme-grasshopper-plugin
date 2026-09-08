@@ -343,14 +343,16 @@ namespace Enzyme.Components
             List<Color> legendColors = customColors.Count > 0 ? customColors : new List<Color> { Color.FromArgb(255, 0, 0, 255), Color.FromArgb(255, 255, 0, 0) };
             string colorJsonArray = "[" + string.Join(",", legendColors.Select(c => $"{{\"R\":{c.R},\"G\":{c.G},\"B\":{c.B}}}")) + "]";
             string labelsJson = $@"[""0.0"", ""{(wSpeed * 1.5):F1}""]";
-            string subLabelsJson = $@"[""Avg: {avgSpeed:F1} m/s"", ""Comfort: {pctComfort:F1}%""]";
             
             string jsonStr = $@"{{
-  ""Type"": ""Continuous"",
+  ""Type"": ""Gradient"",
   ""Title"": ""WIND SPEED (m/s)"",
   ""Colors"": {colorJsonArray},
   ""Labels"": {labelsJson},
-  ""SubLabels"": {subLabelsJson}
+  ""Metrics"": [
+    {{ ""Name"": ""Avg Speed"", ""Value"": ""{avgSpeed:F1} m/s"" }},
+    {{ ""Name"": ""Comfort ({comfortThreshold:F1} m/s)"", ""Value"": ""{pctComfort:F1}%"" }}
+  ]
 }}";
             DA.SetData(5, jsonStr);
 
