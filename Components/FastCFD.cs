@@ -22,17 +22,17 @@ namespace Enzyme.Components
 
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddMeshParameter("TerrainMesh", "TM", "Input Terrain Mesh", GH_ParamAccess.item);
-            pManager.AddMeshParameter("ContextMeshes", "CM", "Buildings and context as closed meshes", GH_ParamAccess.list);
-            pManager.AddVectorParameter("WindVector", "WV", "Wind direction and speed (m/s)", GH_ParamAccess.item, new Vector3d(5, 5, 0));
-            pManager.AddNumberParameter("CellSize", "CS", "Resolution of the grid in meters.", GH_ParamAccess.item, 4.0);
-            pManager.AddIntegerParameter("Iterations", "I", "Simulation steps", GH_ParamAccess.item, 50);
-            pManager.AddNumberParameter("AnalysisHeight", "Z", "Drape offset above terrain (m)", GH_ParamAccess.item, 1.5);
-            pManager.AddNumberParameter("Viscosity", "V", "Kinematic viscosity (diffusion/turbulence)", GH_ParamAccess.item, 0.1);
-            pManager.AddNumberParameter("Friction", "F", "Surface drag (0.0 to 1.0). Accepts item or list.", GH_ParamAccess.list, 0.1);
-            pManager.AddNumberParameter("ComfortThreshold", "CT", "Threshold for pedestrian comfort (m/s)", GH_ParamAccess.item, 5.0);
-            pManager.AddCurveParameter("BoundaryMask", "Mask", "Optional closed curve to crop the simulation domain and filter statistics.", GH_ParamAccess.item);
-            pManager.AddColourParameter("CustomColors", "CC", "Custom color spectrum override (min to max)", GH_ParamAccess.list);
+            pManager.AddMeshParameter("TerrainMesh", "TerrainMesh", "Input Terrain Mesh", GH_ParamAccess.item);
+            pManager.AddMeshParameter("ContextMeshes", "ContextMeshes", "Buildings and context as closed meshes", GH_ParamAccess.list);
+            pManager.AddVectorParameter("WindVector", "WindVector", "Wind direction and speed (m/s)", GH_ParamAccess.item, new Vector3d(5, 5, 0));
+            pManager.AddNumberParameter("CellSize", "CellSize", "Resolution of the grid in meters.", GH_ParamAccess.item, 4.0);
+            pManager.AddIntegerParameter("Iterations", "Iterations", "Simulation steps", GH_ParamAccess.item, 50);
+            pManager.AddNumberParameter("AnalysisHeight", "AnalysisHeight", "Drape offset above terrain (m)", GH_ParamAccess.item, 1.5);
+            pManager.AddNumberParameter("Viscosity", "Viscosity", "Kinematic viscosity (diffusion/turbulence)", GH_ParamAccess.item, 0.1);
+            pManager.AddNumberParameter("Friction", "Friction", "Surface drag (0.0 to 1.0). Accepts item or list.", GH_ParamAccess.list, 0.1);
+            pManager.AddNumberParameter("ComfortThreshold", "ComfortThreshold", "Threshold for pedestrian comfort (m/s)", GH_ParamAccess.item, 5.0);
+            pManager.AddCurveParameter("BoundaryMask", "BoundaryMask", "Optional closed curve to crop the simulation domain and filter statistics.", GH_ParamAccess.item);
+            pManager.AddColourParameter("Colors", "Colors", "Custom color spectrum override (min to max)", GH_ParamAccess.list);
             
             pManager[1].Optional = true;
             pManager[7].Optional = true;
@@ -42,12 +42,12 @@ namespace Enzyme.Components
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddMeshParameter("WindMesh", "WM", "Heatmap of wind speeds mapped to the terrain", GH_ParamAccess.item);
-            pManager.AddVectorParameter("WindVectors", "WV", "Wind velocity vectors for visualization", GH_ParamAccess.list);
-            pManager.AddPointParameter("Points", "Pt", "Grid points corresponding to the vectors", GH_ParamAccess.list);
-            pManager.AddNumberParameter("Speeds", "Sp", "Wind speed magnitude (m/s) at each point", GH_ParamAccess.list);
-            pManager.AddColourParameter("Colors", "C", "The color assigned to each point/vector", GH_ParamAccess.list);
-            pManager.AddTextParameter("Dashboard Data", "Dash", "JSON string for Dashboard and Legend", GH_ParamAccess.item);
+            pManager.AddMeshParameter("WindMesh", "WindMesh", "Heatmap of wind speeds mapped to the terrain", GH_ParamAccess.item);
+            pManager.AddPointParameter("Points", "Points", "Grid points corresponding to the vectors", GH_ParamAccess.list);
+            pManager.AddVectorParameter("WindVectors", "WindVectors", "Wind velocity vectors for visualization", GH_ParamAccess.list);
+            pManager.AddNumberParameter("Speeds", "Speeds", "Wind speed magnitude (m/s) at each point", GH_ParamAccess.list);
+            pManager.AddColourParameter("Colors", "Colors", "The color assigned to each point/vector", GH_ParamAccess.list);
+            pManager.AddTextParameter("Dashboard Data", "Dashboard", "JSON string for Dashboard and Legend", GH_ParamAccess.item);
             pManager.AddTextParameter("Info", "Info", "Simulation data and timing", GH_ParamAccess.item);
         }
 
@@ -99,7 +99,7 @@ namespace Enzyme.Components
             int cols = (int)Math.Ceiling((bbox.Max.X - bbox.Min.X) / cellSize);
             int rows = (int)Math.Ceiling((bbox.Max.Y - bbox.Min.Y) / cellSize);
 
-            if (cols * rows > 50000)
+            if (cols * rows > 60000)
             {
                 AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Grid is too dense ({cols}x{rows}). Increase CellSize or use a smaller BoundaryMask.");
                 return;
@@ -182,8 +182,19 @@ namespace Enzyme.Components
             float windU = (float)windVector.X;
             float windV = (float)windVector.Y;
 
+            // INITIALIZE THE ENTIRE DOMAIN (Prevents the "Solid Blue" issue)
+            for (int i = 1; i <= N; i++) {
+                for (int j = 1; j <= M; j++) {
+                    if (!obstacles[IX(i, j, N)]) {
+                        u[IX(i, j, N)] = windU;
+                        v[IX(i, j, N)] = windV;
+                    }
+                }
+            }
+
             for (int iter = 0; iter < iterations; iter++)
             {
+                // INJECT WIND AT BOUNDARIES CONTINUOUSLY
                 for (int j = 1; j <= M; j++) {
                     if (windU > 0) { u[IX(1, j, N)] = windU; v[IX(1, j, N)] = windV; obstacles[IX(1, j, N)] = false; }
                     if (windU < 0) { u[IX(N, j, N)] = windU; v[IX(N, j, N)] = windV; obstacles[IX(N, j, N)] = false; }
@@ -298,8 +309,8 @@ namespace Enzyme.Components
             outMesh.Compact(); 
 
             DA.SetData(0, outMesh);
-            DA.SetDataList(1, outVectors);
-            DA.SetDataList(2, outPoints);
+            DA.SetDataList(1, outPoints);
+            DA.SetDataList(2, outVectors);
             DA.SetDataList(3, outSpeeds);
             DA.SetDataList(4, outColors);
 
