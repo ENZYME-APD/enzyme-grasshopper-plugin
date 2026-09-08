@@ -17,14 +17,14 @@ namespace Enzyme.Components
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddNumberParameter("Values", "Values", "List of numbers to remap", GH_ParamAccess.list);
-            pManager.AddIntervalParameter("TargetDomain", "TargetDomain", "The target domain to remap the values into", GH_ParamAccess.item, new Interval(0.0, 1.0));
+            pManager.AddIntervalParameter("Target", "Target", "The target domain to remap the values into", GH_ParamAccess.item, new Interval(0.0, 1.0));
             
             pManager[1].Optional = true;
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddNumberParameter("RemappedValues", "RemappedValues", "The remapped numbers", GH_ParamAccess.list);
+            pManager.AddNumberParameter("Remapped", "Remapped", "The remapped numbers", GH_ParamAccess.list);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
