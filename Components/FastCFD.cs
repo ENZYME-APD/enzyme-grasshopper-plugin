@@ -30,10 +30,12 @@ namespace Enzyme.Components
             pManager.AddNumberParameter("Friction", "F", "Surface drag (0.0 to 1.0). Accepts item or list.", GH_ParamAccess.list, 0.1);
             pManager.AddNumberParameter("ComfortThreshold", "CT", "Threshold for pedestrian comfort (m/s)", GH_ParamAccess.item, 5.0);
             pManager.AddCurveParameter("BoundaryMask", "Mask", "Optional closed curve to crop the simulation domain and filter statistics.", GH_ParamAccess.item);
+            pManager.AddColourParameter("CustomColors", "CC", "Custom color spectrum override (min to max)", GH_ParamAccess.list);
             
             pManager[1].Optional = true;
             pManager[7].Optional = true;
             pManager[9].Optional = true;
+            pManager[10].Optional = true;
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
@@ -41,6 +43,8 @@ namespace Enzyme.Components
             pManager.AddMeshParameter("WindMesh", "WM", "Heatmap of wind speeds mapped to the terrain", GH_ParamAccess.item);
             pManager.AddVectorParameter("WindVectors", "WV", "Wind velocity vectors for visualization", GH_ParamAccess.list);
             pManager.AddPointParameter("Points", "Pt", "Grid points corresponding to the vectors", GH_ParamAccess.list);
+            pManager.AddNumberParameter("Speeds", "Sp", "Wind speed magnitude (m/s) at each point", GH_ParamAccess.list);
+            pManager.AddColourParameter("Colors", "C", "The color assigned to each point/vector", GH_ParamAccess.list);
             pManager.AddTextParameter("Info", "Info", "Simulation data and timing", GH_ParamAccess.item);
         }
 
@@ -76,6 +80,9 @@ namespace Enzyme.Components
 
             Curve maskCurve = null;
             DA.GetData(9, ref maskCurve);
+
+            List<Color> customColors = new List<Color>();
+            DA.GetDataList(10, customColors);
 
             var sw = System.Diagnostics.Stopwatch.StartNew();
 
@@ -211,6 +218,8 @@ namespace Enzyme.Components
             Mesh outMesh = new Mesh();
             List<Vector3d> outVectors = new List<Vector3d>();
             List<Point3d> outPoints = new List<Point3d>();
+            List<double> outSpeeds = new List<double>();
+            List<Color> outColors = new List<Color>();
             
             double maxSpeed = 0.0;
             double minSpeed = double.MaxValue;
@@ -235,8 +244,13 @@ namespace Enzyme.Components
                     validCells++;
                     if (speed <= comfortThreshold) comfortCells++;
 
+                    double normalized = Math.Min(speed / (wSpeed * 1.5), 1.0);
+                    Color ptColor = GetColor(normalized, customColors);
+
                     outPoints.Add(gridPoints[idx]);
                     outVectors.Add(new Vector3d(u[idx], v[idx], 0));
+                    outSpeeds.Add(speed);
+                    outColors.Add(ptColor);
                 }
             }
 
@@ -254,13 +268,13 @@ namespace Enzyme.Components
                     outMesh.Vertices.Add(gridPoints[idx]);
                     vMap[idx] = vCounter++;
                     
-                    double speed = speeds[idx];
-                    double normalized = Math.Min(speed / (wSpeed * 1.5), 1.0);
-                    int r = (int)(normalized * 255);
-                    int b = (int)((1.0 - normalized) * 255);
-                    
-                    if (obstacles[idx]) outMesh.VertexColors.Add(Color.Gray);
-                    else outMesh.VertexColors.Add(Color.FromArgb(255, r, 0, b));
+                    if (obstacles[idx]) {
+                        outMesh.VertexColors.Add(Color.Gray);
+                    } else {
+                        double speed = speeds[idx];
+                        double normalized = Math.Min(speed / (wSpeed * 1.5), 1.0);
+                        outMesh.VertexColors.Add(GetColor(normalized, customColors));
+                    }
                 }
             }
 
@@ -273,17 +287,18 @@ namespace Enzyme.Components
                     int idx11 = IX(i + 1, j + 1, N);
                     int idx01 = IX(i, j + 1, N);
 
-                    // If any vertex of the quad is inside the mask, keep the quad
                     if (insideMask[idx00] || insideMask[idx10] || insideMask[idx11] || insideMask[idx01]) {
                         outMesh.Faces.AddFace(vMap[idx00], vMap[idx10], vMap[idx11], vMap[idx01]);
                     }
                 }
             }
-            outMesh.Compact(); // Cleanup unused exterior vertices
+            outMesh.Compact(); 
 
             DA.SetData(0, outMesh);
             DA.SetDataList(1, outVectors);
             DA.SetDataList(2, outPoints);
+            DA.SetDataList(3, outSpeeds);
+            DA.SetDataList(4, outColors);
 
             string infoStr = 
                 "FAST CFD (2.5D EULERIAN SOLVER)\n" +
@@ -297,10 +312,37 @@ namespace Enzyme.Components
                 "- Friction: Simulates surface drag slowing down the wind at the boundary layer (e.g., concrete vs forest).\n" +
                 "- BoundaryMask: Crops the simulation domain to vastly improve calculation speed, and strictly isolates the output geometry and HUD statistics to the enclosed area.";
             
-            DA.SetData(3, infoStr);
+            DA.SetData(5, infoStr);
 
             sw.Stop();
             Message = $"FAST CFD\nTime: {sw.ElapsedMilliseconds} ms\n---\nGrid: {cols}x{rows}\nMax: {maxSpeed:F1} | Min: {minSpeed:F1} | Avg: {avgSpeed:F1}\nComfort: {pctComfort:F1}%";
+        }
+
+        private Color GetColor(double normalized, List<Color> palette)
+        {
+            if (palette == null || palette.Count == 0)
+            {
+                int r = (int)(normalized * 255);
+                int b = (int)((1.0 - normalized) * 255);
+                return Color.FromArgb(255, r, 0, b);
+            }
+            if (palette.Count == 1) return palette[0];
+            
+            double scaled = Math.Max(0.0, Math.Min(1.0, normalized)) * (palette.Count - 1);
+            int idx1 = (int)Math.Floor(scaled);
+            int idx2 = (int)Math.Ceiling(scaled);
+            if (idx1 == idx2) return palette[idx1];
+            if (idx2 >= palette.Count) return palette.Last();
+            
+            double t = scaled - idx1;
+            Color c1 = palette[idx1];
+            Color c2 = palette[idx2];
+            
+            int R = (int)(c1.R + (c2.R - c1.R) * t);
+            int G = (int)(c1.G + (c2.G - c1.G) * t);
+            int B = (int)(c1.B + (c2.B - c1.B) * t);
+            
+            return Color.FromArgb(255, R, G, B);
         }
 
         public override void AppendAdditionalMenuItems(ToolStripDropDown menu)
