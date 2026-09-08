@@ -19,8 +19,8 @@ namespace Enzyme.Components
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddColourParameter("Default Color", "Default", "Default color for unmatched groups", GH_ParamAccess.item, Color.FromArgb(255, 214, 206, 206));
-            pManager.AddTextParameter("Group Names", "Names", "List of group name prefixes", GH_ParamAccess.list);
             pManager.AddColourParameter("Colors", "Colors", "List of colors corresponding to the names", GH_ParamAccess.list);
+            pManager.AddTextParameter("Group Names", "Names", "List of group name prefixes", GH_ParamAccess.list);
             
             pManager[1].Optional = true;
             pManager[2].Optional = true;
@@ -102,15 +102,9 @@ namespace Enzyme.Components
         {
             base.AddedToDocument(document);
             if (this.Params.Input[0].SourceCount == 0)
-                Enzyme.Utils.AutoWireHelper.WireColorSwatch(this, document, 0, Color.FromArgb(255, 214, 206, 206), 160, -80);
+                Enzyme.Utils.AutoWireHelper.WireColorSwatch(this, document, 0, Color.FromArgb(255, 214, 206, 206), -337, -147);
             
             if (this.Params.Input[1].SourceCount == 0)
-            {
-                string text = "Parameters\nProcess\nAnalysis\nOutput\nBake\nDisplay\nArchicad\nSpeckle\nAnnotation\nTest";
-                Enzyme.Utils.AutoWireHelper.WirePanel(this, document, 1, text, 160, -40, 100, 180);
-            }
-
-            if (this.Params.Input[2].SourceCount == 0)
             {
                 Color[] defaultColors = new Color[] {
                     Color.FromArgb(255, 64, 64, 64),
@@ -121,7 +115,6 @@ namespace Enzyme.Components
                     Color.FromArgb(255, 35, 84, 219),
                     Color.FromArgb(255, 214, 175, 154),
                     Color.FromArgb(255, 227, 123, 163),
-                    Color.FromArgb(255, 255, 0, 98),
                     Color.FromArgb(255, 255, 0, 98)
                 };
 
@@ -130,10 +123,16 @@ namespace Enzyme.Components
                     var swatch = new Grasshopper.Kernel.Special.GH_ColourSwatch();
                     swatch.CreateAttributes();
                     swatch.SwatchColour = defaultColors[i];
-                    swatch.Attributes.Pivot = new System.Drawing.PointF(this.Attributes.Pivot.X - 160, this.Attributes.Pivot.Y + (i * 25) - 40);
+                    swatch.Attributes.Pivot = new System.Drawing.PointF(this.Attributes.Pivot.X - 412, this.Attributes.Pivot.Y - 99 + (i * 27));
                     document.AddObject(swatch, false);
-                    this.Params.Input[2].AddSource(swatch);
+                    this.Params.Input[1].AddSource(swatch);
                 }
+            }
+
+            if (this.Params.Input[2].SourceCount == 0)
+            {
+                string text = "In\nProcess\nAnalysis\nOut\nBake\nViz\nTapir\nArchicad\nAnnotation\nDash";
+                Enzyme.Utils.AutoWireHelper.WirePanel(this, document, 2, text, -369, 169, 122, 170);
             }
         }
 
