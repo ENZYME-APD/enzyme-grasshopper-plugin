@@ -29,9 +29,11 @@ namespace Enzyme.Components
             pManager.AddNumberParameter("Viscosity", "V", "Kinematic viscosity (diffusion/turbulence)", GH_ParamAccess.item, 0.1);
             pManager.AddNumberParameter("Friction", "F", "Surface drag (0.0 to 1.0). Accepts item or list.", GH_ParamAccess.list, 0.1);
             pManager.AddNumberParameter("ComfortThreshold", "CT", "Threshold for pedestrian comfort (m/s)", GH_ParamAccess.item, 5.0);
+            pManager.AddCurveParameter("BoundaryMask", "Mask", "Optional closed curve to crop the simulation domain and filter statistics.", GH_ParamAccess.item);
             
             pManager[1].Optional = true;
             pManager[7].Optional = true;
+            pManager[9].Optional = true;
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
@@ -72,15 +74,24 @@ namespace Enzyme.Components
             double comfortThreshold = 5.0;
             if (!DA.GetData(8, ref comfortThreshold)) return;
 
+            Curve maskCurve = null;
+            DA.GetData(9, ref maskCurve);
+
             var sw = System.Diagnostics.Stopwatch.StartNew();
 
-            BoundingBox bbox = terrainMesh.GetBoundingBox(true);
+            BoundingBox bbox;
+            if (maskCurve != null && maskCurve.IsValid) {
+                bbox = maskCurve.GetBoundingBox(true);
+            } else {
+                bbox = terrainMesh.GetBoundingBox(true);
+            }
+
             int cols = (int)Math.Ceiling((bbox.Max.X - bbox.Min.X) / cellSize);
             int rows = (int)Math.Ceiling((bbox.Max.Y - bbox.Min.Y) / cellSize);
 
-            if (cols * rows > 40000)
+            if (cols * rows > 50000)
             {
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Grid is too dense ({cols}x{rows}). Increase CellSize.");
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Grid is too dense ({cols}x{rows}). Increase CellSize or use a smaller BoundaryMask.");
                 return;
             }
 
@@ -94,11 +105,12 @@ namespace Enzyme.Components
             Point3d[] gridPoints = new Point3d[totalCells];
             bool[] obstacles = new bool[totalCells];
             float[] frictionMap = new float[totalCells];
+            bool[] insideMask = new bool[totalCells];
 
             double startX = bbox.Min.X + cellSize / 2.0;
             double startY = bbox.Min.Y + cellSize / 2.0;
             
-            int vIdxCounter = 0; // Simple index mapping for friction if it matches grid size
+            int vIdxCounter = 0; 
 
             for (int i = 1; i <= N; i++)
             {
@@ -108,7 +120,6 @@ namespace Enzyme.Components
                     double x = startX + (i - 1) * cellSize;
                     double y = startY + (j - 1) * cellSize;
 
-                    // Assign friction
                     double fVal = 0.1;
                     if (frictionList.Count > 0)
                         fVal = frictionList.Count > vIdxCounter ? frictionList[vIdxCounter] : frictionList.Last();
@@ -139,6 +150,13 @@ namespace Enzyme.Components
                         gridPoints[idx] = new Point3d(x, y, bbox.Min.Z);
                         obstacles[idx] = true;
                     }
+
+                    if (maskCurve != null && maskCurve.IsValid) {
+                        var ptContainment = maskCurve.Contains(new Point3d(x, y, 0), Plane.WorldXY, 0.01);
+                        insideMask[idx] = (ptContainment == PointContainment.Inside || ptContainment == PointContainment.Coincident);
+                    } else {
+                        insideMask[idx] = true;
+                    }
                 }
             }
 
@@ -147,7 +165,6 @@ namespace Enzyme.Components
             float[] u0 = new float[totalCells];
             float[] v0 = new float[totalCells];
 
-            // CFL Safe Time Step
             double wSpeed = windVector.Length + 0.01;
             float dt = (float)(0.5 * cellSize / wSpeed);
             if (dt > 0.5f) dt = 0.5f;
@@ -181,7 +198,6 @@ namespace Enzyme.Components
 
                 Project(N, M, obstacles, u, v, u0, v0);
 
-                // Apply surface friction (drag)
                 for (int i = 1; i <= N; i++) {
                     for (int j = 1; j <= M; j++) {
                         if (obstacles[IX(i, j, N)]) continue;
@@ -208,10 +224,10 @@ namespace Enzyme.Components
                 for (int j = 1; j <= M; j++)
                 {
                     int idx = IX(i, j, N);
-                    if (obstacles[idx]) continue;
-                    
                     double speed = Math.Sqrt(u[idx] * u[idx] + v[idx] * v[idx]);
                     speeds[idx] = speed;
+
+                    if (obstacles[idx] || !insideMask[idx]) continue;
                     
                     if (speed > maxSpeed) maxSpeed = speed;
                     if (speed < minSpeed) minSpeed = speed;
@@ -228,32 +244,42 @@ namespace Enzyme.Components
             if (minSpeed == double.MaxValue) minSpeed = 0;
             double pctComfort = validCells > 0 ? ((double)comfortCells / validCells) * 100.0 : 0;
 
+            int[] vMap = new int[totalCells];
+            int vCounter = 0;
             for (int i = 1; i <= N; i++)
             {
                 for (int j = 1; j <= M; j++)
                 {
                     int idx = IX(i, j, N);
                     outMesh.Vertices.Add(gridPoints[idx]);
+                    vMap[idx] = vCounter++;
                     
                     double speed = speeds[idx];
                     double normalized = Math.Min(speed / (wSpeed * 1.5), 1.0);
                     int r = (int)(normalized * 255);
                     int b = (int)((1.0 - normalized) * 255);
+                    
                     if (obstacles[idx]) outMesh.VertexColors.Add(Color.Gray);
                     else outMesh.VertexColors.Add(Color.FromArgb(255, r, 0, b));
                 }
             }
-            for (int i = 0; i < N - 1; i++)
+
+            for (int i = 1; i < N; i++)
             {
-                for (int j = 0; j < M - 1; j++)
+                for (int j = 1; j < M; j++)
                 {
-                    int v00 = i + j * N;
-                    int v10 = (i + 1) + j * N;
-                    int v11 = (i + 1) + (j + 1) * N;
-                    int v01 = i + (j + 1) * N;
-                    outMesh.Faces.AddFace(v00, v10, v11, v01);
+                    int idx00 = IX(i, j, N);
+                    int idx10 = IX(i + 1, j, N);
+                    int idx11 = IX(i + 1, j + 1, N);
+                    int idx01 = IX(i, j + 1, N);
+
+                    // If any vertex of the quad is inside the mask, keep the quad
+                    if (insideMask[idx00] || insideMask[idx10] || insideMask[idx11] || insideMask[idx01]) {
+                        outMesh.Faces.AddFace(vMap[idx00], vMap[idx10], vMap[idx11], vMap[idx01]);
+                    }
                 }
             }
+            outMesh.Compact(); // Cleanup unused exterior vertices
 
             DA.SetData(0, outMesh);
             DA.SetDataList(1, outVectors);
@@ -268,7 +294,8 @@ namespace Enzyme.Components
                 "To remain insanely fast, this uses a 'Terrain-Following 2.5D Grid'. The grid drapes perfectly over the terrain topography. However, because it calculates a 2D sheet, it cannot simulate '3D Downdrafts' (wind hitting a skyscraper and plunging vertically down to the ground).\n\n" +
                 "VARIABLES:\n" +
                 "- Viscosity: Simulates the turbulence/thickness of the air. Lower = more chaotic vortices. Higher = smoother laminar flow.\n" +
-                "- Friction: Simulates surface drag slowing down the wind at the boundary layer (e.g., concrete vs forest).";
+                "- Friction: Simulates surface drag slowing down the wind at the boundary layer (e.g., concrete vs forest).\n" +
+                "- BoundaryMask: Crops the simulation domain to vastly improve calculation speed, and strictly isolates the output geometry and HUD statistics to the enclosed area.";
             
             DA.SetData(3, infoStr);
 
@@ -302,7 +329,7 @@ namespace Enzyme.Components
 
         private void CreateSlider(GH_Document doc, string name, double min, double max, double val, int index, float x, float y)
         {
-            if (this.Params.Input[index].SourceCount > 0) return; // Skip if already wired
+            if (this.Params.Input[index].SourceCount > 0) return;
 
             GH_NumberSlider slider = new GH_NumberSlider();
             slider.CreateAttributes();
