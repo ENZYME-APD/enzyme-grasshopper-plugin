@@ -12,7 +12,7 @@ namespace Enzyme.Components
     public class AdaptiveTerrainGrader : GH_Component
     {
         public AdaptiveTerrainGrader()
-            : base("Adaptive Terrain Grader", "TERRAIN GRADER",
+            : base("Terrain Grader", "TERRAIN GRADER",
                 "Generates adaptive grading meshes, volumes, and crisp cut/fill colors.",
                 "Enzyme", "Terrain")
         {
@@ -22,7 +22,7 @@ namespace Enzyme.Components
         {
             get
             {
-                return IconLoader.Load("AdaptiveTerrainGrader.png");
+                return IconLoader.Load("TerrainGrader.png");
             }
         }
 

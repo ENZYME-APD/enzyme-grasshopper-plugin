@@ -131,6 +131,8 @@ namespace Enzyme.Components
             DA.SetDataList(0, keylines);
         }
 
+        protected override System.Drawing.Bitmap Icon => Enzyme.IconLoader.Load("Keyline.png");
+
         public override Guid ComponentGuid
         {
             get { return new Guid("F6B3D4C1-92A5-4E38-B2C3-D4E5F6A7B8C9"); }

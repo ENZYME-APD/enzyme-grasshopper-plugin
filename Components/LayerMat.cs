@@ -256,7 +256,7 @@ Time: {elapsedMs} ms
 
         protected override Bitmap Icon
         {
-            get { return IconLoader.Load("LAYERMAT.png"); }
+            get { return IconLoader.Load("AssignLayerMaterial.png"); }
         }
         
         public override Guid ComponentGuid

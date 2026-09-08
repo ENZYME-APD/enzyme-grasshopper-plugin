@@ -176,6 +176,8 @@ namespace Enzyme.Components
             DA.SetDataList(2, topPoints);
         }
 
+        protected override System.Drawing.Bitmap Icon => Enzyme.IconLoader.Load("HydroDEM.png");
+
         public override Guid ComponentGuid
         {
             get { return new Guid("E5A9D3B2-81C4-4B39-A1B2-C3D4E5F6A7B8"); }

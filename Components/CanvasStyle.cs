@@ -55,6 +55,8 @@ namespace Enzyme.Components
                 Enzyme.Utils.AutoWireHelper.WireColorSwatch(this, document, 2, Color.FromArgb(255, 224, 175, 175), 120, 40);
         }
 
+        protected override System.Drawing.Bitmap Icon => Enzyme.IconLoader.Load("canvasStyle.png");
+
         public override Guid ComponentGuid => new Guid("B2C3D4E5-F6A1-4B2C-9D0E-F1A2B3C4D5E6");
     }
 }

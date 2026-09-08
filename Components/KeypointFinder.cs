@@ -180,6 +180,8 @@ namespace Enzyme.Components
             DA.SetDataList(1, keylines);
         }
 
+        protected override System.Drawing.Bitmap Icon => Enzyme.IconLoader.Load("keypoint.png");
+
         public override Guid ComponentGuid
         {
             get { return new Guid("AA112233-4455-6677-8899-AABBCCDDEEFF"); }

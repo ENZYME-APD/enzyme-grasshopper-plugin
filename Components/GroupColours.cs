@@ -133,6 +133,8 @@ namespace Enzyme.Components
             }
         }
 
+        protected override System.Drawing.Bitmap Icon => Enzyme.IconLoader.Load("GroupColors.png");
+
         public override Guid ComponentGuid => new Guid("A1B2C3D4-E5F6-4A1B-8C9D-E0F1A2B3C4D5");
     }
 }

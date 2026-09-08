@@ -193,7 +193,7 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
 
         protected override System.Drawing.Bitmap Icon
         {
-            get { return IconLoader.Load("GlobalFlood.png"); }
+            get { return IconLoader.Load("FloodEngine.png"); }
         }
 
         public override Guid ComponentGuid
