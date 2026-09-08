@@ -17,12 +17,17 @@ namespace Enzyme.Components
         
         public override GH_Exposure Exposure => GH_Exposure.primary;
 
-protected override void RegisterInputParams(GH_InputParamManager pManager)
+        protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
             pManager.AddMeshParameter("TerrainMesh", "TM", "Input Terrain Mesh", GH_ParamAccess.item);
             pManager.AddNumberParameter("Rainfall", "RF", "Rainfall intensity in Liters/m2/hour (mm/h)", GH_ParamAccess.item, 50.0);
             pManager.AddNumberParameter("Duration", "T", "Duration of the rain event in hours", GH_ParamAccess.item, 2.0);
             pManager.AddIntegerParameter("Iterations", "I", "Simulation steps for water flow", GH_ParamAccess.item, 200);
+            pManager.AddNumberParameter("Runoff Coefficient", "RC", "Multiplier for rainfall (0.0 to 1.0). 1.0 = concrete (no absorption). Can be a single value or a list matching the mesh vertices.", GH_ParamAccess.list, 1.0);
+            pManager.AddIntegerParameter("Boundary Condition", "BC", "0 = Closed (water pools at edges), 1 = Open (water drains off edges)", GH_ParamAccess.item, 1);
+            
+            pManager[4].Optional = true;
+            pManager[5].Optional = true;
         }
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
@@ -47,6 +52,12 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
             int Iterations = 200;
             if (!DA.GetData(3, ref Iterations)) return;
 
+            List<double> runoffCoeffs = new List<double>();
+            DA.GetDataList(4, runoffCoeffs);
+
+            int boundaryCondition = 1;
+            DA.GetData(5, ref boundaryCondition);
+
             System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
 
             if (TerrainMesh == null) return;
@@ -62,12 +73,21 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
 
             double[] topWaterDepth = new double[numTopVertices];
             double[] topZ = new double[numTopVertices];
+            bool[] nakedEdges = outMesh.GetNakedEdgePointStatus();
+            bool[] topNaked = new bool[numTopVertices];
 
             for (int i = 0; i < numTopVertices; i++)
             {
-                topWaterDepth[i] = rainDepthMeters;
-                // Get Z of the topology vertex
                 int vIdx = outMesh.TopologyVertices.MeshVertexIndices(i)[0];
+                topNaked[i] = nakedEdges != null && nakedEdges.Length > vIdx ? nakedEdges[vIdx] : false;
+
+                double coeff = 1.0;
+                if (runoffCoeffs.Count > 0)
+                {
+                    coeff = runoffCoeffs.Count > vIdx ? runoffCoeffs[vIdx] : runoffCoeffs[runoffCoeffs.Count - 1];
+                }
+
+                topWaterDepth[i] = rainDepthMeters * coeff;
                 topZ[i] = outMesh.Vertices[vIdx].Z;
             }
 
@@ -111,6 +131,18 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
                     }
                 }
                 
+                // Process boundaries
+                if (boundaryCondition == 1)
+                {
+                    for (int i = 0; i < numTopVertices; i++)
+                    {
+                        if (topNaked[i])
+                        {
+                            nextWater[i] = 0.0; // Water drains off the map
+                        }
+                    }
+                }
+
                 Array.Copy(nextWater, topWaterDepth, numTopVertices);
                 if (!moved) break;
             }
