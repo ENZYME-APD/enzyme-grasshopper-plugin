@@ -45,6 +45,7 @@ namespace Enzyme.Components
             pManager.AddPointParameter("Points", "Pt", "Grid points corresponding to the vectors", GH_ParamAccess.list);
             pManager.AddNumberParameter("Speeds", "Sp", "Wind speed magnitude (m/s) at each point", GH_ParamAccess.list);
             pManager.AddColourParameter("Colors", "C", "The color assigned to each point/vector", GH_ParamAccess.list);
+            pManager.AddTextParameter("Dashboard Data", "Dash", "JSON string for Dashboard and Legend", GH_ParamAccess.item);
             pManager.AddTextParameter("Info", "Info", "Simulation data and timing", GH_ParamAccess.item);
         }
 
@@ -300,6 +301,22 @@ namespace Enzyme.Components
             DA.SetDataList(3, outSpeeds);
             DA.SetDataList(4, outColors);
 
+            List<Color> legendColors = customColors.Count > 0 ? customColors : new List<Color> { Color.FromArgb(255, 0, 0, 255), Color.FromArgb(255, 255, 0, 0) };
+            string colorJsonArray = "[" + string.Join(",", legendColors.Select(c => $"{{\"R\":{c.R},\"G\":{c.G},\"B\":{c.B}}}")) + "]";
+            
+            string jsonStr = $@"{{
+  ""AnalysisType"": ""FastCFD"",
+  ""Title"": ""Wind Speed (m/s)"",
+  ""Type"": ""Continuous"",
+  ""Min"": 0.0,
+  ""Max"": {(wSpeed * 1.5).ToString(System.Globalization.CultureInfo.InvariantCulture)},
+  ""Average"": {avgSpeed.ToString(System.Globalization.CultureInfo.InvariantCulture)},
+  ""ComfortThreshold"": {comfortThreshold.ToString(System.Globalization.CultureInfo.InvariantCulture)},
+  ""ComfortPercentage"": {pctComfort.ToString(System.Globalization.CultureInfo.InvariantCulture)},
+  ""Colors"": {colorJsonArray}
+}}";
+            DA.SetData(5, jsonStr);
+
             string infoStr = 
                 "FAST CFD (2.5D EULERIAN SOLVER)\n" +
                 "===============================\n\n" +
@@ -312,7 +329,7 @@ namespace Enzyme.Components
                 "- Friction: Simulates surface drag slowing down the wind at the boundary layer (e.g., concrete vs forest).\n" +
                 "- BoundaryMask: Crops the simulation domain to vastly improve calculation speed, and strictly isolates the output geometry and HUD statistics to the enclosed area.";
             
-            DA.SetData(5, infoStr);
+            DA.SetData(6, infoStr);
 
             sw.Stop();
             Message = $"FAST CFD\nTime: {sw.ElapsedMilliseconds} ms\n---\nGrid: {cols}x{rows}\nMax: {maxSpeed:F1} | Min: {minSpeed:F1} | Avg: {avgSpeed:F1}\nComfort: {pctComfort:F1}%";
