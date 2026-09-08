@@ -196,7 +196,10 @@ namespace Enzyme.Components
                 "GLOBAL FLOOD ENGINE\n" +
                 "===================\n\n" +
                 "HOW IT WORKS:\n" +
-                "Simulates ponding (accumulation volume). You input a rain intensity and duration, and the engine calculates how much water falls on the site and fills local depressions, outputting exact water depths.\n\n" +
+                "Simulates ponding and flow accumulation. You input a rain intensity and duration, and the engine calculates how much water falls on the site and fills local depressions, outputting exact water depths.\n\n" +
+                "NEW PARAMETERS:\n" +
+                "- Runoff Coefficient: Simulates absorption. 1.0 means all rain becomes flood water (e.g. concrete). 0.0 means all rain is absorbed by the terrain. Can be a global value or a per-vertex list.\n" +
+                "- Boundary Condition: 0 (Closed) forces water to pool at the edges of the mesh. 1 (Open) allows water to naturally drain off the map.\n\n" +
                 "INTERPRETATION & IMPORTANCE:\n" +
                 "Essential for flood risk assessment. Reveals trapped water areas, calculates retention pond volumes, and shows submerged regions during storms. It shows the 'destination' of water.";
             DA.SetData(3, info);
