@@ -46,8 +46,8 @@ namespace Enzyme.Components
             pManager.AddMeshParameter("WindMesh", "WindMesh", "Heatmap of wind speeds mapped to the terrain", GH_ParamAccess.item);
             pManager.AddPointParameter("Points", "Points", "Grid points corresponding to the vectors", GH_ParamAccess.list);
             pManager.AddVectorParameter("WindVectors", "WindVectors", "Wind velocity vectors for visualization", GH_ParamAccess.list);
-            pManager.AddNumberParameter("Speeds", "Speeds", "Wind speed magnitude (m/s) at each point", GH_ParamAccess.list);
             pManager.AddColourParameter("Colors", "Colors", "The color assigned to each point/vector", GH_ParamAccess.list);
+            pManager.AddNumberParameter("Speeds", "Speeds", "Wind speed magnitude (m/s) at each point", GH_ParamAccess.list);
             pManager.AddTextParameter("Dashboard Data", "Dashboard", "JSON string for Dashboard and Legend", GH_ParamAccess.item);
             pManager.AddTextParameter("Info", "Info", "Simulation data and timing", GH_ParamAccess.item);
         }
@@ -183,17 +183,20 @@ namespace Enzyme.Components
             float[] v0 = new float[totalCells];
 
             double wSpeed = windSpeed + 0.01;
-            float dt = (float)(0.5 * cellSize / wSpeed);
-            if (dt > 0.5f) dt = 0.5f;
+            
+            // CONVERT TO CELLS/SEC TO STABILIZE GRID-SCALE PHYSICS
+            float windU_cells = (float)(windVector.X / cellSize);
+            float windV_cells = (float)(windVector.Y / cellSize);
+            float wSpeed_cells = (float)(wSpeed / cellSize);
 
-            float windU = (float)windVector.X;
-            float windV = (float)windVector.Y;
+            float dt = 0.5f / wSpeed_cells;
+            if (dt > 0.5f) dt = 0.5f;
 
             for (int i = 1; i <= N; i++) {
                 for (int j = 1; j <= M; j++) {
                     if (!obstacles[IX(i, j, N)]) {
-                        u[IX(i, j, N)] = windU;
-                        v[IX(i, j, N)] = windV;
+                        u[IX(i, j, N)] = windU_cells;
+                        v[IX(i, j, N)] = windV_cells;
                     }
                 }
             }
@@ -201,12 +204,12 @@ namespace Enzyme.Components
             for (int iter = 0; iter < iterations; iter++)
             {
                 for (int j = 1; j <= M; j++) {
-                    if (windU > 0) { u[IX(1, j, N)] = windU; v[IX(1, j, N)] = windV; obstacles[IX(1, j, N)] = false; }
-                    if (windU < 0) { u[IX(N, j, N)] = windU; v[IX(N, j, N)] = windV; obstacles[IX(N, j, N)] = false; }
+                    if (windU_cells > 0) { u[IX(1, j, N)] = windU_cells; v[IX(1, j, N)] = windV_cells; obstacles[IX(1, j, N)] = false; }
+                    if (windU_cells < 0) { u[IX(N, j, N)] = windU_cells; v[IX(N, j, N)] = windV_cells; obstacles[IX(N, j, N)] = false; }
                 }
                 for (int i = 1; i <= N; i++) {
-                    if (windV > 0) { u[IX(i, 1, N)] = windU; v[IX(i, 1, N)] = windV; obstacles[IX(i, 1, N)] = false; }
-                    if (windV < 0) { u[IX(i, M, N)] = windU; v[IX(i, M, N)] = windV; obstacles[IX(i, M, N)] = false; }
+                    if (windV_cells > 0) { u[IX(i, 1, N)] = windU_cells; v[IX(i, 1, N)] = windV_cells; obstacles[IX(i, 1, N)] = false; }
+                    if (windV_cells < 0) { u[IX(i, M, N)] = windU_cells; v[IX(i, M, N)] = windV_cells; obstacles[IX(i, M, N)] = false; }
                 }
 
                 float[] tmp = u; u = u0; u0 = tmp;
@@ -252,7 +255,12 @@ namespace Enzyme.Components
                 for (int j = 1; j <= M; j++)
                 {
                     int idx = IX(i, j, N);
-                    double speed = Math.Sqrt(u[idx] * u[idx] + v[idx] * v[idx]);
+                    
+                    // REVERT CELLS/SEC BACK TO METERS/SEC
+                    double u_ms = u[idx] * cellSize;
+                    double v_ms = v[idx] * cellSize;
+                    
+                    double speed = Math.Sqrt(u_ms * u_ms + v_ms * v_ms);
                     speeds[idx] = speed;
 
                     if (obstacles[idx] || !insideMask[idx]) continue;
@@ -267,9 +275,9 @@ namespace Enzyme.Components
                     Color ptColor = GetColor(normalized, customColors);
 
                     outPoints.Add(gridPoints[idx]);
-                    outVectors.Add(new Vector3d(u[idx], v[idx], 0));
-                    outSpeeds.Add(speed);
+                    outVectors.Add(new Vector3d(u_ms, v_ms, 0));
                     outColors.Add(ptColor);
+                    outSpeeds.Add(speed);
                 }
             }
 
@@ -316,22 +324,20 @@ namespace Enzyme.Components
             DA.SetData(0, outMesh);
             DA.SetDataList(1, outPoints);
             DA.SetDataList(2, outVectors);
-            DA.SetDataList(3, outSpeeds);
-            DA.SetDataList(4, outColors);
+            DA.SetDataList(3, outColors);
+            DA.SetDataList(4, outSpeeds);
 
             List<Color> legendColors = customColors.Count > 0 ? customColors : new List<Color> { Color.FromArgb(255, 0, 0, 255), Color.FromArgb(255, 255, 0, 0) };
             string colorJsonArray = "[" + string.Join(",", legendColors.Select(c => $"{{\"R\":{c.R},\"G\":{c.G},\"B\":{c.B}}}")) + "]";
+            string labelsJson = $@"[""0.0"", ""{(wSpeed * 1.5):F1}""]";
+            string subLabelsJson = $@"[""Avg: {avgSpeed:F1} m/s"", ""Comfort: {pctComfort:F1}%""]";
             
             string jsonStr = $@"{{
-  ""AnalysisType"": ""FastCFD"",
-  ""Title"": ""Wind Speed (m/s)"",
   ""Type"": ""Continuous"",
-  ""Min"": 0.0,
-  ""Max"": {(wSpeed * 1.5).ToString(System.Globalization.CultureInfo.InvariantCulture)},
-  ""Average"": {avgSpeed.ToString(System.Globalization.CultureInfo.InvariantCulture)},
-  ""ComfortThreshold"": {comfortThreshold.ToString(System.Globalization.CultureInfo.InvariantCulture)},
-  ""ComfortPercentage"": {pctComfort.ToString(System.Globalization.CultureInfo.InvariantCulture)},
-  ""Colors"": {colorJsonArray}
+  ""Title"": ""WIND SPEED (m/s)"",
+  ""Colors"": {colorJsonArray},
+  ""Labels"": {labelsJson},
+  ""SubLabels"": {subLabelsJson}
 }}";
             DA.SetData(5, jsonStr);
 
@@ -434,7 +440,7 @@ namespace Enzyme.Components
 
         private void Advect(int N, int M, bool[] obs, float[] d, float[] d0, float[] u, float[] v, float dt)
         {
-            float dt0 = dt * N;
+            float dt0 = dt; 
             for (int i = 1; i <= N; i++) {
                 for (int j = 1; j <= M; j++) {
                     if (obs[IX(i, j, N)]) continue;
@@ -455,7 +461,7 @@ namespace Enzyme.Components
 
         private void Diffuse(int N, int M, bool[] obs, float[] x, float[] x0, float diff, float dt)
         {
-            float a = dt * diff * N * M;
+            float a = dt * diff; 
             for (int k = 0; k < 10; k++) {
                 for (int i = 1; i <= N; i++) {
                     for (int j = 1; j <= M; j++) {
@@ -473,7 +479,7 @@ namespace Enzyme.Components
                 for (int j = 1; j <= M; j++) {
                     if (obs[IX(i, j, N)]) continue;
                     div[IX(i, j, N)] = -0.5f * (u[IX(i + 1, j, N)] - u[IX(i - 1, j, N)] +
-                                                v[IX(i, j + 1, N)] - v[IX(i, j - 1, N)]) / N;
+                                                v[IX(i, j + 1, N)] - v[IX(i, j - 1, N)]);
                     p[IX(i, j, N)] = 0;
                 }
             }
@@ -494,8 +500,8 @@ namespace Enzyme.Components
             for (int i = 1; i <= N; i++) {
                 for (int j = 1; j <= M; j++) {
                     if (obs[IX(i, j, N)]) continue;
-                    u[IX(i, j, N)] -= 0.5f * N * (p[IX(i + 1, j, N)] - p[IX(i - 1, j, N)]);
-                    v[IX(i, j, N)] -= 0.5f * N * (p[IX(i, j + 1, N)] - p[IX(i, j - 1, N)]);
+                    u[IX(i, j, N)] -= 0.5f * (p[IX(i + 1, j, N)] - p[IX(i - 1, j, N)]);
+                    v[IX(i, j, N)] -= 0.5f * (p[IX(i, j + 1, N)] - p[IX(i, j - 1, N)]);
                 }
             }
             SetBnd(N, M, obs, u);
