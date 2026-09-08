@@ -14,9 +14,11 @@ namespace Enzyme.Components
         public FastCFD()
           : base("Fast CFD", "FastCFD",
               "A 2.5D Terrain-Following Grid Fluid Solver for fast urban wind analysis.",
-              "Enzyme", "Analysis")
+              "Enzyme", "Terrain")
         {
         }
+
+        public override GH_Exposure Exposure => GH_Exposure.secondary;
 
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
@@ -492,7 +494,7 @@ namespace Enzyme.Components
             }
         }
 
-        protected override System.Drawing.Bitmap Icon => null;
+        protected override System.Drawing.Bitmap Icon => Enzyme.IconLoader.Load("FastCFD.png");
         public override Guid ComponentGuid => new Guid("11223344-5566-7788-9900-AABBCCDDEEFF");
     }
 }
