@@ -160,13 +160,18 @@ namespace Enzyme.Components
                         Point3d drapedPt = new Point3d(terrainPt.X, terrainPt.Y, terrainPt.Z + analysisHeight);
                         gridPoints[idx] = drapedPt;
 
-                        if (combinedContext.IsValid && combinedContext.Faces.Count > 0)
+                        foreach (var m in contextMeshes)
                         {
-                            double contextT = Rhino.Geometry.Intersect.Intersection.MeshRay(combinedContext, rayDown);
-                            if (contextT >= 0.0 && contextT < terrainT)
+                            if (m != null && m.IsValid)
                             {
-                                Point3d contextPt = rayDown.PointAt(contextT);
-                                if (contextPt.Z > drapedPt.Z) obstacles[idx] = true;
+                                if (m.GetBoundingBox(false).Contains(drapedPt))
+                                {
+                                    if (m.IsPointInside(drapedPt, 0.01, true))
+                                    {
+                                        obstacles[idx] = true;
+                                        break;
+                                    }
+                                }
                             }
                         }
                     }
