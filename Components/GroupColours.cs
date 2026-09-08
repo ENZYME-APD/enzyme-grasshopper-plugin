@@ -36,9 +36,13 @@ namespace Enzyme.Components
             List<string> names = new List<string>();
             List<Color> colors = new List<Color>();
 
-            DA.GetData(0, ref defaultColor);
-            DA.GetDataList(1, names);
-            DA.GetDataList(2, colors);
+            int idxDefault = Params.IndexOfInputParam("Default Color");
+            int idxNames = Params.IndexOfInputParam("Group Names");
+            int idxColors = Params.IndexOfInputParam("Colors");
+
+            if (idxDefault != -1) DA.GetData(idxDefault, ref defaultColor);
+            if (idxNames != -1) DA.GetDataList(idxNames, names);
+            if (idxColors != -1) DA.GetDataList(idxColors, colors);
 
             GH_Document doc = OnPingDocument();
             if (doc == null) return;
