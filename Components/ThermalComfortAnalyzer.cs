@@ -101,6 +101,7 @@ namespace Enzyme.Components
             pManager.AddPointParameter("WorstComfortPoints", "Worst", "Point(s) with apparent temperature furthest from IdealTemperature, within ComfortTolerance of the single worst", GH_ParamAccess.list);
             pManager.AddNumberParameter("WorstComfortValues", "WorstValues", "The apparent temperatures for the WorstComfortPoints", GH_ParamAccess.list);
             pManager.AddMeshParameter("ComfortMesh", "ComfortMesh", "The input terrain mesh, vertex-colored by comfort deviation", GH_ParamAccess.item);
+            pManager.AddPointParameter("TagPoints", "TagPoints", "Pass-through of the input tag points", GH_ParamAccess.list);
             pManager.AddNumberParameter("ComfortValues", "ComfortValues", "Raw apparent temperature (deg C) per terrain vertex", GH_ParamAccess.list);
             pManager.AddColourParameter("ComfortColors", "ComfortColors", "List of colors corresponding to each vertex on the mesh", GH_ParamAccess.list);
             pManager.AddTextParameter("Info", "Info", "Component information and interpretation", GH_ParamAccess.item);
@@ -347,7 +348,7 @@ namespace Enzyme.Components
                 jmetrics.Add(new JObject { ["Name"] = "Worst Comfort Pts", ["Value"] = worstPoints.Count.ToString() });
                 payload["Metrics"] = jmetrics;
 
-                DA.SetData(8, payload.ToString(Newtonsoft.Json.Formatting.None));
+                DA.SetData(9, payload.ToString(Newtonsoft.Json.Formatting.None));
             }
 
             DA.SetDataList(0, bestPoints);
@@ -355,10 +356,11 @@ namespace Enzyme.Components
             DA.SetDataList(2, worstPoints);
             DA.SetDataList(3, worstValues);
             DA.SetData(4, comfortMesh);
-            DA.SetDataList(5, comfortValues);
-            DA.SetDataList(6, comfortColors);
+            DA.SetDataList(5, tagPoints);
+            DA.SetDataList(6, comfortValues);
+            DA.SetDataList(7, comfortColors);
 
-            DA.SetData(7, "HIGROTHERMAL COMFORT\n"
+            DA.SetData(8, "HIGROTHERMAL COMFORT\n"
                 + "\n"
                 + "METHODOLOGY (STEADMAN 1994):\n"
                 + "Calculates Apparent Temperature (AT) combining ambient dry-bulb temperature, relative humidity, and wind speed. "
