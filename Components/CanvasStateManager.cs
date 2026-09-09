@@ -34,6 +34,7 @@ namespace Enzyme.Components
             pManager.AddTextParameter("Save Name", "S_Name", "Name to save the state under", GH_ParamAccess.item, "State1");
             pManager.AddBooleanParameter("Load State", "Load", "Button to load the specified canvas state", GH_ParamAccess.item, false);
             pManager.AddTextParameter("Load Name", "L_Name", "Name of the state to load", GH_ParamAccess.item, "State1");
+            pManager.AddBooleanParameter("Turn Off New Nodes", "OffNew", "If true, new nodes added after the state was saved will be disabled/hidden.", GH_ParamAccess.item, true);
         }
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
@@ -47,13 +48,14 @@ namespace Enzyme.Components
         protected override void SolveInstance(IGH_DataAccess DA)
         {
             var sw = System.Diagnostics.Stopwatch.StartNew();
-            bool save = false, load = false;
+            bool save = false, load = false, offNew = true;
             string saveName = "", loadName = "";
 
             DA.GetData(0, ref save);
             DA.GetData(1, ref saveName);
             DA.GetData(2, ref load);
             DA.GetData(3, ref loadName);
+            DA.GetData(4, ref offNew);
 
             GH_Document doc = OnPingDocument();
             if (doc == null) return;
@@ -107,9 +109,9 @@ namespace Enzyme.Components
                             if (obj.InstanceGuid != this.InstanceGuid)
                             {
                                 string guidStr = obj.InstanceGuid.ToString();
+                                bool changed = false;
                                 if (savedState.TryGetValue(guidStr, out NodeState wasState))
                                 {
-                                    bool changed = false;
                                     if (obj is IGH_ActiveObject act && act.Locked != wasState.Locked)
                                     {
                                         act.Locked = wasState.Locked;
@@ -119,13 +121,27 @@ namespace Enzyme.Components
                                     {
                                         prv.Hidden = wasState.Hidden;
                                         changed = true;
-                                        redraw = true; // Preview changes require redraw
+                                        redraw = true; 
                                     }
-                                    
-                                    if (changed && obj is IGH_ActiveObject act2)
+                                }
+                                else if (offNew)
+                                {
+                                    if (obj is IGH_ActiveObject act && !act.Locked)
                                     {
-                                        act2.ExpireSolution(false);
+                                        act.Locked = true;
+                                        changed = true;
                                     }
+                                    if (obj is IGH_PreviewObject prv && !prv.Hidden)
+                                    {
+                                        prv.Hidden = true;
+                                        changed = true;
+                                        redraw = true;
+                                    }
+                                }
+                                
+                                if (changed && obj is IGH_ActiveObject act2)
+                                {
+                                    act2.ExpireSolution(false);
                                 }
                             }
                         }
