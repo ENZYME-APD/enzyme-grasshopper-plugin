@@ -44,7 +44,7 @@ namespace Enzyme.Components
             pManager.AddIntegerParameter("Accumulation", "A", "Flow accumulation value per topology vertex", GH_ParamAccess.list);
             pManager.AddPointParameter("Topology Points", "P", "Topology vertices matching the accumulation list", GH_ParamAccess.list);
             pManager.AddTextParameter("Info", "Info", "Component information and methodology", GH_ParamAccess.item);
-            pManager.AddTextParameter("Dashboard JSON", "JSON", "Unified JSON payload containing legend and key analysis metrics for the Analysis Dashboard", GH_ParamAccess.item);
+            pManager.AddTextParameter("Dashboard Data", "Dashboard Data", "Unified JSON payload containing legend and key analysis metrics for the Analysis Dashboard", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)

@@ -48,7 +48,7 @@ namespace Enzyme.Components
             pManager.AddVectorParameter("WindVectors", "WindVectors", "Wind velocity vectors for visualization", GH_ParamAccess.list);
             pManager.AddColourParameter("Colors", "Colors", "The color assigned to each point/vector", GH_ParamAccess.list);
             pManager.AddNumberParameter("Speeds", "Speeds", "Wind speed magnitude (m/s) at each point", GH_ParamAccess.list);
-            pManager.AddTextParameter("Dashboard Data", "Dashboard", "JSON string for Dashboard and Legend", GH_ParamAccess.item);
+            pManager.AddTextParameter("Dashboard Data", "Dashboard Data", "JSON string for Dashboard and Legend", GH_ParamAccess.item);
             pManager.AddTextParameter("Info", "Info", "Simulation data and timing", GH_ParamAccess.item);
         }
 

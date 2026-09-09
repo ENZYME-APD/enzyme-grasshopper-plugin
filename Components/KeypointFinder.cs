@@ -44,7 +44,7 @@ namespace Enzyme.Components
             pManager.AddPointParameter("Keypoints", "P", "The identified points of inflection (steep to flat)", GH_ParamAccess.list);
             pManager.AddCurveParameter("Master Keylines", "K", "The specific horizontal terrain contours passing through the Keypoints", GH_ParamAccess.list);
             pManager.AddTextParameter("Info", "Info", "Component information and methodology", GH_ParamAccess.item);
-            pManager.AddTextParameter("Dashboard JSON", "JSON", "Unified JSON payload containing legend and key analysis metrics for the Analysis Dashboard", GH_ParamAccess.item);
+            pManager.AddTextParameter("Dashboard Data", "Dashboard Data", "Unified JSON payload containing legend and key analysis metrics for the Analysis Dashboard", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)

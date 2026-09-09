@@ -96,7 +96,7 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
             pManager.AddPointParameter("GlobalMinPoint", "GMI", "Absolute lowest point on the mesh.", GH_ParamAccess.tree);
             pManager.AddNumberParameter("GlobalMinElevation", "GMIE", "Absolute lowest Z-value.", GH_ParamAccess.tree);
             pManager.AddMeshParameter("HeatmapMeshes", "HM", "The vertex-colored duplicate mesh.", GH_ParamAccess.tree);
-            pManager.AddGenericParameter("Color Legend", "Color Legend", "JSON Legend Data", GH_ParamAccess.item);
+            pManager.AddTextParameter("Dashboard Data", "Dashboard Data", "JSON Legend Data", GH_ParamAccess.item);
                     pManager.AddTextParameter("Info", "Info", "Component information and interpretation", GH_ParamAccess.item);
         }
 

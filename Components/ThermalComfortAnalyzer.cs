@@ -98,10 +98,13 @@ namespace Enzyme.Components
         {
             pManager.AddPointParameter("BestComfortPoints", "Best", "Point(s) with apparent temperature closest to IdealTemperature, within ComfortTolerance of the single best", GH_ParamAccess.list);
             pManager.AddPointParameter("WorstComfortPoints", "Worst", "Point(s) with apparent temperature furthest from IdealTemperature, within ComfortTolerance of the single worst", GH_ParamAccess.list);
-            pManager.AddMeshParameter("ComfortMesh", "ComfortMesh", "The input terrain mesh, vertex-colored by comfort deviation - same connectivity as TerrainMesh, no new grid/UVs", GH_ParamAccess.item);
-            pManager.AddNumberParameter("ComfortValues", "ComfortValues", "Raw apparent temperature (deg C) per terrain vertex, aligned with ComfortMesh's vertex order", GH_ParamAccess.list);
+            pManager.AddMeshParameter("ComfortMesh", "ComfortMesh", "The input terrain mesh, vertex-colored by comfort deviation", GH_ParamAccess.item);
+            pManager.AddNumberParameter("ComfortValues", "ComfortValues", "Raw apparent temperature (deg C) per terrain vertex", GH_ParamAccess.list);
+            pManager.AddColourParameter("ComfortColors", "ComfortColors", "List of colors corresponding to each vertex on the mesh", GH_ParamAccess.list);
+            pManager.AddNumberParameter("BestComfortValues", "BestValues", "The apparent temperatures for the BestComfortPoints", GH_ParamAccess.list);
+            pManager.AddNumberParameter("WorstComfortValues", "WorstValues", "The apparent temperatures for the WorstComfortPoints", GH_ParamAccess.list);
             pManager.AddTextParameter("Info", "Info", "Component information and interpretation", GH_ParamAccess.item);
-            pManager.AddTextParameter("Dashboard JSON", "JSON", "Unified JSON payload containing legend and key analysis metrics for the Analysis Dashboard", GH_ParamAccess.item);
+            pManager.AddTextParameter("Dashboard Data", "Dashboard Data", "Unified JSON payload containing legend and key analysis metrics for the Analysis Dashboard", GH_ParamAccess.item);
         }
 
         private static double ApparentTemperature(double tempC, double humidityPct, double windSpeedMs)
@@ -143,8 +146,11 @@ namespace Enzyme.Components
 
             List<Point3d> bestPoints = new List<Point3d>();
             List<Point3d> worstPoints = new List<Point3d>();
-            Mesh comfortMesh = new Mesh();
+            List<double> bestValues = new List<double>();
+            List<double> worstValues = new List<double>();
+            Mesh comfortMesh = null;
             List<double> comfortValues = new List<double>();
+            List<Color> comfortColors = new List<Color>();
 
             if (execute && terrain != null && tagPoints.Count > 0 && velocityValues.Count == tagPoints.Count)
             {
@@ -152,12 +158,14 @@ namespace Enzyme.Components
                 // themselves, since they're already one-to-one - no mesh mapping needed here.
                 int n = tagPoints.Count;
                 double[] deviation = new double[n];
+                double[] atVals = new double[n];
                 double minDev = double.MaxValue;
                 double maxDev = double.MinValue;
 
                 for (int i = 0; i < n; i++)
                 {
                     double at = ApparentTemperature(temperature, humidity, velocityValues[i]);
+                    atVals[i] = at;
                     deviation[i] = Math.Abs(at - idealTemperature);
                     if (deviation[i] < minDev) minDev = deviation[i];
                     if (deviation[i] > maxDev) maxDev = deviation[i];
@@ -168,8 +176,16 @@ namespace Enzyme.Components
 
                 for (int i = 0; i < n; i++)
                 {
-                    if (deviation[i] <= minDev + tol) bestPoints.Add(tagPoints[i]);
-                    if (deviation[i] >= maxDev - tol) worstPoints.Add(tagPoints[i]);
+                    if (deviation[i] <= minDev + tol)
+                    {
+                        bestPoints.Add(tagPoints[i]);
+                        bestValues.Add(atVals[i]);
+                    }
+                    if (deviation[i] >= maxDev - tol)
+                    {
+                        worstPoints.Add(tagPoints[i]);
+                        worstValues.Add(atVals[i]);
+                    }
                 }
 
                 // --- ComfortMesh: reuse the terrain mesh's own vertices/faces directly (no new
@@ -297,6 +313,7 @@ namespace Enzyme.Components
 
                     comfortMesh.VertexColors.Add(mappedColor);
                     comfortValues.Add(vertexAT[vi]);
+                    comfortColors.Add(mappedColor);
                 }
             }
 
@@ -330,15 +347,18 @@ namespace Enzyme.Components
                 jmetrics.Add(new JObject { ["Name"] = "Worst Comfort Pts", ["Value"] = worstPoints.Count.ToString() });
                 payload["Metrics"] = jmetrics;
 
-                DA.SetData(5, payload.ToString(Newtonsoft.Json.Formatting.None));
+                DA.SetData(8, payload.ToString(Newtonsoft.Json.Formatting.None));
             }
 
             DA.SetDataList(0, bestPoints);
             DA.SetDataList(1, worstPoints);
             DA.SetData(2, comfortMesh);
             DA.SetDataList(3, comfortValues);
+            DA.SetDataList(4, comfortColors);
+            DA.SetDataList(5, bestValues);
+            DA.SetDataList(6, worstValues);
 
-            DA.SetData(4, "HIGROTHERMAL COMFORT\n"
+            DA.SetData(7, "HIGROTHERMAL COMFORT\n"
                 + "\n"
                 + "METHODOLOGY (STEADMAN 1994):\n"
                 + "Calculates Apparent Temperature (AT) combining ambient dry-bulb temperature, relative humidity, and wind speed. "

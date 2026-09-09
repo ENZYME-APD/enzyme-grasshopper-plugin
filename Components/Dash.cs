@@ -311,7 +311,7 @@ namespace Enzyme.Components
             Color warningRed = Color.OrangeRed;
 
             var rect = new Rectangle((int)x, (int)y, (int)boxW, (int)boxH);
-            e.Display.Draw2dRectangle(rect, bg, 1, bg);
+            e.Display.Draw2dRectangle(rect, bg, 0, bg);
 
             double currentY = y + _fitPadding;
             foreach (var item in _displayData)

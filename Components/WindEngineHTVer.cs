@@ -253,7 +253,7 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
             pManager.AddMeshParameter("PlainMesh", "PlainMesh", "Original topography mesh without vertex colors", GH_ParamAccess.item);
             pManager.AddNumberParameter("VelocityValues", "VelocityValues", "Raw unformatted velocity values, aligned with WindVectors", GH_ParamAccess.list);
                     pManager.AddTextParameter("Info", "Info", "Component information and interpretation", GH_ParamAccess.item);
-            pManager.AddTextParameter("LegendData", "LegendData", "JSON legend payload (min/max speed + the actual color ramp in use) - feed directly into the Legend Geometry component's Color Legend input", GH_ParamAccess.item);
+            pManager.AddTextParameter("Dashboard Data", "Dashboard Data", "JSON legend payload (min/max speed + the actual color ramp in use) - feed directly into the Legend Geometry component's Color Legend input", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)

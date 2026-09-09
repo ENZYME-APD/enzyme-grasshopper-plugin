@@ -47,7 +47,7 @@ namespace Enzyme.Components
         protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
             pManager.AddBooleanParameter("Run", "run", "Enable HUD", GH_ParamAccess.item, false);
-            pManager.AddTextParameter("JSON Payload", "json", "JSON string representing the analysis data or legend", GH_ParamAccess.item);
+            pManager.AddTextParameter("Dashboard Data", "Dashboard Data", "JSON string representing the analysis data or legend", GH_ParamAccess.item);
             pManager.AddNumberParameter("Size", "size", "Base text size", GH_ParamAccess.item, 12.0);
             pManager.AddIntegerParameter("Anchor", "anchor", "0=TL, 1=TR, 2=BL, 3=BR", GH_ParamAccess.item, 0);
             pManager.AddTextParameter("Font", "font", "Font family name", GH_ParamAccess.item, "Arial");
@@ -210,7 +210,7 @@ namespace Enzyme.Components
             
             double alpha = Math.Max(0.0, Math.Min(1.0, _transparency));
             Color bg = Color.FromArgb((int)(alpha * 255), 25, 25, 25);
-            e.Display.Draw2dRectangle(rect, bg, 1, bg);
+            e.Display.Draw2dRectangle(rect, bg, 0, bg);
 
             double curY = y + padding;
             e.Display.Draw2dText(_title.ToUpper(), _fontColor, new Point2d(x + padding, curY), false, (int)_size, _fontFace);
@@ -227,7 +227,7 @@ namespace Enzyme.Components
             for (int i = _colors.Count - 1; i >= 0; i--)
             {
                 var crect = new Rectangle((int)(x + padding), (int)curY, (int)colorBoxW, (int)colorBoxH);
-                e.Display.Draw2dRectangle(crect, _colors[i], 1, _colors[i]);
+                e.Display.Draw2dRectangle(crect, _colors[i], 0, _colors[i]);
                 
                 string labelStr = "";
                 if (_legendType == "Discrete" && i < _labels.Count)
