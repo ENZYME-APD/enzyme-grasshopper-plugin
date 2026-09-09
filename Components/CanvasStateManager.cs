@@ -34,7 +34,11 @@ namespace Enzyme.Components
             pManager.AddTextParameter("Save Name", "S_Name", "Name to save the state under", GH_ParamAccess.item, "State1");
             pManager.AddBooleanParameter("Load State", "Load", "Button to load the specified canvas state", GH_ParamAccess.item, false);
             pManager.AddTextParameter("Load Name", "L_Name", "Name of the state to load", GH_ParamAccess.item, "State1");
-            pManager.AddBooleanParameter("Turn Off New Nodes", "OffNew", "If true, new nodes added after the state was saved will be disabled/hidden.", GH_ParamAccess.item, true);
+            pManager.AddBooleanParameter("Turn Off New Nodes", "OffNew", "If true, new nodes added after the state was saved will have preview disabled (hidden).", GH_ParamAccess.item, true);
+
+            // Make text inputs optional so value lists without a selection don't break the component
+            pManager[1].Optional = true;
+            pManager[3].Optional = true;
         }
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
@@ -57,47 +61,48 @@ namespace Enzyme.Components
             DA.GetData(3, ref loadName);
             DA.GetData(4, ref offNew);
 
-            GH_Document doc = OnPingDocument();
-            if (doc == null) return;
-
             string msg = "Idle";
+            GH_Document doc = OnPingDocument();
 
             if (save && !_prevSave && !string.IsNullOrWhiteSpace(saveName))
             {
                 var currentState = new Dictionary<string, NodeState>();
-                foreach (var obj in doc.Objects)
+                if (doc != null)
                 {
-                    if (obj.InstanceGuid != this.InstanceGuid)
+                    foreach (var obj in doc.Objects)
                     {
-                        var st = new NodeState();
-                        bool hasState = false;
-                        
-                        if (obj is IGH_ActiveObject act)
+                        if (obj.InstanceGuid != this.InstanceGuid)
                         {
-                            st.Locked = act.Locked;
-                            hasState = true;
-                        }
-                        if (obj is IGH_PreviewObject prv)
-                        {
-                            st.Hidden = prv.Hidden;
-                            hasState = true;
-                        }
-                        
-                        if (hasState)
-                        {
-                            currentState[obj.InstanceGuid.ToString()] = st;
+                            var st = new NodeState();
+                            bool hasState = false;
+                            
+                            if (obj is IGH_ActiveObject act)
+                            {
+                                st.Locked = act.Locked;
+                                hasState = true;
+                            }
+                            if (obj is IGH_PreviewObject prv)
+                            {
+                                st.Hidden = prv.Hidden;
+                                hasState = true;
+                            }
+                            
+                            if (hasState)
+                            {
+                                currentState[obj.InstanceGuid.ToString()] = st;
+                            }
                         }
                     }
+                    _states[saveName] = currentState;
+                    msg = "Saved state '" + saveName + "' with " + currentState.Count + " components.";
+                    _lastAction = "SAVED: " + saveName;
                 }
-                _states[saveName] = currentState;
-                msg = "Saved state '" + saveName + "' with " + currentState.Count + " components.";
-                _lastAction = "SAVED: " + saveName;
             }
             _prevSave = save;
 
             if (load && !_prevLoad && !string.IsNullOrWhiteSpace(loadName))
             {
-                if (_states.TryGetValue(loadName, out var savedState))
+                if (_states.TryGetValue(loadName, out var savedState) && doc != null)
                 {
                     msg = "Loaded state '" + loadName + "'.";
                     _lastAction = "LOADED: " + loadName;
@@ -126,11 +131,7 @@ namespace Enzyme.Components
                                 }
                                 else if (offNew)
                                 {
-                                    if (obj is IGH_ActiveObject act && !act.Locked)
-                                    {
-                                        act.Locked = true;
-                                        changed = true;
-                                    }
+                                    // Per user request, new components should only be Hidden (Preview Off), not Locked (Disabled).
                                     if (obj is IGH_PreviewObject prv && !prv.Hidden)
                                     {
                                         prv.Hidden = true;
