@@ -12,7 +12,7 @@ namespace Enzyme.Components
         public Streamlines()
           : base("Streamlines", "Streamlines",
               "Generates smooth streamlines (particle traces) through any vector field using Inverse Distance Weighting.",
-              "Enzyme", "Utilities")
+              "Enzyme", "Terrain")
         {
         }
 

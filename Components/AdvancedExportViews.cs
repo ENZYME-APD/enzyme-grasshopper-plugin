@@ -289,7 +289,7 @@ namespace Enzyme.Components
             }
         }
 
-        protected override Bitmap Icon => Enzyme.IconLoader.Load("Export Views.png");
+        protected override Bitmap Icon => Enzyme.IconLoader.Load("AdvancedExportViews.png");
 
         public override Guid ComponentGuid => new Guid("B5D8F0B2-1C2A-4F8A-8C3D-7E8E9B1A2C3D");
     }
