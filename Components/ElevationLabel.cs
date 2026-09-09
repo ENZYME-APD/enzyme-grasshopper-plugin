@@ -14,6 +14,45 @@ namespace Enzyme.Terrain
 {
     public class ElevationLabel : GH_Component
     {
+        private struct TagData
+        {
+            public Rhino.Display.Text3d Text;
+        }
+        private List<TagData> _tags = new List<TagData>();
+
+        public override void DrawViewportWires(IGH_PreviewArgs args)
+        {
+            base.DrawViewportWires(args);
+            if (this.Hidden || this.Locked) return;
+
+            System.Drawing.Color textCol = this.Attributes.Selected ? args.WireColour_Selected : args.WireColour;
+
+            foreach (var tag in _tags)
+            {
+                args.Display.Draw3dText(tag.Text, textCol);
+            }
+        }
+
+        public override BoundingBox ClippingBox
+        {
+            get
+            {
+                BoundingBox box = base.ClippingBox;
+                foreach (var t in _tags)
+                {
+                    if (t.Text != null)
+                        box.Union(t.Text.BoundingBox);
+                }
+                return box;
+            }
+        }
+
+        protected override void BeforeSolveInstance()
+        {
+            base.BeforeSolveInstance();
+            _tags.Clear();
+        }
+
         public ElevationLabel()
           : base("Elevation Label", "ElevLabel",
               "Custom text/elevation labels with radial rotation and auto-sync.",
@@ -370,14 +409,53 @@ Outputs:
 
                     te.Justification = Justifications.TryGetValue(anchorVal, out var just) ? just : TextJustification.BottomCenter;
 
+                    double tHeight = 2.0;
                     if (dimStyle != null)
                     {
                         te.DimensionStyleId = dimStyle.Id;
+                        tHeight = dimStyle.TextHeight * dimStyle.DimensionScale;
+                        if (tHeight <= 0) tHeight = 2.0;
                     }
                     else
                     {
                         te.TextHeight = 2.0;
                     }
+
+                    var text3d = new Rhino.Display.Text3d(te.PlainText, plane, tHeight);
+                    switch (te.Justification)
+                    {
+                        case TextJustification.BottomLeft:
+                            text3d.HorizontalAlignment = Rhino.DocObjects.TextHorizontalAlignment.Left;
+                            text3d.VerticalAlignment = Rhino.DocObjects.TextVerticalAlignment.Bottom; break;
+                        case TextJustification.BottomCenter:
+                            text3d.HorizontalAlignment = Rhino.DocObjects.TextHorizontalAlignment.Center;
+                            text3d.VerticalAlignment = Rhino.DocObjects.TextVerticalAlignment.Bottom; break;
+                        case TextJustification.BottomRight:
+                            text3d.HorizontalAlignment = Rhino.DocObjects.TextHorizontalAlignment.Right;
+                            text3d.VerticalAlignment = Rhino.DocObjects.TextVerticalAlignment.Bottom; break;
+                        case TextJustification.MiddleLeft:
+                            text3d.HorizontalAlignment = Rhino.DocObjects.TextHorizontalAlignment.Left;
+                            text3d.VerticalAlignment = Rhino.DocObjects.TextVerticalAlignment.Middle; break;
+                        case TextJustification.MiddleCenter:
+                            text3d.HorizontalAlignment = Rhino.DocObjects.TextHorizontalAlignment.Center;
+                            text3d.VerticalAlignment = Rhino.DocObjects.TextVerticalAlignment.Middle; break;
+                        case TextJustification.MiddleRight:
+                            text3d.HorizontalAlignment = Rhino.DocObjects.TextHorizontalAlignment.Right;
+                            text3d.VerticalAlignment = Rhino.DocObjects.TextVerticalAlignment.Middle; break;
+                        case TextJustification.TopLeft:
+                            text3d.HorizontalAlignment = Rhino.DocObjects.TextHorizontalAlignment.Left;
+                            text3d.VerticalAlignment = Rhino.DocObjects.TextVerticalAlignment.Top; break;
+                        case TextJustification.TopCenter:
+                            text3d.HorizontalAlignment = Rhino.DocObjects.TextHorizontalAlignment.Center;
+                            text3d.VerticalAlignment = Rhino.DocObjects.TextVerticalAlignment.Top; break;
+                        case TextJustification.TopRight:
+                            text3d.HorizontalAlignment = Rhino.DocObjects.TextHorizontalAlignment.Right;
+                            text3d.VerticalAlignment = Rhino.DocObjects.TextVerticalAlignment.Top; break;
+                        default:
+                            text3d.HorizontalAlignment = Rhino.DocObjects.TextHorizontalAlignment.Center;
+                            text3d.VerticalAlignment = Rhino.DocObjects.TextVerticalAlignment.Bottom; break;
+                    }
+                    _tags.Add(new TagData { Text = text3d });
 
                     leaderLineTree.Append(new GH_Curve(lCrv), path);
                     textTree.Append(new GH_ObjectWrapper(te), path);
