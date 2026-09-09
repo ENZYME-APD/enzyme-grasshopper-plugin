@@ -292,6 +292,8 @@ namespace Enzyme.Components
         public override void AppendAdditionalMenuItems(System.Windows.Forms.ToolStripDropDown menu)
         {
             base.AppendAdditionalMenuItems(menu);
+            Grasshopper.Kernel.GH_DocumentObject.Menu_AppendItem(menu, "Add Default Controls", Menu_AddDefaultControls_Clicked);
+            menu.Items.Add(new System.Windows.Forms.ToolStripSeparator());
             Grasshopper.Kernel.GH_DocumentObject.Menu_AppendItem(menu, "Auto-create ALL Value Lists", Menu_AutoCreateAll_Clicked);
             menu.Items.Add(new System.Windows.Forms.ToolStripSeparator());
             Grasshopper.Kernel.GH_DocumentObject.Menu_AppendItem(menu, "Auto-create View List", Menu_AutoCreateViewList_Clicked);
@@ -299,6 +301,57 @@ namespace Enzyme.Components
             Grasshopper.Kernel.GH_DocumentObject.Menu_AppendItem(menu, "Auto-create Layer State List", Menu_AutoCreateLayerStateList_Clicked);
             Grasshopper.Kernel.GH_DocumentObject.Menu_AppendItem(menu, "Auto-create Format List", Menu_AutoCreateFormatList_Clicked);
         }
+
+        private void Menu_AddDefaultControls_Clicked(object sender, EventArgs e)
+        {
+            var document = OnPingDocument();
+            if (document == null) return;
+            
+            if (this.Params.Input[0].SourceCount == 0)
+            {
+                var btn = new Grasshopper.Kernel.Special.GH_ButtonObject();
+                btn.CreateAttributes();
+                btn.Attributes.Pivot = new System.Drawing.PointF(this.Attributes.Pivot.X - 170, this.Attributes.Pivot.Y - 162);
+                document.AddObject(btn, false);
+                this.Params.Input[0].AddSource(btn);
+            }
+            
+            if (this.Params.Input[5].SourceCount == 0)
+            {
+                var pathParam = new Grasshopper.Kernel.Parameters.Param_FilePath();
+                pathParam.CreateAttributes();
+                pathParam.Attributes.Pivot = new System.Drawing.PointF(this.Attributes.Pivot.X - 140, this.Attributes.Pivot.Y - 50);
+                document.AddObject(pathParam, false);
+                this.Params.Input[5].AddSource(pathParam);
+            }
+
+            if (this.Params.Input[9].SourceCount == 0 && this.Params.Input[10].SourceCount == 0)
+            {
+                var doc2px = new PaperSizeToPixels();
+                doc2px.CreateAttributes();
+                doc2px.Attributes.Pivot = new System.Drawing.PointF(this.Attributes.Pivot.X - 224, this.Attributes.Pivot.Y + 51);
+                document.AddObject(doc2px, false);
+                
+                this.Params.Input[9].AddSource(doc2px.Params.Output[0]);
+                this.Params.Input[10].AddSource(doc2px.Params.Output[1]);
+                this.Params.Input[11].AddSource(doc2px.Params.Output[2]);
+                
+                Enzyme.Utils.AutoWireHelper.WireValueList(doc2px, document, 0,
+                    new string[] { "A4", "A3", "A2", "A1", "A0", "A5", "16:9 FHD", "16:9 QHD", "16:9 4K", "1:1 Instagram" },
+                    new string[] { "\"A4\"", "\"A3\"", "\"A2\"", "\"A1\"", "\"A0\"", "\"A5\"", "\"16:9 FHD\"", "\"16:9 QHD\"", "\"16:9 4K\"", "\"1:1 Instagram\"" },
+                    102, -20);
+                    
+                Enzyme.Utils.AutoWireHelper.WireBooleanToggle(doc2px, document, 1, true, 106, 10);
+            }
+            
+            Enzyme.Utils.AutoWireHelper.WireBooleanToggle(this, document, 12, false, 265, 101);
+            Enzyme.Utils.AutoWireHelper.WireBooleanToggle(this, document, 13, false, 265, 131);
+            Enzyme.Utils.AutoWireHelper.WireBooleanToggle(this, document, 14, false, 265, 161);
+            Enzyme.Utils.AutoWireHelper.WireBooleanToggle(this, document, 15, true, 265, 191);
+
+            document.ExpireSolution();
+        }
+
 
         private void Menu_AutoCreateAll_Clicked(object sender, EventArgs e)
         {
