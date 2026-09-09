@@ -289,7 +289,115 @@ namespace Enzyme.Components
             }
         }
 
-        protected override Bitmap Icon => Enzyme.IconLoader.Load("AdvancedExportViews.png");
+        public override void AppendAdditionalMenuItems(System.Windows.Forms.ToolStripDropDown menu)
+        {
+            base.AppendAdditionalMenuItems(menu);
+            Grasshopper.Kernel.GH_DocumentObject.Menu_AppendItem(menu, "Auto-create ALL Value Lists", Menu_AutoCreateAll_Clicked);
+            menu.Items.Add(new System.Windows.Forms.ToolStripSeparator());
+            Grasshopper.Kernel.GH_DocumentObject.Menu_AppendItem(menu, "Auto-create View List", Menu_AutoCreateViewList_Clicked);
+            Grasshopper.Kernel.GH_DocumentObject.Menu_AppendItem(menu, "Auto-create Display Style List", Menu_AutoCreateDisplayStyleList_Clicked);
+            Grasshopper.Kernel.GH_DocumentObject.Menu_AppendItem(menu, "Auto-create Layer State List", Menu_AutoCreateLayerStateList_Clicked);
+            Grasshopper.Kernel.GH_DocumentObject.Menu_AppendItem(menu, "Auto-create Format List", Menu_AutoCreateFormatList_Clicked);
+        }
+
+        private void Menu_AutoCreateAll_Clicked(object sender, EventArgs e)
+        {
+            Menu_AutoCreateViewList_Clicked(sender, e);
+            Menu_AutoCreateDisplayStyleList_Clicked(sender, e);
+            Menu_AutoCreateLayerStateList_Clicked(sender, e);
+            Menu_AutoCreateFormatList_Clicked(sender, e);
+        }
+
+        private void Menu_AutoCreateViewList_Clicked(object sender, EventArgs e)
+        {
+            var doc = Rhino.RhinoDoc.ActiveDoc;
+            if (doc == null) return;
+
+            var namedViews = doc.NamedViews;
+            if (namedViews.Count == 0)
+            {
+                Rhino.RhinoApp.WriteLine("No named views found in the document.");
+                return;
+            }
+
+            Grasshopper.Kernel.Special.GH_ValueList vl = new Grasshopper.Kernel.Special.GH_ValueList();
+            vl.CreateAttributes();
+            vl.Attributes.Pivot = new System.Drawing.PointF(this.Attributes.Pivot.X - 200, this.Attributes.Pivot.Y - 20);
+            vl.ListItems.Clear();
+            foreach (var nv in namedViews)
+            {
+                vl.ListItems.Add(new Grasshopper.Kernel.Special.GH_ValueListItem(nv.Name, $"\"{nv.Name}\""));
+            }
+
+            OnPingDocument().AddObject(vl, false);
+            this.Params.Input[1].AddSource(vl);
+            vl.ExpireSolution(true);
+        }
+
+        private void Menu_AutoCreateDisplayStyleList_Clicked(object sender, EventArgs e)
+        {
+            var modes = Rhino.Display.DisplayModeDescription.GetDisplayModes();
+            if (modes.Length == 0) return;
+
+            Grasshopper.Kernel.Special.GH_ValueList vl = new Grasshopper.Kernel.Special.GH_ValueList();
+            vl.CreateAttributes();
+            vl.Attributes.Pivot = new System.Drawing.PointF(this.Attributes.Pivot.X - 200, this.Attributes.Pivot.Y - 80);
+            vl.ListItems.Clear();
+
+            foreach (var mode in modes)
+            {
+                vl.ListItems.Add(new Grasshopper.Kernel.Special.GH_ValueListItem(mode.EnglishName, $"\"{mode.EnglishName}\""));
+            }
+
+            OnPingDocument().AddObject(vl, false);
+            this.Params.Input[3].AddSource(vl);
+            vl.ExpireSolution(true);
+        }
+
+        private void Menu_AutoCreateLayerStateList_Clicked(object sender, EventArgs e)
+        {
+            var doc = Rhino.RhinoDoc.ActiveDoc;
+            if (doc == null) return;
+            var names = doc.NamedLayerStates.Names;
+            if (names.Length == 0)
+            {
+                Rhino.RhinoApp.WriteLine("No saved layer states found.");
+                return;
+            }
+
+            Grasshopper.Kernel.Special.GH_ValueList vl = new Grasshopper.Kernel.Special.GH_ValueList();
+            vl.CreateAttributes();
+            vl.Attributes.Pivot = new System.Drawing.PointF(this.Attributes.Pivot.X - 200, this.Attributes.Pivot.Y - 50);
+            vl.ListItems.Clear();
+
+            foreach (string n in names)
+            {
+                vl.ListItems.Add(new Grasshopper.Kernel.Special.GH_ValueListItem(n, $"\"{n}\""));
+            }
+
+            OnPingDocument().AddObject(vl, false);
+            this.Params.Input[4].AddSource(vl);
+            vl.ExpireSolution(true);
+        }
+
+        private void Menu_AutoCreateFormatList_Clicked(object sender, EventArgs e)
+        {
+            Grasshopper.Kernel.Special.GH_ValueList vl = new Grasshopper.Kernel.Special.GH_ValueList();
+            vl.CreateAttributes();
+            vl.Attributes.Pivot = new System.Drawing.PointF(this.Attributes.Pivot.X - 200, this.Attributes.Pivot.Y + 60);
+            vl.ListItems.Clear();
+
+            vl.ListItems.Add(new Grasshopper.Kernel.Special.GH_ValueListItem("PNG", "\"png\""));
+            vl.ListItems.Add(new Grasshopper.Kernel.Special.GH_ValueListItem("JPG", "\"jpg\""));
+            vl.ListItems.Add(new Grasshopper.Kernel.Special.GH_ValueListItem("BMP", "\"bmp\""));
+            vl.ListItems.Add(new Grasshopper.Kernel.Special.GH_ValueListItem("TIFF", "\"tif\""));
+
+            OnPingDocument().AddObject(vl, false);
+            this.Params.Input[8].AddSource(vl);
+            vl.ExpireSolution(true);
+        }
+
+        protected override System.Drawing.Bitmap Icon => Enzyme.IconLoader.Load("AdvancedExportViews.png");
 
         public override Guid ComponentGuid => new Guid("B5D8F0B2-1C2A-4F8A-8C3D-7E8E9B1A2C3D");
     }
