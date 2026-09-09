@@ -117,6 +117,8 @@ namespace Enzyme.Components
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+
             bool execute = false;
             DA.GetData(0, ref execute);
 
@@ -370,15 +372,36 @@ namespace Enzyme.Components
                 + "Best/Worst points flag where pedestrian comfort is strongest or weakest relative to IdealTemperature. "
                 + "Use this after wind analysis to verify whether high-speed corridors or sheltered wakes improve or degrade outdoor comfort.");
 
+            sw.Stop();
             if (execute)
             {
-                Message = bestPoints.Count > 0 || worstPoints.Count > 0
-                    ? $"{this.NickName}\nBest: {bestPoints.Count} pt(s)\nWorst: {worstPoints.Count} pt(s)"
-                    : $"{this.NickName}\nNo valid input data";
+                if (tagPoints.Count > 0)
+                {
+                    double bestPct = (double)bestPoints.Count / tagPoints.Count * 100.0;
+                    double worstPct = (double)worstPoints.Count / tagPoints.Count * 100.0;
+                    
+                    Message = "HIGROTHERMAL COMFORT\n" +
+                              $"Time: {sw.ElapsedMilliseconds} ms\n" +
+                              "---\n" +
+                              $"Ideal Temp: {idealTemperature:F1} °C\n" +
+                              $"Tolerance: {comfortTolerance * 100.0:F0}%\n" +
+                              $"Best: {bestPoints.Count} ({bestPct:F1}%)\n" +
+                              $"Worst: {worstPoints.Count} ({worstPct:F1}%)";
+                }
+                else
+                {
+                    Message = "HIGROTHERMAL COMFORT\n" +
+                              $"Time: {sw.ElapsedMilliseconds} ms\n" +
+                              "---\n" +
+                              "No valid input data";
+                }
             }
             else
             {
-                Message = $"{this.NickName}\nSTATUS: SLEEPING";
+                Message = "HIGROTHERMAL COMFORT\n" +
+                          $"Time: {sw.ElapsedMilliseconds} ms\n" +
+                          "---\n" +
+                          "STATUS: OFF";
             }
         }
     }
