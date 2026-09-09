@@ -87,13 +87,13 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
             pManager.AddCurveParameter("SectionOutlinesX", "SOX", "3D Polylines running parallel to the X-axis.", GH_ParamAccess.tree);
             pManager.AddCurveParameter("SectionOutlinesY", "SOY", "3D Polylines running parallel to the Y-axis.", GH_ParamAccess.tree);
             pManager.AddTextParameter("LabelText3D", "LT3D", "Text strings for 3D section labels.", GH_ParamAccess.tree);
-            pManager.AddPointParameter("LabelPoints3D", "LP3D", "Points for 3D section labels.", GH_ParamAccess.tree);
+            pManager.AddPlaneParameter("LabelPlanes3D", "LPl3D", "Planes for 3D section labels.", GH_ParamAccess.tree);
             pManager.AddCurveParameter("FlatSectionsX", "FSX", "2D X-Sections stacked downwards (-Y direction).", GH_ParamAccess.tree);
             pManager.AddCurveParameter("FlatSectionsY", "FSY", "2D Y-Sections stacked leftwards (-X direction).", GH_ParamAccess.tree);
             pManager.AddTextParameter("LabelTextFlat", "LTF", "Text strings for the flattened section layout.", GH_ParamAccess.tree);
-            pManager.AddPointParameter("LabelPointsFlat", "LPF", "Points for the flattened section layout.", GH_ParamAccess.tree);
+            pManager.AddPlaneParameter("LabelPlanesFlat", "LPlF", "Planes for the flattened section layout.", GH_ParamAccess.tree);
             pManager.AddTextParameter("SectionMetadata", "SM", "Dictionary keys containing spatial transform & ID data.", GH_ParamAccess.tree);
-                    pManager.AddTextParameter("Info", "Info", "Component information and interpretation", GH_ParamAccess.item);
+            pManager.AddTextParameter("Info", "Info", "Component information and interpretation", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
@@ -127,9 +127,9 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
             GH_Structure<GH_Curve> flatSectionsY = new GH_Structure<GH_Curve>();
 
             GH_Structure<GH_String> labelText3D = new GH_Structure<GH_String>();
-            GH_Structure<GH_Point> labelPoints3D = new GH_Structure<GH_Point>();
+            GH_Structure<GH_Plane> labelPlanes3D = new GH_Structure<GH_Plane>();
             GH_Structure<GH_String> labelTextFlat = new GH_Structure<GH_String>();
-            GH_Structure<GH_Point> labelPointsFlat = new GH_Structure<GH_Point>();
+            GH_Structure<GH_Plane> labelPlanesFlat = new GH_Structure<GH_Plane>();
             GH_Structure<GH_String> sectionMetadata = new GH_Structure<GH_String>();
 
             int totalSectionsX = 0;
@@ -227,10 +227,13 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
                                         Point3d ptStart3D = firstCrv.PointAtStart - cutPlaneXDir.XAxis * 2.0;
                                         Point3d ptEnd3D = lastCrv.PointAtEnd + cutPlaneXDir.XAxis * 2.0;
                                         
+                                        Plane planeStart3D = new Plane(ptStart3D, cutPlaneXDir.XAxis, cutPlaneXDir.YAxis);
+                                        Plane planeEnd3D = new Plane(ptEnd3D, cutPlaneXDir.XAxis, cutPlaneXDir.YAxis);
+
                                         labelText3D.Append(new GH_String(secId), currentPath);
                                         labelText3D.Append(new GH_String(secId), currentPath);
-                                        labelPoints3D.Append(new GH_Point(ptStart3D), currentPath);
-                                        labelPoints3D.Append(new GH_Point(ptEnd3D), currentPath);
+                                        labelPlanes3D.Append(new GH_Plane(planeStart3D), currentPath);
+                                        labelPlanes3D.Append(new GH_Plane(planeEnd3D), currentPath);
                                         
                                         if (layoutFlat)
                                         {
@@ -242,15 +245,15 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
                                                 flatSectionsX.Append(new GH_Curve(flatCrv), currentPath);
                                             }
 
-                                            Point3d ptStartFlat = new Point3d(ptStart3D);
-                                            Point3d ptEndFlat = new Point3d(ptEnd3D);
-                                            ptStartFlat.Transform(xformToWorld); ptStartFlat.Transform(xformMove); ptStartFlat.Transform(finalLayoutXform);
-                                            ptEndFlat.Transform(xformToWorld); ptEndFlat.Transform(xformMove); ptEndFlat.Transform(finalLayoutXform);
+                                            Plane planeStartFlat = planeStart3D;
+                                            Plane planeEndFlat = planeEnd3D;
+                                            planeStartFlat.Transform(xformToWorld); planeStartFlat.Transform(xformMove); planeStartFlat.Transform(finalLayoutXform);
+                                            planeEndFlat.Transform(xformToWorld); planeEndFlat.Transform(xformMove); planeEndFlat.Transform(finalLayoutXform);
                                             
                                             labelTextFlat.Append(new GH_String(secId), currentPath);
                                             labelTextFlat.Append(new GH_String(secId), currentPath);
-                                            labelPointsFlat.Append(new GH_Point(ptStartFlat), currentPath);
-                                            labelPointsFlat.Append(new GH_Point(ptEndFlat), currentPath);
+                                            labelPlanesFlat.Append(new GH_Plane(planeStartFlat), currentPath);
+                                            labelPlanesFlat.Append(new GH_Plane(planeEndFlat), currentPath);
                                             
                                             string meta = $"{{\"id\": \"{secId}\", \"plane_origin\": \"{origin}\", \"direction\": \"X_Section\"}}";
                                             sectionMetadata.Append(new GH_String(meta), currentPath);
@@ -308,10 +311,13 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
                                         Point3d ptStart3D = firstCrv.PointAtStart - cutPlaneYDir.XAxis * 2.0;
                                         Point3d ptEnd3D = lastCrv.PointAtEnd + cutPlaneYDir.XAxis * 2.0;
 
+                                        Plane planeStart3D = new Plane(ptStart3D, cutPlaneYDir.XAxis, cutPlaneYDir.YAxis);
+                                        Plane planeEnd3D = new Plane(ptEnd3D, cutPlaneYDir.XAxis, cutPlaneYDir.YAxis);
+
                                         labelText3D.Append(new GH_String(secId), currentPath);
                                         labelText3D.Append(new GH_String(secId), currentPath);
-                                        labelPoints3D.Append(new GH_Point(ptStart3D), currentPath);
-                                        labelPoints3D.Append(new GH_Point(ptEnd3D), currentPath);
+                                        labelPlanes3D.Append(new GH_Plane(planeStart3D), currentPath);
+                                        labelPlanes3D.Append(new GH_Plane(planeEnd3D), currentPath);
 
                                         if (layoutFlat)
                                         {
@@ -323,15 +329,15 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
                                                 flatSectionsY.Append(new GH_Curve(flatCrv), currentPath);
                                             }
 
-                                            Point3d ptStartFlat = new Point3d(ptStart3D);
-                                            Point3d ptEndFlat = new Point3d(ptEnd3D);
-                                            ptStartFlat.Transform(xformToWorld); ptStartFlat.Transform(xformMove); ptStartFlat.Transform(finalLayoutXform);
-                                            ptEndFlat.Transform(xformToWorld); ptEndFlat.Transform(xformMove); ptEndFlat.Transform(finalLayoutXform);
+                                            Plane planeStartFlat = planeStart3D;
+                                            Plane planeEndFlat = planeEnd3D;
+                                            planeStartFlat.Transform(xformToWorld); planeStartFlat.Transform(xformMove); planeStartFlat.Transform(finalLayoutXform);
+                                            planeEndFlat.Transform(xformToWorld); planeEndFlat.Transform(xformMove); planeEndFlat.Transform(finalLayoutXform);
 
                                             labelTextFlat.Append(new GH_String(secId), currentPath);
                                             labelTextFlat.Append(new GH_String(secId), currentPath);
-                                            labelPointsFlat.Append(new GH_Point(ptStartFlat), currentPath);
-                                            labelPointsFlat.Append(new GH_Point(ptEndFlat), currentPath);
+                                            labelPlanesFlat.Append(new GH_Plane(planeStartFlat), currentPath);
+                                            labelPlanesFlat.Append(new GH_Plane(planeEndFlat), currentPath);
 
                                             string meta = $"{{\"id\": \"{secId}\", \"plane_origin\": \"{origin}\", \"direction\": \"Y_Section\"}}";
                                             sectionMetadata.Append(new GH_String(meta), currentPath);
@@ -453,11 +459,11 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
             DA.SetDataTree(0, sectionOutlinesX);
             DA.SetDataTree(1, sectionOutlinesY);
             DA.SetDataTree(2, labelText3D);
-            DA.SetDataTree(3, labelPoints3D);
+            DA.SetDataTree(3, labelPlanes3D);
             DA.SetDataTree(4, flatSectionsX);
             DA.SetDataTree(5, flatSectionsY);
             DA.SetDataTree(6, labelTextFlat);
-            DA.SetDataTree(7, labelPointsFlat);
+            DA.SetDataTree(7, labelPlanesFlat);
             DA.SetDataTree(8, sectionMetadata);
             
             t_start.Stop();
