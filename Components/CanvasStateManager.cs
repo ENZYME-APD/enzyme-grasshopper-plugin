@@ -20,6 +20,7 @@ namespace Enzyme.Components
         private Dictionary<string, Dictionary<string, NodeState>> _states = new Dictionary<string, Dictionary<string, NodeState>>();
         private bool _prevSave = false;
         private bool _prevLoad = false;
+        private string _prevLoadName = "";
 
         public CanvasStateManager()
           : base("Canvas State Manager", "StateMgr",
@@ -100,7 +101,9 @@ namespace Enzyme.Components
             }
             _prevSave = save;
 
-            if (load && !_prevLoad && !string.IsNullOrWhiteSpace(loadName))
+            bool triggerLoad = (load && !_prevLoad) || (load && loadName != _prevLoadName);
+
+            if (triggerLoad && !string.IsNullOrWhiteSpace(loadName))
             {
                 if (_states.TryGetValue(loadName, out var savedState) && doc != null)
                 {
@@ -159,6 +162,7 @@ namespace Enzyme.Components
                 }
             }
             _prevLoad = load;
+            _prevLoadName = loadName;
 
             DA.SetDataList(0, _states.Keys.ToList());
             DA.SetData(1, "CANVAS STATE MANAGER\n\nHOW IT WORKS:\nSaves and restores the Enabled/Disabled (Locked) and Preview (Hidden) states of all components on the canvas.\n\nINTERPRETATION & IMPORTANCE:\nAllows you to swap between different visualization or computation modes instantly.");
