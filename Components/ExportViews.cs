@@ -179,84 +179,90 @@ namespace Enzyme.Components
                         // Handle Layer State
                         string tempLayerState = "Enzyme_Temp_" + Guid.NewGuid().ToString();
                         bool layerStateChanged = false;
-                        if (!string.IsNullOrEmpty(layerState))
+
+                        try
                         {
-                            var names = doc.NamedLayerStates.Names;
-                            bool found = false;
-                            foreach(var n in names)
+                            if (!string.IsNullOrEmpty(layerState))
                             {
-                                if (n.Equals(layerState, StringComparison.OrdinalIgnoreCase))
+                                var names = doc.NamedLayerStates.Names;
+                                bool found = false;
+                                foreach(var n in names)
                                 {
-                                    found = true;
-                                    break;
+                                    if (n.Equals(layerState, StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        found = true;
+                                        break;
+                                    }
+                                }
+                                if (found)
+                                {
+                                    doc.NamedLayerStates.Save(tempLayerState);
+                                    doc.NamedLayerStates.Restore(layerState, Rhino.DocObjects.Tables.RestoreLayerProperties.All);
+                                    layerStateChanged = true;
+                                }
+                                else
+                                {
+                                    AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Layer State '{layerState}' not found.");
                                 }
                             }
-                            if (found)
+
+                            foreach (var nv in viewsToExport)
                             {
-                                doc.NamedLayerStates.Save(tempLayerState);
-                                doc.NamedLayerStates.Restore(layerState, Rhino.DocObjects.Tables.RestoreLayerProperties.All);
-                                layerStateChanged = true;
-                            }
-                            else
-                            {
-                                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Layer State '{layerState}' not found.");
+                                // Push the named view to the active viewport
+                                activeView.ActiveViewport.PushViewInfo(nv, false);
+                                
+                                // Let the UI update slightly to ensure redraw - Removed RhinoApp.Wait() as it causes GH Canvas freezes
+                                // RhinoApp.Wait();
+
+                                var bitmap = capture.CaptureToBitmap(activeView);
+                                if (bitmap != null)
+                                {
+                                    string safeName = string.Join("_", nv.Name.Split(Path.GetInvalidFileNameChars()));
+                                    
+                                    string f = formatStr.ToLower().Trim();
+                                    System.Drawing.Imaging.ImageFormat imgFormat = System.Drawing.Imaging.ImageFormat.Png;
+                                    string ext = "png";
+                                    
+                                    if (f == "jpg" || f == "jpeg") { imgFormat = System.Drawing.Imaging.ImageFormat.Jpeg; ext = "jpg"; }
+                                    else if (f == "bmp") { imgFormat = System.Drawing.Imaging.ImageFormat.Bmp; ext = "bmp"; }
+                                    else if (f == "tif" || f == "tiff") { imgFormat = System.Drawing.Imaging.ImageFormat.Tiff; ext = "tif"; }
+                                    
+                                    string pre = string.IsNullOrEmpty(prefix) ? "" : prefix + "_";
+                                    string suf = string.IsNullOrEmpty(suffix) ? "" : "_" + suffix;
+                                    
+                                    string filename = $"{pre}{safeName}{suf}.{ext}";
+                                    string path = Path.Combine(directory, filename);
+                                    
+                                    bitmap.SetResolution(dpi, dpi);
+                                    bitmap.Save(path, imgFormat);
+                                    savedFiles.Add(path);
+                                    bitmap.Dispose();
+                                }
+
+                                // Restore view
+                                activeView.ActiveViewport.PushViewInfo(originalViewInfo, false);
                             }
                         }
-
-                        foreach (var nv in viewsToExport)
+                        finally
                         {
-                            // Push the named view to the active viewport
-                            activeView.ActiveViewport.PushViewInfo(nv, false);
-                            activeView.Redraw();
-                            
-                            // Let the UI update slightly to ensure redraw
-                            RhinoApp.Wait();
-
-                            var bitmap = capture.CaptureToBitmap(activeView);
-                            if (bitmap != null)
-                            {
-                                string safeName = string.Join("_", nv.Name.Split(Path.GetInvalidFileNameChars()));
-                                
-                                string f = formatStr.ToLower().Trim();
-                                System.Drawing.Imaging.ImageFormat imgFormat = System.Drawing.Imaging.ImageFormat.Png;
-                                string ext = "png";
-                                
-                                if (f == "jpg" || f == "jpeg") { imgFormat = System.Drawing.Imaging.ImageFormat.Jpeg; ext = "jpg"; }
-                                else if (f == "bmp") { imgFormat = System.Drawing.Imaging.ImageFormat.Bmp; ext = "bmp"; }
-                                else if (f == "tif" || f == "tiff") { imgFormat = System.Drawing.Imaging.ImageFormat.Tiff; ext = "tif"; }
-                                
-                                string pre = string.IsNullOrEmpty(prefix) ? "" : prefix + "_";
-                                string suf = string.IsNullOrEmpty(suffix) ? "" : "_" + suffix;
-                                
-                                string filename = $"{pre}{safeName}{suf}.{ext}";
-                                string path = Path.Combine(directory, filename);
-                                
-                                bitmap.SetResolution(dpi, dpi);
-                                bitmap.Save(path, imgFormat);
-                                savedFiles.Add(path);
-                                bitmap.Dispose();
-                            }
-
-                            // Restore view
+                            // Ensure it's fully restored
                             activeView.ActiveViewport.PushViewInfo(originalViewInfo, false);
-                        }
-                        
-                        // Ensure it's fully restored
-                        
-                        // Revert display mode if changed
-                        if (activeView.ActiveViewport.DisplayMode.Id != originalDisplayMode.Id)
-                        {
-                            activeView.ActiveViewport.DisplayMode = originalDisplayMode;
-                        }
+                            
+                            // Revert display mode if changed
+                            if (activeView.ActiveViewport.DisplayMode.Id != originalDisplayMode.Id)
+                            {
+                                activeView.ActiveViewport.DisplayMode = originalDisplayMode;
+                            }
 
-                        // Revert layer state if changed
-                        if (layerStateChanged)
-                        {
-                            doc.NamedLayerStates.Restore(tempLayerState, Rhino.DocObjects.Tables.RestoreLayerProperties.All);
-                            doc.NamedLayerStates.Delete(tempLayerState);
-                        }
+                            // Revert layer state if changed
+                            if (layerStateChanged)
+                            {
+                                doc.NamedLayerStates.Restore(tempLayerState, Rhino.DocObjects.Tables.RestoreLayerProperties.All);
+                                doc.NamedLayerStates.Delete(tempLayerState);
+                            }
 
-                        activeView.Redraw();
+                            activeView.Redraw();
+                        }
                     }
                 }
             }
