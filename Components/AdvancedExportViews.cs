@@ -29,6 +29,7 @@ namespace Enzyme.Components
         private bool _worldAxes;
         private bool _cplaneAxes;
         private bool _transparent;
+        private bool _scaleItems;
         private string _displayStyle;
         private string _layerState;
         
@@ -61,6 +62,7 @@ namespace Enzyme.Components
             pManager.AddBooleanParameter("World Axes", "WA", "Show World Axes.", GH_ParamAccess.item, false);
             pManager.AddBooleanParameter("CPlane Axes", "CA", "Show CPlane Axes.", GH_ParamAccess.item, false);
             pManager.AddBooleanParameter("Transparent", "T", "Transparent background (PNG only).", GH_ParamAccess.item, false);
+            pManager.AddBooleanParameter("Scale Items", "SI", "Scale line thicknesses and text sizes when capturing at high resolutions.", GH_ParamAccess.item, false);
 
             pManager[1].Optional = true;
             pManager[2].Optional = true;
@@ -105,6 +107,7 @@ namespace Enzyme.Components
                 _worldAxes = false; DA.GetData("World Axes", ref _worldAxes);
                 _cplaneAxes = false; DA.GetData("CPlane Axes", ref _cplaneAxes);
                 _transparent = false; DA.GetData("Transparent", ref _transparent);
+                _scaleItems = false; DA.GetData("Scale Items", ref _scaleItems);
                 
                 _displayStyle = ""; DA.GetData("Display Style", ref _displayStyle);
                 _layerState = ""; DA.GetData("Layer State", ref _layerState);
@@ -210,7 +213,8 @@ namespace Enzyme.Components
                 TransparentBackground = _transparent,
                 DrawGrid = _grid,
                 DrawAxes = _worldAxes,
-                DrawGridAxes = _cplaneAxes
+                DrawGridAxes = _cplaneAxes,
+                ScaleScreenItems = _scaleItems
             };
 
             try
@@ -348,6 +352,7 @@ namespace Enzyme.Components
             Enzyme.Utils.AutoWireHelper.WireBooleanToggle(this, document, 13, false, 265, 131);
             Enzyme.Utils.AutoWireHelper.WireBooleanToggle(this, document, 14, false, 265, 161);
             Enzyme.Utils.AutoWireHelper.WireBooleanToggle(this, document, 15, true, 265, 191);
+            Enzyme.Utils.AutoWireHelper.WireBooleanToggle(this, document, 16, false, 265, 221);
 
             document.ExpireSolution();
         }
