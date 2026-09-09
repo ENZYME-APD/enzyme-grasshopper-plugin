@@ -30,25 +30,20 @@ namespace Enzyme.Components
 
         public override Guid ComponentGuid => new Guid("B2C3D4E5-F6A7-489A-0B1C-2D3E4F5A6B7C");
 
-                public override void AddedToDocument(GH_Document document)
+        protected override void AppendAdditionalComponentMenuItems(System.Windows.Forms.ToolStripDropDown menu)
         {
-            base.AddedToDocument(document);
-            if (this.Attributes == null) this.CreateAttributes();
-
-            bool hasSources = false;
-            foreach (var param in this.Params.Input)
-                if (param.SourceCount > 0) { hasSources = true; break; }
-
-            if (!hasSources)
+            base.AppendAdditionalComponentMenuItems(menu);
+            Grasshopper.Kernel.GH_DocumentObject.Menu_AppendItem(menu, "Add Default Controls", (sender, e) =>
             {
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 1, 0.0, 60, 30.0, 330, -80);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 0.0, 2.0, 0, 330, -40);
-                Enzyme.Utils.AutoWireHelper.WireColorSwatch(this, document, 3, System.Drawing.Color.LightGreen, 210, 0);
-                Enzyme.Utils.AutoWireHelper.WireColorSwatch(this, document, 4, System.Drawing.Color.Red, 210, 40);
+                var document = OnPingDocument();
+                if (document == null) return;
+                
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 1, 0.0, 60.0, 26.0, 330, -80);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 0.0, 2.0, 1.0, 330, -40);
+                Enzyme.Utils.AutoWireHelper.WireColorSwatch(this, document, 3, System.Drawing.Color.FromArgb(0, 150, 255), 210, 0);
+                Enzyme.Utils.AutoWireHelper.WireColorSwatch(this, document, 4, System.Drawing.Color.OrangeRed, 210, 40);
                 Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 5, true, 210, 80);
-                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 0, System.Drawing.Color.FromArgb(230, 230, 230), 220, -38);
-                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 2, 220, 26, 180, 22);
-            }
+            });
         }
 
         
@@ -279,7 +274,11 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
             string mode_str = is_binary ? "Binary" : "Gradient";
             string conversion_str = $"{deg:F1}° | {pct:F1}% | 1:{ratio:F1}";
 
-            Message = $"{this.NickName}\nTime: {exec_ms:F1} ms\n---\nInput: {conversion_str}\n● {mode_str} | ○ Over: {final_pct_over:F1}%";
+            string thresholdModeName = "Degrees";
+            if (t_mode == 1) thresholdModeName = "Percentage";
+            else if (t_mode == 2) thresholdModeName = "Ratio";
+
+            Message = $"{this.NickName}\nTime: {exec_ms:F1} ms\n---\nMode: {thresholdModeName}\nInput: {conversion_str}\n● {mode_str} | ○ Over: {final_pct_over:F1}%";
             
             DA.SetData(5, "TERRAIN SLOPE\n"
                 + "\n"
