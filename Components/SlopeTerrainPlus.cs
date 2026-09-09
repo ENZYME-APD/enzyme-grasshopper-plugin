@@ -49,58 +49,27 @@ namespace Enzyme.Components
         
         public override GH_Exposure Exposure => GH_Exposure.tertiary;
 
-protected override void RegisterInputParams(GH_InputParamManager pManager)
+        protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
             pManager.AddMeshParameter("TargetMeshes", "TargetMeshes", "Meshes to analyze", GH_ParamAccess.list);
             pManager.AddNumberParameter("ThresholdValue", "ThresholdValue", "Threshold for slope analysis", GH_ParamAccess.item, 30.0);
             pManager.AddIntegerParameter("ThresholdMode", "ThresholdMode", "0: Degrees, 1: Percentage, 2: Ratio", GH_ParamAccess.item, 0);
-            pManager.AddColourParameter("ColorStart", "ColorStart", "Color for flat terrain", GH_ParamAccess.item, Color.LightGreen);
-            pManager.AddColourParameter("ColorEnd", "ColorEnd", "Color for steep terrain", GH_ParamAccess.item, Color.Red);
-            pManager.AddBooleanParameter("EnableBinaryMode", "EnableBinaryMode", "If true, snaps to binary colors", GH_ParamAccess.item, true);
+            pManager.AddColourParameter("Custom Colors", "Custom Colors", "List of colors for gradient or binary mapping", GH_ParamAccess.list);
+            pManager[3].Optional = true;
+            pManager.AddBooleanParameter("EnableBinaryMode", "EnableBinaryMode", "If true, snaps to binary colors (Under/Over threshold)", GH_ParamAccess.item, true);
         }
 
-                protected override void RegisterOutputParams(GH_OutputParamManager pManager)
+                        protected override void RegisterOutputParams(GH_OutputParamManager pManager)
         {
             pManager.AddMeshParameter("AnalyzedMeshes", "AnalyzedMeshes", "Colored Meshes", GH_ParamAccess.list);
-            pManager.AddColourParameter("LegendColors", "LegendColors", "Legend Colors", GH_ParamAccess.list);
-            pManager.AddTextParameter("LegendValues", "LegendValues", "Legend Values", GH_ParamAccess.list);
-            pManager.AddNumberParameter("OverThresholdRatio", "OverThresholdRatio", "Ratio of faces over threshold", GH_ParamAccess.list);
             pManager.AddTextParameter("Dashboard Data", "Dashboard Data", "JSON Legend Data", GH_ParamAccess.item);
-                    pManager.AddTextParameter("Info", "Info", "Component information and interpretation", GH_ParamAccess.item);
+            pManager.AddTextParameter("Info", "Info", "Component information and interpretation", GH_ParamAccess.item);
         }
 
-        protected override void SolveInstance(IGH_DataAccess DA)
+                protected override void SolveInstance(IGH_DataAccess DA)
         {
-            foreach (var param in Params.Input)
-            {
-                if (param.Name == "ThresholdMode")
-                {
-                    foreach (var source in param.Sources)
-                    {
-                        if (source is Grasshopper.Kernel.Special.GH_ValueList vl)
-                        {
-                            if (vl.ListItems.Count == 3 && vl.ListItems[0].Name == "Degrees")
-                                continue;
-                                
-                            vl.ListItems.Clear();
-                            vl.ListItems.Add(new Grasshopper.Kernel.Special.GH_ValueListItem("Degrees", "0"));
-                            vl.ListItems.Add(new Grasshopper.Kernel.Special.GH_ValueListItem("Percentage", "1"));
-                            vl.ListItems.Add(new Grasshopper.Kernel.Special.GH_ValueListItem("Ratio (1:X)", "2"));
-                            
-                            var ghDoc = OnPingDocument();
-                            if (ghDoc != null) {
-                                ghDoc.ScheduleSolution(5, d => {
-                                    vl.ExpireSolution(false);
-                                                                    DA.SetData(5, "TERRAIN SLOPE\n" + "\n" + "HOW IT WORKS:\n" + "An advanced version of the slope analyzer that not only maps steepness but also extracts vector arrows pointing downhill for every face.\n\n" + "INTERPRETATION & IMPORTANCE:\n" + "Combines slope severity with flow direction. Perfect for understanding not just how steep a hill is, but exactly which way the land naturally drains or faces (aspect analysis).");
-                                });
-                            }
-                        }
-                    }
-                }
-            }
-
             List<Mesh> TargetMeshes = new List<Mesh>();
-            if (!DA.GetDataList(0, TargetMeshes)) return;
+            DA.GetDataList(0, TargetMeshes);
 
             double t_val = 30.0;
             DA.GetData(1, ref t_val);
@@ -108,14 +77,22 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
             int t_mode = 0;
             DA.GetData(2, ref t_mode);
 
-            Color c_start = Color.LightGreen;
-            DA.GetData(3, ref c_start);
-
-            Color c_end = Color.Red;
-            DA.GetData(4, ref c_end);
+            List<Color> customColors = new List<Color>();
+            DA.GetDataList(3, customColors);
+            if (customColors.Count == 0)
+            {
+                customColors.Add(Color.LightGreen);
+                customColors.Add(Color.Red);
+            }
+            else if (customColors.Count == 1)
+            {
+                customColors.Add(customColors[0]);
+            }
+            Color c_start = customColors[0];
+            Color c_end = customColors[customColors.Count - 1];
 
             bool is_binary = true;
-            DA.GetData(5, ref is_binary);
+            DA.GetData(4, ref is_binary);
 
             System.Diagnostics.Stopwatch perf_start = System.Diagnostics.Stopwatch.StartNew();
 
@@ -199,10 +176,20 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
                     } else {
                         double t = (slope - minSlope) / slopeDomain;
                         if (t < 0.0) t = 0.0; else if (t > 1.0) t = 1.0;
-                        int r = (int)(c_start.R + (c_end.R - c_start.R) * t);
-                        int g = (int)(c_start.G + (c_end.G - c_start.G) * t);
-                        int b = (int)(c_start.B + (c_end.B - c_start.B) * t);
-                        c = Color.FromArgb(r, g, b);
+                        
+                        double scaled = t * (customColors.Count - 1);
+                        int idx = (int)scaled;
+                        if (idx >= customColors.Count - 1) idx = customColors.Count - 2;
+                        if (idx < 0) idx = 0;
+                        
+                        double blend = scaled - idx;
+                        Color c1 = customColors[idx];
+                        Color c2 = customColors[idx + 1];
+                        
+                        int r = (int)(c1.R + (c2.R - c1.R) * blend);
+                        int g = (int)(c1.G + (c2.G - c1.G) * blend);
+                        int b = (int)(c1.B + (c2.B - c1.B) * blend);
+                        c = Color.FromArgb(255, r, g, b);
                     }
 
                     vertexColors[face.A] = c;
@@ -222,27 +209,21 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
                 out_values.Add("Under Threshold");
                 out_values.Add("Over Threshold");
             } else {
-                for (int i = 0; i < 5; i++) {
-                    double t = i / 4.0;
-                    int r = (int)(c_start.R + (c_end.R - c_start.R) * t);
-                    int g = (int)(c_start.G + (c_end.G - c_start.G) * t);
-                    int b = (int)(c_start.B + (c_end.B - c_start.B) * t);
-                    out_colors.Add(Color.FromArgb(r, g, b));
-                    out_values.Add($"Step {(t * 100):F0}%");
+                for (int i = 0; i < customColors.Count; i++) {
+                    out_colors.Add(customColors[i]);
+                    double p = (i / (double)(customColors.Count - 1)) * 100.0;
+                    out_values.Add($"Step {p:F0}%");
                 }
             }
 
-                        DA.SetDataList(0, out_meshes);
-            DA.SetDataList(1, out_colors);
-            DA.SetDataList(2, out_values);
-            DA.SetDataList(3, out_ratios);
+            DA.SetDataList(0, out_meshes);
 
             if (out_meshes.Count > 0)
             {
-                var jColors = new JArray();
-                foreach (var c in out_colors) jColors.Add(new JObject { ["R"] = c.R, ["G"] = c.G, ["B"] = c.B });
+                var jColors = new Newtonsoft.Json.Linq.JArray();
+                foreach (var c in out_colors) jColors.Add(new Newtonsoft.Json.Linq.JObject { ["R"] = c.R, ["G"] = c.G, ["B"] = c.B });
                 
-                var jLabels = new JArray();
+                var jLabels = new Newtonsoft.Json.Linq.JArray();
                 foreach (var v in out_values) jLabels.Add(v.ToString());
                 
                 double avgRatio = 0;
@@ -251,7 +232,7 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
                 
                 double total_pct_over = global_total_faces > 0 ? ((double)global_over_count / global_total_faces * 100.0) : 0.0;
                 
-                var legendObj = new JObject
+                var legendObj = new Newtonsoft.Json.Linq.JObject
                 {
                     ["Type"] = is_binary ? "Discrete" : "Gradient",
                     ["Title"] = $"TERRAIN SLOPE (>{deg:F1}°)",
@@ -259,12 +240,12 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
                     ["Labels"] = jLabels
                 };
 
-                JArray jmetrics = new JArray();
-                jmetrics.Add(new JObject { ["Name"] = "Total Area Over", ["Value"] = $"{total_pct_over:F1}%" });
-                jmetrics.Add(new JObject { ["Name"] = "Avg Mesh Ratio", ["Value"] = $"{avgRatio:F1}%" });
+                Newtonsoft.Json.Linq.JArray jmetrics = new Newtonsoft.Json.Linq.JArray();
+                jmetrics.Add(new Newtonsoft.Json.Linq.JObject { ["Name"] = "Total Area Over", ["Value"] = $"{total_pct_over:F1}%" });
+                jmetrics.Add(new Newtonsoft.Json.Linq.JObject { ["Name"] = "Avg Mesh Ratio", ["Value"] = $"{avgRatio:F1}%" });
                 legendObj["Metrics"] = jmetrics;
 
-                DA.SetData(4, legendObj.ToString(Newtonsoft.Json.Formatting.None));
+                DA.SetData(1, legendObj.ToString(Newtonsoft.Json.Formatting.None));
             }
 
             perf_start.Stop();
@@ -280,14 +261,7 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
 
             Message = $"{this.NickName}\nTime: {exec_ms:F1} ms\n---\nMode: {thresholdModeName}\nInput: {conversion_str}\n● {mode_str} | ○ Over: {final_pct_over:F1}%";
             
-            DA.SetData(5, "TERRAIN SLOPE\n"
-                + "\n"
-                + "METHODOLOGY:\n"
-                + "Extracts face normals from the un-welded mesh via the cross-product of vertex edges. "
-                + "The Z-component of each normal (n.Z) provides the slope angle using acos(n.Z), converting to degrees or percentage. "
-                + "Faces are sorted and colored dynamically to identify areas exceeding maximum gradient thresholds.\n\n"
-                + "INTERPRETATION & IMPORTANCE:\n"
-                + "Highlights severity of topography and naturally draining facets. Critical for planning accessible paths, building foundations, and managing stormwater runoff without exceeding max legal grades.");
+            DA.SetData(2, "TERRAIN SLOPE\n\nMETHODOLOGY:\nExtracts face normals from the un-welded mesh via the cross-product of vertex edges. The Z-component of each normal (n.Z) provides the slope angle using acos(n.Z), converting to degrees or percentage. Faces are sorted and colored dynamically to identify areas exceeding maximum gradient thresholds.\n\nINTERPRETATION & IMPORTANCE:\nHighlights severity of topography and naturally draining facets. Critical for planning accessible paths, building foundations, and managing stormwater runoff without exceeding max legal grades.");
         }
     }
 }
