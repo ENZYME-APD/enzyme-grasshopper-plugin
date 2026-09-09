@@ -63,25 +63,24 @@ namespace Enzyme.Components
             // No outputs, purely a visual HUD
         }
 
-        public override void AddedToDocument(GH_Document document)
+        protected override void AppendAdditionalComponentMenuItems(System.Windows.Forms.ToolStripDropDown menu)
         {
-            base.AddedToDocument(document);
-            bool hasSources = false;
-            foreach (var param in this.Params.Input)
-                if (param.SourceCount > 0) { hasSources = true; break; }
-
-            if (!hasSources)
+            base.AppendAdditionalComponentMenuItems(menu);
+            Grasshopper.Kernel.GH_DocumentObject.Menu_AppendItem(menu, "Add Default Controls", (sender, e) =>
             {
-                Enzyme.Utils.AutoWireHelper.WireBooleanToggle(this, document, 0, false, 200, -90);
-                Enzyme.Utils.AutoWireHelper.WireSlider1Dec(this, document, 2, 8.0, 32.0, 12.0, 200, -30);
+                var document = OnPingDocument();
+                if (document == null) return;
+                
+                Enzyme.Utils.AutoWireHelper.WireBooleanToggle(this, document, 0, false, 175, -110);
+                Enzyme.Utils.AutoWireHelper.WireSlider1Dec(this, document, 2, 8.0, 32.0, 12.0, 285, -60);
                 Enzyme.Utils.AutoWireHelper.WireValueList(this, document, 3, 
                     new string[] { "TL", "TR", "BL", "BR" }, 
-                    new string[] { "0", "1", "2", "3" }, 200, 0);
-                Enzyme.Utils.AutoWireHelper.WireSlider1Dec(this, document, 6, 0.0, 1.0, 0.8, 200, 30);
-                Enzyme.Utils.AutoWireHelper.WireSliderInt(this, document, 7, 0, 100, 20, 200, 60);
-                Enzyme.Utils.AutoWireHelper.WireSliderInt(this, document, 8, 0, 100, 20, 200, 90);
-                Enzyme.Utils.AutoWireHelper.WireSliderInt(this, document, 9, 0, 50, 10, 200, 120);
-            }
+                    new string[] { "0", "1", "2", "3" }, 155, -30);
+                Enzyme.Utils.AutoWireHelper.WireSlider1Dec(this, document, 6, 0.0, 1.0, 0.8, 322, 20);
+                Enzyme.Utils.AutoWireHelper.WireSliderInt(this, document, 7, 0, 100, 20, 296, 40);
+                Enzyme.Utils.AutoWireHelper.WireSliderInt(this, document, 8, 0, 100, 20, 296, 60);
+                Enzyme.Utils.AutoWireHelper.WireSliderInt(this, document, 9, 0, 50, 10, 296, 80);
+            });
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
