@@ -123,7 +123,7 @@ namespace Enzyme.Components
             return base.Read(reader);
         }
 
-        protected override System.Drawing.Bitmap Icon => null; // Fallback to default
+        protected override System.Drawing.Bitmap Icon => Enzyme.IconLoader.Load("AutoListItem.png");
         
         public override Guid ComponentGuid => new Guid("B5D1F6A8-A2C4-4395-8D9E-E2A4B1C9F3A1");
     }
