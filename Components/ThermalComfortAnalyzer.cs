@@ -97,12 +97,12 @@ namespace Enzyme.Components
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
         {
             pManager.AddPointParameter("BestComfortPoints", "Best", "Point(s) with apparent temperature closest to IdealTemperature, within ComfortTolerance of the single best", GH_ParamAccess.list);
+            pManager.AddNumberParameter("BestComfortValues", "BestValues", "The apparent temperatures for the BestComfortPoints", GH_ParamAccess.list);
             pManager.AddPointParameter("WorstComfortPoints", "Worst", "Point(s) with apparent temperature furthest from IdealTemperature, within ComfortTolerance of the single worst", GH_ParamAccess.list);
+            pManager.AddNumberParameter("WorstComfortValues", "WorstValues", "The apparent temperatures for the WorstComfortPoints", GH_ParamAccess.list);
             pManager.AddMeshParameter("ComfortMesh", "ComfortMesh", "The input terrain mesh, vertex-colored by comfort deviation", GH_ParamAccess.item);
             pManager.AddNumberParameter("ComfortValues", "ComfortValues", "Raw apparent temperature (deg C) per terrain vertex", GH_ParamAccess.list);
             pManager.AddColourParameter("ComfortColors", "ComfortColors", "List of colors corresponding to each vertex on the mesh", GH_ParamAccess.list);
-            pManager.AddNumberParameter("BestComfortValues", "BestValues", "The apparent temperatures for the BestComfortPoints", GH_ParamAccess.list);
-            pManager.AddNumberParameter("WorstComfortValues", "WorstValues", "The apparent temperatures for the WorstComfortPoints", GH_ParamAccess.list);
             pManager.AddTextParameter("Info", "Info", "Component information and interpretation", GH_ParamAccess.item);
             pManager.AddTextParameter("Dashboard Data", "Dashboard Data", "Unified JSON payload containing legend and key analysis metrics for the Analysis Dashboard", GH_ParamAccess.item);
         }
@@ -351,12 +351,12 @@ namespace Enzyme.Components
             }
 
             DA.SetDataList(0, bestPoints);
-            DA.SetDataList(1, worstPoints);
-            DA.SetData(2, comfortMesh);
-            DA.SetDataList(3, comfortValues);
-            DA.SetDataList(4, comfortColors);
-            DA.SetDataList(5, bestValues);
-            DA.SetDataList(6, worstValues);
+            DA.SetDataList(1, bestValues);
+            DA.SetDataList(2, worstPoints);
+            DA.SetDataList(3, worstValues);
+            DA.SetData(4, comfortMesh);
+            DA.SetDataList(5, comfortValues);
+            DA.SetDataList(6, comfortColors);
 
             DA.SetData(7, "HIGROTHERMAL COMFORT\n"
                 + "\n"
