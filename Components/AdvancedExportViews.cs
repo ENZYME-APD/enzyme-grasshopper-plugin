@@ -32,6 +32,7 @@ namespace Enzyme.Components
         private bool _scaleItems;
         private string _displayStyle;
         private string _layerState;
+        private string _statusInfo = "Idle";
         
         private List<string> _savedFiles = new List<string>();
 
@@ -44,25 +45,25 @@ namespace Enzyme.Components
 
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddBooleanParameter("Run", "R", "Set to true to start the batch export.", GH_ParamAccess.item, false);
-            pManager.AddTextParameter("Views", "V", "Names of the views to export. If empty, exports ALL named views.", GH_ParamAccess.list);
-            pManager.AddTextParameter("GH States", "GHS", "Optional. List of GH Canvas State names to cycle through. Wire the 'Current GH State' output to your Canvas State Manager.", GH_ParamAccess.list);
-            pManager.AddTextParameter("Display Style", "DS", "Optional. Name of the Display Mode (e.g., 'Rendered').", GH_ParamAccess.item, "");
-            pManager.AddTextParameter("Layer State", "LS", "Optional. Name of the saved Layer State to restore.", GH_ParamAccess.item, "");
-            pManager.AddTextParameter("Directory", "Dir", "Folder path to save the images.", GH_ParamAccess.item);
-            pManager.AddTextParameter("Prefix", "P", "Prefix for the output filenames.", GH_ParamAccess.item, "");
-            pManager.AddTextParameter("Suffix", "Suf", "Suffix for the output filenames.", GH_ParamAccess.item, "");
-            pManager.AddTextParameter("Format", "Fmt", "Image format: png, jpg, bmp, tiff.", GH_ParamAccess.item, "png");
+            pManager.AddBooleanParameter("Run", "Run", "Set to true to start the batch export.", GH_ParamAccess.item, false);
+            pManager.AddTextParameter("Views", "Views", "Names of the views to export. If empty, exports ALL named views.", GH_ParamAccess.list);
+            pManager.AddTextParameter("GH States", "GH States", "Optional. List of GH Canvas State names to cycle through. Wire the 'Current GH State' output to your Canvas State Manager.", GH_ParamAccess.list);
+            pManager.AddTextParameter("Display Style", "Display Style", "Optional. Name of the Display Mode (e.g., 'Rendered').", GH_ParamAccess.item, "");
+            pManager.AddTextParameter("Layer State", "Layer State", "Optional. Name of the saved Layer State to restore.", GH_ParamAccess.item, "");
+            pManager.AddTextParameter("Directory", "Directory", "Folder path to save the images.", GH_ParamAccess.item);
+            pManager.AddTextParameter("Prefix", "Prefix", "Prefix for the output filenames.", GH_ParamAccess.item, "");
+            pManager.AddTextParameter("Suffix", "Suffix", "Suffix for the output filenames.", GH_ParamAccess.item, "");
+            pManager.AddTextParameter("Format", "Format", "Image format: png, jpg, bmp, tiff.", GH_ParamAccess.item, "png");
             
-            pManager.AddIntegerParameter("Width", "W", "Image width in pixels.", GH_ParamAccess.item, 1920);
-            pManager.AddIntegerParameter("Height", "H", "Image height in pixels.", GH_ParamAccess.item, 1080);
+            pManager.AddIntegerParameter("Width", "Width", "Image width in pixels.", GH_ParamAccess.item, 1920);
+            pManager.AddIntegerParameter("Height", "Height", "Image height in pixels.", GH_ParamAccess.item, 1080);
             pManager.AddIntegerParameter("DPI", "DPI", "Print DPI metadata embedded into the image.", GH_ParamAccess.item, 300);
             
-            pManager.AddBooleanParameter("Grid", "G", "Show Grid.", GH_ParamAccess.item, false);
-            pManager.AddBooleanParameter("World Axes", "WA", "Show World Axes.", GH_ParamAccess.item, false);
-            pManager.AddBooleanParameter("CPlane Axes", "CA", "Show CPlane Axes.", GH_ParamAccess.item, false);
-            pManager.AddBooleanParameter("Transparent", "T", "Transparent background (PNG only).", GH_ParamAccess.item, false);
-            pManager.AddBooleanParameter("Scale Items", "SI", "Scale line thicknesses and text sizes when capturing at high resolutions.", GH_ParamAccess.item, false);
+            pManager.AddBooleanParameter("Grid", "Grid", "Show Grid.", GH_ParamAccess.item, false);
+            pManager.AddBooleanParameter("World Axes", "World Axes", "Show World Axes.", GH_ParamAccess.item, false);
+            pManager.AddBooleanParameter("CPlane Axes", "CPlane Axes", "Show CPlane Axes.", GH_ParamAccess.item, false);
+            pManager.AddBooleanParameter("Transparent", "Transparent", "Transparent background (PNG only).", GH_ParamAccess.item, false);
+            pManager.AddBooleanParameter("Scale Items", "Scale Items", "Scale line thicknesses and text sizes when capturing at high resolutions.", GH_ParamAccess.item, false);
 
             pManager[1].Optional = true;
             pManager[2].Optional = true;
@@ -81,6 +82,7 @@ namespace Enzyme.Components
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            var sw = System.Diagnostics.Stopwatch.StartNew();
             bool run = false;
             DA.GetData("Run", ref run);
 
@@ -124,7 +126,7 @@ namespace Enzyme.Components
                 _isExporting = true;
                 _stateIndex = 0;
                 _savedFiles.Clear();
-                Message = "Starting Export...";
+                _statusInfo = "Starting Export...";
             }
 
             if (_isExporting)
@@ -133,7 +135,7 @@ namespace Enzyme.Components
                 {
                     string currentState = _ghStates[_stateIndex];
                     DA.SetData(1, currentState);
-                    Message = $"Exporting State {_stateIndex + 1}/{_ghStates.Count}\n{currentState}";
+                    _statusInfo = $"Exporting State {_stateIndex + 1}/{_ghStates.Count}\n{currentState}";
 
                     // Safely delay the capture to allow GH Canvas and geometries to fully update
                     System.Threading.Tasks.Task.Delay(500).ContinueWith(t => 
@@ -158,14 +160,14 @@ namespace Enzyme.Components
                 {
                     // Finished
                     _isExporting = false;
-                    Message = "Export Complete\n" + _savedFiles.Count + " images";
+                    _statusInfo = "Export Complete\n" + _savedFiles.Count + " images";
                     DA.SetDataList(0, _savedFiles);
                 }
             }
             else
             {
                 DA.SetDataList(0, _savedFiles);
-                Message = "Idle";
+                if (_savedFiles.Count == 0) _statusInfo = "Idle";
             }
 
             string info = 
@@ -175,6 +177,9 @@ namespace Enzyme.Components
                 "This component acts as an automated state-machine. It cycles through the provided 'GH States' and 'Views', pausing to let Grasshopper generate the new geometry, and then captures high-res images directly to your specified folder.\n\n" +
                 "Wire the 'Current GH State' output to your Canvas State Manager to animate your definitions safely.";
             DA.SetData(2, info);
+            
+            sw.Stop();
+            this.Message = $"ADVANCED EXPORT VIEWS\nTime: {sw.ElapsedMilliseconds} ms\n---\n{_statusInfo}";
         }
 
         private void CaptureCurrentViews(string ghStateName)
