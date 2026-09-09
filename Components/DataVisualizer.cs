@@ -65,11 +65,15 @@ namespace Enzyme.Components
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
         {
             pManager.AddMeshParameter("Visualization", "M", "A single joined mesh representing the data (for fast viewport rendering)", GH_ParamAccess.item);
-                    pManager.AddTextParameter("Info", "Info", "Component information and interpretation", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Values", "V", "The data values corresponding to the points", GH_ParamAccess.list);
+            pManager.AddColourParameter("Colors", "C", "The interpolated colors corresponding to the points", GH_ParamAccess.list);
+            pManager.AddTextParameter("Info", "Info", "Component information and interpretation", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+
             List<Point3d> pts = new List<Point3d>();
             if (!DA.GetDataList(0, pts)) return;
 
@@ -89,7 +93,7 @@ namespace Enzyme.Components
             if (!DA.GetDataList(5, thicknesses) || thicknesses.Count == 0)
             {
                 thicknesses.Add(0.5);
-                            DA.SetData(1, "LEAP DATA VISUALIZER\n" + "\n" + "HOW IT WORKS:\n" + "A generic visualization module that takes numerical data streams from LEAP components and maps them to charts, graphs, or colored geometry.\n\n" + "INTERPRETATION & IMPORTANCE:\n" + "Bridges the gap between raw spreadsheet data and spatial intuition. It allows designers to 'see' abstract ecological metrics directly overlaid on their 3D model.");
+                            DA.SetData(3, "LEAP DATA VISUALIZER\n" + "\n" + "HOW IT WORKS:\n" + "A generic visualization module that takes numerical data streams from LEAP components and maps them to charts, graphs, or colored geometry.\n\n" + "INTERPRETATION & IMPORTANCE:\n" + "Bridges the gap between raw spreadsheet data and spatial intuition. It allows designers to 'see' abstract ecological metrics directly overlaid on their 3D model.");
             }
 
             if (pts.Count == 0 || vals.Count == 0) return;
@@ -103,9 +107,13 @@ namespace Enzyme.Components
                 if (v > maxVal) maxVal = v;
             }
 
+            double originalMin = minVal;
+            double originalMax = maxVal;
             if (Math.Abs(maxVal - minVal) < 1e-9) maxVal = minVal + 1.0;
 
             Mesh masterMesh = new Mesh();
+            List<Color> outColors = new List<Color>();
+            List<double> outVals = new List<double>();
 
             for (int i = 0; i < pts.Count; i++)
             {
@@ -113,6 +121,7 @@ namespace Enzyme.Components
 
                 Point3d p = pts[i];
                 double v = vals[i];
+                outVals.Add(v);
 
                 double normalized = (v - minVal) / (maxVal - minVal);
                 if (normalized < 0.0) normalized = 0.0;
@@ -120,6 +129,7 @@ namespace Enzyme.Components
 
                 double mappedSize = targetDomain.T0 + normalized * (targetDomain.T1 - targetDomain.T0);
                 Color c = GetInterpolatedColor(normalized, colors);
+                outColors.Add(c);
 
                 double currentThickness = thicknesses[i % thicknesses.Count];
                 Mesh m = CreateGeometry(type, p, mappedSize, currentThickness);
@@ -133,9 +143,13 @@ namespace Enzyme.Components
                 masterMesh.Append(m);
             }
 
+            sw.Stop();
             string typeName = type == 0 ? "Bar Chart" : (type == 1 ? "Flat Dot" : "Sphere");
-            Message = $"Data Visualizer\n---\nType: {typeName}\nPoints: {pts.Count}";
+            Message = $"DATA VISUALIZER\nTime: {sw.ElapsedMilliseconds} ms\n---\nType: {typeName}\nBounds: {originalMin:F1} to {originalMax:F1}";
             DA.SetData(0, masterMesh);
+            DA.SetDataList(1, outVals);
+            DA.SetDataList(2, outColors);
+            DA.SetData(3, "LEAP DATA VISUALIZER\n" + "\n" + "HOW IT WORKS:\n" + "A generic visualization module that takes numerical data streams from LEAP components and maps them to charts, graphs, or colored geometry.\n\n" + "INTERPRETATION & IMPORTANCE:\n" + "Bridges the gap between raw spreadsheet data and spatial intuition. It allows designers to 'see' abstract ecological metrics directly overlaid on their 3D model.");
         }
 
         private Color GetInterpolatedColor(double t, List<Color> palette)
