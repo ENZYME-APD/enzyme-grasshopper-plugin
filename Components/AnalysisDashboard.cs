@@ -83,12 +83,48 @@ namespace Enzyme.Components
             });
         }
 
-        protected override void SolveInstance(IGH_DataAccess DA)
+
+        private bool IsSourceLocked(Grasshopper.Kernel.IGH_Param param)
+        {
+            if (param == null) return false;
+            
+            var topLevel = param.Attributes?.GetTopLevel?.DocObject as Grasshopper.Kernel.IGH_ActiveObject;
+            if (topLevel != null && topLevel.Locked) return true;
+
+            if (param.Sources != null && param.Sources.Count > 0)
+            {
+                foreach (var src in param.Sources)
+                {
+                    if (IsSourceLocked(src)) return true;
+                }
+            }
+            return false;
+        }
+
+                protected override void SolveInstance(IGH_DataAccess DA)
         {
             _run = false;
             DA.GetData(0, ref _run);
 
             if (!DA.GetData(1, ref _jsonPayload)) _jsonPayload = "";
+
+            bool upstreamDisabled = false;
+            if (this.Params.Input[1].Sources.Count > 0)
+            {
+                foreach (var src in this.Params.Input[1].Sources)
+                {
+                    if (IsSourceLocked(src)) 
+                    {
+                        upstreamDisabled = true;
+                        break;
+                    }
+                }
+            }
+
+            if (upstreamDisabled)
+            {
+                _jsonPayload = "";
+            }
 
             _size = 12.0; DA.GetData(2, ref _size);
             _anchor = 0; DA.GetData(3, ref _anchor);
