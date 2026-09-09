@@ -172,7 +172,7 @@ namespace Enzyme.Components
             return false;
         }
 
-        protected override System.Drawing.Bitmap Icon => null;
+        protected override System.Drawing.Bitmap Icon => Enzyme.IconLoader.Load("streamlines.png");
         public override Guid ComponentGuid => new Guid("C4E1D2A9-1234-4ABC-8D9E-F98765432101");
     }
 }

@@ -69,7 +69,7 @@ namespace Enzyme.Components
             DA.SetDataList(0, remapped);
         }
 
-        protected override System.Drawing.Bitmap Icon => null;
+        protected override System.Drawing.Bitmap Icon => Enzyme.IconLoader.Load("Remap.png");
 
         public override Guid ComponentGuid => new Guid("B5D1F6A8-D5B4-4ABC-8D9E-F12345678901");
     }

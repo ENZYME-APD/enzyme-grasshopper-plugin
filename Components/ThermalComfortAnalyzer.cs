@@ -39,7 +39,7 @@ namespace Enzyme.Components
         {
             get
             {
-                return IconLoader.Load("ThermalComfortAnalyzer.png");
+                return IconLoader.Load("Comfort Analysis.png");
             }
         }
 
