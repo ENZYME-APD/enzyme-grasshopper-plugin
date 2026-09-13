@@ -13,7 +13,9 @@ namespace Enzyme.Components
     public class AdvancedExportViews : GH_Component
     {
         private bool _isExporting = false;
+        private bool _taskPending = false;
         private int _stateIndex = 0;
+        private bool _prevRun = false;
         
         // Stored settings for the state machine
         private List<string> _ghStates = new List<string>();
@@ -85,8 +87,11 @@ namespace Enzyme.Components
             var sw = System.Diagnostics.Stopwatch.StartNew();
             bool run = false;
             DA.GetData("Run", ref run);
+            
+            bool triggerStart = run && !_prevRun;
+            _prevRun = run;
 
-            if (run && !_isExporting)
+            if (triggerStart && !_isExporting)
             {
                 // Initialize State Machine
                 _viewNames = new List<string>();
@@ -133,6 +138,14 @@ namespace Enzyme.Components
             {
                 if (_stateIndex < _ghStates.Count)
                 {
+                    if (_taskPending) 
+                    {
+                        // Output the current state to prevent grasshopper warnings while waiting
+                        DA.SetDataList(0, _savedFiles);
+                        return;
+                    }
+                    _taskPending = true;
+
                     string currentState = _ghStates[_stateIndex];
                     DA.SetData(1, currentState);
                     _statusInfo = $"Exporting State {_stateIndex + 1}/{_ghStates.Count}\n{currentState}";
@@ -145,6 +158,7 @@ namespace Enzyme.Components
                             CaptureCurrentViews(currentState);
                             
                             _stateIndex++;
+                            _taskPending = false;
                             
                             var doc = OnPingDocument();
                             if (doc != null)
@@ -160,8 +174,13 @@ namespace Enzyme.Components
                 {
                     // Finished
                     _isExporting = false;
+                    _taskPending = false;
                     _statusInfo = "Export Complete\n" + _savedFiles.Count + " images";
                     DA.SetDataList(0, _savedFiles);
+                    
+                    // Automatically reset the run state in case it was a toggle
+                    _prevRun = true; // Prevents it from immediately restarting on next frame if they left it true
+
                 }
             }
             else
