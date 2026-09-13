@@ -12,6 +12,10 @@ namespace Enzyme.Components
 {
     public class TurntableCamera : GH_Component
     {
+        private string _lastExportDate = "Never";
+        private string _lastExportDuration = "-";
+        private int _lastExportFrames = 0;
+
         public TurntableCamera()
           : base("Turntable Camera", "Turntable",
               "Automated camera rotation and sequence rendering for 360° product/site views.",
@@ -153,15 +157,21 @@ namespace Enzyme.Components
 
             timer.Stop();
 
+            if (run && savedFiles.Count > 0)
+            {
+                _lastExportDate = DateTime.Now.ToString("dd MMM yyyy HH:mm");
+                _lastExportDuration = timer.ElapsedMilliseconds.ToString() + " ms";
+                _lastExportFrames = savedFiles.Count;
+            }
+
             DA.SetData(0, orbitPath);
             DA.SetDataList(1, camPoints);
-            DA.SetDataList(2, savedFiles);
-
-            string status = run ? (savedFiles.Count > 0 ? $"Exported {savedFiles.Count} frames" : "Failed to export") : "Sleeping (Run is False)";
+            DA.SetData(2, target);
+            DA.SetDataList(3, savedFiles);
             
-            Message = $"{this.NickName}\nTime: {timer.ElapsedMilliseconds} ms\n---\n{status}";
+            Message = $"{this.NickName}\nTime: {_lastExportDuration}\n---\nLast: {_lastExportDate}\nFrames: {_lastExportFrames}";
 
-            DA.SetData(3, "TURNTABLE CAMERA ENGINE\n"
+            DA.SetData(4, "TURNTABLE CAMERA ENGINE\n"
                 + "\n"
                 + "METHODOLOGY:\n"
                 + "Calculates an orbital path around the target point and locks the active Rhino viewport camera to each step. Uses Enzyme's Advanced Export Engine settings to dump high-resolution imagery per frame.\n\n"
@@ -202,7 +212,7 @@ namespace Enzyme.Components
             Enzyme.Utils.AutoWireHelper.WireButton(this, doc, 10, 200, 80);
         }
 
-        protected override Bitmap Icon => Enzyme.IconLoader.Load("TurntableCamera.png"); // Uses fallback if missing
+        protected override System.Drawing.Bitmap Icon => Enzyme.IconLoader.Load("TurntableCamera.png"); // Uses fallback if missing
 
         public override Guid ComponentGuid => new Guid("4A9812DC-F41C-4B9A-A3E5-D9814C12D55B");
     }
