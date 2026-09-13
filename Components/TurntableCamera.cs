@@ -40,6 +40,7 @@ namespace Enzyme.Components
         {
             pManager.AddCurveParameter("Orbit Path", "Orbit", "The circular path of the camera.", GH_ParamAccess.item);
             pManager.AddPointParameter("Camera Points", "Pts", "Calculated 3D camera coordinates.", GH_ParamAccess.list);
+            pManager.AddPointParameter("Target Out", "Target", "Passthrough of the focal target point.", GH_ParamAccess.item);
             pManager.AddTextParameter("File Paths", "Files", "Paths of exported PNG frames.", GH_ParamAccess.list);
             pManager.AddTextParameter("Info", "Info", "Component execution HUD.", GH_ParamAccess.item);
         }
