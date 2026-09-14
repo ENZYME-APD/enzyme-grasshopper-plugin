@@ -19,7 +19,7 @@ namespace Enzyme.Components
         protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
             pManager.AddPointParameter("Test Points", "Pts", "(Workflow 2) High LOD: Specific points to test (e.g., window centroids). Overrides Massing.", GH_ParamAccess.list);
-            pManager.AddBrepParameter("Massing", "Massing", "(Workflow 1) Low LOD: 3D Massing boxes or terrain to auto-subdivide.", GH_ParamAccess.list);
+            pManager.AddGeometryParameter("Geometry", "Geo", "(Workflow 1) Low LOD: 3D Massing (Breps) or Terrain (Meshes) to analyze.", GH_ParamAccess.list);
             pManager.AddNumberParameter("Grid Size", "Grid", "Subdivision size for auto-meshing the Massing.", GH_ParamAccess.item, 2.0);
             pManager.AddMeshParameter("Context", "Context", "Environment geometry (buildings, terrain) as shadow casters.", GH_ParamAccess.list);
             pManager.AddVectorParameter("Sun Vectors", "Vectors", "Solar vectors from the Heliodon.", GH_ParamAccess.list);
@@ -40,13 +40,13 @@ namespace Enzyme.Components
         protected override void SolveInstance(IGH_DataAccess DA)
         {
             List<Point3d> testPoints = new List<Point3d>();
-            List<Brep> massings = new List<Brep>();
+            List<Grasshopper.Kernel.Types.IGH_GeometricGoo> geos = new List<Grasshopper.Kernel.Types.IGH_GeometricGoo>();
             double gridSize = 2.0;
             List<Mesh> context = new List<Mesh>();
             List<Vector3d> vectors = new List<Vector3d>();
 
             DA.GetDataList(0, testPoints);
-            DA.GetDataList(1, massings);
+            DA.GetDataList(1, geos);
             DA.GetData(2, ref gridSize);
             DA.GetDataList(3, context); // Optional
             if (!DA.GetDataList(4, vectors)) return;
@@ -58,7 +58,7 @@ namespace Enzyme.Components
             bool isWorkflow1 = false;
 
             // WORKFLOW 1: Auto-Subdivide Massing if no points are provided
-            if ((testPoints == null || testPoints.Count == 0) && massings.Count > 0)
+            if ((testPoints == null || testPoints.Count == 0) && geos.Count > 0)
             {
                 isWorkflow1 = true;
                 if (gridSize < 0.1) gridSize = 0.1;
@@ -68,13 +68,24 @@ namespace Enzyme.Components
                 // mp.MinimumEdgeLength = gridSize * 0.5; // Optional constraint
                 mp.GridAspectRatio = 1.0;
 
-                foreach (Brep b in massings)
+                foreach (var goo in geos)
                 {
-                    if (b == null || !b.IsValid) continue;
-                    Mesh[] ms = Mesh.CreateFromBrep(b, mp);
-                    if (ms != null)
+                    if (goo == null) continue;
+                    GeometryBase geo = goo.ScriptVariable() as GeometryBase;
+                    
+                    if (geo is Brep b)
                     {
-                        foreach (Mesh m in ms) displayMesh.Append(m);
+                        Mesh[] ms = Mesh.CreateFromBrep(b, mp);
+                        if (ms != null)
+                        {
+                            foreach (Mesh m in ms) displayMesh.Append(m);
+                        }
+                    }
+                    else if (geo is Mesh m)
+                    {
+                        // For terrain meshes, we just evaluate their existing faces to save massive remeshing overhead,
+                        // unless we want to do a top-down grid. For now, appending is fastest and safest for colors.
+                        displayMesh.Append(m);
                     }
                 }
 
