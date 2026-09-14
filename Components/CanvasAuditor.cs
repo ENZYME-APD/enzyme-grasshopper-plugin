@@ -18,6 +18,8 @@ namespace Enzyme.Components
             pManager.AddBooleanParameter("Select Enzyme", "Select Enzyme", "Selects all Enzyme components on the canvas.", GH_ParamAccess.item, false);
             pManager.AddBooleanParameter("Select Errors", "Select Errors", "Selects all components currently throwing errors (red nodes).", GH_ParamAccess.item, false);
             pManager.AddBooleanParameter("Select Outdated", "Select Outdated", "Selects outdated, obsolete, or unrecognized 'placeholder' components.", GH_ParamAccess.item, false);
+            pManager.AddBooleanParameter("Select Disabled", "Select Disabled", "Selects all disabled components.", GH_ParamAccess.item, false);
+            pManager.AddBooleanParameter("Select Preview-On", "Select Preview-On", "Selects all components with preview toggled ON.", GH_ParamAccess.item, false);
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
@@ -30,10 +32,14 @@ namespace Enzyme.Components
             bool selEnzyme = false;
             bool selErrors = false;
             bool selOutdated = false;
+            bool selDisabled = false;
+            bool selPreviewOn = false;
 
             DA.GetData("Select Enzyme", ref selEnzyme);
             DA.GetData("Select Errors", ref selErrors);
             DA.GetData("Select Outdated", ref selOutdated);
+            DA.GetData("Select Disabled", ref selDisabled);
+            DA.GetData("Select Preview-On", ref selPreviewOn);
 
             GH_Document doc = OnPingDocument();
             if (doc == null) return;
@@ -41,8 +47,10 @@ namespace Enzyme.Components
             int enzymeCount = 0;
             int errorCount = 0;
             int outdatedCount = 0;
+            int disabledCount = 0;
+            int previewOnCount = 0;
 
-            bool redrawNeeded = selEnzyme || selErrors || selOutdated;
+            bool redrawNeeded = selEnzyme || selErrors || selOutdated || selDisabled || selPreviewOn;
 
             if (redrawNeeded)
             {
@@ -54,10 +62,14 @@ namespace Enzyme.Components
                 bool isEnzyme = obj.Category != null && obj.Category.Equals("Enzyme", StringComparison.OrdinalIgnoreCase);
                 bool isError = obj is IGH_ActiveObject act && act.RuntimeMessageLevel == GH_RuntimeMessageLevel.Error;
                 bool isOutdated = obj.Obsolete || obj.GetType().Name.Contains("Placeholder");
+                bool isDisabled = obj is IGH_ActiveObject activeObj && activeObj.Locked;
+                bool isPreviewOn = obj is IGH_PreviewObject previewObj && !previewObj.Hidden && previewObj.IsPreviewCapable;
 
                 if (isEnzyme) enzymeCount++;
                 if (isError) errorCount++;
                 if (isOutdated) outdatedCount++;
+                if (isDisabled) disabledCount++;
+                if (isPreviewOn) previewOnCount++;
 
                 if (redrawNeeded)
                 {
@@ -65,6 +77,8 @@ namespace Enzyme.Components
                     if (selEnzyme && isEnzyme) selectMe = true;
                     if (selErrors && isError) selectMe = true;
                     if (selOutdated && isOutdated) selectMe = true;
+                    if (selDisabled && isDisabled) selectMe = true;
+                    if (selPreviewOn && isPreviewOn) selectMe = true;
 
                     if (selectMe)
                     {
@@ -87,7 +101,9 @@ namespace Enzyme.Components
                 $"Total Objects: {doc.Objects.Count}\n" +
                 $"Enzyme Components: {enzymeCount}\n" +
                 $"Nodes with Errors: {errorCount}\n" +
-                $"Outdated/Broken Nodes: {outdatedCount}\n\n" +
+                $"Outdated/Broken Nodes: {outdatedCount}\n" +
+                $"Disabled Nodes: {disabledCount}\n" +
+                $"Preview-On Nodes: {previewOnCount}\n\n" +
                 "Connect a Button to inputs to select specific groups.";
 
             DA.SetData(0, report);
@@ -103,6 +119,8 @@ namespace Enzyme.Components
                 Enzyme.Utils.AutoWireHelper.WireButton(this, document, 0, 160, 0);
                 Enzyme.Utils.AutoWireHelper.WireButton(this, document, 1, 160, 30);
                 Enzyme.Utils.AutoWireHelper.WireButton(this, document, 2, 160, 60);
+                Enzyme.Utils.AutoWireHelper.WireButton(this, document, 3, 160, 90);
+                Enzyme.Utils.AutoWireHelper.WireButton(this, document, 4, 160, 120);
                 document.ExpireSolution();
             }
         }
