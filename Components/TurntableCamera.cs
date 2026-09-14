@@ -72,7 +72,8 @@ namespace Enzyme.Components
             DA.GetData("Prefix", ref prefix);
             DA.GetData("Width", ref width);
             DA.GetData("Height", ref height);
-            DA.GetData("DPI", ref dpi);
+            int dpiIdx = this.Params.IndexOfInputParam("DPI");
+            if (dpiIdx != -1) DA.GetData(dpiIdx, ref dpi);
             DA.GetData("Transparent", ref transparent);
             DA.GetData("Scale Items", ref scaleItems);
             DA.GetData("Run", ref run);
