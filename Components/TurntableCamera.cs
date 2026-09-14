@@ -59,6 +59,7 @@ namespace Enzyme.Components
             string prefix = "Turntable_";
             int width = 1920;
             int height = 1080;
+            int dpi = 300;
             bool transparent = false;
             bool scaleItems = false;
             bool run = false;
@@ -71,6 +72,7 @@ namespace Enzyme.Components
             DA.GetData("Prefix", ref prefix);
             DA.GetData("Width", ref width);
             DA.GetData("Height", ref height);
+            DA.GetData("DPI", ref dpi);
             DA.GetData("Transparent", ref transparent);
             DA.GetData("Scale Items", ref scaleItems);
             DA.GetData("Run", ref run);
@@ -140,6 +142,7 @@ namespace Enzyme.Components
                             {
                                 if (bmp != null)
                                 {
+                                    bmp.SetResolution(dpi, dpi);
                                     string fileName = $"{prefix}{i:D4}.png";
                                     string fullPath = Path.Combine(dir, fileName);
                                     bmp.Save(fullPath, System.Drawing.Imaging.ImageFormat.Png);
@@ -207,9 +210,9 @@ namespace Enzyme.Components
             Enzyme.Utils.AutoWireHelper.WireSlider1Dec(this, doc, 2, 0.0, 500.0, 50.0, 200, -80);
             Enzyme.Utils.AutoWireHelper.WireSliderInt(this, doc, 3, 1, 360, 36, 200, -60);
             Enzyme.Utils.AutoWireHelper.WirePanel(this, doc, 4, "C:\\Turntable", 200, -40, 150, 20);
-            Enzyme.Utils.AutoWireHelper.WireBooleanToggle(this, doc, 8, false, 200, 40);
-            Enzyme.Utils.AutoWireHelper.WireBooleanToggle(this, doc, 9, false, 200, 60);
-            Enzyme.Utils.AutoWireHelper.WireButton(this, doc, 10, 200, 80);
+            Enzyme.Utils.AutoWireHelper.WireBooleanToggle(this, doc, 9, false, 200, 40);
+            Enzyme.Utils.AutoWireHelper.WireBooleanToggle(this, doc, 10, false, 200, 60);
+            Enzyme.Utils.AutoWireHelper.WireButton(this, doc, 11, 200, 80);
         }
 
         protected override System.Drawing.Bitmap Icon => Enzyme.IconLoader.Load("TurntableCamera.png"); // Uses fallback if missing
