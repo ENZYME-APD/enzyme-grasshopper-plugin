@@ -18,11 +18,15 @@ namespace Enzyme.Components
 
         protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
-            pManager.AddPointParameter("Test Points", "Pts", "Grid of points to test for sun exposure", GH_ParamAccess.list);
-            pManager.AddMeshParameter("Context", "Context", "Environment geometry (buildings, terrain) as Meshes", GH_ParamAccess.list);
+            pManager.AddPointParameter("Test Points", "Pts", "(Optional) Specific points to test (e.g. facade windows). Overrides Base Mesh.", GH_ParamAccess.list);
+            pManager.AddMeshParameter("Base Mesh", "Base", "(Optional) Terrain or surface to automatically generate a grid on.", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Grid Size", "Grid", "Size of the auto-generated grid on the Base Mesh", GH_ParamAccess.item, 2.0);
+            pManager.AddMeshParameter("Context", "Context", "Environment geometry (buildings, terrain) as shadow casters", GH_ParamAccess.list);
             pManager.AddVectorParameter("Sun Vectors", "Vectors", "Solar vectors from the Heliodon (pointing TO the sun)", GH_ParamAccess.list);
             
-            pManager[1].Optional = true; // Context is optional (100% sun if none)
+            pManager[0].Optional = true;
+            pManager[1].Optional = true;
+            pManager[3].Optional = true;
         }
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
@@ -35,14 +39,56 @@ namespace Enzyme.Components
         protected override void SolveInstance(IGH_DataAccess DA)
         {
             List<Point3d> testPoints = new List<Point3d>();
+            Mesh baseMesh = null;
+            double gridSize = 2.0;
             List<Mesh> context = new List<Mesh>();
             List<Vector3d> vectors = new List<Vector3d>();
 
-            if (!DA.GetDataList(0, testPoints)) return;
-            DA.GetDataList(1, context); // Optional
-            if (!DA.GetDataList(2, vectors)) return;
+            DA.GetDataList(0, testPoints);
+            DA.GetData(1, ref baseMesh);
+            DA.GetData(2, ref gridSize);
+            DA.GetDataList(3, context); // Optional
+            if (!DA.GetDataList(4, vectors)) return;
 
-            if (testPoints.Count == 0 || vectors.Count == 0) return;
+            if (vectors.Count == 0) return;
+
+            // Generate grid if no points were provided but a mesh was
+            if ((testPoints == null || testPoints.Count == 0) && baseMesh != null && baseMesh.IsValid)
+            {
+                testPoints = new List<Point3d>();
+                BoundingBox bbox = baseMesh.GetBoundingBox(true);
+                double rayStartZ = bbox.Max.Z + 100.0;
+                
+                if (gridSize < 0.1) gridSize = 0.1;
+                
+                int cols = (int)Math.Ceiling((bbox.Max.X - bbox.Min.X) / gridSize);
+                int rows = (int)Math.Ceiling((bbox.Max.Y - bbox.Min.Y) / gridSize);
+                
+                double startX = bbox.Min.X + (gridSize / 2.0);
+                double startY = bbox.Min.Y + (gridSize / 2.0);
+                
+                for (int i = 0; i <= cols; i++)
+                {
+                    for (int j = 0; j <= rows; j++)
+                    {
+                        double x = startX + i * gridSize;
+                        double y = startY + j * gridSize;
+                        
+                        Ray3d rayDown = new Ray3d(new Point3d(x, y, rayStartZ), new Vector3d(0, 0, -1));
+                        double t = Rhino.Geometry.Intersect.Intersection.MeshRay(baseMesh, rayDown);
+                        if (t >= 0.0)
+                        {
+                            testPoints.Add(rayDown.PointAt(t));
+                        }
+                    }
+                }
+            }
+
+            if (testPoints == null || testPoints.Count == 0)
+            {
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Please provide either Test Points or a Base Mesh to generate points.");
+                return;
+            }
 
             Stopwatch sw = Stopwatch.StartNew();
 
