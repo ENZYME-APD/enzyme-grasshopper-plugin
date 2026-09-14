@@ -101,7 +101,7 @@ namespace Enzyme.Components
             DA.SetDataList(0, mappedColors);
         }
 
-        protected override System.Drawing.Bitmap Icon => null; // Uses default fallback
+        protected override System.Drawing.Bitmap Icon => Enzyme.IconLoader.Load("MapToGradient.png");
         
         
         public override GH_Exposure Exposure => GH_Exposure.quinary;
