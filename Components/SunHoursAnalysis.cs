@@ -23,10 +23,12 @@ namespace Enzyme.Components
             pManager.AddNumberParameter("Grid Size", "Grid", "Subdivision size for auto-meshing the Massing.", GH_ParamAccess.item, 2.0);
             pManager.AddMeshParameter("Context", "Context", "Environment geometry (buildings, terrain) as shadow casters.", GH_ParamAccess.list);
             pManager.AddVectorParameter("Sun Vectors", "Vectors", "Solar vectors from the Heliodon.", GH_ParamAccess.list);
+            pManager.AddColourParameter("Gradient", "Gradient", "Optional custom color gradient (list of colors from 0% to 100%).", GH_ParamAccess.list);
             
             pManager[0].Optional = true;
-            pManager[1].Optional = true;
-            pManager[3].Optional = true;
+            
+            pManager[5].Optional = true;
+            
         }
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
@@ -35,6 +37,7 @@ namespace Enzyme.Components
             pManager.AddNumberParameter("Exposure %", "Exposure", "Percentage of time in the sun (0.0 to 1.0).", GH_ParamAccess.list);
             pManager.AddPointParameter("Points Out", "Pts", "The analyzed points.", GH_ParamAccess.list);
             pManager.AddMeshParameter("Analysis Mesh", "Mesh", "The auto-subdivided Massing mesh (for easy gradient coloring).", GH_ParamAccess.item);
+            pManager.AddColourParameter("Colors", "Colors", "Color mapped to each point based on exposure.", GH_ParamAccess.list);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
@@ -50,8 +53,21 @@ namespace Enzyme.Components
             DA.GetData(2, ref gridSize);
             DA.GetDataList(3, context); // Optional
             if (!DA.GetDataList(4, vectors)) return;
+            
+            List<System.Drawing.Color> customColors = new List<System.Drawing.Color>();
+            DA.GetDataList(5, customColors);
 
             if (vectors.Count == 0) return;
+
+            if (customColors.Count == 0)
+            {
+                customColors = new List<System.Drawing.Color> { 
+                    System.Drawing.Color.FromArgb(255, 0, 0, 139), // DarkBlue
+                    System.Drawing.Color.FromArgb(255, 0, 255, 255), // Cyan
+                    System.Drawing.Color.FromArgb(255, 255, 255, 0), // Yellow
+                    System.Drawing.Color.FromArgb(255, 255, 0, 0) // Red
+                };
+            }
 
             Mesh displayMesh = new Mesh();
             List<Vector3d> normals = new List<Vector3d>();
@@ -169,6 +185,11 @@ namespace Enzyme.Components
                 exposures[i] = (double)hits / totalRays;
             });
 
+            System.Drawing.Color[] outColors = new System.Drawing.Color[testPoints.Count];
+            Parallel.For(0, testPoints.Count, i => {
+                outColors[i] = InterpolateColor(customColors, exposures[i]);
+            });
+
             sw.Stop();
 
             DA.SetDataList(0, sunHits);
@@ -179,8 +200,33 @@ namespace Enzyme.Components
             {
                 DA.SetData(3, displayMesh);
             }
+            
+            DA.SetDataList(4, outColors);
 
             Message = $"Points: {testPoints.Count:N0}\\nRays: {testPoints.Count * totalRays:N0}\\nTime: {sw.ElapsedMilliseconds} ms";
+        }
+
+        private System.Drawing.Color InterpolateColor(List<System.Drawing.Color> gradient, double t)
+        {
+            if (gradient == null || gradient.Count == 0) return System.Drawing.Color.White;
+            if (gradient.Count == 1) return gradient[0];
+            
+            t = Math.Max(0.0, Math.Min(1.0, t));
+            double scaledT = t * (gradient.Count - 1);
+            int idx1 = (int)Math.Floor(scaledT);
+            int idx2 = (int)Math.Ceiling(scaledT);
+            if (idx1 >= gradient.Count - 1) return gradient[gradient.Count - 1];
+            if (idx1 == idx2) return gradient[idx1];
+            
+            double blend = scaledT - idx1;
+            System.Drawing.Color c1 = gradient[idx1];
+            System.Drawing.Color c2 = gradient[idx2];
+            
+            int r = (int)(c1.R + (c2.R - c1.R) * blend);
+            int g = (int)(c1.G + (c2.G - c1.G) * blend);
+            int b = (int)(c1.B + (c2.B - c1.B) * blend);
+            
+            return System.Drawing.Color.FromArgb(255, r, g, b);
         }
 
         protected override System.Drawing.Bitmap Icon => Enzyme.IconLoader.Load("SunHoursAnalysis.png");
