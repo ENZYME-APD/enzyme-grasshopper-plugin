@@ -111,7 +111,7 @@ namespace Enzyme.Components
                 + "Decouples camera animation from exporting. Plug the output of this component into Advanced Export Views to apply Layer States, Canvas States, and high-res capturing to your flythrough paths.");
         }
 
-        protected override System.Drawing.Bitmap Icon => null;
+        protected override System.Drawing.Bitmap Icon => Enzyme.IconLoader.Load("CreateNamedViews.png");
 
         
         public override GH_Exposure Exposure => GH_Exposure.secondary;

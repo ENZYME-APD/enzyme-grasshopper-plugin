@@ -70,7 +70,7 @@ namespace Enzyme.Components
             }
         }
 
-        protected override System.Drawing.Bitmap Icon => null; // Fallback to default icon
+        protected override System.Drawing.Bitmap Icon => Enzyme.IconLoader.Load("ChangePulse.png");
 
         
         public override GH_Exposure Exposure => GH_Exposure.quinary;
