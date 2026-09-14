@@ -444,7 +444,9 @@ namespace Enzyme.Components
             get { return Enzyme.IconLoader.Load("ExportNamedViews.png"); }
         }
 
-        public override Guid ComponentGuid
+        
+        public override GH_Exposure Exposure => GH_Exposure.tertiary;
+public override Guid ComponentGuid
         {
             get { return new Guid("8E5B7C2A-4F9D-4638-9B2E-1D7F5A8C9B3D"); }
         }

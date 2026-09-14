@@ -56,7 +56,7 @@ namespace Enzyme.Terrain
         public ElevationLabel()
           : base("Elevation Label", "ElevLabel",
               "Custom text/elevation labels with radial rotation and auto-sync.",
-              "Enzyme", "Terrain")
+              "Enzyme", "Site Analysis")
         {
         }
 

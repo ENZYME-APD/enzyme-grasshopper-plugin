@@ -12,7 +12,7 @@ namespace Enzyme.Components
         public Streamlines()
           : base("Streamlines", "Streamlines",
               "Generates smooth streamlines (particle traces) through any vector field using Inverse Distance Weighting.",
-              "Enzyme", "Terrain")
+              "Enzyme", "Site Analysis")
         {
         }
 
@@ -173,6 +173,8 @@ namespace Enzyme.Components
         }
 
         protected override System.Drawing.Bitmap Icon => Enzyme.IconLoader.Load("streamlines.png");
-        public override Guid ComponentGuid => new Guid("C4E1D2A9-1234-4ABC-8D9E-F98765432101");
+        
+        public override GH_Exposure Exposure => GH_Exposure.primary;
+public override Guid ComponentGuid => new Guid("C4E1D2A9-1234-4ABC-8D9E-F98765432101");
     }
 }

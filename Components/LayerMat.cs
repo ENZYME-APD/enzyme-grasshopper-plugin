@@ -259,7 +259,9 @@ Time: {elapsedMs} ms
             get { return IconLoader.Load("AssignLayerMaterial.png"); }
         }
         
-        public override Guid ComponentGuid
+        
+        public override GH_Exposure Exposure => GH_Exposure.quinary;
+public override Guid ComponentGuid
         {
             get { return new Guid("d14f24bd-3b47-49f3-8b7c-3f41a31d4e6b"); }
         }

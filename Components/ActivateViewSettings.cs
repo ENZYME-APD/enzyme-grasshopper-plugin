@@ -233,7 +233,9 @@ namespace Enzyme.Components
             get { return Enzyme.IconLoader.Load("ActivateViewSettings.png"); }
         }
 
-        public override Guid ComponentGuid
+        
+        public override GH_Exposure Exposure => GH_Exposure.secondary;
+public override Guid ComponentGuid
         {
             get { return new Guid("14A6B8F7-9D2E-47F1-B89C-215E58C4F1A2"); }
         }

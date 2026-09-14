@@ -14,7 +14,7 @@ namespace Enzyme.Components
         public DataVisualizer()
           : base("Data Visualizer", "DataVis",
               "Visualizes points and data values as a fast gradient mesh (Bars, Dots, or Spheres).",
-              "Enzyme", "Display")
+              "Enzyme", "Utilities")
         {
         }
 
@@ -279,7 +279,9 @@ namespace Enzyme.Components
             }
         }
 
-        public override Guid ComponentGuid
+        
+        public override GH_Exposure Exposure => GH_Exposure.quarternary;
+public override Guid ComponentGuid
         {
             get { return new Guid("11223344-5566-7788-99AA-BBCCDDEEFF00"); }
         }

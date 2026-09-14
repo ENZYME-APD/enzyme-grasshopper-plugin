@@ -13,7 +13,7 @@ namespace Enzyme.Components
         public AutoListItem()
           : base("Auto List Item", "AutoItem",
               "Extracts an item from a list. Can automatically wire and adjust a slider to match the list's length.",
-              "Enzyme", "Utilities")
+              "Enzyme", "Data")
         {
         }
 

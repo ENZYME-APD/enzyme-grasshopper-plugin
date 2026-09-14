@@ -14,7 +14,7 @@ namespace Enzyme.Components
         public FastCFD()
           : base("Fast CFD", "FastCFD",
               "A 2.5D Terrain-Following Grid Fluid Solver for fast urban wind analysis.",
-              "Enzyme", "Terrain")
+              "Enzyme", "Site Analysis")
         {
         }
 

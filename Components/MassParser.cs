@@ -19,7 +19,7 @@ namespace Enzyme.Components
         public MassParserComponent()
           : base("Masses JSON Parser", "Mass_Parser",
               "Parses Masses JSON",
-              "Enzyme", "Masterplan (Beta)")
+              "Enzyme", "JSON Masterplan (Beta)")
         {
         }
 

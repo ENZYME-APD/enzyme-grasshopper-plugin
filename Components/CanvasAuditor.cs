@@ -109,6 +109,8 @@ namespace Enzyme.Components
 
         protected override System.Drawing.Bitmap Icon => null; // Fallback
 
-        public override Guid ComponentGuid => new Guid("4A2B8D9F-E13C-4D2A-B981-F0C6A53D749B");
+        
+        public override GH_Exposure Exposure => GH_Exposure.primary;
+public override Guid ComponentGuid => new Guid("4A2B8D9F-E13C-4D2A-B981-F0C6A53D749B");
     }
 }

@@ -12,7 +12,7 @@ namespace Enzyme.Components
         public KeylinePattern()
           : base("Keyline Engine", "Keyline",
               "Generates parametric plowing lines or swale networks by offsetting guide curves along a terrain mesh.",
-              "Enzyme", "LEAP")
+              "Enzyme", "Site Analysis")
         {
         }
 
@@ -133,7 +133,9 @@ namespace Enzyme.Components
 
         protected override System.Drawing.Bitmap Icon => Enzyme.IconLoader.Load("Keyline.png");
 
-        public override Guid ComponentGuid
+        
+        public override GH_Exposure Exposure => GH_Exposure.tertiary;
+public override Guid ComponentGuid
         {
             get { return new Guid("F6B3D4C1-92A5-4E38-B2C3-D4E5F6A7B8C9"); }
         }

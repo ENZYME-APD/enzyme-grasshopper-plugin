@@ -144,6 +144,8 @@ namespace Enzyme.Components
 
         protected override System.Drawing.Bitmap Icon => Enzyme.IconLoader.Load("CanvasUsageiInfo.png");
 
-        public override Guid ComponentGuid => new Guid("C3D4E5F6-A1B2-4C3D-0E1F-A2B3C4D5E6F7");
+        
+        public override GH_Exposure Exposure => GH_Exposure.primary;
+public override Guid ComponentGuid => new Guid("C3D4E5F6-A1B2-4C3D-0E1F-A2B3C4D5E6F7");
     }
 }

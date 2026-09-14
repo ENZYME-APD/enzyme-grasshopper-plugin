@@ -12,7 +12,7 @@ namespace Enzyme.Components
         public HydroDEM()
           : base("Hydro-DEM Engine", "HydroDEM",
               "Calculates Flow Direction and Flow Accumulation on a terrain mesh to extract stream networks.",
-              "Enzyme", "LEAP")
+              "Enzyme", "Site Analysis")
         {
         }
 
@@ -178,7 +178,9 @@ namespace Enzyme.Components
 
         protected override System.Drawing.Bitmap Icon => Enzyme.IconLoader.Load("HydroDEM.png");
 
-        public override Guid ComponentGuid
+        
+        public override GH_Exposure Exposure => GH_Exposure.tertiary;
+public override Guid ComponentGuid
         {
             get { return new Guid("E5A9D3B2-81C4-4B39-A1B2-C3D4E5F6A7B8"); }
         }

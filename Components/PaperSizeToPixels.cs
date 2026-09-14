@@ -166,7 +166,9 @@ namespace Enzyme.Components
             get { return Enzyme.IconLoader.Load("PaperSizeToPixels.png"); }
         }
 
-        public override Guid ComponentGuid
+        
+        public override GH_Exposure Exposure => GH_Exposure.secondary;
+public override Guid ComponentGuid
         {
             get { return new Guid("C92461D2-835A-4B6A-949B-5A3841D6B630"); }
         }

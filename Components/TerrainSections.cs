@@ -15,7 +15,7 @@ namespace Enzyme.Components
         public TerrainSections()
           : base("Terrain Sections", "TerrSec",
               "Slices meshes into sections and unrolls them for layout.",
-              "Enzyme", "Terrain")
+              "Enzyme", "Site Analysis")
         {
         }
 

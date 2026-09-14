@@ -11,7 +11,7 @@ namespace Enzyme.Components
         public Heliodon()
           : base("Enzyme Heliodon", "Heliodon",
               "Generates a 3D solar dome and calculates annual sun vectors for environmental analysis.",
-              "Enzyme", "Analysis")
+              "Enzyme", "Site Analysis")
         {
         }
 
@@ -168,6 +168,8 @@ namespace Enzyme.Components
 
         protected override System.Drawing.Bitmap Icon => Enzyme.IconLoader.Load("Heliodon.png"); 
 
-        public override Guid ComponentGuid => new Guid("B5D8F2B1-4A2E-4D7F-8C9B-9A3E4F5D6C7B");
+        
+        public override GH_Exposure Exposure => GH_Exposure.secondary;
+public override Guid ComponentGuid => new Guid("B5D8F2B1-4A2E-4D7F-8C9B-9A3E4F5D6C7B");
     }
 }

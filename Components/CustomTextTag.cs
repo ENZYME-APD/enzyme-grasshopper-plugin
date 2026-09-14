@@ -24,7 +24,7 @@ namespace Enzyme.Components
         public CustomTextTag()
           : base("Custom Text Tag", "CustomTag",
               "Displays a 3D text tag with a custom move vector. Right-click to change the move axis.",
-              "Enzyme", "Display")
+              "Enzyme", "Utilities")
         {
         }
 
@@ -195,6 +195,8 @@ namespace Enzyme.Components
 
         protected override System.Drawing.Bitmap Icon => Enzyme.IconLoader.Load("custom tex tag.png");
 
-        public override Guid ComponentGuid => new Guid("D8B6F9A2-4E1C-458B-8D7F-E2A4B1C9F3D5");
+        
+        public override GH_Exposure Exposure => GH_Exposure.quarternary;
+public override Guid ComponentGuid => new Guid("D8B6F9A2-4E1C-458B-8D7F-E2A4B1C9F3D5");
     }
 }

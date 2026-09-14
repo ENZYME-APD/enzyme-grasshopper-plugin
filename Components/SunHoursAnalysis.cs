@@ -12,7 +12,7 @@ namespace Enzyme.Components
         public SunHoursAnalysis()
           : base("Sun Hours Analysis", "SunHours",
               "Multi-threaded raycaster. Analyzes arbitrary 3D massing or custom points for sun exposure.",
-              "Enzyme", "Analysis")
+              "Enzyme", "Site Analysis")
         {
         }
 
@@ -231,6 +231,8 @@ namespace Enzyme.Components
 
         protected override System.Drawing.Bitmap Icon => Enzyme.IconLoader.Load("SunHoursAnalysis.png");
 
-        public override Guid ComponentGuid => new Guid("C4F812D3-A42E-4D7F-8C9B-9A3E4F5D6C11");
+        
+        public override GH_Exposure Exposure => GH_Exposure.secondary;
+public override Guid ComponentGuid => new Guid("C4F812D3-A42E-4D7F-8C9B-9A3E4F5D6C11");
     }
 }

@@ -103,6 +103,8 @@ namespace Enzyme.Components
 
         protected override System.Drawing.Bitmap Icon => null; // Uses default fallback
         
-        public override Guid ComponentGuid => new Guid("D345F12A-99B7-4C10-A1E2-F4D3C5B1709A");
+        
+        public override GH_Exposure Exposure => GH_Exposure.quinary;
+public override Guid ComponentGuid => new Guid("D345F12A-99B7-4C10-A1E2-F4D3C5B1709A");
     }
 }

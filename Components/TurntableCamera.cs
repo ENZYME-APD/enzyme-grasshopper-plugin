@@ -19,7 +19,7 @@ namespace Enzyme.Components
         public TurntableCamera()
           : base("Turntable Camera", "Turntable",
               "Automated camera rotation and sequence rendering for 360° product/site views.",
-              "Enzyme", "Export")
+              "Enzyme", "Utilities")
         {
         }
 
@@ -219,6 +219,8 @@ namespace Enzyme.Components
 
         protected override System.Drawing.Bitmap Icon => Enzyme.IconLoader.Load("TurntableCamera.png"); // Uses fallback if missing
 
-        public override Guid ComponentGuid => new Guid("4A9812DC-F41C-4B9A-A3E5-D9814C12D55B");
+        
+        public override GH_Exposure Exposure => GH_Exposure.secondary;
+public override Guid ComponentGuid => new Guid("4A9812DC-F41C-4B9A-A3E5-D9814C12D55B");
     }
 }

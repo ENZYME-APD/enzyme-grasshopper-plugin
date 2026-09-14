@@ -38,7 +38,7 @@ namespace Enzyme.Components
         public AnalysisDashboard()
           : base("Analysis Dashboard", "AnaDash",
               "Reads a JSON payload from Terrain/LEAP analysis tools and renders a responsive Legend HUD.",
-              "Enzyme", "Terrain")
+              "Enzyme", "Site Analysis")
         {
         }
 

@@ -13,7 +13,7 @@ namespace Enzyme.Components
         public CreateNamedViews()
           : base("Create Named Views", "NamedViews",
               "Converts a list of camera locations and targets into Rhino Named Views. Combine with Advanced Export Views for flythroughs and animations.",
-              "Enzyme", "Export")
+              "Enzyme", "Utilities")
         {
         }
 
@@ -113,6 +113,8 @@ namespace Enzyme.Components
 
         protected override System.Drawing.Bitmap Icon => null;
 
-        public override Guid ComponentGuid => new Guid("7F2A3D1B-5B2E-4D9E-8A11-C345F12A709A");
+        
+        public override GH_Exposure Exposure => GH_Exposure.secondary;
+public override Guid ComponentGuid => new Guid("7F2A3D1B-5B2E-4D9E-8A11-C345F12A709A");
     }
 }

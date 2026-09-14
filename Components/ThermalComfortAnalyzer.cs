@@ -28,7 +28,7 @@ namespace Enzyme.Components
         public ThermalComfortAnalyzer()
             : base("Higrothermal Comfort", "HigroComfort",
                 "Maps wind-engine velocity samples onto apparent (\"feels like\") temperature and locates the best/worst comfort points, without requiring a regular grid.",
-                "Enzyme", "Terrain")
+                "Enzyme", "Site Analysis")
         {
             this.Message = "ThermalComfort\n-- WAITING --";
         }

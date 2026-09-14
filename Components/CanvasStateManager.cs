@@ -294,6 +294,8 @@ namespace Enzyme.Components
 
         protected override System.Drawing.Bitmap Icon => Enzyme.IconLoader.Load("canvasStateManager.png");
         
-        public override Guid ComponentGuid => new Guid("7F2A3B9D-1C4E-4A8D-9B1C-E3D2F4A5B6C7");
+        
+        public override GH_Exposure Exposure => GH_Exposure.primary;
+public override Guid ComponentGuid => new Guid("7F2A3B9D-1C4E-4A8D-9B1C-E3D2F4A5B6C7");
     }
 }

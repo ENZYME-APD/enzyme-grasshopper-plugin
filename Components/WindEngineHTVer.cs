@@ -79,7 +79,7 @@ namespace Enzyme.Components
         public WindEngineHTVer()
             : base("Urban Wind Vector Engine HT (Beta)", "WindEngineHTVer",
                 "Simulates urban wind fields using terrain-parallel raycasting. Outputs a perfectly flat, crisp XY pixel-screen heatmap at a custom elevation.",
-                "Enzyme", "Terrain")
+                "Enzyme", "Site Analysis")
         {
         }
 
