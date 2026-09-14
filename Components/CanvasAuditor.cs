@@ -125,7 +125,7 @@ namespace Enzyme.Components
             }
         }
 
-        protected override System.Drawing.Bitmap Icon => null; // Fallback
+        protected override System.Drawing.Bitmap Icon => Enzyme.IconLoader.Load("CanvasAuditor.png");
 
         
         public override GH_Exposure Exposure => GH_Exposure.primary;
