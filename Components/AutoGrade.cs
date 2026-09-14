@@ -140,6 +140,8 @@ namespace Enzyme.Components
             DA.SetData(1, egCrv);
         }
 
+        protected override System.Drawing.Bitmap Icon => Enzyme.IconLoader.Load("AutoGrade.png");
+
         public override Guid ComponentGuid
         {
             get { return new Guid("8F1604B4-CC1A-4FF0-911E-14E1C2BC9DB2"); }

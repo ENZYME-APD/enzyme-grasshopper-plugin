@@ -523,6 +523,8 @@ namespace Enzyme.Components
             return area2D * avgDz;
         }
 
+        protected override System.Drawing.Bitmap Icon => Enzyme.IconLoader.Load("RoadGenerator.png");
+
         public override Guid ComponentGuid
         {
             get { return new Guid("E5A7B8C9-1234-4ABC-9DEF-0123456789AB"); }
