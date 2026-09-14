@@ -33,6 +33,7 @@ namespace Enzyme.Components
             pManager.AddTextParameter("Prefix", "Prefix", "Prefix for the image files", GH_ParamAccess.item, "Turntable_");
             pManager.AddIntegerParameter("Width", "Width", "Export width in pixels", GH_ParamAccess.item, 1920);
             pManager.AddIntegerParameter("Height", "Height", "Export height in pixels", GH_ParamAccess.item, 1080);
+            pManager.AddIntegerParameter("DPI", "DPI", "Print resolution in Dots Per Inch", GH_ParamAccess.item, 300);
             pManager.AddBooleanParameter("Transparent", "Trans", "Export with a transparent background", GH_ParamAccess.item, false);
             pManager.AddBooleanParameter("Scale Items", "ScaleItems", "Scale lineweights and screen items", GH_ParamAccess.item, false);
             pManager.AddBooleanParameter("Run", "Run", "Trigger the export loop", GH_ParamAccess.item, false);
