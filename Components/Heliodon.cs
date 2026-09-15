@@ -36,65 +36,80 @@ namespace Enzyme.Components
             pManager.AddPointParameter("Sun Points", "Points", "Visual hourly sun positions.", GH_ParamAccess.list);
         }
 
-        protected override void SolveInstance(IGH_DataAccess DA)
+                protected override void SolveInstance(IGH_DataAccess DA)
         {
+            System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
+
             double lat = 51.5;
             double lon = -0.1;
             double tz = 0.0;
             double radius = 100.0;
-            Point3d center = Point3d.Origin;
+            Rhino.Geometry.Point3d center = Rhino.Geometry.Point3d.Origin;
+            Rhino.Geometry.Interval mth = new Rhino.Geometry.Interval(1, 12);
+            Rhino.Geometry.Interval hrs = new Rhino.Geometry.Interval(0, 24);
 
             DA.GetData(0, ref lat);
             DA.GetData(1, ref lon);
             DA.GetData(2, ref tz);
             DA.GetData(3, ref radius);
             DA.GetData(4, ref center);
+            DA.GetData(5, ref mth);
+            DA.GetData(6, ref hrs);
 
-            List<Vector3d> vectors = new List<Vector3d>();
-            List<Curve> arcs = new List<Curve>();
-            List<Point3d> points = new List<Point3d>();
+            System.Collections.Generic.List<Rhino.Geometry.Vector3d> vectors = new System.Collections.Generic.List<Rhino.Geometry.Vector3d>();
+            System.Collections.Generic.List<Rhino.Geometry.Curve> arcs = new System.Collections.Generic.List<Rhino.Geometry.Curve>();
+            System.Collections.Generic.List<Rhino.Geometry.Point3d> points = new System.Collections.Generic.List<Rhino.Geometry.Point3d>();
 
-            // The 21st of each month (approximate days of year)
-            // Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec
-            int[] daysOfMonth = new int[] { 21, 52, 80, 111, 141, 172, 202, 233, 264, 294, 325, 355 };
+            int startMonth = (int)System.Math.Max(1, System.Math.Min(12, mth.Min));
+            int endMonth = (int)System.Math.Max(1, System.Math.Min(12, mth.Max));
+            
+            double startHour = System.Math.Max(0, System.Math.Min(24, hrs.Min));
+            double endHour = System.Math.Max(0, System.Math.Min(24, hrs.Max));
 
-            foreach (int day in daysOfMonth)
+            int[] allDays = new int[] { 21, 52, 80, 111, 141, 172, 202, 233, 264, 294, 325, 355 };
+            
+            System.Collections.Generic.List<int> validDays = new System.Collections.Generic.List<int>();
+            for (int i = startMonth - 1; i <= endMonth - 1; i++)
             {
-                List<Point3d> dailyPts = new List<Point3d>();
+                if (i >= 0 && i < 12) validDays.Add(allDays[i]);
+            }
 
-                // Calculate every 30 mins for smooth curves
-                for (double hour = 0; hour <= 24; hour += 0.5)
+            foreach (int day in validDays)
+            {
+                System.Collections.Generic.List<Rhino.Geometry.Point3d> dailyPts = new System.Collections.Generic.List<Rhino.Geometry.Point3d>();
+
+                for (double hour = startHour; hour <= endHour; hour += 0.5)
                 {
-                    Vector3d sunVec = GetSunVector(lat, lon, day, hour, tz);
+                    Rhino.Geometry.Vector3d sunVec = GetSunVector(lat, lon, day, hour, tz);
                     
-                    // Only process sun if it's above the horizon (Z > 0)
                     if (sunVec.Z > 0.01) 
                     {
-                        // Add to vectors (only on full hours for analysis speed, but curve gets all)
-                        if (Math.Abs(hour % 1.0) < 0.01)
+                        if (System.Math.Abs(hour % 1.0) < 0.01)
                         {
                             vectors.Add(sunVec);
-                            Point3d pt = center + (sunVec * radius);
+                            Rhino.Geometry.Point3d pt = center + (sunVec * radius);
                             points.Add(pt);
                         }
                         
-                        Point3d curvePt = center + (sunVec * radius);
+                        Rhino.Geometry.Point3d curvePt = center + (sunVec * radius);
                         dailyPts.Add(curvePt);
                     }
                 }
 
                 if (dailyPts.Count > 1)
                 {
-                    Curve arc = Curve.CreateInterpolatedCurve(dailyPts, 3);
+                    Rhino.Geometry.Curve arc = Rhino.Geometry.Curve.CreateInterpolatedCurve(dailyPts, 3);
                     if (arc != null) arcs.Add(arc);
                 }
             }
+
+            sw.Stop();
 
             DA.SetDataList(0, vectors);
             DA.SetDataList(1, arcs);
             DA.SetDataList(2, points);
             
-            Message = $"Lat: {lat:F1}\\nLon: {lon:F1}\\nVectors: {vectors.Count}";
+            Message = $"Heliodon\n{sw.ElapsedMilliseconds} ms\n---\nLat: {lat:F1}\nLon: {lon:F1}\nVectors: {vectors.Count}";
         }
 
         private Vector3d GetSunVector(double lat, double lon, int dayOfYear, double hour, double tz)
