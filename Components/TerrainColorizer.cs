@@ -12,11 +12,11 @@ namespace Enzyme.Components
         public TerrainColorizer()
           : base("Terrain Colorizer", "Terrain Color",
               "Colors a terrain mesh by elevation and generates contours.",
-              "Enzyme", "Terrain")
+              "Enzyme", "Site Analysis")
         {
         }
 
-        public override GH_Exposure Exposure => GH_Exposure.secondary;
+        public override GH_Exposure Exposure => GH_Exposure.quarternary;
 
         protected override void RegisterInputParams(GH_InputParamManager pManager)
         {

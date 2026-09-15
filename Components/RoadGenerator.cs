@@ -99,6 +99,8 @@ namespace Enzyme.Components
             pManager.AddCurveParameter("Pillars", "P", "Bridge pillar lines", GH_ParamAccess.list);
             pManager.AddMeshParameter("Cut Volume", "C", "Excavated earth volume", GH_ParamAccess.list);
             pManager.AddMeshParameter("Fill Volume", "F", "Added earth volume", GH_ParamAccess.list);
+            pManager.AddCurveParameter("Contours", "Ct", "Normal contours (1m)", GH_ParamAccess.list);
+            pManager.AddCurveParameter("Main Contours", "MC", "Main contours (5m)", GH_ParamAccess.list);
         }
 
                 protected override void SolveInstance(IGH_DataAccess DA)
