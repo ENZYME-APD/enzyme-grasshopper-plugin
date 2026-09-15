@@ -84,6 +84,11 @@ namespace Enzyme.Components
             }
             else
             {
+                // Scale digital formats by DPI (baseline 72)
+                double scale = dpi / 72.0;
+                exactWidth = (int)Math.Round(exactWidth * scale);
+                exactHeight = (int)Math.Round(exactHeight * scale);
+
                 // For exact pixels, if user forces portrait, flip them.
                 if (!landscape && exactWidth > exactHeight)
                 {
