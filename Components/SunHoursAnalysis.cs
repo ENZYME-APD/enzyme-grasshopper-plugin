@@ -13,6 +13,8 @@ namespace Enzyme.Components
         private List<double> _cachedExposures = new List<double>();
         private List<Point3d> _cachedPoints = new List<Point3d>();
         private Mesh _cachedMesh = new Mesh();
+        private List<System.Drawing.Color> _cachedColors = new List<System.Drawing.Color>();
+        private string _cachedJson = "";
         private long _cachedTime = 0;
         private int _cachedRays = 0;
 
@@ -36,6 +38,8 @@ namespace Enzyme.Components
             
             pManager[5].Optional = true;
             pManager.AddBooleanParameter("Run", "Run", "Trigger the analysis.", GH_ParamAccess.item, true);
+            pManager.AddNumberParameter("Offset", "Offset", "Offset distance for output points.", GH_ParamAccess.item, 0.1);
+            pManager[6].Optional = true;
             
         }
 
@@ -45,10 +49,12 @@ namespace Enzyme.Components
             pManager.AddNumberParameter("Exposure %", "Exposure", "Percentage of time in the sun (0.0 to 1.0).", GH_ParamAccess.list);
             pManager.AddPointParameter("Points Out", "Pts", "The analyzed points.", GH_ParamAccess.list);
             pManager.AddMeshParameter("Analysis Mesh", "Mesh", "The auto-subdivided Massing mesh (for easy gradient coloring).", GH_ParamAccess.item);
+            pManager.AddColourParameter("Colors", "Colors", "Color mapped to each point.", GH_ParamAccess.list);
+            pManager.AddTextParameter("Dashboard Data", "Dashboard", "JSON legend data", GH_ParamAccess.item);
             pManager.AddColourParameter("Colors", "Colors", "Color mapped to each point based on exposure.", GH_ParamAccess.list);
         }
 
-                protected override void SolveInstance(IGH_DataAccess DA)
+                        protected override void SolveInstance(IGH_DataAccess DA)
         {
             List<Point3d> testPoints = new List<Point3d>();
             List<Grasshopper.Kernel.Types.IGH_GeometricGoo> geos = new List<Grasshopper.Kernel.Types.IGH_GeometricGoo>();
@@ -68,6 +74,9 @@ namespace Enzyme.Components
             bool run = true;
             DA.GetData(6, ref run);
 
+            double offset = 0.1;
+            DA.GetData(7, ref offset);
+
             if (!run)
             {
                 if (_cachedHits.Count > 0)
@@ -76,6 +85,8 @@ namespace Enzyme.Components
                     DA.SetDataList(1, _cachedExposures);
                     DA.SetDataList(2, _cachedPoints);
                     if (_cachedMesh != null && _cachedMesh.IsValid) DA.SetData(3, _cachedMesh);
+                    DA.SetDataList(4, _cachedColors);
+                    DA.SetData(5, _cachedJson);
                     Message = $"Sun Hours\n{_cachedTime} ms (Cached)\n---\nPoints: {_cachedPoints.Count}\nRays: {_cachedRays}";
                 }
                 else
@@ -139,6 +150,11 @@ namespace Enzyme.Components
                     normals.Add(displayMesh.FaceNormals[i]);
                 }
             }
+            else
+            {
+                // Ensure normals array matches testPoints count
+                for (int i = 0; i < testPoints.Count; i++) normals.Add(Vector3d.ZAxis);
+            }
 
             if (testPoints == null || testPoints.Count == 0)
             {
@@ -148,7 +164,6 @@ namespace Enzyme.Components
 
             System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
 
-            // Optimization: Combine all context meshes and the display mesh into a single massive mesh for Raycasting
             Mesh combinedContext = new Mesh();
             foreach (Mesh cm in context)
             {
@@ -160,24 +175,22 @@ namespace Enzyme.Components
             }
             combinedContext.Compact();
             
-            // Build RTree for the combined mesh for ultra-fast intersections (Rhino handles this natively if we pass it, 
-            // but MeshRay is faster on a single mesh because it builds the tree internally once).
-            
             int[] sunHits = new int[testPoints.Count];
             double[] exposures = new double[testPoints.Count];
+            Point3d[] offsetPoints = new Point3d[testPoints.Count];
             int totalRays = vectors.Count;
 
             System.Threading.Tasks.Parallel.For(0, testPoints.Count, i =>
             {
                 Point3d pt = testPoints[i];
-                bool hasNormal = (isWorkflow1 && normals.Count == testPoints.Count);
-                Vector3d normal = hasNormal ? normals[i] : Vector3d.Unset;
+                Vector3d normal = normals[i];
+                offsetPoints[i] = pt + (normal * offset);
                 
                 int hits = 0;
 
                 foreach (Vector3d vec in vectors)
                 {
-                    if (hasNormal && Vector3d.Multiply(normal, vec) <= 0.001)
+                    if (isWorkflow1 && Vector3d.Multiply(normal, vec) <= 0.001)
                     {
                         continue;
                     }
@@ -207,13 +220,9 @@ namespace Enzyme.Components
 
             if (isWorkflow1 && displayMesh.IsValid)
             {
-                // Unweld the mesh to allow per-face colors (by making sure vertices are distinct per face)
                 displayMesh.Unweld(0.0, true);
                 displayMesh.VertexColors.CreateMonotoneMesh(System.Drawing.Color.White);
                 
-                // Now assign the computed face color to all vertices of that face
-                // displayMesh has Faces.Count == outColors.Length
-                // Since it is unwelded, each face has unique vertices
                 for (int i = 0; i < displayMesh.Faces.Count; i++)
                 {
                     if (i >= outColors.Length) break;
@@ -229,11 +238,26 @@ namespace Enzyme.Components
             }
 
             sw.Stop();
+            
+            var jColors = new Newtonsoft.Json.Linq.JArray();
+            foreach (var c in customColors) jColors.Add(new Newtonsoft.Json.Linq.JObject { ["R"] = c.R, ["G"] = c.G, ["B"] = c.B });
+            
+            var legendObj = new Newtonsoft.Json.Linq.JObject
+            {
+                ["Type"] = "Blocks",
+                ["Title"] = "Sun Exposure",
+                ["Colors"] = jColors,
+                ["Labels"] = new Newtonsoft.Json.Linq.JArray("0 Hours", $"{totalRays} Hours"),
+                ["SubLabels"] = new Newtonsoft.Json.Linq.JArray("Annual Exposure")
+            };
+            string jsonOut = legendObj.ToString();
 
             _cachedHits = new List<int>(sunHits);
             _cachedExposures = new List<double>(exposures);
-            _cachedPoints = new List<Point3d>(testPoints);
+            _cachedPoints = new List<Point3d>(offsetPoints);
             _cachedMesh = isWorkflow1 ? displayMesh : null;
+            _cachedColors = new List<System.Drawing.Color>(outColors);
+            _cachedJson = jsonOut;
             _cachedTime = sw.ElapsedMilliseconds;
             _cachedRays = totalRays;
 
@@ -243,8 +267,9 @@ namespace Enzyme.Components
             DA.SetDataList(1, _cachedExposures);
             DA.SetDataList(2, _cachedPoints);
             if (isWorkflow1 && displayMesh.IsValid) DA.SetData(3, displayMesh);
+            DA.SetDataList(4, _cachedColors);
+            DA.SetData(5, _cachedJson);
         }
-
         private System.Drawing.Color InterpolateColor(List<System.Drawing.Color> gradient, double t)
         {
             if (gradient == null || gradient.Count == 0) return System.Drawing.Color.White;

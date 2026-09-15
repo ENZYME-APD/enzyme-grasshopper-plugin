@@ -37,6 +37,7 @@ namespace Enzyme.Components
             pManager.AddNumberParameter("Feels Like", "FL", "Perceived temperature in Celsius.", GH_ParamAccess.list);
             pManager.AddTextParameter("Category", "C", "Comfort category label.", GH_ParamAccess.list);
             pManager.AddColourParameter("Colors", "Col", "Gradient color mapping.", GH_ParamAccess.list);
+            pManager.AddTextParameter("Dashboard Data", "Dashboard", "JSON Legend Data", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
@@ -121,10 +122,32 @@ namespace Enzyme.Components
                 colors.Add(GetComfortColor(fl));
             }
 
+            
+            var jColors = new Newtonsoft.Json.Linq.JArray();
+            var stops = new double[] { -10, 5, 20, 30, 40 };
+            var baseColors = new System.Drawing.Color[] { 
+                System.Drawing.Color.FromArgb(0, 0, 139), 
+                System.Drawing.Color.FromArgb(0, 191, 255), 
+                System.Drawing.Color.FromArgb(34, 139, 34), 
+                System.Drawing.Color.FromArgb(255, 215, 0), 
+                System.Drawing.Color.FromArgb(139, 0, 0) 
+            };
+            foreach (var c in baseColors) jColors.Add(new Newtonsoft.Json.Linq.JObject { ["R"] = c.R, ["G"] = c.G, ["B"] = c.B });
+            
+            var legendObj = new Newtonsoft.Json.Linq.JObject
+            {
+                ["Type"] = "Blocks",
+                ["Title"] = "Microclimate Comfort",
+                ["Colors"] = jColors,
+                ["Labels"] = new Newtonsoft.Json.Linq.JArray("-10°C", "40°C"),
+                ["SubLabels"] = new Newtonsoft.Json.Linq.JArray(method == 0 ? "Fast Apparent Temp" : "Precise UTCI")
+            };
+
             DA.SetDataList(0, points);
             DA.SetDataList(1, feelsLike);
             DA.SetDataList(2, categories);
             DA.SetDataList(3, colors);
+            DA.SetData(4, legendObj.ToString());
         }
 
         private Color GetComfortColor(double temp)

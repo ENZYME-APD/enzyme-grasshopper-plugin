@@ -34,6 +34,7 @@ namespace Enzyme.Components
             pManager.AddVectorParameter("Sun Vectors", "Vectors", "All solar vectors above the horizon (pointing TO the sun).", GH_ParamAccess.list);
             pManager.AddCurveParameter("Daily Arcs", "Arcs", "Visual sun path curves for the 21st of each month.", GH_ParamAccess.list);
             pManager.AddPointParameter("Sun Points", "Points", "Visual hourly sun positions.", GH_ParamAccess.list);
+            pManager.AddCurveParameter("Base Circle", "Circle", "A flat circle framing the heliodon radius.", GH_ParamAccess.item);
         }
 
                 protected override void SolveInstance(IGH_DataAccess DA)
@@ -108,6 +109,7 @@ namespace Enzyme.Components
             DA.SetDataList(0, vectors);
             DA.SetDataList(1, arcs);
             DA.SetDataList(2, points);
+            DA.SetData(3, new Rhino.Geometry.Circle(new Rhino.Geometry.Plane(center, Rhino.Geometry.Vector3d.ZAxis), radius).ToNurbsCurve());
             
             Message = $"Heliodon\n{sw.ElapsedMilliseconds} ms\n---\nLat: {lat:F1}\nLon: {lon:F1}\nVectors: {vectors.Count}";
         }
