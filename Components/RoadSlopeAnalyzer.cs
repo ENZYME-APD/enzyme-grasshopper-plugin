@@ -123,6 +123,31 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
                 ["Labels"] = new Newtonsoft.Json.Linq.JArray($"<= {threshold}{unit}", $"> {threshold}{unit}"),
                 ["SubLabels"] = new Newtonsoft.Json.Linq.JArray($"Compliance: {result.CompliancePercentage}%")
             };
+            double maxVal = double.MinValue;
+            double minVal = double.MaxValue;
+            double sumVal = 0;
+            int countVal = 0;
+            foreach (Grasshopper.Kernel.Types.GH_Number val in result.SlopeValues.AllData(true))
+            {
+                if(val != null) {
+                    double v = val.Value;
+                    if(v > maxVal) maxVal = v;
+                    if(v < minVal) minVal = v;
+                    sumVal += v;
+                    countVal++;
+                }
+            }
+            if(countVal == 0) { maxVal = 0; minVal = 0; }
+            double avgVal = countVal > 0 ? sumVal / countVal : 0;
+            string modeName = mode == 0 ? "Degrees" : (mode == 1 ? "Percentage" : "Ratio");
+            string unitStr = mode == 0 ? "°" : (mode == 1 ? "%" : "");
+            string prefix = mode == 2 ? "1:" : "";
+            string statMax = countVal > 0 ? $"{prefix}{System.Math.Round((mode == 2 ? minVal : maxVal), 1)}{unitStr}" : "N/A";
+            string statMin = countVal > 0 ? $"{prefix}{System.Math.Round((mode == 2 ? maxVal : minVal), 1)}{unitStr}" : "N/A";
+            string statAvg = countVal > 0 ? $"{prefix}{System.Math.Round(avgVal, 1)}{unitStr}" : "N/A";
+            
+            Message = $"Road Slope\n{sw.ElapsedMilliseconds} ms\n---\nMode: {modeName}\nMax: {statMax}\nMin: {statMin}\nAvg: {statAvg}\nCompliance: {result.CompliancePercentage}%";
+
 
             DA.SetDataTree(0, result.AnalyzedSegments);
             DA.SetDataTree(1, result.SlopeValues);
@@ -131,8 +156,6 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
             DA.SetDataTree(4, result.ProjectedPoints);
             DA.SetDataTree(5, result.ProjectionLines);
             DA.SetData(6, legendObj.ToString());
-            
-            Message = $"Road Slope\n{sw.ElapsedMilliseconds} ms\n---\nCompliance: {result.CompliancePercentage}%";
         }
 
         private RoadAnalysisResult AnalyzeRoadSlopes(

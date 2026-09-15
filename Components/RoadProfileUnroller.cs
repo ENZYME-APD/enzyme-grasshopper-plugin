@@ -232,9 +232,32 @@ namespace Enzyme.Components
                 ["SubLabels"] = new Newtonsoft.Json.Linq.JArray($"Compliance: {compliancePct}%")
             };
 
-            sw.Stop();
+            sw.Stop(); //
+            double maxVal = double.MinValue;
+            double minVal = double.MaxValue;
+            double sumVal = 0;
+            int countVal = 0;
+            foreach (Grasshopper.Kernel.Types.GH_Number val in outSlopes.AllData(true))
+            {
+                if(val != null) {
+                    double v = val.Value;
+                    if(v > maxVal) maxVal = v;
+                    if(v < minVal) minVal = v;
+                    sumVal += v;
+                    countVal++;
+                }
+            }
+            if(countVal == 0) { maxVal = 0; minVal = 0; }
+            double avgVal = countVal > 0 ? sumVal / countVal : 0;
+            string modeName = mode == 0 ? "Degrees" : (mode == 1 ? "Percentage" : "Ratio");
+            string unitStr = mode == 0 ? "°" : (mode == 1 ? "%" : "");
+            string prefix = mode == 2 ? "1:" : "";
+            string statMax = countVal > 0 ? $"{prefix}{System.Math.Round((mode == 2 ? minVal : maxVal), 1)}{unitStr}" : "N/A";
+            string statMin = countVal > 0 ? $"{prefix}{System.Math.Round((mode == 2 ? maxVal : minVal), 1)}{unitStr}" : "N/A";
+            string statAvg = countVal > 0 ? $"{prefix}{System.Math.Round(avgVal, 1)}{unitStr}" : "N/A";
+            
+            Message = $"Road Profile\n{sw.ElapsedMilliseconds} ms\n---\nMode: {modeName}\nMax: {statMax}\nMin: {statMin}\nAvg: {statAvg}\nCompliance: {compliancePct}%";
 
-            Message = $"Road Profile\n{sw.ElapsedMilliseconds} ms\n---\nCompliance: {compliancePct}%"; //
 
             DA.SetDataTree(0, outProfiles);
             DA.SetDataTree(1, outSegments);
