@@ -53,13 +53,15 @@ namespace Enzyme.Components
             Enzyme.Utils.AutoWireHelper.WireSlider1Dec(this, document, 9, 0.5, 10.0, 2.0, 316, 70);
             Enzyme.Utils.AutoWireHelper.WireBooleanToggle(this, document, 10, true, 316, 89);
 
-            Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 0, "mesh", -145, -94);
-            Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 1, "mesh", -145, -63);
-            Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 2, "curve", -145, -31);
-            Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 3, "curve", -145, 0);
-            Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 4, "curve", -145, 31);
-            Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 5, "mesh", -145, 63);
-            Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 6, "mesh", -145, 94);
+            Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 0, "mesh", -145, -80);
+            Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 1, "mesh", -145, -60);
+            Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 2, "curve", -145, -40);
+            Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 3, "curve", -145, -20);
+            Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 4, "curve", -145, 0);
+            Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 5, "mesh", -145, 20);
+            Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 6, "mesh", -145, 40);
+            Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 7, "curve", -145, 60);
+            Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 8, "curve", -145, 80);
         }
 
         public override void AddedToDocument(GH_Document document)
