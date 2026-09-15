@@ -43,7 +43,18 @@ namespace Enzyme.Components
             {
                 Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 0.0, 16, 8.0, 330, -40);
                 Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 3, 0.0, 10.0, 5.0, 330, 0);
-                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 4, false, 210, 40);
+                
+                                var vl = new Grasshopper.Kernel.Special.GH_ValueList();
+                vl.CreateAttributes();
+                vl.Attributes.Pivot = new System.Drawing.PointF(this.Attributes.Pivot.X - 200, this.Attributes.Pivot.Y + 40);
+                vl.ListItems.Clear();
+                vl.ListItems.Add(new Grasshopper.Kernel.Special.GH_ValueListItem("Degrees", "0"));
+                vl.ListItems.Add(new Grasshopper.Kernel.Special.GH_ValueListItem("Percentage", "1"));
+                vl.ListItems.Add(new Grasshopper.Kernel.Special.GH_ValueListItem("Ratio (1:X)", "2"));
+                vl.SelectItem(1);
+                document.AddObject(vl, false);
+                this.Params.Input[4].AddSource(vl);
+                
                 Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 0, "curve", 220, -68);
                 Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 2, "point", 220, -23);
                 Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 4, "point", 220, 22);
@@ -58,10 +69,13 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
             pManager.AddCurveParameter("Curves", "Curves", "2D curves representing roads", GH_ParamAccess.list);
             pManager.AddMeshParameter("Terrain", "Terrain", "Terrain mesh for projection", GH_ParamAccess.item);
-            pManager.AddNumberParameter("Threshold", "Threshold", "Slope threshold in percentage", GH_ParamAccess.item, 8.0);
+            pManager.AddNumberParameter("Threshold", "Threshold", "Slope threshold", GH_ParamAccess.item, 8.0);
             pManager.AddNumberParameter("Segment Size", "Segment Size", "Size of segments for analysis", GH_ParamAccess.item, 5.0);
-            pManager.AddBooleanParameter("Ray Upward", "Ray Upward", "Cast rays upward instead of both directions", GH_ParamAccess.item, false);
+            pManager.AddIntegerParameter("Threshold Mode", "Mode", "0: Degrees, 1: Percentage, 2: Ratio 1:X", GH_ParamAccess.item, 1);
+            pManager[4].Optional = true;
         }
+        
+        
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
         {
