@@ -71,66 +71,54 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
             pManager.AddNumberParameter("Compliance Percentage", "Compliance Percentage", "Percentage of compliant/non-compliant segments", GH_ParamAccess.item);
             pManager.AddPointParameter("Projected Points", "Projected Points", "Points projected onto terrain", GH_ParamAccess.list);
             pManager.AddLineParameter("Projection Lines", "Projection Lines", "Lines showing projection from original to terrain", GH_ParamAccess.list);
-                    pManager.AddTextParameter("Info", "Info", "Component information and interpretation", GH_ParamAccess.item);
+            pManager.AddTextParameter("Dashboard Data", "Dashboard", "JSON legend data", GH_ParamAccess.item);
         }
 
-        protected override void SolveInstance(IGH_DataAccess DA)
+                protected override void SolveInstance(IGH_DataAccess DA)
         {
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
+            System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
 
-            // Input variables
-            var curves = new System.Collections.Generic.List<Rhino.Geometry.Curve>();
+            System.Collections.Generic.List<Rhino.Geometry.Curve> curves = new System.Collections.Generic.List<Rhino.Geometry.Curve>();
             Rhino.Geometry.Mesh terrain = null;
             double threshold = 8.0;
             double segmentSize = 5.0;
-            bool rayUpward = false;
+            int mode = 1;
 
-            // Get input data
             if (!DA.GetDataList(0, curves)) return;
             if (!DA.GetData(1, ref terrain)) return;
-            if (!DA.GetData(2, ref threshold)) return;
-            if (!DA.GetData(3, ref segmentSize)) return;
-            if (!DA.GetData(4, ref rayUpward)) return;
+            DA.GetData(2, ref threshold);
+            DA.GetData(3, ref segmentSize);
+            DA.GetData(4, ref mode);
 
-            // Validate input
-            if (curves.Count == 0)
+            var result = AnalyzeRoadSlopes(curves, terrain, threshold, segmentSize, mode);
+
+            sw.Stop();
+            
+            // Generate JSON Dashboard Data
+            var jColors = new Newtonsoft.Json.Linq.JArray();
+            jColors.Add(new Newtonsoft.Json.Linq.JObject { ["R"] = 0, ["G"] = 255, ["B"] = 0 }); // Compliant
+            jColors.Add(new Newtonsoft.Json.Linq.JObject { ["R"] = 255, ["G"] = 0, ["B"] = 0 }); // Non-Compliant
+            
+            string unit = mode == 0 ? "°" : (mode == 1 ? "%" : " Ratio");
+            
+            var legendObj = new Newtonsoft.Json.Linq.JObject
             {
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "No curves provided");
-                return;
-                            
-            }
+                ["Type"] = "Binary",
+                ["Title"] = "Road Slope Compliance",
+                ["Colors"] = jColors,
+                ["Labels"] = new Newtonsoft.Json.Linq.JArray($"<= {threshold}{unit}", $"> {threshold}{unit}"),
+                ["SubLabels"] = new Newtonsoft.Json.Linq.JArray($"Compliance: {result.CompliancePercentage}%")
+            };
 
-            if (terrain == null || !terrain.IsValid)
-            {
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Invalid terrain mesh");
-                return;
-            }
-
-            if (segmentSize <= 0)
-            {
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Segment size must be greater than zero");
-                return;
-            }
-
-            // Process the curves and analyze road slopes
-            var result = AnalyzeRoadSlopes(curves, terrain, threshold, segmentSize, rayUpward);
-
-            stopwatch.Stop();
-            double executionTime = stopwatch.Elapsed.TotalSeconds;
-
-            // Set output data
             DA.SetDataTree(0, result.AnalyzedSegments);
             DA.SetDataTree(1, result.SlopeValues);
             DA.SetDataTree(2, result.CenterPoints);
             DA.SetData(3, result.CompliancePercentage);
             DA.SetDataTree(4, result.ProjectedPoints);
             DA.SetDataTree(5, result.ProjectionLines);
-
-            Message = $"Compliant: {result.CompliancePercentage}%";
-            Message += $"\nNon-compliant: {Math.Round(100 - result.CompliancePercentage, 1)}%";
-            Message += $"\nTime: {executionTime:F3}s";
-                    DA.SetData(6, "ROAD SLOPE ANALYZER\n" + "\n" + "HOW IT WORKS:\n" + "Evaluates curves representing road centerlines against the terrain, calculating the longitudinal slope at discrete intervals along the path.\n\n" + "INTERPRETATION & IMPORTANCE:\n" + "Ensures road networks comply with accessibility and vehicular safety standards (e.g., keeping grades under 8-10%). Prevents designing impossible infrastructure on steep sites.");
+            DA.SetData(6, legendObj.ToString());
+            
+            Message = $"Road Slope\n{sw.ElapsedMilliseconds} ms\n---\nCompliance: {result.CompliancePercentage}%";
         }
 
         private RoadAnalysisResult AnalyzeRoadSlopes(
@@ -138,143 +126,102 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
             Rhino.Geometry.Mesh terrain,
             double threshold,
             double segmentSize,
-            bool rayUpward)
+            int mode)
         {
             var result = new RoadAnalysisResult();
-
-            // Ensure the mesh has face normals
             terrain.FaceNormals.ComputeFaceNormals();
 
-            // Process each curve
             for (int curveIndex = 0; curveIndex < curves.Count; curveIndex++)
             {
                 var curve = curves[curveIndex];
-
-                // Skip invalid curves
                 if (curve == null || !curve.IsValid) continue;
 
-                // Divide the curve into segments
                 double curveLength = curve.GetLength();
-                int segmentCount = Math.Max(1, (int)Math.Ceiling(curveLength / segmentSize));
+                int segmentCount = System.Math.Max(1, (int)System.Math.Ceiling(curveLength / segmentSize));
                 double actualSegmentSize = curveLength / segmentCount;
 
-                // Process each segment
                 for (int i = 0; i < segmentCount; i++)
                 {
-                    // Get the segment start and end parameters
                     double t0 = curve.Domain.ParameterAt((double)i / segmentCount);
                     double t1 = curve.Domain.ParameterAt((double)(i + 1) / segmentCount);
 
-                    // Get the segment points
                     Rhino.Geometry.Point3d p0 = curve.PointAt(t0);
                     Rhino.Geometry.Point3d p1 = curve.PointAt(t1);
 
-                    // Project points onto the terrain
-                    Rhino.Geometry.Point3d p0Projected = ProjectPointToMesh(p0, terrain, rayUpward);
-                    Rhino.Geometry.Point3d p1Projected = ProjectPointToMesh(p1, terrain, rayUpward);
+                    Rhino.Geometry.Point3d p0Projected = ProjectPointToMesh(p0, terrain);
+                    Rhino.Geometry.Point3d p1Projected = ProjectPointToMesh(p1, terrain);
 
-                    // Skip if projection failed
                     if (p0Projected.IsValid && p1Projected.IsValid)
                     {
-                        // Create the projected segment
                         var segment = new Rhino.Geometry.Line(p0Projected, p1Projected).ToNurbsCurve();
 
-                        // Calculate the segment slope
-                        double horizontalDistance = Math.Sqrt(Math.Pow(p1Projected.X - p0Projected.X, 2) + Math.Pow(p1Projected.Y - p0Projected.Y, 2));
-                        double verticalDistance = Math.Abs(p1Projected.Z - p0Projected.Z);
-                        double slopePercentage = 0;
+                        double horizontalDistance = System.Math.Sqrt(System.Math.Pow(p1Projected.X - p0Projected.X, 2) + System.Math.Pow(p1Projected.Y - p0Projected.Y, 2));
+                        double verticalDistance = System.Math.Abs(p1Projected.Z - p0Projected.Z);
+                        double slopeValue = 0;
 
                         if (horizontalDistance > 0)
                         {
-                            slopePercentage = (verticalDistance / horizontalDistance) * 100.0;
+                            if (mode == 0) // Degrees
+                            {
+                                slopeValue = System.Math.Atan(verticalDistance / horizontalDistance) * (180.0 / System.Math.PI);
+                            }
+                            else if (mode == 1) // Percentage
+                            {
+                                slopeValue = (verticalDistance / horizontalDistance) * 100.0;
+                            }
+                            else if (mode == 2) // Ratio 1:X
+                            {
+                                slopeValue = horizontalDistance / verticalDistance;
+                            }
                         }
 
-                        // Determine if the segment complies with the threshold
-                        bool isCompliant = slopePercentage <= threshold;
+                        bool isCompliant = false;
+                        if (mode == 2) {
+                            // For ratio, a larger number means flatter, so compliant if >= threshold
+                            isCompliant = slopeValue >= threshold || verticalDistance == 0;
+                        } else {
+                            isCompliant = slopeValue <= threshold;
+                        }
 
-                        // Branch index: 0 for compliant, 1 for non-compliant
                         int branchIndex = isCompliant ? 0 : 1;
-
-                        // Define path as {curveIndex;branchIndex}
                         var path = new Grasshopper.Kernel.Data.GH_Path(branchIndex);
 
-                        // Add to results using data trees
                         result.AnalyzedSegments.Append(new Grasshopper.Kernel.Types.GH_Curve(segment), path);
-                        result.SlopeValues.Append(new Grasshopper.Kernel.Types.GH_Number(slopePercentage), path);
+                        result.SlopeValues.Append(new Grasshopper.Kernel.Types.GH_Number(slopeValue), path);
                         result.CenterPoints.Append(new Grasshopper.Kernel.Types.GH_Point(segment.PointAtNormalizedLength(0.5)), path);
                         result.ProjectedPoints.Append(new Grasshopper.Kernel.Types.GH_Point(p0Projected), path);
                         result.ProjectedPoints.Append(new Grasshopper.Kernel.Types.GH_Point(p1Projected), path);
                         result.ProjectionLines.Append(new Grasshopper.Kernel.Types.GH_Line(new Rhino.Geometry.Line(p0, p0Projected)), path);
                         result.ProjectionLines.Append(new Grasshopper.Kernel.Types.GH_Line(new Rhino.Geometry.Line(p1, p1Projected)), path);
 
-                        if (isCompliant)
-                        {
-                            result.CompliantSegmentCount++;
-                        }
-
+                        if (isCompliant) result.CompliantSegmentCount++;
                         result.TotalSegmentCount++;
                     }
                 }
             }
 
-            // Calculate compliance percentage
             if (result.TotalSegmentCount > 0)
             {
-                result.CompliancePercentage = Math.Round((double)result.CompliantSegmentCount / result.TotalSegmentCount * 100.0, 1);
+                result.CompliancePercentage = System.Math.Round((double)result.CompliantSegmentCount / result.TotalSegmentCount * 100.0, 1);
             }
-
             return result;
         }
 
-        private Rhino.Geometry.Point3d ProjectPointToMesh(Rhino.Geometry.Point3d point, Rhino.Geometry.Mesh mesh, bool rayUpward)
+        private Rhino.Geometry.Point3d ProjectPointToMesh(Rhino.Geometry.Point3d point, Rhino.Geometry.Mesh mesh)
         {
-            // Create a ray for projection
-            Rhino.Geometry.Ray3d ray;
+            // Automatic robust bi-directional projection (downwards first, then upwards)
+            var rayDown = new Rhino.Geometry.Ray3d(new Rhino.Geometry.Point3d(point.X, point.Y, mesh.GetBoundingBox(false).Max.Z + 1000), -Rhino.Geometry.Vector3d.ZAxis);
+            double tDown = Rhino.Geometry.Intersect.Intersection.MeshRay(mesh, rayDown);
+            if (tDown >= 0) return rayDown.PointAt(tDown);
 
-            if (rayUpward)
-            {
-                // Ray pointing upward from below the mesh
-                ray = new Rhino.Geometry.Ray3d(
-                    new Rhino.Geometry.Point3d(point.X, point.Y, mesh.GetBoundingBox(false).Min.Z - 1000),
-                    Rhino.Geometry.Vector3d.ZAxis
-                );
-            }
-            else
-            {
-                // Ray pointing straight down from above the mesh
-                ray = new Rhino.Geometry.Ray3d(
-                    new Rhino.Geometry.Point3d(point.X, point.Y, mesh.GetBoundingBox(false).Max.Z + 1000),
-                    -Rhino.Geometry.Vector3d.ZAxis
-                );
-            }
+            var rayUp = new Rhino.Geometry.Ray3d(new Rhino.Geometry.Point3d(point.X, point.Y, mesh.GetBoundingBox(false).Min.Z - 1000), Rhino.Geometry.Vector3d.ZAxis);
+            double tUp = Rhino.Geometry.Intersect.Intersection.MeshRay(mesh, rayUp);
+            if (tUp >= 0) return rayUp.PointAt(tUp);
 
-            // Perform the ray-mesh intersection
-            double t = Rhino.Geometry.Intersect.Intersection.MeshRay(mesh, ray);
-            if (t >= 0)
-            {
-                return ray.PointAt(t);
-            }
-
-            // If no intersection, try the opposite direction
-            if (!rayUpward)
-            {
-                ray = new Rhino.Geometry.Ray3d(
-                    new Rhino.Geometry.Point3d(point.X, point.Y, mesh.GetBoundingBox(false).Min.Z - 1000),
-                    Rhino.Geometry.Vector3d.ZAxis
-                );
-
-                t = Rhino.Geometry.Intersect.Intersection.MeshRay(mesh, ray);
-                if (t >= 0)
-                {
-                    return ray.PointAt(t);
-                }
-            }
-
-            // Return an invalid point if no intersection found
             return Rhino.Geometry.Point3d.Unset;
         }
 
-        private class RoadAnalysisResult
+private class RoadAnalysisResult
         {
             public Grasshopper.Kernel.Data.GH_Structure<Grasshopper.Kernel.Types.GH_Curve> AnalyzedSegments { get; set; } 
                 = new Grasshopper.Kernel.Data.GH_Structure<Grasshopper.Kernel.Types.GH_Curve>();
