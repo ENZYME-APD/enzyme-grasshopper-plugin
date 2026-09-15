@@ -322,7 +322,7 @@ namespace Enzyme.Components
         }
 
         public override GH_Exposure Exposure => GH_Exposure.secondary;
-        protected override System.Drawing.Bitmap Icon => null;
+        protected override System.Drawing.Bitmap Icon => Enzyme.IconLoader.Load("MicroclimateComfort.png");
         public override Guid ComponentGuid => new Guid("4A7E0065-D94F-4987-96D6-C925345DC377");
     }
 }
