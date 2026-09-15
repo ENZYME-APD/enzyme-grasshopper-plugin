@@ -84,7 +84,7 @@ namespace Enzyme.Components
         }
         
         public override GH_Exposure Exposure => GH_Exposure.secondary;
-        protected override System.Drawing.Bitmap Icon => null;
+        protected override System.Drawing.Bitmap Icon => Enzyme.IconLoader.Load("GifCompiler.png");
         public override Guid ComponentGuid => new Guid("0F6CAAE5-F729-4560-A656-9F7CBAF73F53");
     }
 }
