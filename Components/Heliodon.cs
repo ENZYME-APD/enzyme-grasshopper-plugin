@@ -20,8 +20,13 @@ namespace Enzyme.Components
             pManager.AddNumberParameter("Latitude", "Lat", "Location latitude (-90 to 90)", GH_ParamAccess.item, 51.5);
             pManager.AddNumberParameter("Longitude", "Lon", "Location longitude (-180 to 180)", GH_ParamAccess.item, -0.1);
             pManager.AddNumberParameter("Time Zone", "TZ", "Time zone offset from GMT", GH_ParamAccess.item, 0.0);
-            pManager.AddNumberParameter("Radius", "Radius", "Visual radius of the heliodon dome", GH_ParamAccess.item, 100.0);
+                        pManager.AddNumberParameter("Radius", "Radius", "Visual radius of the heliodon dome", GH_ParamAccess.item, 100.0);
             pManager.AddPointParameter("Center", "Center", "Center point of the heliodon", GH_ParamAccess.item, Point3d.Origin);
+            pManager.AddIntervalParameter("Months", "Months", "Domain of months to evaluate (e.g., 1 to 12).", GH_ParamAccess.item, new Interval(1, 12));
+            pManager.AddIntervalParameter("Hours", "Hours", "Domain of hours to evaluate (e.g., 8 to 17).", GH_ParamAccess.item, new Interval(0, 24));
+            
+            pManager[5].Optional = true;
+            pManager[6].Optional = true;
         }
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)

@@ -9,6 +9,13 @@ namespace Enzyme.Components
 {
     public class SunHoursAnalysis : GH_Component
     {
+        private List<int> _cachedHits = new List<int>();
+        private List<double> _cachedExposures = new List<double>();
+        private List<Point3d> _cachedPoints = new List<Point3d>();
+        private Mesh _cachedMesh = new Mesh();
+        private long _cachedTime = 0;
+        private int _cachedRays = 0;
+
         public SunHoursAnalysis()
           : base("Sun Hours Analysis", "SunHours",
               "Multi-threaded raycaster. Analyzes arbitrary 3D massing or custom points for sun exposure.",
@@ -28,6 +35,7 @@ namespace Enzyme.Components
             pManager[0].Optional = true;
             
             pManager[5].Optional = true;
+            pManager.AddBooleanParameter("Run", "Run", "Trigger the analysis.", GH_ParamAccess.item, true);
             
         }
 
@@ -40,7 +48,7 @@ namespace Enzyme.Components
             pManager.AddColourParameter("Colors", "Colors", "Color mapped to each point based on exposure.", GH_ParamAccess.list);
         }
 
-        protected override void SolveInstance(IGH_DataAccess DA)
+                protected override void SolveInstance(IGH_DataAccess DA)
         {
             List<Point3d> testPoints = new List<Point3d>();
             List<Grasshopper.Kernel.Types.IGH_GeometricGoo> geos = new List<Grasshopper.Kernel.Types.IGH_GeometricGoo>();
@@ -51,11 +59,31 @@ namespace Enzyme.Components
             DA.GetDataList(0, testPoints);
             DA.GetDataList(1, geos);
             DA.GetData(2, ref gridSize);
-            DA.GetDataList(3, context); // Optional
+            DA.GetDataList(3, context); 
             if (!DA.GetDataList(4, vectors)) return;
             
             List<System.Drawing.Color> customColors = new List<System.Drawing.Color>();
             DA.GetDataList(5, customColors);
+
+            bool run = true;
+            DA.GetData(6, ref run);
+
+            if (!run)
+            {
+                if (_cachedHits.Count > 0)
+                {
+                    DA.SetDataList(0, _cachedHits);
+                    DA.SetDataList(1, _cachedExposures);
+                    DA.SetDataList(2, _cachedPoints);
+                    if (_cachedMesh != null && _cachedMesh.IsValid) DA.SetData(3, _cachedMesh);
+                    Message = $"Sun Hours\n{_cachedTime} ms (Cached)\n---\nPoints: {_cachedPoints.Count}\nRays: {_cachedRays}";
+                }
+                else
+                {
+                    Message = "Paused";
+                }
+                return;
+            }
 
             if (vectors.Count == 0) return;
 
@@ -73,7 +101,6 @@ namespace Enzyme.Components
             List<Vector3d> normals = new List<Vector3d>();
             bool isWorkflow1 = false;
 
-            // WORKFLOW 1: Auto-Subdivide Massing if no points are provided
             if ((testPoints == null || testPoints.Count == 0) && geos.Count > 0)
             {
                 isWorkflow1 = true;
@@ -81,7 +108,6 @@ namespace Enzyme.Components
 
                 MeshingParameters mp = new MeshingParameters();
                 mp.MaximumEdgeLength = gridSize;
-                // mp.MinimumEdgeLength = gridSize * 0.5; // Optional constraint
                 mp.GridAspectRatio = 1.0;
 
                 foreach (var goo in geos)
@@ -99,8 +125,6 @@ namespace Enzyme.Components
                     }
                     else if (geo is Mesh m)
                     {
-                        // For terrain meshes, we just evaluate their existing faces to save massive remeshing overhead,
-                        // unless we want to do a top-down grid. For now, appending is fastest and safest for colors.
                         displayMesh.Append(m);
                     }
                 }
@@ -122,15 +146,28 @@ namespace Enzyme.Components
                 return;
             }
 
-            Stopwatch sw = Stopwatch.StartNew();
+            System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
 
-            Mesh[] contextMeshes = context.ToArray();
+            // Optimization: Combine all context meshes and the display mesh into a single massive mesh for Raycasting
+            Mesh combinedContext = new Mesh();
+            foreach (Mesh cm in context)
+            {
+                if (cm != null && cm.IsValid) combinedContext.Append(cm);
+            }
+            if (isWorkflow1 && displayMesh.IsValid)
+            {
+                combinedContext.Append(displayMesh);
+            }
+            combinedContext.Compact();
+            
+            // Build RTree for the combined mesh for ultra-fast intersections (Rhino handles this natively if we pass it, 
+            // but MeshRay is faster on a single mesh because it builds the tree internally once).
+            
             int[] sunHits = new int[testPoints.Count];
             double[] exposures = new double[testPoints.Count];
             int totalRays = vectors.Count;
 
-            // Multi-threaded raycasting
-            Parallel.For(0, testPoints.Count, i =>
+            System.Threading.Tasks.Parallel.For(0, testPoints.Count, i =>
             {
                 Point3d pt = testPoints[i];
                 bool hasNormal = (isWorkflow1 && normals.Count == testPoints.Count);
@@ -140,39 +177,17 @@ namespace Enzyme.Components
 
                 foreach (Vector3d vec in vectors)
                 {
-                    // 1. Self-Shading Optimization (Workflow 1)
-                    // If the sun vector (pointing TO sun) is behind the face normal, it's immediately shaded.
-                    if (hasNormal)
+                    if (hasNormal && Vector3d.Multiply(normal, vec) <= 0.001)
                     {
-                        if (Vector3d.Multiply(normal, vec) <= 0.001)
-                        {
-                            continue; // Self-shaded, no raycast needed
-                        }
+                        continue;
                     }
 
-                    // Shift the point slightly along the vector to prevent self-intersection
                     Ray3d ray = new Ray3d(pt + (vec * 0.01), vec);
                     bool isShaded = false;
 
-                    // 2. Check Context Geometry
-                    for (int m = 0; m < contextMeshes.Length; m++)
+                    if (combinedContext.IsValid && Rhino.Geometry.Intersect.Intersection.MeshRay(combinedContext, ray) >= 0.0)
                     {
-                        if (contextMeshes[m] == null) continue;
-                        
-                        if (Rhino.Geometry.Intersect.Intersection.MeshRay(contextMeshes[m], ray) >= 0.0)
-                        {
-                            isShaded = true;
-                            break;
-                        }
-                    }
-
-                    // 3. Check Massing itself (so Building A shades Building B in Workflow 1)
-                    if (!isShaded && isWorkflow1 && displayMesh.IsValid)
-                    {
-                        if (Rhino.Geometry.Intersect.Intersection.MeshRay(displayMesh, ray) >= 0.0)
-                        {
-                            isShaded = true;
-                        }
+                        isShaded = true;
                     }
 
                     if (!isShaded)
@@ -186,24 +201,48 @@ namespace Enzyme.Components
             });
 
             System.Drawing.Color[] outColors = new System.Drawing.Color[testPoints.Count];
-            Parallel.For(0, testPoints.Count, i => {
+            System.Threading.Tasks.Parallel.For(0, testPoints.Count, i => {
                 outColors[i] = InterpolateColor(customColors, exposures[i]);
             });
 
-            sw.Stop();
-
-            DA.SetDataList(0, sunHits);
-            DA.SetDataList(1, exposures);
-            DA.SetDataList(2, testPoints);
-            
             if (isWorkflow1 && displayMesh.IsValid)
             {
-                DA.SetData(3, displayMesh);
+                // Unweld the mesh to allow per-face colors (by making sure vertices are distinct per face)
+                displayMesh.Unweld(0.0, true);
+                displayMesh.VertexColors.CreateMonotoneMesh(System.Drawing.Color.White);
+                
+                // Now assign the computed face color to all vertices of that face
+                // displayMesh has Faces.Count == outColors.Length
+                // Since it is unwelded, each face has unique vertices
+                for (int i = 0; i < displayMesh.Faces.Count; i++)
+                {
+                    if (i >= outColors.Length) break;
+                    var face = displayMesh.Faces[i];
+                    displayMesh.VertexColors[face.A] = outColors[i];
+                    displayMesh.VertexColors[face.B] = outColors[i];
+                    displayMesh.VertexColors[face.C] = outColors[i];
+                    if (face.IsQuad)
+                    {
+                        displayMesh.VertexColors[face.D] = outColors[i];
+                    }
+                }
             }
-            
-            DA.SetDataList(4, outColors);
 
-            Message = $"Points: {testPoints.Count:N0}\\nRays: {testPoints.Count * totalRays:N0}\\nTime: {sw.ElapsedMilliseconds} ms";
+            sw.Stop();
+
+            _cachedHits = new List<int>(sunHits);
+            _cachedExposures = new List<double>(exposures);
+            _cachedPoints = new List<Point3d>(testPoints);
+            _cachedMesh = isWorkflow1 ? displayMesh : null;
+            _cachedTime = sw.ElapsedMilliseconds;
+            _cachedRays = totalRays;
+
+            Message = $"Sun Hours\n{_cachedTime} ms\n---\nPoints: {_cachedPoints.Count}\nRays: {_cachedRays}";
+
+            DA.SetDataList(0, _cachedHits);
+            DA.SetDataList(1, _cachedExposures);
+            DA.SetDataList(2, _cachedPoints);
+            if (isWorkflow1 && displayMesh.IsValid) DA.SetData(3, displayMesh);
         }
 
         private System.Drawing.Color InterpolateColor(List<System.Drawing.Color> gradient, double t)
