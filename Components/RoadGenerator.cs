@@ -41,34 +41,51 @@ namespace Enzyme.Components
             pManager[1].Optional = true;
         }
 
-        private bool hasSources = false;
+        private void AutoWireDefaults(GH_Document document)
+        {
+            Enzyme.Utils.AutoWireHelper.WireIntegerSlider(this, document, 2, 1, 2, 2, 316, -70);
+            Enzyme.Utils.AutoWireHelper.WireIntegerSlider(this, document, 3, 1, 6, 2, 316, -50);
+            Enzyme.Utils.AutoWireHelper.WireSlider1Dec(this, document, 4, 1.0, 10.0, 3.5, 316, -30);
+            Enzyme.Utils.AutoWireHelper.WireSlider1Dec(this, document, 5, 0.0, 5.0, 1.5, 316, -10);
+            Enzyme.Utils.AutoWireHelper.WireSlider1Dec(this, document, 6, 1.0, 20.0, 5.0, 316, 10);
+            Enzyme.Utils.AutoWireHelper.WireSlider1Dec(this, document, 7, 5.0, 100.0, 20.0, 316, 30);
+            Enzyme.Utils.AutoWireHelper.WireIntegerSlider(this, document, 8, 10, 80, 45, 316, 50);
+            Enzyme.Utils.AutoWireHelper.WireSlider1Dec(this, document, 9, 0.5, 10.0, 2.0, 316, 70);
+            Enzyme.Utils.AutoWireHelper.WireBooleanToggle(this, document, 10, true, 316, 89);
+
+            Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 0, "mesh", -145, -94);
+            Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 1, "mesh", -145, -63);
+            Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 2, "curve", -145, -31);
+            Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 3, "curve", -145, 0);
+            Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 4, "curve", -145, 31);
+            Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 5, "mesh", -145, 63);
+            Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 6, "mesh", -145, 94);
+        }
+
         public override void AddedToDocument(GH_Document document)
         {
             base.AddedToDocument(document);
             if (this.Attributes == null) this.CreateAttributes();
+            bool hasSources = false;
             foreach (var param in this.Params.Input)
                 if (param.SourceCount > 0) { hasSources = true; break; }
 
             if (!hasSources)
             {
-                Enzyme.Utils.AutoWireHelper.WireIntegerSlider(this, document, 2, 1, 2, 2, 330, -60);
-                Enzyme.Utils.AutoWireHelper.WireIntegerSlider(this, document, 3, 1, 6, 2, 330, -20);
-                Enzyme.Utils.AutoWireHelper.WireSlider1Dec(this, document, 4, 1.0, 10.0, 3.5, 330, 20);
-                Enzyme.Utils.AutoWireHelper.WireSlider1Dec(this, document, 5, 0.0, 5.0, 1.5, 330, 60);
-                Enzyme.Utils.AutoWireHelper.WireSlider1Dec(this, document, 6, 1.0, 20.0, 5.0, 330, 100);
-                Enzyme.Utils.AutoWireHelper.WireSlider1Dec(this, document, 7, 5.0, 100.0, 20.0, 330, 140);
-                Enzyme.Utils.AutoWireHelper.WireIntegerSlider(this, document, 8, 10, 80, 45, 330, 180);
-                Enzyme.Utils.AutoWireHelper.WireSlider1Dec(this, document, 9, 0.5, 10.0, 2.0, 330, 220);
-                Enzyme.Utils.AutoWireHelper.WireBooleanToggle(this, document, 10, true, 330, 260);
-
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 0, "mesh", -250, -60);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 1, "mesh", -250, -20);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 2, "curve", -250, 20);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 3, "curve", -250, 60);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 4, "curve", -250, 100);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 5, "mesh", -250, 140);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 6, "mesh", -250, 180);
+                AutoWireDefaults(document);
             }
+        }
+
+        public override void AppendAdditionalMenuItems(System.Windows.Forms.ToolStripDropDown menu)
+        {
+            base.AppendAdditionalMenuItems(menu);
+            Grasshopper.Kernel.GH_DocumentObject.Menu_AppendItem(menu, "Auto-Fill Defaults", (s, e) =>
+            {
+                if (OnPingDocument() != null)
+                {
+                    AutoWireDefaults(OnPingDocument());
+                }
+            });
         }
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
