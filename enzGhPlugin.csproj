@@ -31,6 +31,14 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="AnimatedGif" Version="1.0.5" />
+    <PackageReference Include="Costura.Fody" Version="5.7.0">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Fody" Version="6.8.0">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
     <PackageReference Include="Grasshopper" Version="8.*" IncludeAssets="compile;build" />
     <PackageReference Include="RhinoCommon" Version="8.*" IncludeAssets="compile;build" />
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="All" />
