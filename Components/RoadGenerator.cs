@@ -365,8 +365,8 @@ namespace Enzyme.Components
                 foreach(var lanePts in rd.allLanes) laneCurves.Add(new PolylineCurve(lanePts));
                 pillarsOut.AddRange(rd.pillars);
 
-                Mesh cutMesh = new Mesh();
-                Mesh fillMesh = new Mesh();
+                VolumeBuilder cutBuilder = new VolumeBuilder();
+                VolumeBuilder fillBuilder = new VolumeBuilder();
                 
                 for (int i = 0; i < rd.roadProfiles.Count - 1; i++)
                 {
@@ -377,77 +377,25 @@ namespace Enzyme.Components
 
                     if (rp1[2].DistanceTo(rp2[2]) > subDist * 3.5) continue; 
 
-                    bool isCut = rp1[2].Z < tp1[2].Z; 
-                    Mesh target = isCut ? cutMesh : fillMesh;
-                    System.Drawing.Color c = isCut ? System.Drawing.Color.Red : System.Drawing.Color.Blue;
-                    
-                    int bIdx = target.Vertices.Count;
-                    Point3d[] top1 = isCut ? tp1 : rp1;
-                    Point3d[] top2 = isCut ? tp2 : rp2;
-                    Point3d[] bot1 = isCut ? rp1 : tp1;
-                    Point3d[] bot2 = isCut ? rp2 : tp2;
-
-                    for(int j=0; j<5; j++) target.Vertices.Add(top1[j]);
-                    for(int j=0; j<5; j++) target.Vertices.Add(top2[j]);
-                    for(int j=0; j<5; j++) target.Vertices.Add(bot1[j]);
-                    for(int j=0; j<5; j++) target.Vertices.Add(bot2[j]);
-
-                    if (colorize) for (int j = 0; j < 20; j++) target.VertexColors.Add(c);
-
-                    for (int j = 0; j < 4; j++) {
-                        if (top1[j].DistanceTo(top1[j+1]) > 0.001) {
-                            int A = bIdx + j, B = bIdx + j + 1, C = bIdx + j + 6, D = bIdx + j + 5;
-                            target.Faces.AddFace(A, B, C); target.Faces.AddFace(A, C, D);
-                        }
-                    }
-                    int bOff = bIdx + 10;
-                    for (int j = 0; j < 4; j++) {
-                        if (bot1[j].DistanceTo(bot1[j+1]) > 0.001) {
-                            int A = bOff + j, B = bOff + j + 5, C = bOff + j + 6, D = bOff + j + 1;
-                            target.Faces.AddFace(A, B, C); target.Faces.AddFace(A, C, D);
-                        }
-                    }
-                    
-                    if (i == 0 && (!rd.IsClosed)) {
-                        for (int j = 0; j < 4; j++) {
-                           if (top1[j].DistanceTo(bot1[j]) > 0.001 || top1[j+1].DistanceTo(bot1[j+1]) > 0.001) {
-                               int A = bIdx + j, B = bOff + j, C = bOff + j + 1, D = bIdx + j + 1;
-                               target.Faces.AddFace(A, B, C); target.Faces.AddFace(A, C, D);
-                           }
-                        }
-                    }
-                    if (i == rd.roadProfiles.Count - 2 && (!rd.IsClosed)) {
-                        for (int j = 0; j < 4; j++) {
-                           if (top2[j].DistanceTo(bot2[j]) > 0.001 || top2[j+1].DistanceTo(bot2[j+1]) > 0.001) {
-                               int A = bIdx + j + 5, B = bIdx + j + 6, C = bOff + j + 6, D = bOff + j + 5;
-                               target.Faces.AddFace(A, B, C); target.Faces.AddFace(A, C, D);
-                           }
-                        }
-                    }
-
-                    for (int j = 0; j < 4; j++) {
-                        double vol1 = TriVolume(top1[j], top1[j+1], top2[j], bot1[j], bot1[j+1], bot2[j]);
-                        double vol2 = TriVolume(top1[j+1], top2[j+1], top2[j], bot1[j+1], bot2[j+1], bot2[j]);
-                        if (isCut) totalCutM3 += vol1 + vol2;
-                        else totalFillM3 += vol1 + vol2;
+                    for (int j = 0; j < 4; j++)
+                    {
+                        ProcessVolumeTriangle(rp1[j], rp1[j+1], rp2[j], tp1[j], tp1[j+1], tp2[j], cutBuilder, fillBuilder);
+                        ProcessVolumeTriangle(rp1[j+1], rp2[j+1], rp2[j], tp1[j+1], tp2[j+1], tp2[j], cutBuilder, fillBuilder);
                     }
                 }
 
-                if (cutMesh.Faces.Count > 0) { 
-                    cutMesh.Faces.CullDegenerateFaces();
-                    cutMesh.Vertices.CullUnused();
-                    cutMesh.Compact();
-                    cutMesh.Weld(3.14159);
-                    cutMesh.Normals.ComputeNormals(); 
-                    if (cutMesh.IsValid) cutVols.Add(cutMesh); 
+                totalCutM3 += cutBuilder.TotalVolume;
+                totalFillM3 += fillBuilder.TotalVolume;
+
+                if (cutBuilder.Vertices.Count > 0) {
+                    Mesh m = cutBuilder.ToMesh(colorize ? System.Drawing.Color.Red : System.Drawing.Color.Transparent);
+                    if (!colorize) m.VertexColors.Clear();
+                    if (m.IsValid && m.Faces.Count > 0) cutVols.Add(m);
                 }
-                if (fillMesh.Faces.Count > 0) { 
-                    fillMesh.Faces.CullDegenerateFaces();
-                    fillMesh.Vertices.CullUnused();
-                    fillMesh.Compact();
-                    fillMesh.Weld(3.14159);
-                    fillMesh.Normals.ComputeNormals(); 
-                    if (fillMesh.IsValid) fillVols.Add(fillMesh); 
+                if (fillBuilder.Vertices.Count > 0) {
+                    Mesh m = fillBuilder.ToMesh(colorize ? System.Drawing.Color.Blue : System.Drawing.Color.Transparent);
+                    if (!colorize) m.VertexColors.Clear();
+                    if (m.IsValid && m.Faces.Count > 0) fillVols.Add(m);
                 }
             }
 
@@ -548,5 +496,132 @@ namespace Enzyme.Components
         {
             get { return new Guid("E5A7B8C9-1234-4ABC-9DEF-0123456789AB"); }
         }
+    
+        private void ProcessVolumeTriangle(Point3d r0, Point3d r1, Point3d r2, Point3d t0, Point3d t1, Point3d t2, VolumeBuilder cutBuilder, VolumeBuilder fillBuilder)
+        {
+            var pts = new[] {
+                new { R = r0, T = t0, D = r0.Z - t0.Z },
+                new { R = r1, T = t1, D = r1.Z - t1.Z },
+                new { R = r2, T = t2, D = r2.Z - t2.Z }
+            };
+            Array.Sort(pts, (a, b) => a.D.CompareTo(b.D));
+            
+            var A = pts[0];
+            var B = pts[1];
+            var C = pts[2];
+
+            if (C.D <= 1e-4) {
+                cutBuilder.AddPrism(A.R, B.R, C.R, A.T, B.T, C.T, true);
+                return;
+            }
+            if (A.D >= -1e-4) {
+                fillBuilder.AddPrism(A.R, B.R, C.R, A.T, B.T, C.T, false);
+                return;
+            }
+
+            if (B.D <= 0) {
+                double tAC = A.D / (A.D - C.D);
+                double tBC = B.D / (B.D - C.D);
+                Point3d zAC = A.R + (C.R - A.R) * tAC; zAC.Z = A.R.Z + (C.R.Z - A.R.Z) * tAC;
+                Point3d zBC = B.R + (C.R - B.R) * tBC; zBC.Z = B.R.Z + (C.R.Z - B.R.Z) * tBC;
+
+                cutBuilder.AddPrism(A.R, B.R, zBC, A.T, B.T, zBC, true);
+                cutBuilder.AddPrism(A.R, zBC, zAC, A.T, zBC, zAC, true);
+                fillBuilder.AddPrism(zAC, zBC, C.R, zAC, zBC, C.T, false);
+            } else {
+                double tAB = A.D / (A.D - B.D);
+                double tAC = A.D / (A.D - C.D);
+                Point3d zAB = A.R + (B.R - A.R) * tAB; zAB.Z = A.R.Z + (B.R.Z - A.R.Z) * tAB;
+                Point3d zAC = A.R + (C.R - A.R) * tAC; zAC.Z = A.R.Z + (C.R.Z - A.R.Z) * tAC;
+
+                cutBuilder.AddPrism(A.R, zAB, zAC, A.T, zAB, zAC, true);
+                fillBuilder.AddPrism(zAB, B.R, C.R, zAB, B.T, C.T, false);
+                fillBuilder.AddPrism(zAB, C.R, zAC, zAB, C.T, zAC, false);
+            }
+        }
+
+        private class VolumeBuilder {
+            public List<Point3d> Vertices = new List<Point3d>();
+            public Dictionary<Point3d, int> VertDict = new Dictionary<Point3d, int>();
+            public Dictionary<string, int[]> FaceCounts = new Dictionary<string, int[]>();
+            public double TotalVolume = 0.0;
+
+            public int GetOrAddVert(Point3d p) {
+                Point3d key = new Point3d(Math.Round(p.X, 3), Math.Round(p.Y, 3), Math.Round(p.Z, 3));
+                if (VertDict.TryGetValue(key, out int idx)) return idx;
+                idx = Vertices.Count;
+                Vertices.Add(p);
+                VertDict[key] = idx;
+                return idx;
+            }
+
+            public void AddFace(Point3d pA, Point3d pB, Point3d pC) {
+                int a = GetOrAddVert(pA);
+                int b = GetOrAddVert(pB);
+                int c = GetOrAddVert(pC);
+                if (a == b || b == c || c == a) return; 
+
+                int[] arr = new int[] { a, b, c };
+                Array.Sort(arr);
+                string key = arr[0] + "_" + arr[1] + "_" + arr[2];
+                
+                if (FaceCounts.ContainsKey(key)) {
+                    FaceCounts.Remove(key);
+                } else {
+                    FaceCounts[key] = new int[] { a, b, c };
+                }
+            }
+
+            public void AddQuad(Point3d pA, Point3d pB, Point3d pC, Point3d pD) {
+                AddFace(pA, pB, pC);
+                AddFace(pA, pC, pD);
+            }
+
+            public void AddPrism(Point3d rA, Point3d rB, Point3d rC, Point3d tA, Point3d tB, Point3d tC, bool isCut) {
+                double cross = (rB.X - rA.X) * (rC.Y - rA.Y) - (rB.Y - rA.Y) * (rC.X - rA.X);
+                if (cross < 0) {
+                    Point3d tmpR = rB; rB = rC; rC = tmpR;
+                    Point3d tmpT = tB; tB = tC; tC = tmpT;
+                    cross = -cross;
+                }
+                double area2D = 0.5 * cross;
+                if (area2D < 1e-5) return;
+                
+                double avgDz = 0;
+                if (isCut) {
+                    avgDz = ((tA.Z - rA.Z) + (tB.Z - rB.Z) + (tC.Z - rC.Z)) / 3.0;
+                } else {
+                    avgDz = ((rA.Z - tA.Z) + (rB.Z - tB.Z) + (rC.Z - tC.Z)) / 3.0;
+                }
+                if (avgDz > 0) TotalVolume += area2D * avgDz;
+
+                if (isCut) {
+                    AddFace(tA, tB, tC);
+                    AddFace(rA, rC, rB);
+                    AddQuad(rA, rB, tB, tA);
+                    AddQuad(rB, rC, tC, tB);
+                    AddQuad(rC, rA, tA, tC);
+                } else {
+                    AddFace(rA, rB, rC);
+                    AddFace(tA, tC, tB);
+                    AddQuad(tA, tB, rB, rA);
+                    AddQuad(tB, tC, rC, rB);
+                    AddQuad(tC, tA, rA, rC);
+                }
+            }
+
+            public Mesh ToMesh(System.Drawing.Color color) {
+                Mesh m = new Mesh();
+                foreach (var v in Vertices) m.Vertices.Add(v);
+                foreach (var kvp in FaceCounts) {
+                    m.Faces.AddFace(kvp.Value[0], kvp.Value[1], kvp.Value[2]);
+                }
+                m.Normals.ComputeNormals();
+                if (m.SolidOrientation() == -1) m.Flip(true, true, true);
+                for(int i=0; i<m.Vertices.Count; i++) m.VertexColors.Add(color);
+                return m;
+            }
+        }
+
     }
 }
