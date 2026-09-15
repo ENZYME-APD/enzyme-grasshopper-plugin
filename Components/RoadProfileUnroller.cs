@@ -25,8 +25,10 @@ namespace Enzyme.Components
             pManager.AddIntegerParameter("Threshold Mode", "Mode", "0: Degrees, 1: Percentage, 2: Ratio 1:X", GH_ParamAccess.item, 1);
             pManager.AddNumberParameter("Z Exaggeration", "Z Scale", "Vertical scale multiplier for the profile graph", GH_ParamAccess.item, 1.0);
             pManager.AddNumberParameter("Reference Y", "Ref Y", "Base elevation (Y-coordinate) to drop alignment lines down to", GH_ParamAccess.item, 0.0);
+            pManager.AddPlaneParameter("Base Plane", "Plane", "Origin plane for the unrolled profile graph", GH_ParamAccess.item, Rhino.Geometry.Plane.WorldXY);
             
             pManager[5].Optional = true;
+            pManager[6].Optional = true;
         }
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
@@ -60,6 +62,8 @@ namespace Enzyme.Components
             DA.GetData(3, ref mode);
             DA.GetData(4, ref zScale);
             DA.GetData(5, ref refY);
+            Rhino.Geometry.Plane basePlane = Rhino.Geometry.Plane.WorldXY;
+            DA.GetData(6, ref basePlane);
 
             Grasshopper.Kernel.Data.GH_Structure<Grasshopper.Kernel.Types.GH_Curve> outProfiles = new Grasshopper.Kernel.Data.GH_Structure<Grasshopper.Kernel.Types.GH_Curve>();
             Grasshopper.Kernel.Data.GH_Structure<Grasshopper.Kernel.Types.GH_Curve> outSegments = new Grasshopper.Kernel.Data.GH_Structure<Grasshopper.Kernel.Types.GH_Curve>();
@@ -93,7 +97,7 @@ namespace Enzyme.Components
                     {
                         double l = curve.GetLength(new Rhino.Geometry.Interval(curve.Domain.Min, t));
                         Rhino.Geometry.Point3d p3d = curve.PointAt(t);
-                        graphPts.Add(new Rhino.Geometry.Point3d(l, p3d.Z * zScale, 0));
+                        graphPts.Add(basePlane.PointAt(l, p3d.Z * zScale));
                     }
                     if (graphPts.Count > 1)
                     {
@@ -151,10 +155,10 @@ namespace Enzyme.Components
                     }
 
                     // Map to 2D Graph space
-                    Rhino.Geometry.Point3d g0 = new Rhino.Geometry.Point3d(l0, p0.Z * zScale, 0);
-                    Rhino.Geometry.Point3d g1 = new Rhino.Geometry.Point3d(l1, p1.Z * zScale, 0);
+                    Rhino.Geometry.Point3d g0 = basePlane.PointAt(l0, p0.Z * zScale);
+                    Rhino.Geometry.Point3d g1 = basePlane.PointAt(l1, p1.Z * zScale);
                     Rhino.Geometry.Curve segment2D = new Rhino.Geometry.Line(g0, g1).ToNurbsCurve();
-                    Rhino.Geometry.Point3d center2D = new Rhino.Geometry.Point3d((l0 + l1) / 2.0, (g0.Y + g1.Y) / 2.0, 0);
+                    Rhino.Geometry.Point3d center2D = basePlane.PointAt((l0 + l1) / 2.0, (p0.Z * zScale + p1.Z * zScale) / 2.0);
 
                     outSegments.Append(new Grasshopper.Kernel.Types.GH_Curve(segment2D), path);
                     outSlopes.Append(new Grasshopper.Kernel.Types.GH_Number(slopeValue), path);
@@ -180,7 +184,7 @@ namespace Enzyme.Components
                     double l1 = accumulatedLength + sLen;
                     
                     double y0 = sSeg.PointAtStart.Z * zScale;
-                    Rhino.Geometry.Line vLine = new Rhino.Geometry.Line(new Rhino.Geometry.Point3d(l0, y0, 0), new Rhino.Geometry.Point3d(l0, refY, 0));
+                    Rhino.Geometry.Line vLine = new Rhino.Geometry.Line(basePlane.PointAt(l0, y0), basePlane.PointAt(l0, refY));
                     outAlignLines.Append(new Grasshopper.Kernel.Types.GH_Curve(vLine.ToNurbsCurve()), path);
                     
                     string label = "Spline";
@@ -202,7 +206,7 @@ namespace Enzyme.Components
                     }
                     
                     outAlignLabels.Append(new Grasshopper.Kernel.Types.GH_String(label), path);
-                    outAlignPts.Append(new Grasshopper.Kernel.Types.GH_Point(new Rhino.Geometry.Point3d((l0 + l1) / 2.0, refY - (2.0 * zScale), 0)), path);
+                    outAlignPts.Append(new Grasshopper.Kernel.Types.GH_Point(basePlane.PointAt((l0 + l1) / 2.0, refY - (2.0 * zScale))), path);
                     
                     accumulatedLength = l1;
                 }
@@ -211,7 +215,7 @@ namespace Enzyme.Components
                 if (structuralSegments.Length > 0)
                 {
                     double yEnd = structuralSegments[structuralSegments.Length - 1].PointAtEnd.Z * zScale;
-                    Rhino.Geometry.Line vEnd = new Rhino.Geometry.Line(new Rhino.Geometry.Point3d(accumulatedLength, yEnd, 0), new Rhino.Geometry.Point3d(accumulatedLength, refY, 0));
+                    Rhino.Geometry.Line vEnd = new Rhino.Geometry.Line(basePlane.PointAt(accumulatedLength, yEnd), basePlane.PointAt(accumulatedLength, refY));
                     outAlignLines.Append(new Grasshopper.Kernel.Types.GH_Curve(vEnd.ToNurbsCurve()), path);
                 }
             }
