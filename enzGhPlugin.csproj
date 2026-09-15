@@ -30,6 +30,7 @@
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="AnimatedGif" Version="1.0.5" />
     <PackageReference Include="Grasshopper" Version="8.*" IncludeAssets="compile;build" />
     <PackageReference Include="RhinoCommon" Version="8.*" IncludeAssets="compile;build" />
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="All" />
