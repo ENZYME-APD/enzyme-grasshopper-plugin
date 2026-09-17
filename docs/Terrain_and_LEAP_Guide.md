@@ -30,10 +30,10 @@ This guide covers the remaining components in the Terrain and LEAP toolsets, exp
 
 ---
 
-## ROAD SLOPE ANALYZER
-**How it works:** Evaluates curves representing road centerlines against the terrain, calculating the longitudinal slope at discrete intervals along the path.
+## ROAD SLOPE ANALYZER (2D & 3D)
+**How it works:** Evaluates curves representing road centerlines (either flat curves projected to a mesh, or native 3D curves via the 3D Analyzer) to calculate the longitudinal slope at discrete intervals. Supports Threshold Modes (Degrees, Percentage, Ratio) and exports JSON dashboard data.
 
-**Interpretation & Importance:** Ensures road networks comply with accessibility and vehicular safety standards (e.g., keeping grades under 8-10%). Prevents designing impossible infrastructure on steep sites.
+**Interpretation & Importance:** Ensures road networks comply with accessibility and vehicular safety standards. Prevents designing impossible infrastructure on steep sites and automatically outputs dashboard analytics for compliance reporting.
 
 ---
 
@@ -93,3 +93,27 @@ This guide covers the remaining components in the Terrain and LEAP toolsets, exp
 
 ---
 
+
+---
+
+## PROCEDURAL ROAD GENERATOR
+**How it works:** Procedurally generates a full road corridor (asphalt mesh, lanes, railings, bridge pillars) by projecting a centerline onto a terrain mesh. It features high-precision quadrant-based volumetric algorithms to slice terrain at exact zero-crossings for cut/fill analysis.
+**Interpretation & Importance:** Rapidly prototypes infrastructure while immediately returning precise earthworks volumes (Cut/Fill solids) and generating 1m/5m site contours, deeply informing route feasibility and costs.
+
+---
+
+## ROAD PROFILE UNROLLER
+**How it works:** Flattens a 3D road centerline into a scaled 2D profile view (Length vs Elevation) onto a custom reference plane. Superimposes slope compliance segments and extracts structural alignment bands (Lines, Arcs, Splines) with radius dimensions.
+**Interpretation & Importance:** Automates the creation of standard civil engineering profile drawings directly from 3D models, essential for documentation and precise grading reviews.
+
+---
+
+## TERRAIN COLORIZER
+**How it works:** A standalone utility that colors any terrain mesh procedurally based on elevation and slope steepness (detecting sheer cliffs). Also extracts 1m and 5m contours automatically.
+**Interpretation & Importance:** Decouples procedural visualization from terrain generation, allowing imported GIS meshes to be instantly styled and contoured for presentation and analysis.
+
+---
+
+## DIVIDE TARGET LENGTH BY SEGMENT
+**How it works:** Subdivides curves by target length while strictly respecting the structural breaks, kinks, and segments of the original curve.
+**Interpretation & Importance:** A critical utility for architectural panelization or road segment analysis, ensuring that corner points are never skipped and no duplicate divisions occur at segment joints.
