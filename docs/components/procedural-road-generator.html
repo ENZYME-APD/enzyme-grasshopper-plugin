@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Procedural Road Generator - Enzyme Plugin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="../index.html" class="nav-brand">
+            <img src="../images/enzyme_logo.png" alt="Enzyme Logo" class="logo-img">
+        </a>
+        <div class="nav-links">
+            <a href="../index.html#components">Components</a>
+            <a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank">GitHub</a>
+        </div>
+    </nav>
+
+    <main class="container doc-page">
+        <div class="doc-header" style="display: flex; align-items: center;">
+            <div>
+                <h1>Procedural Road Generator</h1>
+                <p class="doc-subtitle">Procedurally generates a full road corridor (asphalt mesh, lanes, railings, bridge pillars) by projecting a centerline onto a terrain mesh. Includes accurate quad-splitting cut/fill volumetric solids.</p>
+                <div class="doc-meta">
+                    <span class="badge masterplan">Masterplan</span>
+                    <span>Nickname: <strong>RoadGen</strong></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="doc-content">
+            <h2>Overview</h2>
+            <p>Procedurally generates a full road corridor (asphalt mesh, lanes, railings, bridge pillars) by projecting a centerline onto a terrain mesh. Includes accurate quad-splitting cut/fill volumetric solids.</p>
+            
+            <div class="io-grid">
+                <div class="io-col">
+                    <h3>Inputs (4)</h3>
+                    <ul>
+                        <li><strong>Terrain</strong> (Mesh): Base topography mesh</li>
+                        <li><strong>Network</strong> (Curve): Centerline curve(s) of the road</li>
+                        <li><strong>Parameters</strong> (Text): Road parameters JSON from Spec Component</li>
+                        <li><strong>Exclusions</strong> (Point): Points to exclude from generation</li>
+                    </ul>
+                </div>
+                <div class="io-col">
+                    <h3>Outputs (9)</h3>
+                    <ul>
+                        <li><strong>Terrain</strong> (Mesh): Modified terrain mesh</li>
+                        <li><strong>Road Table</strong> (Mesh): Asphalt surface mesh</li>
+                        <li><strong>Lanes</strong> (Curve): Lane centerlines</li>
+                        <li><strong>Railings</strong> (Curve): Road boundaries and shoulders</li>
+                        <li><strong>Pillars</strong> (Curve): Bridge pillar lines</li>
+                        <li><strong>Cut Volume</strong> (Mesh): Excavated earth volume</li>
+                        <li><strong>Fill Volume</strong> (Mesh): Added earth volume</li>
+                        <li><strong>Contours</strong> (Curve): Normal contours (1m)</li>
+                        <li><strong>Main Contours</strong> (Curve): Main contours (5m)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

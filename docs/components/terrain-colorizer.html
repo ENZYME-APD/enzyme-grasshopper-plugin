@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terrain Colorizer - Enzyme Plugin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="../index.html" class="nav-brand">
+            <img src="../images/enzyme_logo.png" alt="Enzyme Logo" class="logo-img">
+        </a>
+        <div class="nav-links">
+            <a href="../index.html#components">Components</a>
+            <a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank">GitHub</a>
+        </div>
+    </nav>
+
+    <main class="container doc-page">
+        <div class="doc-header" style="display: flex; align-items: center;">
+            <div>
+                <h1>Terrain Colorizer</h1>
+                <p class="doc-subtitle">Colors a terrain mesh procedurally based on elevation and slope steepness, extracting 1m and 5m contours.</p>
+                <div class="doc-meta">
+                    <span class="badge site-analysis">Site Analysis</span>
+                    <span>Nickname: <strong>TerrainCol</strong></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="doc-content">
+            <h2>Overview</h2>
+            <p>Colors a terrain mesh procedurally based on elevation and slope steepness, extracting 1m and 5m contours.</p>
+            
+            <div class="io-grid">
+                <div class="io-col">
+                    <h3>Inputs (5)</h3>
+                    <ul>
+                        <li><strong>Terrain</strong> (Mesh): The input terrain mesh</li>
+                        <li><strong>Colors</strong> (Colour): Optional list of colors for the elevation gradient (if none, defaults to procedural palette)</li>
+                        <li><strong>Cliff Threshold</strong> (Number): Slope angle above which a face is considered a cliff (Default 45)</li>
+                        <li><strong>Cliff Color</strong> (Colour): Color for cliff faces (Default Gray)</li>
+                        <li><strong>Flat Threshold</strong> (Number): Slope angle below which a face is considered flat (Default 5)</li>
+                    </ul>
+                </div>
+                <div class="io-col">
+                    <h3>Outputs (3)</h3>
+                    <ul>
+                        <li><strong>Colored Terrain</strong> (Mesh): The terrain mesh with procedural vertex colors applied</li>
+                        <li><strong>Contours</strong> (Curve): 1m normal contours</li>
+                        <li><strong>Main Contours</strong> (Curve): 5m main contours</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

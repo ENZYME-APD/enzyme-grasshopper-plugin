@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Divide Target Length by Segment - Enzyme Plugin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="../index.html" class="nav-brand">
+            <img src="../images/enzyme_logo.png" alt="Enzyme Logo" class="logo-img">
+        </a>
+        <div class="nav-links">
+            <a href="../index.html#components">Components</a>
+            <a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank">GitHub</a>
+        </div>
+    </nav>
+
+    <main class="container doc-page">
+        <div class="doc-header" style="display: flex; align-items: center;">
+            <div>
+                <h1>Divide Target Length by Segment</h1>
+                <p class="doc-subtitle">Subdivides curves by target length while strictly respecting the structural breaks, kinks, and segments of the original curve.</p>
+                <div class="doc-meta">
+                    <span class="badge utilities">Utilities</span>
+                    <span>Nickname: <strong>DivSegment</strong></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="doc-content">
+            <h2>Overview</h2>
+            <p>Subdivides curves by target length while strictly respecting the structural breaks, kinks, and segments of the original curve.</p>
+            
+            <div class="io-grid">
+                <div class="io-col">
+                    <h3>Inputs (2)</h3>
+                    <ul>
+                        <li><strong>Curve</strong> (Curve): Curve to divide</li>
+                        <li><strong>Target Length</strong> (Number): Target length for subdivisions</li>
+                    </ul>
+                </div>
+                <div class="io-col">
+                    <h3>Outputs (3)</h3>
+                    <ul>
+                        <li><strong>Points</strong> (Point): Division points</li>
+                        <li><strong>Tangents</strong> (Vector): Tangents at division points</li>
+                        <li><strong>Parameters</strong> (Number): Curve parameters at division points</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Road Slope 3D Analyzer - Enzyme Plugin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="../index.html" class="nav-brand">
+            <img src="../images/enzyme_logo.png" alt="Enzyme Logo" class="logo-img">
+        </a>
+        <div class="nav-links">
+            <a href="../index.html#components">Components</a>
+            <a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank">GitHub</a>
+        </div>
+    </nav>
+
+    <main class="container doc-page">
+        <div class="doc-header" style="display: flex; align-items: center;">
+            <div>
+                <h1>Road Slope 3D Analyzer</h1>
+                <p class="doc-subtitle">Evaluates slope compliance directly on 3D curves. Supports Threshold Modes (Degrees, Percentage, Ratio) and exports JSON dashboard data.</p>
+                <div class="doc-meta">
+                    <span class="badge terrain">Terrain</span>
+                    <span>Nickname: <strong>RoadSlope3D</strong></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="doc-content">
+            <h2>Overview</h2>
+            <p>Evaluates slope compliance directly on 3D curves. Supports Threshold Modes (Degrees, Percentage, Ratio) and exports JSON dashboard data.</p>
+            
+            <div class="io-grid">
+                <div class="io-col">
+                    <h3>Inputs (3)</h3>
+                    <ul>
+                        <li><strong>Road Curve</strong> (Curve): 3D road centerline</li>
+                        <li><strong>Threshold Mode</strong> (Integer): 0: Degrees, 1: Percentage, 2: Ratio</li>
+                        <li><strong>Max Slope</strong> (Number): Maximum allowed slope threshold</li>
+                    </ul>
+                </div>
+                <div class="io-col">
+                    <h3>Outputs (3)</h3>
+                    <ul>
+                        <li><strong>Pass Curves</strong> (Curve): Segments that pass the threshold</li>
+                        <li><strong>Fail Curves</strong> (Curve): Segments that fail the threshold</li>
+                        <li><strong>Dashboard JSON</strong> (Text): JSON export of analytical volumes and slopes</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
