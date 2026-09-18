@@ -31,6 +31,8 @@ namespace Enzyme.Components
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+            
             Curve crv = null;
             Mesh terrain = null;
             double maxSlope = 0.08;
@@ -138,6 +140,25 @@ namespace Enzyme.Components
 
             DA.SetData(0, final3D);
             DA.SetData(1, egCrv);
+
+            double maxActualSlope = 0.0;
+            double maxCut = 0.0;
+            double maxFill = 0.0;
+            for (int i = 0; i < pts2D.Length - 1; i++) {
+                double dist = new Point3d(pts2D[i].X, pts2D[i].Y, 0).DistanceTo(new Point3d(pts2D[i+1].X, pts2D[i+1].Y, 0));
+                if (dist > 1e-4) {
+                    double slope = Math.Abs(zSmooth[i+1] - zSmooth[i]) / dist;
+                    if (slope > maxActualSlope) maxActualSlope = slope;
+                }
+            }
+            for (int i = 0; i < zSmooth.Length; i++) {
+                double diff = zSmooth[i] - zEG[i];
+                if (diff > maxFill) maxFill = diff;
+                if (-diff > maxCut) maxCut = -diff;
+            }
+
+            stopwatch.Stop();
+            Message = $"Auto-Grade\n{stopwatch.ElapsedMilliseconds} ms\n---\nMax Grade: {(maxActualSlope*100):F1}%\nMax Cut: {maxCut:F1}m\nMax Fill: {maxFill:F1}m";
         }
 
         protected override System.Drawing.Bitmap Icon => Enzyme.IconLoader.Load("AutoGrade.png");
