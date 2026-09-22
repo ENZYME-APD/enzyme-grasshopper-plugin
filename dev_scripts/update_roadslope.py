@@ -1,0 +1,225 @@
+import re
+
+with open("Components/RoadSlopeAnalyzer.cs", "r") as f:
+    content = f.read()
+
+# Update Input Params
+old_inputs = """        protected override void RegisterInputParams(GH_InputParamManager pManager)
+        {
+            pManager.AddCurveParameter("Curves", "Curves", "2D curves representing roads", GH_ParamAccess.list);
+            pManager.AddMeshParameter("Terrain", "Terrain", "Terrain mesh for projection", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Threshold", "Threshold", "Slope threshold in percentage", GH_ParamAccess.item, 8.0);
+            pManager.AddNumberParameter("Segment Size", "Segment Size", "Size of segments for analysis", GH_ParamAccess.item, 5.0);
+            pManager.AddBooleanParameter("Ray Upward", "Ray Upward", "Cast rays upward instead of both directions", GH_ParamAccess.item, false);
+        }"""
+new_inputs = """        protected override void RegisterInputParams(GH_InputParamManager pManager)
+        {
+            pManager.AddCurveParameter("Curves", "Curves", "2D curves representing roads", GH_ParamAccess.list);
+            pManager.AddMeshParameter("Terrain", "Terrain", "Terrain mesh for projection", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Threshold", "Threshold", "Slope threshold", GH_ParamAccess.item, 8.0);
+            pManager.AddNumberParameter("Segment Size", "Segment Size", "Size of segments for analysis", GH_ParamAccess.item, 5.0);
+            pManager.AddIntegerParameter("Threshold Mode", "Mode", "0: Degrees, 1: Percentage, 2: Ratio", GH_ParamAccess.item, 1);
+            
+            // Auto-wiring for ValueList
+        }
+        
+        public override void AddedToDocument(Grasshopper.Kernel.GH_Document document)
+        {
+            base.AddedToDocument(document);
+            if (this.Params.Input[4].SourceCount == 0)
+            {
+                var vl = new Grasshopper.Kernel.Special.GH_ValueList();
+                vl.CreateAttributes();
+                vl.Attributes.Pivot = new System.Drawing.PointF(this.Attributes.Pivot.X - 200, this.Attributes.Pivot.Y + 60);
+                vl.ListItems.Clear();
+                vl.ListItems.Add(new Grasshopper.Kernel.Special.GH_ValueListItem("Degrees", "0"));
+                vl.ListItems.Add(new Grasshopper.Kernel.Special.GH_ValueListItem("Percentage", "1"));
+                vl.ListItems.Add(new Grasshopper.Kernel.Special.GH_ValueListItem("Ratio (1:X)", "2"));
+                vl.SelectItem(1);
+                document.AddObject(vl, false);
+                this.Params.Input[4].AddSource(vl);
+            }
+        }
+"""
+content = content.replace(old_inputs, new_inputs)
+
+# Update Output Params
+old_outputs = """        protected override void RegisterOutputParams(GH_OutputParamManager pManager)
+        {
+            pManager.AddCurveParameter("Analyzed Segments", "Analyzed Segments", "Road segments with slope analysis", GH_ParamAccess.list);
+            pManager.AddNumberParameter("Slope Values", "Slope Values", "Slope values for each segment", GH_ParamAccess.list);
+            pManager.AddPointParameter("Center Points", "Center Points", "Center points of segments", GH_ParamAccess.list);
+            pManager.AddNumberParameter("Compliance Percentage", "Compliance Percentage", "Percentage of compliant/non-compliant segments", GH_ParamAccess.item);
+            pManager.AddPointParameter("Projected Points", "Projected Points", "Points projected onto terrain", GH_ParamAccess.list);
+            pManager.AddLineParameter("Projection Lines", "Projection Lines", "Lines showing projection from original to terrain", GH_ParamAccess.list);
+                    pManager.AddTextParameter("Info", "Info", "Component information and interpretation", GH_ParamAccess.item);
+        }"""
+new_outputs = """        protected override void RegisterOutputParams(GH_OutputParamManager pManager)
+        {
+            pManager.AddCurveParameter("Analyzed Segments", "Analyzed Segments", "Road segments with slope analysis", GH_ParamAccess.list);
+            pManager.AddNumberParameter("Slope Values", "Slope Values", "Slope values for each segment", GH_ParamAccess.list);
+            pManager.AddPointParameter("Center Points", "Center Points", "Center points of segments", GH_ParamAccess.list);
+            pManager.AddNumberParameter("Compliance Percentage", "Compliance Percentage", "Percentage of compliant/non-compliant segments", GH_ParamAccess.item);
+            pManager.AddPointParameter("Projected Points", "Projected Points", "Points projected onto terrain", GH_ParamAccess.list);
+            pManager.AddLineParameter("Projection Lines", "Projection Lines", "Lines showing projection from original to terrain", GH_ParamAccess.list);
+            pManager.AddTextParameter("Dashboard Data", "Dashboard", "JSON legend data", GH_ParamAccess.item);
+        }"""
+content = content.replace(old_outputs, new_outputs)
+
+# Replace SolveInstance and the helper methods completely
+start_idx = content.find("protected override void SolveInstance(IGH_DataAccess DA)")
+end_idx = content.find("private class RoadAnalysisResult")
+
+new_solve = """        protected override void SolveInstance(IGH_DataAccess DA)
+        {
+            System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
+
+            System.Collections.Generic.List<Rhino.Geometry.Curve> curves = new System.Collections.Generic.List<Rhino.Geometry.Curve>();
+            Rhino.Geometry.Mesh terrain = null;
+            double threshold = 8.0;
+            double segmentSize = 5.0;
+            int mode = 1;
+
+            if (!DA.GetDataList(0, curves)) return;
+            if (!DA.GetData(1, ref terrain)) return;
+            DA.GetData(2, ref threshold);
+            DA.GetData(3, ref segmentSize);
+            DA.GetData(4, ref mode);
+
+            var result = AnalyzeRoadSlopes(curves, terrain, threshold, segmentSize, mode);
+
+            sw.Stop();
+            
+            // Generate JSON Dashboard Data
+            var jColors = new Newtonsoft.Json.Linq.JArray();
+            jColors.Add(new Newtonsoft.Json.Linq.JObject { ["R"] = 0, ["G"] = 255, ["B"] = 0 }); // Compliant
+            jColors.Add(new Newtonsoft.Json.Linq.JObject { ["R"] = 255, ["G"] = 0, ["B"] = 0 }); // Non-Compliant
+            
+            string unit = mode == 0 ? "°" : (mode == 1 ? "%" : " Ratio");
+            
+            var legendObj = new Newtonsoft.Json.Linq.JObject
+            {
+                ["Type"] = "Binary",
+                ["Title"] = "Road Slope Compliance",
+                ["Colors"] = jColors,
+                ["Labels"] = new Newtonsoft.Json.Linq.JArray($"<= {threshold}{unit}", $"> {threshold}{unit}"),
+                ["SubLabels"] = new Newtonsoft.Json.Linq.JArray($"Compliance: {result.CompliancePercentage}%")
+            };
+
+            DA.SetDataTree(0, result.AnalyzedSegments);
+            DA.SetDataTree(1, result.SlopeValues);
+            DA.SetDataTree(2, result.CenterPoints);
+            DA.SetData(3, result.CompliancePercentage);
+            DA.SetDataTree(4, result.ProjectedPoints);
+            DA.SetDataTree(5, result.ProjectionLines);
+            DA.SetData(6, legendObj.ToString());
+            
+            Message = $"Road Slope\\n{sw.ElapsedMilliseconds} ms\\n---\\nCompliance: {result.CompliancePercentage}%";
+        }
+
+        private RoadAnalysisResult AnalyzeRoadSlopes(
+            System.Collections.Generic.List<Rhino.Geometry.Curve> curves,
+            Rhino.Geometry.Mesh terrain,
+            double threshold,
+            double segmentSize,
+            int mode)
+        {
+            var result = new RoadAnalysisResult();
+            terrain.FaceNormals.ComputeFaceNormals();
+
+            for (int curveIndex = 0; curveIndex < curves.Count; curveIndex++)
+            {
+                var curve = curves[curveIndex];
+                if (curve == null || !curve.IsValid) continue;
+
+                double curveLength = curve.GetLength();
+                int segmentCount = System.Math.Max(1, (int)System.Math.Ceiling(curveLength / segmentSize));
+                double actualSegmentSize = curveLength / segmentCount;
+
+                for (int i = 0; i < segmentCount; i++)
+                {
+                    double t0 = curve.Domain.ParameterAt((double)i / segmentCount);
+                    double t1 = curve.Domain.ParameterAt((double)(i + 1) / segmentCount);
+
+                    Rhino.Geometry.Point3d p0 = curve.PointAt(t0);
+                    Rhino.Geometry.Point3d p1 = curve.PointAt(t1);
+
+                    Rhino.Geometry.Point3d p0Projected = ProjectPointToMesh(p0, terrain);
+                    Rhino.Geometry.Point3d p1Projected = ProjectPointToMesh(p1, terrain);
+
+                    if (p0Projected.IsValid && p1Projected.IsValid)
+                    {
+                        var segment = new Rhino.Geometry.Line(p0Projected, p1Projected).ToNurbsCurve();
+
+                        double horizontalDistance = System.Math.Sqrt(System.Math.Pow(p1Projected.X - p0Projected.X, 2) + System.Math.Pow(p1Projected.Y - p0Projected.Y, 2));
+                        double verticalDistance = System.Math.Abs(p1Projected.Z - p0Projected.Z);
+                        double slopeValue = 0;
+
+                        if (horizontalDistance > 0)
+                        {
+                            if (mode == 0) // Degrees
+                            {
+                                slopeValue = System.Math.Atan(verticalDistance / horizontalDistance) * (180.0 / System.Math.PI);
+                            }
+                            else if (mode == 1) // Percentage
+                            {
+                                slopeValue = (verticalDistance / horizontalDistance) * 100.0;
+                            }
+                            else if (mode == 2) // Ratio 1:X
+                            {
+                                slopeValue = horizontalDistance / verticalDistance;
+                            }
+                        }
+
+                        bool isCompliant = false;
+                        if (mode == 2) {
+                            // For ratio, a larger number means flatter, so compliant if >= threshold
+                            isCompliant = slopeValue >= threshold || verticalDistance == 0;
+                        } else {
+                            isCompliant = slopeValue <= threshold;
+                        }
+
+                        int branchIndex = isCompliant ? 0 : 1;
+                        var path = new Grasshopper.Kernel.Data.GH_Path(branchIndex);
+
+                        result.AnalyzedSegments.Append(new Grasshopper.Kernel.Types.GH_Curve(segment), path);
+                        result.SlopeValues.Append(new Grasshopper.Kernel.Types.GH_Number(slopeValue), path);
+                        result.CenterPoints.Append(new Grasshopper.Kernel.Types.GH_Point(segment.PointAtNormalizedLength(0.5)), path);
+                        result.ProjectedPoints.Append(new Grasshopper.Kernel.Types.GH_Point(p0Projected), path);
+                        result.ProjectedPoints.Append(new Grasshopper.Kernel.Types.GH_Point(p1Projected), path);
+                        result.ProjectionLines.Append(new Grasshopper.Kernel.Types.GH_Line(new Rhino.Geometry.Line(p0, p0Projected)), path);
+                        result.ProjectionLines.Append(new Grasshopper.Kernel.Types.GH_Line(new Rhino.Geometry.Line(p1, p1Projected)), path);
+
+                        if (isCompliant) result.CompliantSegmentCount++;
+                        result.TotalSegmentCount++;
+                    }
+                }
+            }
+
+            if (result.TotalSegmentCount > 0)
+            {
+                result.CompliancePercentage = System.Math.Round((double)result.CompliantSegmentCount / result.TotalSegmentCount * 100.0, 1);
+            }
+            return result;
+        }
+
+        private Rhino.Geometry.Point3d ProjectPointToMesh(Rhino.Geometry.Point3d point, Rhino.Geometry.Mesh mesh)
+        {
+            // Automatic robust bi-directional projection (downwards first, then upwards)
+            var rayDown = new Rhino.Geometry.Ray3d(new Rhino.Geometry.Point3d(point.X, point.Y, mesh.GetBoundingBox(false).Max.Z + 1000), -Rhino.Geometry.Vector3d.ZAxis);
+            double tDown = Rhino.Geometry.Intersect.Intersection.MeshRay(mesh, rayDown);
+            if (tDown >= 0) return rayDown.PointAt(tDown);
+
+            var rayUp = new Rhino.Geometry.Ray3d(new Rhino.Geometry.Point3d(point.X, point.Y, mesh.GetBoundingBox(false).Min.Z - 1000), Rhino.Geometry.Vector3d.ZAxis);
+            double tUp = Rhino.Geometry.Intersect.Intersection.MeshRay(mesh, rayUp);
+            if (tUp >= 0) return rayUp.PointAt(tUp);
+
+            return Rhino.Geometry.Point3d.Unset;
+        }
+
+"""
+content = content[:start_idx] + new_solve + content[end_idx:]
+
+with open("Components/RoadSlopeAnalyzer.cs", "w") as f:
+    f.write(content)
+

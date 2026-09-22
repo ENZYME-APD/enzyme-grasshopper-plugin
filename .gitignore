@@ -7,3 +7,11 @@ dist/
 *.userprefs
 *.DS_Store
 .vscode/
+FodyWeavers.xsd
+test_capture.dll
+test_capture.exe
+test_gif.exe
+test_gh.exe
+test_sampler.exe
+test.svg
+test.svg.png
