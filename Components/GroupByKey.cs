@@ -34,6 +34,7 @@ namespace Enzyme.Components
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             List<object> keys = new List<object>();
             List<object> values = new List<object>();
 
@@ -90,7 +91,8 @@ namespace Enzyme.Components
             int itemCount = values.Count;
             int branchCount = keyToIndex.Count;
 
-            Message = $"{itemCount} values\n{branchCount} groups";
+            stopwatch.Stop();
+            Message = $"GroupByKey\n{stopwatch.ElapsedMilliseconds} ms\n---\n{itemCount} values\n{branchCount} groups";
         }
 
         protected override Bitmap Icon

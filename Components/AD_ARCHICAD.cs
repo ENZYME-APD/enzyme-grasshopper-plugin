@@ -60,6 +60,7 @@ namespace Enzyme.Components
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             if (!DA.GetDataTree(0, out GH_Structure<GH_Curve> contoursTree)) return;
             var floorContours = new List<Curve>();
             foreach (var path in contoursTree.Paths)
@@ -266,7 +267,8 @@ namespace Enzyme.Components
             string JSON_Payload = JsonConvert.SerializeObject(payloadDict, Formatting.Indented);
             DA.SetData(0, JSON_Payload);
 
-            this.Message = $"ARCHICAD ADAPTER\n---\nBuildings: {output_buildings.Count}\nFloors: {healed_blocks}\nHeals Applied: {total_heals_applied}";
+            stopwatch.Stop();
+            this.Message = $"ARCHICAD ADAPTER\n{stopwatch.ElapsedMilliseconds} ms\n---\nBuildings: {output_buildings.Count}\nFloors: {healed_blocks}\nHeals Applied: {total_heals_applied}";
         }
 
         private List<Dictionary<string, object>> SerializeExactCurve(Curve crv)

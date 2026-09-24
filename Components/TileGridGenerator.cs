@@ -77,9 +77,8 @@ namespace Enzyme.Components
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
-
+            System.Diagnostics.Stopwatch stopwatch = System.Diagnostics.Stopwatch.StartNew();
+            
             GeometryBase baseGeom = null;
             Point3d setoutPt = Point3d.Unset;
             double x_dim = 1.0, y_dim = 1.0, grout = 0.0, rot = 0.0;
@@ -258,7 +257,8 @@ namespace Enzyme.Components
             DA.SetDataList(5, trimmedTiles);
 
             string capGridType = gridType.Length > 0 ? char.ToUpper(gridType[0]) + gridType.Substring(1).ToLower() : gridType;
-            Message = "TILE PATTERN";
+            stopwatch.Stop();
+            Message = $"TILE PATTERN\n{stopwatch.ElapsedMilliseconds} ms\n---\nDone";
             Message += $"\nTime: {executionTime:F3}s";
             Message += "\n---";
             Message += $"\n{capGridType} Grid";

@@ -44,6 +44,7 @@ namespace Enzyme.Components
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             string text = null;
             if (!DA.GetData(0, ref text)) return;
 
@@ -55,7 +56,8 @@ namespace Enzyme.Components
 
             if (string.IsNullOrWhiteSpace(text))
             {
-                this.Message = $"{this.NickName}\n{msg}";
+                stopwatch.Stop();
+                this.Message = $"{this.NickName}\n{stopwatch.ElapsedMilliseconds} ms\n---\n{msg}";
                 DA.SetDataTree(0, tree);
                 return;
             }
@@ -79,7 +81,8 @@ namespace Enzyme.Components
             if (grid.Count == 0)
             {
                 msg = "No valid data found.";
-                this.Message = $"{this.NickName}\n{msg}";
+                stopwatch.Stop();
+                this.Message = $"{this.NickName}\n{stopwatch.ElapsedMilliseconds} ms\n---\n{msg}";
                 DA.SetDataTree(0, tree);
                 return;
             }
@@ -113,7 +116,8 @@ namespace Enzyme.Components
                 msg = $"Output: {grid.Count} Rows (Branches)";
             }
 
-            this.Message = $"{this.NickName}\n{msg}";
+            stopwatch.Stop();
+                this.Message = $"{this.NickName}\n{stopwatch.ElapsedMilliseconds} ms\n---\n{msg}";
             DA.SetDataTree(0, tree);
         }
 

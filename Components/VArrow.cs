@@ -164,7 +164,7 @@ namespace Enzyme.Components
 
             sw.Stop();
             double msec = sw.Elapsed.TotalMilliseconds;
-            this.Message = $"{current_mode_str}\nn: {arrowMesh.Count} | {msec:F1}ms";
+            this.Message = $"{current_mode_str}\n{msec:F1} ms\n---\nn: {arrowMesh.Count}";
         }
 
         protected override System.Drawing.Bitmap Icon

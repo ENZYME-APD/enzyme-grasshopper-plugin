@@ -117,6 +117,7 @@ namespace Enzyme.Components
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             var sw = System.Diagnostics.Stopwatch.StartNew();
 
             bool execute = false;
@@ -380,7 +381,8 @@ namespace Enzyme.Components
                     double bestPct = (double)bestPoints.Count / tagPoints.Count * 100.0;
                     double worstPct = (double)worstPoints.Count / tagPoints.Count * 100.0;
                     
-                    Message = "HIGROTHERMAL COMFORT\n" +
+                    stopwatch.Stop();
+                    Message = $"HIGROTHERMAL COMFORT\n{stopwatch.ElapsedMilliseconds} ms\n---\n" +
                               $"Time: {sw.ElapsedMilliseconds} ms\n" +
                               "---\n" +
                               $"Ideal Temp: {idealTemperature:F1} °C\n" +
@@ -390,7 +392,8 @@ namespace Enzyme.Components
                 }
                 else
                 {
-                    Message = "HIGROTHERMAL COMFORT\n" +
+                    stopwatch.Stop();
+                    Message = $"HIGROTHERMAL COMFORT\n{stopwatch.ElapsedMilliseconds} ms\n---\n" +
                               $"Time: {sw.ElapsedMilliseconds} ms\n" +
                               "---\n" +
                               "No valid input data";
@@ -398,7 +401,8 @@ namespace Enzyme.Components
             }
             else
             {
-                Message = "HIGROTHERMAL COMFORT\n" +
+                stopwatch.Stop();
+                    Message = $"HIGROTHERMAL COMFORT\n{stopwatch.ElapsedMilliseconds} ms\n---\n" +
                           $"Time: {sw.ElapsedMilliseconds} ms\n" +
                           "---\n" +
                           "STATUS: OFF";

@@ -43,6 +43,7 @@ namespace Enzyme.Components
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             List<string> progs = new List<string>();
             List<Color> colors = new List<Color>();
 
@@ -52,7 +53,7 @@ namespace Enzyme.Components
             if (!hasProgs || !hasColors || progs.Count == 0 || colors.Count == 0)
             {
                 DA.SetData(0, "{\n}");
-                Message = "Awaiting Data";
+                Message = $"{this.NickName}\n---\nAwaiting Data";
                 return;
             }
 
@@ -76,7 +77,8 @@ namespace Enzyme.Components
                 msg += "\nWarning: List length mismatch!";
             }
             
-            Message = msg;
+            stopwatch.Stop();
+            Message = $"{this.NickName}\n{stopwatch.ElapsedMilliseconds} ms\n---\n" + msg;
             
             DA.SetData(0, jsonStr);
         }

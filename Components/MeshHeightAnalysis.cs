@@ -102,6 +102,7 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             var t_start = System.Diagnostics.Stopwatch.StartNew();
             GH_Structure<GH_Mesh> targetMeshes = new GH_Structure<GH_Mesh>();
             if (!DA.GetDataTree(0, out targetMeshes)) return;
@@ -377,7 +378,8 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
             double terrainRelief = totalVerticesCount > 0 ? Math.Round(globalTerrainZMax - globalTerrainZMin, 2) : 0.0;
             double meanElevation = totalVerticesCount > 0 ? Math.Round(totalZSum / totalVerticesCount, 2) : 0.0;
             
-            Message = "TERRAIN HEIGHT\n";
+            stopwatch.Stop();
+            Message = $"TERRAIN HEIGHT\n{stopwatch.ElapsedMilliseconds} ms\n---\nDone";
             Message += $"Time: {t_start.ElapsedMilliseconds:F2} ms\n";
             Message += "---\n";
             Message += $"Area: {Math.Round(totalTerrainArea, 2)}\n";

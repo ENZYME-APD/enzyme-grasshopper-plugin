@@ -120,7 +120,7 @@ namespace Enzyme.Components
             
             watch.Stop();
             double elapsed_ms = watch.Elapsed.TotalMilliseconds;
-            Message = $"{base_msg}\nTime: {elapsed_ms:F1} ms";
+            Message = $"{base_msg}\n{elapsed_ms:F1} ms\n---\nDone";
 
             DA.SetDataTree(0, out_curves);
             DA.SetDataTree(1, radii);

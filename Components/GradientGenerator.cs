@@ -51,6 +51,7 @@ namespace Enzyme.Components
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             List<Color> inColors = new List<Color>();
             if (!DA.GetDataList(0, inColors) || inColors.Count == 0)
             {
@@ -73,7 +74,8 @@ namespace Enzyme.Components
 
             DA.SetDataList(0, outColors);
             
-            Message = $"Gradient Generator\n---\nInput Colors: {inColors.Count}\nSteps: {steps}";
+            stopwatch.Stop();
+            Message = $"Gradient Generator\n{stopwatch.ElapsedMilliseconds} ms\n---\nInput Colors: {inColors.Count}\nSteps: {steps}";
         }
 
         private Color GetInterpolatedColor(double t, List<Color> palette)

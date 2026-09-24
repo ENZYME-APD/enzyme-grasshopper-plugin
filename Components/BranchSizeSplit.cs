@@ -48,6 +48,7 @@ namespace Enzyme.Components
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             if (!DA.GetDataTree(0, out GH_Structure<IGH_Goo> tree)) return;
             
             double minItems = 0;
@@ -101,7 +102,8 @@ namespace Enzyme.Components
             DA.SetDataTree(1, treeB);
             DA.SetDataTree(2, treeC);
 
-            Message = "BranchSizeSplit\n" +
+            stopwatch.Stop();
+            Message = $"BranchSizeSplit\n{stopwatch.ElapsedMilliseconds} ms\n---\n" +
                       countA + " branches in A (<" + minThreshold + " items)\n" +
                       countB + " branches in B (" + minThreshold + "-" + maxThreshold + " items)\n" +
                       countC + " branches in C (>" + maxThreshold + " items)";

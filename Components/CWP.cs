@@ -57,6 +57,7 @@ namespace Enzyme.Components
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             double A = 0.3;
             double B = 0.5;
             double dA = 0.0;
@@ -71,7 +72,8 @@ namespace Enzyme.Components
 
             string version = "v1.0";
             string filletMessage = R == 0 ? "No fillet" : $"R={R}";
-            Message = $"CWProfile {version}\n{A}x{B}\n{filletMessage}";
+            stopwatch.Stop();
+            Message = $"CWProfile {version}\n{stopwatch.ElapsedMilliseconds} ms\n---\n{A}x{B}\n{filletMessage}";
 
             if (A <= 0 || B <= 0)
             {

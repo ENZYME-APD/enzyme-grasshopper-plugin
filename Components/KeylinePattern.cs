@@ -51,6 +51,7 @@ namespace Enzyme.Components
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             Mesh terrain = null;
             if (!DA.GetData(0, ref terrain) || terrain == null) return;
 
@@ -103,7 +104,8 @@ namespace Enzyme.Components
                 }
             }
 
-            Message = $"Keyline Pattern\n---\nSpacing: {spacing}m\nCount: {count}\nGenerated: {keylines.Count}";
+            stopwatch.Stop();
+            Message = $"Keyline Pattern\n{stopwatch.ElapsedMilliseconds} ms\n---\nSpacing: {spacing}m\nCount: {count}\nGenerated: {keylines.Count}";
             
             double totalLen = 0;
             foreach (var crv in keylines) if (crv != null) totalLen += crv.GetLength();

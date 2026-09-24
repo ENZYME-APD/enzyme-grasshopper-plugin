@@ -50,6 +50,7 @@ namespace Enzyme.Components
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             if (!DA.GetDataTree(0, out GH_Structure<IGH_Goo> T)) return;
             
             double pA = 0;
@@ -119,7 +120,8 @@ namespace Enzyme.Components
             DA.SetDataTree(1, treeB);
             DA.SetDataTree(2, treeC);
 
-            Message = "RandomTreeSplit\n" + totalBranches + " branches split\nA:" + countA + " B:" + countB + " C:" + (totalBranches - countA - countB);
+            stopwatch.Stop();
+            Message = $"RandomTreeSplit\n{stopwatch.ElapsedMilliseconds} ms\n---\n" + totalBranches + " branches split\nA:" + countA + " B:" + countB + " C:" + (totalBranches - countA - countB);
         }
 
         protected override System.Drawing.Bitmap Icon

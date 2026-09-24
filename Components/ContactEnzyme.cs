@@ -38,14 +38,16 @@ namespace Enzyme.Components
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             string msg = "";
             if (DA.GetData(0, ref msg))
             {
-                CurrentMessage = msg;
+                stopwatch.Stop();
+                CurrentMessage = $"{this.NickName}\n{stopwatch.ElapsedMilliseconds} ms\n---\n" + msg;
             }
             else
             {
-                CurrentMessage = "";
+                CurrentMessage = $"{this.NickName}\n---\nReady";
             }
         }
 

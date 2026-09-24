@@ -44,6 +44,7 @@ namespace Enzyme.Components
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             if (!DA.GetDataTree(0, out GH_Structure<IGH_Goo> areaTree))
             {
                 return;
@@ -54,11 +55,13 @@ namespace Enzyme.Components
 
             if (areaTree == null || areaTree.DataCount == 0)
             {
-                Message = "Empty Tree";
+                Message = $"{this.NickName}\n---\nEmpty Tree";
                 return;
             }
 
-            Message = convType ? "SQM > SQFT" : "SQFT > SQM";
+            stopwatch.Stop();
+            string convStr = convType ? "SQM > SQFT" : "SQFT > SQM";
+            Message = $"{this.NickName}\n{stopwatch.ElapsedMilliseconds} ms\n---\n{convStr}";
 
             GH_Structure<IGH_Goo> resultTree = new GH_Structure<IGH_Goo>();
             double factor = 10.7639104;

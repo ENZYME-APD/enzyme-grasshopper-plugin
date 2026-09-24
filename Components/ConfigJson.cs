@@ -66,6 +66,7 @@ namespace Enzyme.Components
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             List<string> progs = new List<string>();
             List<double> targets = new List<double>();
             List<Color> colors = new List<Color>();
@@ -78,7 +79,7 @@ namespace Enzyme.Components
             {
                 DA.SetData(0, "{\n}");
                 DA.SetData(1, "{\n}");
-                this.Message = this.NickName + "\n" + "Awaiting Programs Data";
+                this.Message = $"{this.NickName}\n---\nAwaiting Programs Data";
                 return;
             }
 
@@ -119,7 +120,8 @@ namespace Enzyme.Components
                 msg += "\n(Warning: List lengths differ)";
             }
 
-            this.Message = this.NickName + "\n" + msg;
+            stopwatch.Stop();
+            this.Message = $"{this.NickName}\n{stopwatch.ElapsedMilliseconds} ms\n---\n{msg}";
         }
 
         protected override Bitmap Icon => IconLoader.Load("ConfigJSON.png");

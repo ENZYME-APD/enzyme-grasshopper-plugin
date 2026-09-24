@@ -27,6 +27,7 @@ namespace Enzyme.Components
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             Color panelColor = Color.Empty;
             Color canvasBg = Color.Empty;
             Color gridColor = Color.Empty;
@@ -41,7 +42,8 @@ namespace Enzyme.Components
 
             Grasshopper.Instances.ActiveCanvas?.Refresh();
 
-            this.Message = "Canvas Style\nLove your style!";
+            stopwatch.Stop();
+            this.Message = $"Canvas Style\n{stopwatch.ElapsedMilliseconds} ms\n---\nLove your style!";
         }
 
         public override void AddedToDocument(GH_Document document)

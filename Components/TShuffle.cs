@@ -46,6 +46,7 @@ namespace Enzyme.Components
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             if (!DA.GetDataTree(0, out GH_Structure<IGH_Goo> tree))
             {
                 Message = "Waiting for data...";
@@ -94,7 +95,8 @@ namespace Enzyme.Components
                 }
             }
 
-            Message = $"Branches: {tree.PathCount}\nItems: {total_items}";
+            stopwatch.Stop();
+            Message = $"{this.NickName}\n{stopwatch.ElapsedMilliseconds} ms\n---\nBranches: {tree.PathCount}\nItems: {total_items}";
             
             DA.SetDataTree(0, result);
         }

@@ -23,7 +23,7 @@ namespace Enzyme.Components
                 Bitmap icon = IconLoader.Load("legend_icon.png");
                 if (icon == null)
                 {
-                    this.Message = "Icon missing";
+                    this.Message = $"{this.NickName}\n---\nIcon missing";
                 }
                 return icon;
             }

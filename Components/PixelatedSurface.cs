@@ -93,6 +93,7 @@ namespace Enzyme.Components
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             Random rnd = new Random(42);
             Stopwatch t_start = new Stopwatch();
             t_start.Start();
@@ -478,7 +479,8 @@ namespace Enzyme.Components
             ui_lines.Add("---");
             ui_lines.Add($"Total Tiles: {total_panels}{bake_status}");
 
-            Message = string.Join("\n", ui_lines);
+            stopwatch.Stop();
+            Message = $"{this.NickName}\n{stopwatch.ElapsedMilliseconds} ms\n---\n" + string.Join("\n", ui_lines);
         }
 
         protected override System.Drawing.Bitmap Icon

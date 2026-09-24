@@ -49,6 +49,7 @@ namespace Enzyme.Components
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             Mesh mesh = null;
             if (!DA.GetData(0, ref mesh) || mesh == null) return;
 
@@ -150,7 +151,8 @@ namespace Enzyme.Components
                 topPoints.Add(new Point3d(p.X, p.Y, p.Z));
             }
 
-            Message = $"Hydro-DEM\n---\nThreshold: {threshold}\nStreams: {streams.Count}";
+            stopwatch.Stop();
+            Message = $"Hydro-DEM\n{stopwatch.ElapsedMilliseconds} ms\n---\nThreshold: {threshold}\nStreams: {streams.Count}";
             
             JObject payload = new JObject();
             payload["Title"] = "HYDRO DEM";

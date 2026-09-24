@@ -32,6 +32,7 @@ namespace Enzyme.Components
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             Color defaultColor = Color.Empty;
             List<string> names = new List<string>();
             List<Color> colors = new List<Color>();
@@ -95,7 +96,8 @@ namespace Enzyme.Components
                 }
             }
             
-            this.Message = "Group Colours\nCase-insensitive\nMulti-separator";
+            stopwatch.Stop();
+            this.Message = $"Group Colours\n{stopwatch.ElapsedMilliseconds} ms\n---\nCase-insensitive\nMulti-separator";
         }
 
         public override void AddedToDocument(GH_Document document)

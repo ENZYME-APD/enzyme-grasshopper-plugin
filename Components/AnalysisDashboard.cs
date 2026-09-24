@@ -103,6 +103,7 @@ namespace Enzyme.Components
 
                 protected override void SolveInstance(IGH_DataAccess DA)
         {
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             _run = false;
             DA.GetData(0, ref _run);
 
@@ -185,20 +186,21 @@ namespace Enzyme.Components
                         _subscribed = true;
                     }
 
-                    this.Message = "HUD ACTIVE\n" + _title;
+                    stopwatch.Stop();
+                    this.Message = $"{this.NickName}\n{stopwatch.ElapsedMilliseconds} ms\n---\nHUD ACTIVE\n" + _title;
                 }
                 catch (Exception ex)
                 {
-                    this.Message = "JSON Error: " + ex.Message;
+                    this.Message = $"{this.NickName}\n---\nJSON Error: " + ex.Message;
                     Unsubscribe();
                 }
             }
             else
             {
                 if (!_run)
-                    this.Message = "STATE: OFF";
+                    this.Message = $"{this.NickName}\n---\nSTATE: OFF";
                 else
-                    this.Message = "WAITING FOR DATA";
+                    this.Message = $"{this.NickName}\n---\nWAITING FOR DATA";
                 
                 Unsubscribe();
             }

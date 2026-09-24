@@ -141,7 +141,7 @@ namespace Enzyme.Components
             string statusStr = dimToggle ? "DIMS: ON" : "DIMS: OFF";
             int totalCount = treeLines.DataCount + treeArcs.DataCount;
             
-            this.Message = string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0} ({1} dec)\n{2} Segs | {3:F2} ms", statusStr, numDec, totalCount, elapsedMs);
+            this.Message = string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0} ({1} dec)\n{3:F0} ms\n---\n{2} Segs", statusStr, numDec, totalCount, elapsedMs);
 
             DA.SetDataTree(0, treeLines);
             DA.SetDataTree(1, treeArcs);

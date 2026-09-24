@@ -44,6 +44,7 @@ namespace Enzyme.Components
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             Point3d pt = Point3d.Unset;
             Plane plane = Plane.Unset;
 
@@ -88,7 +89,8 @@ namespace Enzyme.Components
             }
 
             // HUD Message
-            this.Message = message;
+            stopwatch.Stop();
+            this.Message = $"{this.NickName}\n{stopwatch.ElapsedMilliseconds} ms\n---\n" + message;
 
             DA.SetData(0, isContained);
             DA.SetData(1, projectedPt);

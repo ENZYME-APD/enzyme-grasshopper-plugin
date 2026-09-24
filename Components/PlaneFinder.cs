@@ -29,6 +29,7 @@ namespace Enzyme.Components
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             List<GeometryBase> xList = new List<GeometryBase>();
             if (!DA.GetDataList(0, xList)) return;
 
@@ -117,11 +118,13 @@ namespace Enzyme.Components
                     DA.SetData(1, reverse_normal);
                     DA.SetData(2, plane);
 
-                    this.Message = $"{component_name} {component_version}\nSurface is planar.";
+                    stopwatch.Stop();
+                    this.Message = $"{component_name} {component_version}\n{stopwatch.ElapsedMilliseconds} ms\n---\nSurface is planar.";
                 }
                 else
                 {
-                    this.Message = $"{component_name} {component_version}\nSurface is NOT planar.";
+                    stopwatch.Stop();
+                    this.Message = $"{component_name} {component_version}\n{stopwatch.ElapsedMilliseconds} ms\n---\nSurface is NOT planar.";
                 }
             }
         }

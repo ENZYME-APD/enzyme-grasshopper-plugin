@@ -78,7 +78,7 @@ namespace Enzyme.Components
             stopwatch.Stop();
             double calcTimeMs = stopwatch.Elapsed.TotalMilliseconds;
             string version = "v1.2";
-            Message = $"{version}\n{calcTimeMs:F2} ms";
+            Message = $"{version}\n{calcTimeMs:F2} ms\n---\nHealed";
         }
 
         private Curve HealByExtensionLogic(Curve curve, double extensionFactor)

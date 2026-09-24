@@ -58,6 +58,7 @@ namespace Enzyme.Components
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             List<Brep> massing = new List<Brep>();
             List<string> towerIDs = new List<string>();
             List<string> buildingNames = new List<string>();
@@ -253,7 +254,8 @@ namespace Enzyme.Components
             string jsonPayload = JsonConvert.SerializeObject(payload_dict, Formatting.Indented);
             DA.SetData(0, jsonPayload);
 
-            this.Message = $"SCULPTOR ADAPTER\n---\nBuildings: {output_buildings.Count}\nFloors Sliced: {total_sliced_floors}";
+            stopwatch.Stop();
+            this.Message = $"SCULPTOR ADAPTER\n{stopwatch.ElapsedMilliseconds} ms\n---\nBuildings: {output_buildings.Count}\nFloors Sliced: {total_sliced_floors}";
         }
 
         // ==============================================================================

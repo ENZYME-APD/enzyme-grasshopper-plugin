@@ -366,7 +366,7 @@ namespace Enzyme.Components
 
             sw.Stop();
             
-            this.Message = $"TSEC\nTimer: {sw.ElapsedMilliseconds} ms\nZones: {countZones}\nClusters: {countClusters}\nSlabs: {countSlabs}\nInternal walls: {countInternal}\nExternal walls: {countExternal}";
+            this.Message = $"TSEC\n{sw.ElapsedMilliseconds} ms\n---\nZones: {countZones}\nClusters: {countClusters}\nSlabs: {countSlabs}\nInternal walls: {countInternal}\nExternal walls: {countExternal}";
         }
 
         protected override System.Drawing.Bitmap Icon

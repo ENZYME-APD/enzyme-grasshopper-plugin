@@ -49,6 +49,7 @@ namespace Enzyme.Components
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             Mesh terrain = null;
             if (!DA.GetData(0, ref terrain) || terrain == null) return;
 
@@ -154,7 +155,8 @@ namespace Enzyme.Components
                 }
             }
 
-            Message = $"Keypoint Finder\n---\nSmoothing: {window}\nFound: {keypoints.Count}";
+            stopwatch.Stop();
+            Message = $"Keypoint Finder\n{stopwatch.ElapsedMilliseconds} ms\n---\nSmoothing: {window}\nFound: {keypoints.Count}";
             
             JObject payload = new JObject();
             payload["Title"] = "KEYPOINT FINDER";

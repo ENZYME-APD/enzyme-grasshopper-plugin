@@ -92,6 +92,7 @@ namespace Enzyme.Components
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             // Fetch inputs
             DA.GetData(0, ref _run);
             DA.GetData(1, ref _jsonPayload);
@@ -247,19 +248,20 @@ namespace Enzyme.Components
                     }
 
                     string modeMsg = _groupByBldg ? "Per-Building Mode" : "Global Mode";
-                    this.Message = $"HUD ACTIVE\n{modeMsg}";
+                    stopwatch.Stop();
+                    this.Message = $"{this.NickName}\n{stopwatch.ElapsedMilliseconds} ms\n---\nHUD ACTIVE\n{modeMsg}";
                 }
                 catch (Exception ex)
                 {
-                    this.Message = "JSON Error: " + ex.Message;
+                    this.Message = $"{this.NickName}\n---\nJSON Error: " + ex.Message;
                 }
             }
             else
             {
                 if (!_run)
-                    this.Message = "STATE: OFF";
+                    this.Message = $"{this.NickName}\n---\nSTATE: OFF";
                 else
-                    this.Message = "WAITING FOR DATA";
+                    this.Message = $"{this.NickName}\n---\nWAITING FOR DATA";
                 
                 Unsubscribe();
             }

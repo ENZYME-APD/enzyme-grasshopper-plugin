@@ -113,6 +113,7 @@ namespace Enzyme.Components
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             List<Brep> massingBlocks = new List<Brep>();
             List<string> programs = new List<string>();
             List<string> towerIDs = new List<string>();
@@ -281,7 +282,8 @@ namespace Enzyme.Components
 
             DA.SetData(0, finalJson);
 
-            Message = $"LEGO ADAPTER\n---\nTotal Floors: {totalGeneratedFloors}\nStretched Tops: {stretchedFloorsCreated}";
+            stopwatch.Stop();
+            Message = $"LEGO ADAPTER\n{stopwatch.ElapsedMilliseconds} ms\n---\nTotal Floors: {totalGeneratedFloors}\nStretched Tops: {stretchedFloorsCreated}";
         }
 
         private class BuildingData

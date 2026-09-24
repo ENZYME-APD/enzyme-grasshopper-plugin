@@ -234,7 +234,7 @@ namespace Enzyme.Components
 
             var ms = (DateTime.Now - startTime).TotalMilliseconds;
             string dynamicLegend = $"0-{l1:0} / {l1:0}-{l2:0} / >{l2:0}";
-            this.Message = $"{methodName}\n{dynamicLegend}\n{ms:0.1}ms";
+            this.Message = $"{methodName}\n{ms:0.1} ms\n---\n{dynamicLegend}";
 
             DA.SetDataTree(0, distTree);
             DA.SetDataTree(1, lineTree);

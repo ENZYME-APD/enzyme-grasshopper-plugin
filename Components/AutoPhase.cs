@@ -11,7 +11,7 @@ namespace Enzyme.Components
     public class AutoPhaseComponent : GH_Component
     {
         private List<string> _cachedLog = new List<string> { "Awaiting execution. Click the 'Run' button." };
-        private string _cachedMsg = "Auto_Phase\nAwaiting Run";
+        private string _cachedMsg = "Auto_Phase\n---\nAwaiting Run";
 
         public AutoPhaseComponent()
           : base("Auto-Phase Assigner by Z", "Auto_Phase",
@@ -66,7 +66,7 @@ namespace Enzyme.Components
 
             if (goos == null || goos.Count == 0)
             {
-                _cachedMsg = $"{this.NickName}\nNo Guids";
+                _cachedMsg = $"{this.NickName}\n---\nNo Guids";
                 _cachedLog = new List<string> { "No Guids provided." };
                 DA.SetDataList(0, _cachedLog);
                 Message = _cachedMsg;
@@ -184,7 +184,7 @@ namespace Enzyme.Components
             sw.Stop();
             long execTime = sw.ElapsedMilliseconds;
 
-            _cachedMsg = $"{this.NickName}\nTime: {execTime} ms\n{statusLine}";
+            _cachedMsg = $"{this.NickName}\n{execTime} ms\n---\n{statusLine}";
             _cachedLog = log;
 
             Message = _cachedMsg;
