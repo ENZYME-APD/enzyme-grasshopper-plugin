@@ -27,6 +27,8 @@ namespace Enzyme.Components
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+
             IGH_Goo data = null;
             if (!DA.GetData(0, ref data)) 
             {
@@ -56,6 +58,9 @@ namespace Enzyme.Components
             {
                 DA.SetData(0, false);
             }
+        
+            stopwatch.Stop();
+            Message = $"{this.NickName}\n{stopwatch.ElapsedMilliseconds} ms\n---\nDone";
         }
 
         private void ScheduleReset()

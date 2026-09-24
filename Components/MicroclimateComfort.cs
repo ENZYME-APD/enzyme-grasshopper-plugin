@@ -42,6 +42,8 @@ namespace Enzyme.Components
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+
             List<Point3d> points = new List<Point3d>();
             if (!DA.GetDataList(0, points)) return;
 
@@ -148,6 +150,9 @@ namespace Enzyme.Components
             DA.SetDataList(2, categories);
             DA.SetDataList(3, colors);
             DA.SetData(4, legendObj.ToString());
+        
+            stopwatch.Stop();
+            Message = $"{this.NickName}\n{stopwatch.ElapsedMilliseconds} ms\n---\nDone";
         }
 
         private Color GetComfortColor(double temp)

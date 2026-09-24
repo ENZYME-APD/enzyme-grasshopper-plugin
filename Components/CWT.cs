@@ -59,6 +59,8 @@ namespace Enzyme.Components
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+
             if (!DA.GetDataTree(0, out GH_Structure<GH_Curve> curves)) return;
             
             DA.GetDataTree(1, out GH_Structure<GH_Number> modSize);
@@ -272,6 +274,9 @@ namespace Enzyme.Components
             // Output assignment
             DA.SetDataTree(0, transomsTree);
             DA.SetDataTree(1, divisionLinesTree);
+        
+            stopwatch.Stop();
+            Message = $"{this.NickName}\n{stopwatch.ElapsedMilliseconds} ms\n---\nDone";
         }
 
         private double GetDoubleValue(object obj, double fallback)

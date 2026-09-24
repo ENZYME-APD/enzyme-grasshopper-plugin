@@ -27,6 +27,8 @@ namespace Enzyme.Components
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+
             bool run = false;
             if (!DA.GetData(0, ref run) || !run) return;
 
@@ -103,6 +105,9 @@ namespace Enzyme.Components
 
             CheckOrMakePanel(doc, "PlugIns Used", pluginText, Color.LightSkyBlue, new PointF(-690, 0), new RectangleF(-330, 0, 330, 150));
             CheckOrMakePanel(doc, "All Components Used", compsText, Color.LightSkyBlue, new PointF(-345, 0), new RectangleF(-330, 0, 330, 450));
+        
+            stopwatch.Stop();
+            Message = $"{this.NickName}\n{stopwatch.ElapsedMilliseconds} ms\n---\nDone";
         }
 
         private void CheckOrMakePanel(GH_Document doc, string nickname, string text, Color color, PointF pivot, RectangleF bounds)

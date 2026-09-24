@@ -31,6 +31,8 @@ namespace Enzyme.Components
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+
             List<Curve> curves = new List<Curve>();
             double targetLength = 10.0;
 
@@ -113,6 +115,9 @@ namespace Enzyme.Components
             DA.SetDataTree(0, outPts);
             DA.SetDataTree(1, outSubs);
             DA.SetDataTree(2, outLens);
+        
+            stopwatch.Stop();
+            Message = $"{this.NickName}\n{stopwatch.ElapsedMilliseconds} ms\n---\nDone";
         }
 
         public override GH_Exposure Exposure => GH_Exposure.primary;

@@ -29,6 +29,8 @@ namespace Enzyme.Components
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+
             bool selEnzyme = false;
             bool selErrors = false;
             bool selOutdated = false;
@@ -107,6 +109,9 @@ namespace Enzyme.Components
                 "Connect a Button to inputs to select specific groups.";
 
             DA.SetData(0, report);
+        
+            stopwatch.Stop();
+            Message = $"{this.NickName}\n{stopwatch.ElapsedMilliseconds} ms\n---\nDone";
         }
 
         public override void AddedToDocument(GH_Document document)

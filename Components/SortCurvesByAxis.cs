@@ -50,6 +50,8 @@ namespace Enzyme.Components
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+
             GH_Structure<GH_Curve> curvesTree = new GH_Structure<GH_Curve>();
             if (!DA.GetDataTree(0, out curvesTree)) return;
 
@@ -97,6 +99,9 @@ namespace Enzyme.Components
             }
 
             DA.SetDataTree(0, outTree);
+        
+            stopwatch.Stop();
+            Message = $"{this.NickName}\n{stopwatch.ElapsedMilliseconds} ms\n---\nDone";
         }
 
         protected override System.Drawing.Bitmap Icon

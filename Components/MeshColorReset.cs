@@ -26,6 +26,8 @@ namespace Enzyme.Components
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+
             List<Mesh> inputMeshes = new List<Mesh>();
             if (!DA.GetDataList(0, inputMeshes)) return;
 
@@ -40,6 +42,9 @@ namespace Enzyme.Components
             }
 
             DA.SetDataList(0, outputMeshes);
+        
+            stopwatch.Stop();
+            Message = $"{this.NickName}\n{stopwatch.ElapsedMilliseconds} ms\n---\nMeshes: {outputMeshes.Count}";
         }
 
         public override void AddedToDocument(GH_Document document)

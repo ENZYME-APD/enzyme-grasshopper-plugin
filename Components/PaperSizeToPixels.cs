@@ -29,6 +29,8 @@ namespace Enzyme.Components
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+
             string format = "A4";
             if (!DA.GetData(0, ref format)) return;
 
@@ -101,6 +103,9 @@ namespace Enzyme.Components
             DA.SetData(0, exactWidth);
             DA.SetData(1, exactHeight);
             DA.SetData(2, dpi);
+        
+            stopwatch.Stop();
+            Message = $"{this.NickName}\n{stopwatch.ElapsedMilliseconds} ms\n---\nDone";
         }
 
         public override void AppendAdditionalMenuItems(System.Windows.Forms.ToolStripDropDown menu)

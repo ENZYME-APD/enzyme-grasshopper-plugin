@@ -30,6 +30,8 @@ namespace Enzyme.Components
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+
             List<IGH_Goo> list = new List<IGH_Goo>();
             if (!DA.GetDataList(0, list)) return;
             if (list.Count == 0) return;
@@ -77,6 +79,9 @@ namespace Enzyme.Components
             }
 
             DA.SetData(0, list[index]);
+        
+            stopwatch.Stop();
+            Message = $"{this.NickName}\n{stopwatch.ElapsedMilliseconds} ms\n---\nDone";
         }
 
         protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)

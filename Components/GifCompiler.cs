@@ -31,6 +31,8 @@ namespace Enzyme.Components
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+
             string dir = "";
             if (!DA.GetData("Directory", ref dir)) return;
 
@@ -81,6 +83,9 @@ namespace Enzyme.Components
             {
                 AddRuntimeMessage(GH_RuntimeMessageLevel.Error, ex.Message);
             }
+        
+            stopwatch.Stop();
+            Message = $"{this.NickName}\n{stopwatch.ElapsedMilliseconds} ms\n---\nDone";
         }
         
         public override GH_Exposure Exposure => GH_Exposure.secondary;

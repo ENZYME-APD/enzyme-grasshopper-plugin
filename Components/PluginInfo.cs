@@ -46,6 +46,8 @@ namespace Enzyme.Components
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+
             Assembly assembly = Assembly.GetExecutingAssembly();
             
             // Get Version
@@ -69,6 +71,9 @@ namespace Enzyme.Components
 
             DA.SetData(0, version);
             DA.SetData(1, buildDate);
+        
+            stopwatch.Stop();
+            Message = $"{this.NickName}\n{stopwatch.ElapsedMilliseconds} ms\n---\nDone";
         }
 
         protected override System.Drawing.Bitmap Icon

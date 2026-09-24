@@ -75,6 +75,8 @@ namespace Enzyme.Components
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+
             Mesh mesh = null;
             if (!DA.GetData(0, ref mesh) || mesh == null || !mesh.IsValid) return;
 
@@ -176,6 +178,9 @@ namespace Enzyme.Components
             DA.SetData(0, outMesh);
             DA.SetDataList(1, normContours);
             DA.SetDataList(2, mainContours);
+        
+            stopwatch.Stop();
+            Message = $"{this.NickName}\n{stopwatch.ElapsedMilliseconds} ms\n---\nContours: {normContours.Count}\nMain: {mainContours.Count}";
         }
 
         private Color GetGradientColor(double t, List<Color> colors)

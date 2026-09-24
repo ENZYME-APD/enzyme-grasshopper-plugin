@@ -32,6 +32,8 @@ namespace Enzyme.Components
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+
             List<double> values = new List<double>();
             if (!DA.GetDataList(0, values)) return;
             if (values.Count == 0) return;
@@ -99,6 +101,9 @@ namespace Enzyme.Components
             }
 
             DA.SetDataList(0, mappedColors);
+        
+            stopwatch.Stop();
+            Message = $"{this.NickName}\n{stopwatch.ElapsedMilliseconds} ms\n---\nDone";
         }
 
         protected override System.Drawing.Bitmap Icon => Enzyme.IconLoader.Load("MapToGradient.png");
