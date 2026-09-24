@@ -27,9 +27,7 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                int ox = 120;
-                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 0, ox, -45, 180, 40);
-                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 1, ox, 5, 180, 40);
+                AutoWireDefaultInputs(document);
             }
         }
 
@@ -86,6 +84,24 @@ namespace Enzyme.Components
                     return null;
                 }
             }
+        }
+
+        
+        private void AutoWireDefaultInputs(GH_Document document)
+        {
+                int ox = 120;
+                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 0, ox, -45, 180, 40);
+                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 1, ox, 5, 180, 40);
+            }
+
+        protected override void AppendAdditionalComponentMenuItems(System.Windows.Forms.ToolStripDropDown menu)
+        {
+            base.AppendAdditionalComponentMenuItems(menu);
+            Menu_AppendItem(menu, "Auto-wire Default Inputs", (s, e) =>
+            {
+                var doc = OnPingDocument();
+                if (doc != null) AutoWireDefaultInputs(doc);
+            });
         }
 
         public override Guid ComponentGuid => new Guid("fa77cbfa-e422-4e16-8a46-b447dd425067"); // Ensure unique GUID

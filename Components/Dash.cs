@@ -50,15 +50,7 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 0, false, 210, -160);
-                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 2, false, 210, -120);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 5, 0.0, 2.0, 0.0, 330, -80);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 7, 0.0, 24, 12.0, 330, -40);
-                Enzyme.Utils.AutoWireHelper.WireValueList(this, document, 8, new string[]{"TL", "TR", "BL", "BR"}, new string[]{"0", "1", "2", "3"}, 300, 0);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 10, 0.0, 1.0, 0.8, 330, 40);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 11, 0.0, 40, 20.0, 330, 80);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 12, 0.0, 40, 20.0, 330, 120);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 13, 0.0, 20, 10.0, 330, 160);
+                AutoWireDefaultInputs(document);
             }
         }
 
@@ -366,6 +358,30 @@ namespace Enzyme.Components
         }
 
         protected override Bitmap Icon => IconLoader.Load("DASH.png");
+
+        
+        private void AutoWireDefaultInputs(GH_Document document)
+        {
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 0, false, 210, -160);
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 2, false, 210, -120);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 5, 0.0, 2.0, 0.0, 330, -80);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 7, 0.0, 24, 12.0, 330, -40);
+                Enzyme.Utils.AutoWireHelper.WireValueList(this, document, 8, new string[]{"TL", "TR", "BL", "BR"}, new string[]{"0", "1", "2", "3"}, 300, 0);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 10, 0.0, 1.0, 0.8, 330, 40);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 11, 0.0, 40, 20.0, 330, 80);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 12, 0.0, 40, 20.0, 330, 120);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 13, 0.0, 20, 10.0, 330, 160);
+            }
+
+        protected override void AppendAdditionalComponentMenuItems(System.Windows.Forms.ToolStripDropDown menu)
+        {
+            base.AppendAdditionalComponentMenuItems(menu);
+            Menu_AppendItem(menu, "Auto-wire Default Inputs", (s, e) =>
+            {
+                var doc = OnPingDocument();
+                if (doc != null) AutoWireDefaultInputs(doc);
+            });
+        }
 
         public override Guid ComponentGuid => new Guid("B453E8A0-E3A9-4A9E-B19F-D7C6B372F26C");
 

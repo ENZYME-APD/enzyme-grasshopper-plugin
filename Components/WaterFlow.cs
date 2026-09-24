@@ -30,11 +30,7 @@ namespace Enzyme.Terrain
 
             if (!hasSources)
             {
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 1, 0.0, 10.0, 5.0, 330, -40);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 0.0, 10.0, 5.0, 330, 0);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 3, 0.0, 10.0, 10, 330, 40);
-                Enzyme.Utils.AutoWireHelper.WireCurvePreview(this, document, 0, System.Drawing.Color.DeepSkyBlue, 0.06, 300, -30);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 1, "point", 300, 50);
+                AutoWireDefaultInputs(document);
             }
         }
 
@@ -183,6 +179,26 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
             {
                 return IconLoader.Load("WaterFlow.png");
             }
+        }
+
+        
+        private void AutoWireDefaultInputs(GH_Document document)
+        {
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 1, 0.0, 10.0, 5.0, 330, -40);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 0.0, 10.0, 5.0, 330, 0);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 3, 0.0, 10.0, 10, 330, 40);
+                Enzyme.Utils.AutoWireHelper.WireCurvePreview(this, document, 0, System.Drawing.Color.DeepSkyBlue, 0.06, 300, -30);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 1, "point", 300, 50);
+            }
+
+        protected override void AppendAdditionalComponentMenuItems(System.Windows.Forms.ToolStripDropDown menu)
+        {
+            base.AppendAdditionalComponentMenuItems(menu);
+            Menu_AppendItem(menu, "Auto-wire Default Inputs", (s, e) =>
+            {
+                var doc = OnPingDocument();
+                if (doc != null) AutoWireDefaultInputs(doc);
+            });
         }
 
         public override Guid ComponentGuid

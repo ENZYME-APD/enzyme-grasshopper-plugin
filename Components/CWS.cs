@@ -30,13 +30,7 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                Enzyme.Utils.AutoWireHelper.WireValueList(this, document, 4, new string[]{"Start", "Middle", "End"}, new string[]{"\"Start\"", "\"Middle\"", "\"End\""}, 300, -40);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 5, 0.0, 2.0, 0.5, 330, 0);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 6, 0.0, 2.0, 0.3, 330, 40);
-                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 0, System.Drawing.Color.FromArgb(50, 50, 50), 220, -128);
-                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 1, System.Drawing.Color.FromArgb(230, 230, 230), 220, -53);
-                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 2, System.Drawing.Color.FromArgb(50, 50, 50), 220, 22);
-                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 3, System.Drawing.Color.FromArgb(150, 200, 255), 220, 97);
+                AutoWireDefaultInputs(document);
             }
         }
 
@@ -500,6 +494,28 @@ namespace Enzyme.Components
             {
                 return IconLoader.Load("CWS.png");
             }
+        }
+
+        
+        private void AutoWireDefaultInputs(GH_Document document)
+        {
+                Enzyme.Utils.AutoWireHelper.WireValueList(this, document, 4, new string[]{"Start", "Middle", "End"}, new string[]{"\"Start\"", "\"Middle\"", "\"End\""}, 300, -40);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 5, 0.0, 2.0, 0.5, 330, 0);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 6, 0.0, 2.0, 0.3, 330, 40);
+                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 0, System.Drawing.Color.FromArgb(50, 50, 50), 220, -128);
+                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 1, System.Drawing.Color.FromArgb(230, 230, 230), 220, -53);
+                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 2, System.Drawing.Color.FromArgb(50, 50, 50), 220, 22);
+                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 3, System.Drawing.Color.FromArgb(150, 200, 255), 220, 97);
+            }
+
+        protected override void AppendAdditionalComponentMenuItems(System.Windows.Forms.ToolStripDropDown menu)
+        {
+            base.AppendAdditionalComponentMenuItems(menu);
+            Menu_AppendItem(menu, "Auto-wire Default Inputs", (s, e) =>
+            {
+                var doc = OnPingDocument();
+                if (doc != null) AutoWireDefaultInputs(doc);
+            });
         }
 
         public override Guid ComponentGuid => new Guid("0F5F2B51-CD3B-4E38-B7D9-1B86A4F2A143");

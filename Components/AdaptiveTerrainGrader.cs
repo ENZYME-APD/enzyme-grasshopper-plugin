@@ -26,6 +26,30 @@ namespace Enzyme.Components
             }
         }
 
+        
+        private void AutoWireDefaultInputs(GH_Document document)
+        {
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 0.0, 90, 45.0, 330, -80);
+                Enzyme.Utils.AutoWireHelper.WireColorSwatch(this, document, 3, System.Drawing.Color.Red, 210, -40);
+                Enzyme.Utils.AutoWireHelper.WireColorSwatch(this, document, 4, System.Drawing.Color.Blue, 210, 0);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 5, 0.0, 20, 10.0, 330, 40);
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 6, false, 210, 80);
+                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 0, System.Drawing.Color.FromArgb(230, 230, 230), 220, -98);
+                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 1, System.Drawing.Color.FromArgb(230, 230, 230), 220, -23);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 4, "curve", 220, 52);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 5, "curve", 220, 97);
+            }
+
+        protected override void AppendAdditionalComponentMenuItems(System.Windows.Forms.ToolStripDropDown menu)
+        {
+            base.AppendAdditionalComponentMenuItems(menu);
+            Menu_AppendItem(menu, "Auto-wire Default Inputs", (s, e) =>
+            {
+                var doc = OnPingDocument();
+                if (doc != null) AutoWireDefaultInputs(doc);
+            });
+        }
+
         public override Guid ComponentGuid => new Guid("B5D1A2C3-E8F7-4A6B-9C0D-1E2F3A4B5C6D");
 
                 public override void AddedToDocument(GH_Document document)
@@ -39,15 +63,7 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 0.0, 90, 45.0, 330, -80);
-                Enzyme.Utils.AutoWireHelper.WireColorSwatch(this, document, 3, System.Drawing.Color.Red, 210, -40);
-                Enzyme.Utils.AutoWireHelper.WireColorSwatch(this, document, 4, System.Drawing.Color.Blue, 210, 0);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 5, 0.0, 20, 10.0, 330, 40);
-                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 6, false, 210, 80);
-                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 0, System.Drawing.Color.FromArgb(230, 230, 230), 220, -98);
-                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 1, System.Drawing.Color.FromArgb(230, 230, 230), 220, -23);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 4, "curve", 220, 52);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 5, "curve", 220, 97);
+                AutoWireDefaultInputs(document);
             }
         }
 

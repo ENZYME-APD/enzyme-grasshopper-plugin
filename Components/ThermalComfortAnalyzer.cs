@@ -43,6 +43,22 @@ namespace Enzyme.Components
             }
         }
 
+        
+        private void AutoWireDefaultInputs(GH_Document document)
+        {
+                PerformAutoWire(document);
+            }
+
+        protected override void AppendAdditionalComponentMenuItems(System.Windows.Forms.ToolStripDropDown menu)
+        {
+            base.AppendAdditionalComponentMenuItems(menu);
+            Menu_AppendItem(menu, "Auto-wire Default Inputs", (s, e) =>
+            {
+                var doc = OnPingDocument();
+                if (doc != null) AutoWireDefaultInputs(doc);
+            });
+        }
+
         public override Guid ComponentGuid => new Guid("df36188d-f244-4395-9b05-6927c0ca5dab");
 
         public override void AddedToDocument(GH_Document document)
@@ -56,7 +72,7 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                PerformAutoWire(document);
+                AutoWireDefaultInputs(document);
             }
         }
 

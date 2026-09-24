@@ -27,10 +27,7 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 0, 220, -79, 180, 22);
-                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 1, 220, -34, 180, 22);
-                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 2, 220, 11, 180, 22);
-                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 3, 220, 56, 180, 22);
+                AutoWireDefaultInputs(document);
             }
         }
 
@@ -153,6 +150,25 @@ namespace Enzyme.Components
         }
 
         public override GH_Exposure Exposure => GH_Exposure.primary;
+
+        
+        private void AutoWireDefaultInputs(GH_Document document)
+        {
+                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 0, 220, -79, 180, 22);
+                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 1, 220, -34, 180, 22);
+                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 2, 220, 11, 180, 22);
+                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 3, 220, 56, 180, 22);
+            }
+
+        protected override void AppendAdditionalComponentMenuItems(System.Windows.Forms.ToolStripDropDown menu)
+        {
+            base.AppendAdditionalComponentMenuItems(menu);
+            Menu_AppendItem(menu, "Auto-wire Default Inputs", (s, e) =>
+            {
+                var doc = OnPingDocument();
+                if (doc != null) AutoWireDefaultInputs(doc);
+            });
+        }
 
         public override Guid ComponentGuid => new Guid("CA44BB4A-E36D-41D1-A5BC-B0D13993D6B5");
     }

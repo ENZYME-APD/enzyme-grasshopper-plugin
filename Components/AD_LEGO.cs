@@ -26,8 +26,7 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                Enzyme.Utils.AutoWireHelper.WireValueList(this, document, 5, new string[]{"Strict Cutoff", "Stretch Top Floor"}, new string[]{"0", "1"}, 300, 0);
-                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 0, 220, -11, 180, 22);
+                AutoWireDefaultInputs(document);
             }
         }
 
@@ -57,6 +56,23 @@ namespace Enzyme.Components
         protected override System.Drawing.Bitmap Icon => IconLoader.Load("AD_LEGO.png");
         
         public override GH_Exposure Exposure => GH_Exposure.tertiary;
+
+        
+        private void AutoWireDefaultInputs(GH_Document document)
+        {
+                Enzyme.Utils.AutoWireHelper.WireValueList(this, document, 5, new string[]{"Strict Cutoff", "Stretch Top Floor"}, new string[]{"0", "1"}, 300, 0);
+                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 0, 220, -11, 180, 22);
+            }
+
+        protected override void AppendAdditionalComponentMenuItems(System.Windows.Forms.ToolStripDropDown menu)
+        {
+            base.AppendAdditionalComponentMenuItems(menu);
+            Menu_AppendItem(menu, "Auto-wire Default Inputs", (s, e) =>
+            {
+                var doc = OnPingDocument();
+                if (doc != null) AutoWireDefaultInputs(doc);
+            });
+        }
 
         public override Guid ComponentGuid => new Guid("0a47d2c3-4211-4770-b4bd-5561a34c11b1");
 

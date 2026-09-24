@@ -33,17 +33,7 @@ namespace Enzyme.Terrain
 
             if (!hasSources)
             {
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 1, 0.0, 20.0, 5, 330, -140);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 0.0, 2.0, 0.5, 330, -100);
-                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 4, false, 210, -60);
-                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 5, false, 210, -20);
-                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 6, true, 210, 20);
-                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 0, 220, -341, 180, 22);
-                Enzyme.Utils.AutoWireHelper.WirePointDisplay(this, document, 1, System.Drawing.Color.Blue, 10.0, 350, -285);
-                Enzyme.Utils.AutoWireHelper.WirePointDisplay(this, document, 3, System.Drawing.Color.Blue, 5.0, 350, -240);
-                Enzyme.Utils.AutoWireHelper.WirePointDisplay(this, document, 5, System.Drawing.Color.Red, 10.0, 350, -195);
-                Enzyme.Utils.AutoWireHelper.WirePointDisplay(this, document, 7, System.Drawing.Color.Red, 5.0, 350, -150);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 9, "mesh", 220, -105);
+                AutoWireDefaultInputs(document);
             }
         }
 
@@ -446,6 +436,32 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
             {
                 return IconLoader.Load("MeshHeightAnalisys.png");
             }
+        }
+
+        
+        private void AutoWireDefaultInputs(GH_Document document)
+        {
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 1, 0.0, 20.0, 5, 330, -140);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 0.0, 2.0, 0.5, 330, -100);
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 4, false, 210, -60);
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 5, false, 210, -20);
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 6, true, 210, 20);
+                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 0, 220, -341, 180, 22);
+                Enzyme.Utils.AutoWireHelper.WirePointDisplay(this, document, 1, System.Drawing.Color.Blue, 10.0, 350, -285);
+                Enzyme.Utils.AutoWireHelper.WirePointDisplay(this, document, 3, System.Drawing.Color.Blue, 5.0, 350, -240);
+                Enzyme.Utils.AutoWireHelper.WirePointDisplay(this, document, 5, System.Drawing.Color.Red, 10.0, 350, -195);
+                Enzyme.Utils.AutoWireHelper.WirePointDisplay(this, document, 7, System.Drawing.Color.Red, 5.0, 350, -150);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 9, "mesh", 220, -105);
+            }
+
+        protected override void AppendAdditionalComponentMenuItems(System.Windows.Forms.ToolStripDropDown menu)
+        {
+            base.AppendAdditionalComponentMenuItems(menu);
+            Menu_AppendItem(menu, "Auto-wire Default Inputs", (s, e) =>
+            {
+                var doc = OnPingDocument();
+                if (doc != null) AutoWireDefaultInputs(doc);
+            });
         }
 
         public override Guid ComponentGuid

@@ -31,22 +31,7 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                var colors = new System.Drawing.Color[] {
-                    System.Drawing.Color.FromArgb(240, 120, 120),
-                    System.Drawing.Color.FromArgb(200, 120, 120),
-                    System.Drawing.Color.FromArgb(250, 210, 210)
-                };
-                Enzyme.Utils.AutoWireHelper.WireMergeWithSwatches(this, document, 1, colors, 150, -140);
-                Enzyme.Utils.AutoWireHelper.WireColorSwatch(this, document, 2, System.Drawing.Color.FromArgb(255, 30, 0), 210, -50);
-                Enzyme.Utils.AutoWireHelper.WireValueList(this, document, 3, new string[]{"X", "Y", "Z"}, new string[]{"0", "1", "2"}, 300, -10);
-                Enzyme.Utils.AutoWireHelper.WireIntegerSlider(this, document, 4, 0, 100, 30, 330, 30);
-                Enzyme.Utils.AutoWireHelper.WireIntegerSlider(this, document, 5, 0, 100, 40, 330, 70);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 6, 0.0, 1.0, 0.94, 330, 110);
-                Enzyme.Utils.AutoWireHelper.WireButton(this, document, 7, 210, 150);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 0, "mesh", 220, -120);
-                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 1, 220, -50, 180, 50);
-                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 2, 220, 20, 180, 50);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 3, "curve", 220, 90);
+                AutoWireDefaultInputs(document);
             }
         }
 
@@ -447,6 +432,37 @@ namespace Enzyme.Components
             {
                 return IconLoader.Load("Pixel Gradient.png");
             }
+        }
+
+        
+        private void AutoWireDefaultInputs(GH_Document document)
+        {
+                var colors = new System.Drawing.Color[] {
+                    System.Drawing.Color.FromArgb(240, 120, 120),
+                    System.Drawing.Color.FromArgb(200, 120, 120),
+                    System.Drawing.Color.FromArgb(250, 210, 210)
+                };
+                Enzyme.Utils.AutoWireHelper.WireMergeWithSwatches(this, document, 1, colors, 150, -140);
+                Enzyme.Utils.AutoWireHelper.WireColorSwatch(this, document, 2, System.Drawing.Color.FromArgb(255, 30, 0), 210, -50);
+                Enzyme.Utils.AutoWireHelper.WireValueList(this, document, 3, new string[]{"X", "Y", "Z"}, new string[]{"0", "1", "2"}, 300, -10);
+                Enzyme.Utils.AutoWireHelper.WireIntegerSlider(this, document, 4, 0, 100, 30, 330, 30);
+                Enzyme.Utils.AutoWireHelper.WireIntegerSlider(this, document, 5, 0, 100, 40, 330, 70);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 6, 0.0, 1.0, 0.94, 330, 110);
+                Enzyme.Utils.AutoWireHelper.WireButton(this, document, 7, 210, 150);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 0, "mesh", 220, -120);
+                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 1, 220, -50, 180, 50);
+                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 2, 220, 20, 180, 50);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 3, "curve", 220, 90);
+            }
+
+        protected override void AppendAdditionalComponentMenuItems(System.Windows.Forms.ToolStripDropDown menu)
+        {
+            base.AppendAdditionalComponentMenuItems(menu);
+            Menu_AppendItem(menu, "Auto-wire Default Inputs", (s, e) =>
+            {
+                var doc = OnPingDocument();
+                if (doc != null) AutoWireDefaultInputs(doc);
+            });
         }
 
         public override Guid ComponentGuid

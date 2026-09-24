@@ -43,22 +43,7 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                var defaultColors = new Color[] {
-                    Color.FromArgb(0, 50, 150),
-                    Color.FromArgb(0, 180, 200),
-                    Color.FromArgb(150, 220, 100),
-                    Color.FromArgb(255, 200, 50),
-                    Color.FromArgb(255, 50, 0)
-                };
-                Enzyme.Utils.AutoWireHelper.WireMergeWithSwatches(this, document, 2, defaultColors, 150, 30);
-                
-                Enzyme.Utils.AutoWireHelper.WirePanel(this, document, 3, "0.5 To 5.0", 300, -180, 100, 30);
-                
-                string[] keys = new string[] { "Bar Chart", "Flat Dot", "Sphere" };
-                string[] values = new string[] { "0", "1", "2" };
-                Enzyme.Utils.AutoWireHelper.WireValueList(this, document, 4, keys, values, 200, -220);
-                
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 5, 0.1, 5.0, 0.5, 330, -140);
+                AutoWireDefaultInputs(document);
             }
         }
 
@@ -281,7 +266,38 @@ namespace Enzyme.Components
 
         
         public override GH_Exposure Exposure => GH_Exposure.quarternary;
-public override Guid ComponentGuid
+
+        private void AutoWireDefaultInputs(GH_Document document)
+        {
+                var defaultColors = new Color[] {
+                    Color.FromArgb(0, 50, 150),
+                    Color.FromArgb(0, 180, 200),
+                    Color.FromArgb(150, 220, 100),
+                    Color.FromArgb(255, 200, 50),
+                    Color.FromArgb(255, 50, 0)
+                };
+                Enzyme.Utils.AutoWireHelper.WireMergeWithSwatches(this, document, 2, defaultColors, 150, 30);
+                
+                Enzyme.Utils.AutoWireHelper.WirePanel(this, document, 3, "0.5 To 5.0", 300, -180, 100, 30);
+                
+                string[] keys = new string[] { "Bar Chart", "Flat Dot", "Sphere" };
+                string[] values = new string[] { "0", "1", "2" };
+                Enzyme.Utils.AutoWireHelper.WireValueList(this, document, 4, keys, values, 200, -220);
+                
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 5, 0.1, 5.0, 0.5, 330, -140);
+            }
+
+        protected override void AppendAdditionalComponentMenuItems(System.Windows.Forms.ToolStripDropDown menu)
+        {
+            base.AppendAdditionalComponentMenuItems(menu);
+            Menu_AppendItem(menu, "Auto-wire Default Inputs", (s, e) =>
+            {
+                var doc = OnPingDocument();
+                if (doc != null) AutoWireDefaultInputs(doc);
+            });
+        }
+
+        public override Guid ComponentGuid
         {
             get { return new Guid("11223344-5566-7788-99AA-BBCCDDEEFF00"); }
         }

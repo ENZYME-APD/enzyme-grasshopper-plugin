@@ -211,6 +211,10 @@ namespace Enzyme.Components
         {
             base.AppendAdditionalComponentMenuItems(menu);
             Menu_AppendItem(menu, "Auto-fill Load ValueList", (s, e) => AutoFillValueList());
+            Menu_AppendItem(menu, "Auto-wire Default Inputs", (s, e) => {
+                var doc = OnPingDocument();
+                if (doc != null) AutoWireDefaultInputs(doc);
+            });
             Menu_AppendSeparator(menu);
             Menu_AppendItem(menu, "Copy States to Clipboard (JSON)", (s, e) => {
                 try {
@@ -285,10 +289,7 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                Enzyme.Utils.AutoWireHelper.WireButton(this, document, 0, 200, -60);
-                Enzyme.Utils.AutoWireHelper.WirePanel(this, document, 1, "State1", 200, -20, 100, 30);
-                Enzyme.Utils.AutoWireHelper.WireButton(this, document, 2, 200, 20);
-                Enzyme.Utils.AutoWireHelper.WirePanel(this, document, 3, "State1", 200, 60, 100, 30);
+                AutoWireDefaultInputs(document);
             }
         }
 
@@ -296,6 +297,16 @@ namespace Enzyme.Components
         
         
         public override GH_Exposure Exposure => GH_Exposure.primary;
-public override Guid ComponentGuid => new Guid("7F2A3B9D-1C4E-4A8D-9B1C-E3D2F4A5B6C7");
+
+        private void AutoWireDefaultInputs(GH_Document document)
+        {
+                Enzyme.Utils.AutoWireHelper.WireButton(this, document, 0, 200, -60);
+                Enzyme.Utils.AutoWireHelper.WirePanel(this, document, 1, "State1", 200, -20, 100, 30);
+                Enzyme.Utils.AutoWireHelper.WireButton(this, document, 2, 200, 20);
+                Enzyme.Utils.AutoWireHelper.WirePanel(this, document, 3, "State1", 200, 60, 100, 30);
+            }
+
+
+        public override Guid ComponentGuid => new Guid("7F2A3B9D-1C4E-4A8D-9B1C-E3D2F4A5B6C7");
     }
 }

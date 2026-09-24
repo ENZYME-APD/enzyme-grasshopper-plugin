@@ -25,13 +25,7 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                Enzyme.Utils.AutoWireHelper.WirePanel(this, document, 0, "0", 250, -80, 80, 25);
-                Enzyme.Utils.AutoWireHelper.WireMultilinePanel(this, document, 1, "Program\nProgram\nBuilding", 250, -40, 150, 70);
-                Enzyme.Utils.AutoWireHelper.WireMultilinePanel(this, document, 2, "Residential-02\nOffice\nBuilding_11", 250, 50, 150, 70);
-                Enzyme.Utils.AutoWireHelper.WireMergeWithSliders(this, document, 3, new double[] { 6.0, 2.0, 4.0 }, 150, 140);
-                Enzyme.Utils.AutoWireHelper.WireMultilinePanel(this, document, 4, "True\nFalse\nTrue", 250, 230, 150, 70);
-                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 0, 220, -34, 180, 22);
-                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 1, 220, 11, 180, 22);
+                AutoWireDefaultInputs(document);
             }
         }
 
@@ -139,6 +133,28 @@ OUTPUTS:
         }
 
         public override GH_Exposure Exposure => GH_Exposure.primary;
+
+        
+        private void AutoWireDefaultInputs(GH_Document document)
+        {
+                Enzyme.Utils.AutoWireHelper.WirePanel(this, document, 0, "0", 250, -80, 80, 25);
+                Enzyme.Utils.AutoWireHelper.WireMultilinePanel(this, document, 1, "Program\nProgram\nBuilding", 250, -40, 150, 70);
+                Enzyme.Utils.AutoWireHelper.WireMultilinePanel(this, document, 2, "Residential-02\nOffice\nBuilding_11", 250, 50, 150, 70);
+                Enzyme.Utils.AutoWireHelper.WireMergeWithSliders(this, document, 3, new double[] { 6.0, 2.0, 4.0 }, 150, 140);
+                Enzyme.Utils.AutoWireHelper.WireMultilinePanel(this, document, 4, "True\nFalse\nTrue", 250, 230, 150, 70);
+                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 0, 220, -34, 180, 22);
+                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 1, 220, 11, 180, 22);
+            }
+
+        protected override void AppendAdditionalComponentMenuItems(System.Windows.Forms.ToolStripDropDown menu)
+        {
+            base.AppendAdditionalComponentMenuItems(menu);
+            Menu_AppendItem(menu, "Auto-wire Default Inputs", (s, e) =>
+            {
+                var doc = OnPingDocument();
+                if (doc != null) AutoWireDefaultInputs(doc);
+            });
+        }
 
         public override Guid ComponentGuid
         {

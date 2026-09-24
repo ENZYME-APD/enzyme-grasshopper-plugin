@@ -27,6 +27,30 @@ namespace Enzyme.Components
             }
         }
 
+        
+        private void AutoWireDefaultInputs(GH_Document document)
+        {
+                Enzyme.Utils.AutoWireHelper.WireValueList(this, document, 2, 
+                    new string[] { "Rectangular", "Offset Rectangular", "Hexagonal", "Triangular" }, 
+                    new string[] { "\"rectangular\"", "\"offset_rectangular\"", "\"hexagonal\"", "\"triangular\"" }, 
+                    330, -60);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 3, 0.0, 2.0, 1.0, 330, -20);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 4, 0.0, 2.0, 1.0, 330, 20);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 3, "curve", 220, -45);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 4, "curve", 220, 0);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 5, "curve", 220, 45);
+            }
+
+        protected override void AppendAdditionalComponentMenuItems(System.Windows.Forms.ToolStripDropDown menu)
+        {
+            base.AppendAdditionalComponentMenuItems(menu);
+            Menu_AppendItem(menu, "Auto-wire Default Inputs", (s, e) =>
+            {
+                var doc = OnPingDocument();
+                if (doc != null) AutoWireDefaultInputs(doc);
+            });
+        }
+
         public override Guid ComponentGuid => new Guid("3E7B9F2A-C4D8-4A1E-B5F3-8D2C6E0A9B4F");
         public override void AddedToDocument(GH_Document document)
         {
@@ -39,15 +63,7 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                Enzyme.Utils.AutoWireHelper.WireValueList(this, document, 2, 
-                    new string[] { "Rectangular", "Offset Rectangular", "Hexagonal", "Triangular" }, 
-                    new string[] { "\"rectangular\"", "\"offset_rectangular\"", "\"hexagonal\"", "\"triangular\"" }, 
-                    330, -60);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 3, 0.0, 2.0, 1.0, 330, -20);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 4, 0.0, 2.0, 1.0, 330, 20);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 3, "curve", 220, -45);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 4, "curve", 220, 0);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 5, "curve", 220, 45);
+                AutoWireDefaultInputs(document);
             }
         }
 

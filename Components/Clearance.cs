@@ -31,11 +31,7 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 1, 0.0, 400, 200.0, 330, -60);
-                Enzyme.Utils.AutoWireHelper.WireValueList(this, document, 2, new string[]{"Delaunay", "Proximity"}, new string[]{"0", "1"}, 300, -20);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 3, 0.0, 100, 50.0, 330, 20);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 4, 0.0, 200, 100.0, 330, 60);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 1, "line", 220, 0);
+                AutoWireDefaultInputs(document);
             }
         }
 
@@ -252,6 +248,26 @@ namespace Enzyme.Components
 
         
         public override GH_Exposure Exposure => GH_Exposure.tertiary;
+
+        
+        private void AutoWireDefaultInputs(GH_Document document)
+        {
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 1, 0.0, 400, 200.0, 330, -60);
+                Enzyme.Utils.AutoWireHelper.WireValueList(this, document, 2, new string[]{"Delaunay", "Proximity"}, new string[]{"0", "1"}, 300, -20);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 3, 0.0, 100, 50.0, 330, 20);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 4, 0.0, 200, 100.0, 330, 60);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 1, "line", 220, 0);
+            }
+
+        protected override void AppendAdditionalComponentMenuItems(System.Windows.Forms.ToolStripDropDown menu)
+        {
+            base.AppendAdditionalComponentMenuItems(menu);
+            Menu_AppendItem(menu, "Auto-wire Default Inputs", (s, e) =>
+            {
+                var doc = OnPingDocument();
+                if (doc != null) AutoWireDefaultInputs(doc);
+            });
+        }
 
         public override Guid ComponentGuid
         {

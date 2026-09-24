@@ -148,6 +148,20 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
+                AutoWireDefaultInputs(document);
+            }
+        }
+
+        protected override System.Drawing.Bitmap Icon
+        {
+            get { return Enzyme.IconLoader.Load("PaperSizeToPixels.png"); }
+        }
+
+        
+        public override GH_Exposure Exposure => GH_Exposure.secondary;
+
+        private void AutoWireDefaultInputs(GH_Document document)
+        {
                 Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 1, true, 210, 0);
 
                 var vl = new Grasshopper.Kernel.Special.GH_ValueList();
@@ -169,16 +183,18 @@ namespace Enzyme.Components
                 document.AddObject(vl, false);
                 this.Params.Input[0].AddSource(vl);
             }
-        }
 
-        protected override System.Drawing.Bitmap Icon
+        protected override void AppendAdditionalComponentMenuItems(System.Windows.Forms.ToolStripDropDown menu)
         {
-            get { return Enzyme.IconLoader.Load("PaperSizeToPixels.png"); }
+            base.AppendAdditionalComponentMenuItems(menu);
+            Menu_AppendItem(menu, "Auto-wire Default Inputs", (s, e) =>
+            {
+                var doc = OnPingDocument();
+                if (doc != null) AutoWireDefaultInputs(doc);
+            });
         }
 
-        
-        public override GH_Exposure Exposure => GH_Exposure.secondary;
-public override Guid ComponentGuid
+        public override Guid ComponentGuid
         {
             get { return new Guid("C92461D2-835A-4B6A-949B-5A3841D6B630"); }
         }

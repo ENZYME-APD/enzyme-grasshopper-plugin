@@ -28,19 +28,9 @@ namespace Enzyme.Components
             }
         }
 
-        public override Guid ComponentGuid => new Guid("D4E5F6A7-B8C9-4D0E-A1F2-93A4B5C6D7E8");
-
-                public override void AddedToDocument(GH_Document document)
+        
+        private void AutoWireDefaultInputs(GH_Document document)
         {
-            base.AddedToDocument(document);
-            if (this.Attributes == null) this.CreateAttributes();
-
-            bool hasSources = false;
-            foreach (var param in this.Params.Input)
-                if (param.SourceCount > 0) { hasSources = true; break; }
-
-            if (!hasSources)
-            {
                 Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 0.0, 16, 8.0, 330, -40);
                 Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 3, 0.0, 10.0, 5.0, 330, 0);
                 
@@ -59,6 +49,32 @@ namespace Enzyme.Components
                 Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 2, "point", 220, -23);
                 Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 4, "point", 220, 22);
                 Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 5, "line", 220, 67);
+            }
+
+        protected override void AppendAdditionalComponentMenuItems(System.Windows.Forms.ToolStripDropDown menu)
+        {
+            base.AppendAdditionalComponentMenuItems(menu);
+            Menu_AppendItem(menu, "Auto-wire Default Inputs", (s, e) =>
+            {
+                var doc = OnPingDocument();
+                if (doc != null) AutoWireDefaultInputs(doc);
+            });
+        }
+
+        public override Guid ComponentGuid => new Guid("D4E5F6A7-B8C9-4D0E-A1F2-93A4B5C6D7E8");
+
+                public override void AddedToDocument(GH_Document document)
+        {
+            base.AddedToDocument(document);
+            if (this.Attributes == null) this.CreateAttributes();
+
+            bool hasSources = false;
+            foreach (var param in this.Params.Input)
+                if (param.SourceCount > 0) { hasSources = true; break; }
+
+            if (!hasSources)
+            {
+                AutoWireDefaultInputs(document);
             }
         }
 

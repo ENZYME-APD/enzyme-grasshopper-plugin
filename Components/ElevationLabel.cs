@@ -71,10 +71,7 @@ namespace Enzyme.Terrain
 
             if (!hasSources)
             {
-                Enzyme.Utils.AutoWireHelper.WirePanel(this, document, 1, "1", 250, -20, 100, 25);
-                Enzyme.Utils.AutoWireHelper.WireValueList(this, document, 5, new string[]{"XY", "XZ", "YZ"}, new string[]{"0", "1", "2"}, 300, 20);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 0, "curve", 220, -23);
-                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 2, 220, 11, 180, 22);
+                AutoWireDefaultInputs(document);
             }
         }
 
@@ -485,6 +482,25 @@ Outputs:
         }
 
         protected override System.Drawing.Bitmap Icon => IconLoader.Load("ELEV_LABEL.png");
+        
+        private void AutoWireDefaultInputs(GH_Document document)
+        {
+                Enzyme.Utils.AutoWireHelper.WirePanel(this, document, 1, "1", 250, -20, 100, 25);
+                Enzyme.Utils.AutoWireHelper.WireValueList(this, document, 5, new string[]{"XY", "XZ", "YZ"}, new string[]{"0", "1", "2"}, 300, 20);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 0, "curve", 220, -23);
+                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 2, 220, 11, 180, 22);
+            }
+
+        protected override void AppendAdditionalComponentMenuItems(System.Windows.Forms.ToolStripDropDown menu)
+        {
+            base.AppendAdditionalComponentMenuItems(menu);
+            Menu_AppendItem(menu, "Auto-wire Default Inputs", (s, e) =>
+            {
+                var doc = OnPingDocument();
+                if (doc != null) AutoWireDefaultInputs(doc);
+            });
+        }
+
         public override Guid ComponentGuid => new Guid("e1b5f210-9c24-4f81-a67b-1132a2c53db1");
     }
 }

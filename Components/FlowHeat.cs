@@ -31,9 +31,7 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 1.5, 3.0, 1.0, 330, 0);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 0, "mesh", 220, -38);
-                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 2, 220, 26, 180, 22);
+                AutoWireDefaultInputs(document);
             }
         }
 
@@ -150,6 +148,24 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
             {
                 return IconLoader.Load("FlowHeat.png");
             }
+        }
+
+        
+        private void AutoWireDefaultInputs(GH_Document document)
+        {
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 1.5, 3.0, 1.0, 330, 0);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 0, "mesh", 220, -38);
+                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 2, 220, 26, 180, 22);
+            }
+
+        protected override void AppendAdditionalComponentMenuItems(System.Windows.Forms.ToolStripDropDown menu)
+        {
+            base.AppendAdditionalComponentMenuItems(menu);
+            Menu_AppendItem(menu, "Auto-wire Default Inputs", (s, e) =>
+            {
+                var doc = OnPingDocument();
+                if (doc != null) AutoWireDefaultInputs(doc);
+            });
         }
 
         public override Guid ComponentGuid

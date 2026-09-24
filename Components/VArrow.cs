@@ -27,12 +27,7 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                Enzyme.Utils.AutoWireHelper.WireValueList(this, document, 1, new string[]{"End", "Start", "Double"}, new string[]{"0", "1", "2"}, 300, -60);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 0.0, 2.0, 0.5, 330, -20);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 3, 0.0, 3.0, 1.5, 330, 20);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 4, 0.0, 5.0, 2.0, 330, 60);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 0, "curve", 220, -38);
-                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 1, System.Drawing.Color.FromArgb(230, 230, 230), 220, 7);
+                AutoWireDefaultInputs(document);
             }
         }
 
@@ -173,6 +168,27 @@ namespace Enzyme.Components
             {
                 return IconLoader.Load("vector arrow generator.png");
             }
+        }
+
+        
+        private void AutoWireDefaultInputs(GH_Document document)
+        {
+                Enzyme.Utils.AutoWireHelper.WireValueList(this, document, 1, new string[]{"End", "Start", "Double"}, new string[]{"0", "1", "2"}, 300, -60);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 0.0, 2.0, 0.5, 330, -20);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 3, 0.0, 3.0, 1.5, 330, 20);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 4, 0.0, 5.0, 2.0, 330, 60);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 0, "curve", 220, -38);
+                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 1, System.Drawing.Color.FromArgb(230, 230, 230), 220, 7);
+            }
+
+        protected override void AppendAdditionalComponentMenuItems(System.Windows.Forms.ToolStripDropDown menu)
+        {
+            base.AppendAdditionalComponentMenuItems(menu);
+            Menu_AppendItem(menu, "Auto-wire Default Inputs", (s, e) =>
+            {
+                var doc = OnPingDocument();
+                if (doc != null) AutoWireDefaultInputs(doc);
+            });
         }
 
         public override Guid ComponentGuid => new Guid("46c65664-d62f-410a-83b6-12a23af6c6ab");

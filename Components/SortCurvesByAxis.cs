@@ -38,8 +38,7 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                Enzyme.Utils.AutoWireHelper.WireValueList(this, document, 1, new string[]{"X Axis", "Y Axis", "Z Axis"}, new string[]{"0", "1", "2"}, 300, -20);
-                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 2, false, 210, 20);
+                AutoWireDefaultInputs(document);
             }
         }
 
@@ -110,6 +109,23 @@ namespace Enzyme.Components
             {
                 return Enzyme.IconLoader.Load("sort curve by axis.png");
             }
+        }
+
+        
+        private void AutoWireDefaultInputs(GH_Document document)
+        {
+                Enzyme.Utils.AutoWireHelper.WireValueList(this, document, 1, new string[]{"X Axis", "Y Axis", "Z Axis"}, new string[]{"0", "1", "2"}, 300, -20);
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 2, false, 210, 20);
+            }
+
+        protected override void AppendAdditionalComponentMenuItems(System.Windows.Forms.ToolStripDropDown menu)
+        {
+            base.AppendAdditionalComponentMenuItems(menu);
+            Menu_AppendItem(menu, "Auto-wire Default Inputs", (s, e) =>
+            {
+                var doc = OnPingDocument();
+                if (doc != null) AutoWireDefaultInputs(doc);
+            });
         }
 
         public override Guid ComponentGuid

@@ -58,8 +58,7 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 0, "mesh", 100, 0);
-                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 0, System.Drawing.Color.FromArgb(200, 200, 200), 200, -30);
+                AutoWireDefaultInputs(document);
             }
         }
 
@@ -69,6 +68,23 @@ namespace Enzyme.Components
             {
                 return IconLoader.Load("ResetMeshColors.png");
             }
+        }
+
+        
+        private void AutoWireDefaultInputs(GH_Document document)
+        {
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 0, "mesh", 100, 0);
+                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 0, System.Drawing.Color.FromArgb(200, 200, 200), 200, -30);
+            }
+
+        protected override void AppendAdditionalComponentMenuItems(System.Windows.Forms.ToolStripDropDown menu)
+        {
+            base.AppendAdditionalComponentMenuItems(menu);
+            Menu_AppendItem(menu, "Auto-wire Default Inputs", (s, e) =>
+            {
+                var doc = OnPingDocument();
+                if (doc != null) AutoWireDefaultInputs(doc);
+            });
         }
 
         public override Guid ComponentGuid => new Guid("7d3f5b2c-6a4a-4e2b-a1b9-3f8c5b9f7d2a");

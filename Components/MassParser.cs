@@ -36,12 +36,7 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 4, false, 210, -20);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 5, 0.0, 1.0, 0.0, 330, 20);
-                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 0, System.Drawing.Color.FromArgb(230, 230, 230), 220, -83);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 1, "curve", 220, -8);
-                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 5, 220, 26, 180, 22);
-                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 6, 220, 71, 180, 22);
+                AutoWireDefaultInputs(document);
             }
         }
 
@@ -304,6 +299,27 @@ namespace Enzyme.Components
         protected override System.Drawing.Bitmap Icon
         {
             get { return IconLoader.Load("Mass_Parser.png"); }
+        }
+
+        
+        private void AutoWireDefaultInputs(GH_Document document)
+        {
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 4, false, 210, -20);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 5, 0.0, 1.0, 0.0, 330, 20);
+                Enzyme.Utils.AutoWireHelper.WireCustomPreview(this, document, 0, System.Drawing.Color.FromArgb(230, 230, 230), 220, -83);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 1, "curve", 220, -8);
+                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 5, 220, 26, 180, 22);
+                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 6, 220, 71, 180, 22);
+            }
+
+        protected override void AppendAdditionalComponentMenuItems(System.Windows.Forms.ToolStripDropDown menu)
+        {
+            base.AppendAdditionalComponentMenuItems(menu);
+            Menu_AppendItem(menu, "Auto-wire Default Inputs", (s, e) =>
+            {
+                var doc = OnPingDocument();
+                if (doc != null) AutoWireDefaultInputs(doc);
+            });
         }
 
         public override Guid ComponentGuid

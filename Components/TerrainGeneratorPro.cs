@@ -31,19 +31,9 @@ namespace Enzyme.Components
             }
         }
 
-        public override Guid ComponentGuid => new Guid("E3F2D4A1-B9C8-4D7E-A5F1-92A3B4C5D6E7");
-
-                public override void AddedToDocument(GH_Document document)
+        
+        private void AutoWireDefaultInputs(GH_Document document)
         {
-            base.AddedToDocument(document);
-            if (this.Attributes == null) this.CreateAttributes();
-
-            bool hasSources = false;
-            foreach (var param in this.Params.Input)
-                if (param.SourceCount > 0) { hasSources = true; break; }
-
-            if (!hasSources)
-            {
                 Enzyme.Utils.AutoWireHelper.WireInputParam(this, document, 0, "curve", 180, -440);
                 Enzyme.Utils.AutoWireHelper.WireSlider1Dec(this, document, 1, 0.0, 200.0, 100.0, 330, -400);
                 Enzyme.Utils.AutoWireHelper.WireSlider1Dec(this, document, 2, -100.0, 100.0, 0.0, 330, -360);
@@ -68,6 +58,32 @@ namespace Enzyme.Components
                 Enzyme.Utils.AutoWireHelper.WireHumanCurvePreview(this, document, 1, System.Drawing.Color.Gray, 0.35, 300, -45);
                 Enzyme.Utils.AutoWireHelper.WireHumanCurvePreview(this, document, 2, System.Drawing.Color.Black, 0.35, 300, 115);
                 Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 3, "point", 300, 220);
+            }
+
+        protected override void AppendAdditionalComponentMenuItems(System.Windows.Forms.ToolStripDropDown menu)
+        {
+            base.AppendAdditionalComponentMenuItems(menu);
+            Menu_AppendItem(menu, "Auto-wire Default Inputs", (s, e) =>
+            {
+                var doc = OnPingDocument();
+                if (doc != null) AutoWireDefaultInputs(doc);
+            });
+        }
+
+        public override Guid ComponentGuid => new Guid("E3F2D4A1-B9C8-4D7E-A5F1-92A3B4C5D6E7");
+
+                public override void AddedToDocument(GH_Document document)
+        {
+            base.AddedToDocument(document);
+            if (this.Attributes == null) this.CreateAttributes();
+
+            bool hasSources = false;
+            foreach (var param in this.Params.Input)
+                if (param.SourceCount > 0) { hasSources = true; break; }
+
+            if (!hasSources)
+            {
+                AutoWireDefaultInputs(document);
             }
         }
 

@@ -32,12 +32,7 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 0, 220, -124, 180, 22);
-                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 1, 220, -79, 180, 22);
-                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 2, 220, -34, 180, 22);
-                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 3, 220, 11, 180, 22);
-                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 4, 220, 56, 180, 22);
-                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 5, 220, 101, 180, 22);
+                AutoWireDefaultInputs(document);
             }
         }
 
@@ -231,6 +226,27 @@ namespace Enzyme.Components
                     return null;
                 }
             }
+        }
+
+        
+        private void AutoWireDefaultInputs(GH_Document document)
+        {
+                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 0, 220, -124, 180, 22);
+                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 1, 220, -79, 180, 22);
+                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 2, 220, -34, 180, 22);
+                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 3, 220, 11, 180, 22);
+                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 4, 220, 56, 180, 22);
+                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 5, 220, 101, 180, 22);
+            }
+
+        protected override void AppendAdditionalComponentMenuItems(System.Windows.Forms.ToolStripDropDown menu)
+        {
+            base.AppendAdditionalComponentMenuItems(menu);
+            Menu_AppendItem(menu, "Auto-wire Default Inputs", (s, e) =>
+            {
+                var doc = OnPingDocument();
+                if (doc != null) AutoWireDefaultInputs(doc);
+            });
         }
 
         public override Guid ComponentGuid => new Guid("A3F0E3E1-2C5E-49F1-8B35-C4F4A1439F58");

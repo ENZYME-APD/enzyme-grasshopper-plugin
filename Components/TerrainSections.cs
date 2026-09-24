@@ -30,39 +30,7 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                Enzyme.Utils.AutoWireHelper.WireInputParam(this, document, 0, "mesh", 180, -120);
-                Enzyme.Utils.AutoWireHelper.WireIntegerSlider(this, document, 2, 0, 50, 5, 330, -40);
-                Enzyme.Utils.AutoWireHelper.WireIntegerSlider(this, document, 3, 0, 50, 5, 330, 0);
-                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 4, true, 210, 40);
-                Enzyme.Utils.AutoWireHelper.WireButton(this, document, 5, 210, 80);
-                                var pnl = new Grasshopper.Kernel.Special.GH_Panel();
-                pnl.CreateAttributes();
-                pnl.Attributes.Pivot = new System.Drawing.PointF(this.Attributes.Pivot.X - 210, this.Attributes.Pivot.Y + 120);
-                pnl.Attributes.Bounds = new System.Drawing.RectangleF(pnl.Attributes.Pivot.X, pnl.Attributes.Pivot.Y, 100, 30);
-                pnl.UserText = "TerrainSections";
-                document.AddObject(pnl, false);
-                this.Params.Input[6].AddSource(pnl);
-                
-                // Spawn Curve Parameters and hook them to outputs 0 and 1, then hook Custom Preview Lineweights
-                var outCrv0 = new Grasshopper.Kernel.Parameters.Param_Curve();
-                outCrv0.CreateAttributes();
-                outCrv0.Attributes.Pivot = new System.Drawing.PointF(this.Attributes.Pivot.X + 250, this.Attributes.Pivot.Y - 80);
-                document.AddObject(outCrv0, false);
-                outCrv0.AddSource(this.Params.Output[0]);
-                
-                var outCrv1 = new Grasshopper.Kernel.Parameters.Param_Curve();
-                outCrv1.CreateAttributes();
-                outCrv1.Attributes.Pivot = new System.Drawing.PointF(this.Attributes.Pivot.X + 250, this.Attributes.Pivot.Y - 20);
-                document.AddObject(outCrv1, false);
-                outCrv1.AddSource(this.Params.Output[1]);
-                
-                // Now attach Human component to those curve parameters
-                Enzyme.Utils.AutoWireHelper.WireHumanCurvePreviewToParam(outCrv0, document, System.Drawing.Color.Black, 0.35, 200, 0);
-                Enzyme.Utils.AutoWireHelper.WireHumanCurvePreviewToParam(outCrv1, document, System.Drawing.Color.Black, 0.35, 200, 40);
-
-                // For FlatSections, wire Curve parameters
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 4, "curve", 250, 100);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 5, "curve", 250, 140);
+                AutoWireDefaultInputs(document);
             }
         }
 
@@ -474,6 +442,54 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
         protected override System.Drawing.Bitmap Icon
         {
             get { return IconLoader.Load("TerrainSections.png"); }
+        }
+
+        
+        private void AutoWireDefaultInputs(GH_Document document)
+        {
+                Enzyme.Utils.AutoWireHelper.WireInputParam(this, document, 0, "mesh", 180, -120);
+                Enzyme.Utils.AutoWireHelper.WireIntegerSlider(this, document, 2, 0, 50, 5, 330, -40);
+                Enzyme.Utils.AutoWireHelper.WireIntegerSlider(this, document, 3, 0, 50, 5, 330, 0);
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 4, true, 210, 40);
+                Enzyme.Utils.AutoWireHelper.WireButton(this, document, 5, 210, 80);
+                                var pnl = new Grasshopper.Kernel.Special.GH_Panel();
+                pnl.CreateAttributes();
+                pnl.Attributes.Pivot = new System.Drawing.PointF(this.Attributes.Pivot.X - 210, this.Attributes.Pivot.Y + 120);
+                pnl.Attributes.Bounds = new System.Drawing.RectangleF(pnl.Attributes.Pivot.X, pnl.Attributes.Pivot.Y, 100, 30);
+                pnl.UserText = "TerrainSections";
+                document.AddObject(pnl, false);
+                this.Params.Input[6].AddSource(pnl);
+                
+                // Spawn Curve Parameters and hook them to outputs 0 and 1, then hook Custom Preview Lineweights
+                var outCrv0 = new Grasshopper.Kernel.Parameters.Param_Curve();
+                outCrv0.CreateAttributes();
+                outCrv0.Attributes.Pivot = new System.Drawing.PointF(this.Attributes.Pivot.X + 250, this.Attributes.Pivot.Y - 80);
+                document.AddObject(outCrv0, false);
+                outCrv0.AddSource(this.Params.Output[0]);
+                
+                var outCrv1 = new Grasshopper.Kernel.Parameters.Param_Curve();
+                outCrv1.CreateAttributes();
+                outCrv1.Attributes.Pivot = new System.Drawing.PointF(this.Attributes.Pivot.X + 250, this.Attributes.Pivot.Y - 20);
+                document.AddObject(outCrv1, false);
+                outCrv1.AddSource(this.Params.Output[1]);
+                
+                // Now attach Human component to those curve parameters
+                Enzyme.Utils.AutoWireHelper.WireHumanCurvePreviewToParam(outCrv0, document, System.Drawing.Color.Black, 0.35, 200, 0);
+                Enzyme.Utils.AutoWireHelper.WireHumanCurvePreviewToParam(outCrv1, document, System.Drawing.Color.Black, 0.35, 200, 40);
+
+                // For FlatSections, wire Curve parameters
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 4, "curve", 250, 100);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 5, "curve", 250, 140);
+            }
+
+        protected override void AppendAdditionalComponentMenuItems(System.Windows.Forms.ToolStripDropDown menu)
+        {
+            base.AppendAdditionalComponentMenuItems(menu);
+            Menu_AppendItem(menu, "Auto-wire Default Inputs", (s, e) =>
+            {
+                var doc = OnPingDocument();
+                if (doc != null) AutoWireDefaultInputs(doc);
+            });
         }
 
         public override Guid ComponentGuid

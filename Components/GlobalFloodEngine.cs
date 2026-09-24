@@ -219,16 +219,32 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 1, 0.0, 500.0, 50.0, 330, -20);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 0.0, 48.0, 2.0, 330, 20);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 3, 10, 1000, 200, 330, 60);
-                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 0, "mesh", 220, -10);
+                AutoWireDefaultInputs(document);
             }
         }
 
         protected override System.Drawing.Bitmap Icon
         {
             get { return IconLoader.Load("FloodEngine.png"); }
+        }
+
+        
+        private void AutoWireDefaultInputs(GH_Document document)
+        {
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 1, 0.0, 500.0, 50.0, 330, -20);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 0.0, 48.0, 2.0, 330, 20);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 3, 10, 1000, 200, 330, 60);
+                Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 0, "mesh", 220, -10);
+            }
+
+        protected override void AppendAdditionalComponentMenuItems(System.Windows.Forms.ToolStripDropDown menu)
+        {
+            base.AppendAdditionalComponentMenuItems(menu);
+            Menu_AppendItem(menu, "Auto-wire Default Inputs", (s, e) =>
+            {
+                var doc = OnPingDocument();
+                if (doc != null) AutoWireDefaultInputs(doc);
+            });
         }
 
         public override Guid ComponentGuid

@@ -37,8 +37,7 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 0.5, 20.0, 3.0, 330, 20);
-                Enzyme.Utils.AutoWireHelper.WireIntegerSlider(this, document, 3, 0, 10, 5, 330, 60);
+                AutoWireDefaultInputs(document);
             }
         }
 
@@ -137,7 +136,24 @@ namespace Enzyme.Components
 
         
         public override GH_Exposure Exposure => GH_Exposure.tertiary;
-public override Guid ComponentGuid
+
+        private void AutoWireDefaultInputs(GH_Document document)
+        {
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 0.5, 20.0, 3.0, 330, 20);
+                Enzyme.Utils.AutoWireHelper.WireIntegerSlider(this, document, 3, 0, 10, 5, 330, 60);
+            }
+
+        protected override void AppendAdditionalComponentMenuItems(System.Windows.Forms.ToolStripDropDown menu)
+        {
+            base.AppendAdditionalComponentMenuItems(menu);
+            Menu_AppendItem(menu, "Auto-wire Default Inputs", (s, e) =>
+            {
+                var doc = OnPingDocument();
+                if (doc != null) AutoWireDefaultInputs(doc);
+            });
+        }
+
+        public override Guid ComponentGuid
         {
             get { return new Guid("F6B3D4C1-92A5-4E38-B2C3-D4E5F6A7B8C9"); }
         }

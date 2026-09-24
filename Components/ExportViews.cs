@@ -299,30 +299,7 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                Enzyme.Utils.AutoWireHelper.WireButton(this, document, 0, 210, -180);
-                Enzyme.Utils.AutoWireHelper.WireFilePath(this, document, 4, "C:\\", 210, -60);
-                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 11, false, 210, 120);
-                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 12, false, 210, 150);
-                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 13, false, 210, 180);
-                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 14, true, 210, 210);
-
-                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 1, 150, 0, 300, 300);
-
-                // Autowire Document Size to Pixels component
-                var paperComp = new Enzyme.Components.PaperSizeToPixels();
-                paperComp.CreateAttributes();
-                
-                // Position it relatively
-                float px = this.Attributes.Pivot.X - 350;
-                float py = this.Attributes.Pivot.Y + 40;
-                paperComp.Attributes.Pivot = new System.Drawing.PointF(px, py);
-                
-                document.AddObject(paperComp, false);
-                
-                // Wire outputs of PaperSize to ExportViews
-                this.Params.Input[8].AddSource(paperComp.Params.Output[0]); // Width
-                this.Params.Input[9].AddSource(paperComp.Params.Output[1]); // Height
-                this.Params.Input[10].AddSource(paperComp.Params.Output[2]); // DPI
+                AutoWireDefaultInputs(document);
             }
         }
 
@@ -446,7 +423,46 @@ namespace Enzyme.Components
 
         
         public override GH_Exposure Exposure => GH_Exposure.tertiary;
-public override Guid ComponentGuid
+
+        private void AutoWireDefaultInputs(GH_Document document)
+        {
+                Enzyme.Utils.AutoWireHelper.WireButton(this, document, 0, 210, -180);
+                Enzyme.Utils.AutoWireHelper.WireFilePath(this, document, 4, "C:\\", 210, -60);
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 11, false, 210, 120);
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 12, false, 210, 150);
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 13, false, 210, 180);
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 14, true, 210, 210);
+
+                Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 1, 150, 0, 300, 300);
+
+                // Autowire Document Size to Pixels component
+                var paperComp = new Enzyme.Components.PaperSizeToPixels();
+                paperComp.CreateAttributes();
+                
+                // Position it relatively
+                float px = this.Attributes.Pivot.X - 350;
+                float py = this.Attributes.Pivot.Y + 40;
+                paperComp.Attributes.Pivot = new System.Drawing.PointF(px, py);
+                
+                document.AddObject(paperComp, false);
+                
+                // Wire outputs of PaperSize to ExportViews
+                this.Params.Input[8].AddSource(paperComp.Params.Output[0]); // Width
+                this.Params.Input[9].AddSource(paperComp.Params.Output[1]); // Height
+                this.Params.Input[10].AddSource(paperComp.Params.Output[2]); // DPI
+            }
+
+        protected override void AppendAdditionalComponentMenuItems(System.Windows.Forms.ToolStripDropDown menu)
+        {
+            base.AppendAdditionalComponentMenuItems(menu);
+            Menu_AppendItem(menu, "Auto-wire Default Inputs", (s, e) =>
+            {
+                var doc = OnPingDocument();
+                if (doc != null) AutoWireDefaultInputs(doc);
+            });
+        }
+
+        public override Guid ComponentGuid
         {
             get { return new Guid("8E5B7C2A-4F9D-4638-9B2E-1D7F5A8C9B3D"); }
         }

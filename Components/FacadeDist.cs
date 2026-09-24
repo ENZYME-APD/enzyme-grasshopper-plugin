@@ -30,8 +30,7 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 3, false, 210, -20);
-                Enzyme.Utils.AutoWireHelper.WireButton(this, document, 4, 210, 20);
+                AutoWireDefaultInputs(document);
             }
         }
 
@@ -206,6 +205,23 @@ namespace Enzyme.Components
             watch.Stop();
             double exec_time = watch.Elapsed.TotalMilliseconds;
             Message = $"FACADE_DIST\nTime: {exec_time:F1} ms\n---\n{mode_label} [{cache_status}]\nProfiles: {clean_crvs.Count}";
+        }
+
+        
+        private void AutoWireDefaultInputs(GH_Document document)
+        {
+                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 3, false, 210, -20);
+                Enzyme.Utils.AutoWireHelper.WireButton(this, document, 4, 210, 20);
+            }
+
+        protected override void AppendAdditionalComponentMenuItems(System.Windows.Forms.ToolStripDropDown menu)
+        {
+            base.AppendAdditionalComponentMenuItems(menu);
+            Menu_AppendItem(menu, "Auto-wire Default Inputs", (s, e) =>
+            {
+                var doc = OnPingDocument();
+                if (doc != null) AutoWireDefaultInputs(doc);
+            });
         }
 
         public override Guid ComponentGuid => new Guid("08412F4D-DDE4-42CE-A1C8-243B5761358F");

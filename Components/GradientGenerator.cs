@@ -32,15 +32,7 @@ namespace Enzyme.Components
 
             if (!hasSources)
             {
-                var defaultColors = new Color[] {
-                    Color.FromArgb(0, 50, 150),
-                    Color.FromArgb(0, 180, 200),
-                    Color.FromArgb(150, 220, 100),
-                    Color.FromArgb(255, 200, 50),
-                    Color.FromArgb(255, 50, 0)
-                };
-                Enzyme.Utils.AutoWireHelper.WireMergeWithSwatches(this, document, 0, defaultColors, 121, -10);
-                Enzyme.Utils.AutoWireHelper.WireIntegerSlider(this, document, 1, 2, 100, 10, 247, 58);
+                AutoWireDefaultInputs(document);
             }
         }
 
@@ -110,7 +102,31 @@ namespace Enzyme.Components
 
         
         public override GH_Exposure Exposure => GH_Exposure.quinary;
-public override Guid ComponentGuid
+
+        private void AutoWireDefaultInputs(GH_Document document)
+        {
+                var defaultColors = new Color[] {
+                    Color.FromArgb(0, 50, 150),
+                    Color.FromArgb(0, 180, 200),
+                    Color.FromArgb(150, 220, 100),
+                    Color.FromArgb(255, 200, 50),
+                    Color.FromArgb(255, 50, 0)
+                };
+                Enzyme.Utils.AutoWireHelper.WireMergeWithSwatches(this, document, 0, defaultColors, 121, -10);
+                Enzyme.Utils.AutoWireHelper.WireIntegerSlider(this, document, 1, 2, 100, 10, 247, 58);
+            }
+
+        protected override void AppendAdditionalComponentMenuItems(System.Windows.Forms.ToolStripDropDown menu)
+        {
+            base.AppendAdditionalComponentMenuItems(menu);
+            Menu_AppendItem(menu, "Auto-wire Default Inputs", (s, e) =>
+            {
+                var doc = OnPingDocument();
+                if (doc != null) AutoWireDefaultInputs(doc);
+            });
+        }
+
+        public override Guid ComponentGuid
         {
             get { return new Guid("B5D2F6B2-82A1-4F9C-91B2-C3D4E5F6A7B8"); }
         }
