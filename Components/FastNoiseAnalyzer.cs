@@ -44,6 +44,8 @@ namespace Enzyme.Components
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
         {
             pManager.AddMeshParameter("NoiseMeshes", "Meshes", "Vertex-colored meshes representing the noise heatmap", GH_ParamAccess.list);
+            pManager.AddPointParameter("MeshPoints", "MeshPts", "The evaluated vertex coordinates of the analysis meshes", GH_ParamAccess.list);
+            pManager.AddNumberParameter("MeshValues", "Mesh_dB", "The decibel values matching the MeshPoints", GH_ParamAccess.list);
             pManager.AddPointParameter("AnalysisPtsOut", "PtsOut", "Pass-through for AnalysisPoints input", GH_ParamAccess.list);
             pManager.AddNumberParameter("AnalysisPtsValues", "Pts_dB", "Raw dB values precisely at the AnalysisPoints", GH_ParamAccess.list);
             pManager.AddTextParameter("DashboardData", "Dashboard", "JSON legend data", GH_ParamAccess.item);
@@ -91,11 +93,11 @@ namespace Enzyme.Components
                                 "- Soft Occlusion (Vegetation): minor -5dB penalty.\n" +
                                 "- NO complex bouncing, diffraction (Fresnel zones), reverberation, or material absorption is computed.\n" +
                                 "- Best used for rapid early-stage urban blocking, not for certified acoustic engineering.";
-            DA.SetData(4, disclaimer);
+            DA.SetData(6, disclaimer);
 
             if (!run)
             {
-                this.Message = "OFF";
+                this.Message = $"{this.NickName}\nOFF";
                 return;
             }
 
@@ -234,10 +236,21 @@ namespace Enzyme.Components
             };
             string jsonOut = JsonConvert.SerializeObject(dashData);
 
+            List<Point3d> allMeshPts = new List<Point3d>();
+            List<double> allMeshDb = new List<double>();
+            
+            for (int k = 0; k < outMeshes.Count; k++)
+            {
+                allMeshPts.AddRange(outMeshes[k].Vertices.Select(v => new Point3d(v.X, v.Y, v.Z)));
+                allMeshDb.AddRange(allMeshVals[k]);
+            }
+
             DA.SetDataList(0, outMeshes);
-            DA.SetDataList(1, testPointsIn);
-            DA.SetDataList(2, testDbValues.ToList());
-            DA.SetData(3, jsonOut);
+            DA.SetDataList(1, allMeshPts);
+            DA.SetDataList(2, allMeshDb);
+            DA.SetDataList(3, testPointsIn);
+            DA.SetDataList(4, testDbValues.ToList());
+            DA.SetData(5, jsonOut);
             
             sw.Stop();
             this.Message = $"NoiseEnv\n{sw.Elapsed.TotalMilliseconds:F2} ms\n---\nMax: {globalMaxDb:F1} dB\nMin: {globalMinDb:F1} dB";
