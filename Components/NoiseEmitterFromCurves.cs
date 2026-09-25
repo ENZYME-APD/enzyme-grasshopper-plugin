@@ -10,11 +10,11 @@ namespace Enzyme.Components
         public NoiseEmitterFromCurves()
           : base("Noise Emitter From Curves", "NoiseLines",
               "Converts line/curve paths (like roads or railways) into discrete noise emitter points with associated dB values.",
-              "Enzyme", "Environmental")
+              "Enzyme", "Site Analysis")
         {
         }
 
-        public override GH_Exposure Exposure => GH_Exposure.primary;
+        public override GH_Exposure Exposure => GH_Exposure.septenary;
 
         protected override System.Drawing.Bitmap Icon => IconLoader.Load("NoiseEmitterLines.png");
 

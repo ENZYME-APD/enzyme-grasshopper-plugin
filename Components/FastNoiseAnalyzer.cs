@@ -14,11 +14,11 @@ namespace Enzyme.Components
         public FastNoiseAnalyzer()
           : base("Fast Noise Analyzer", "NoiseEnv",
               "A rapid pseudo-acoustic noise analysis component. Maps decibel (dB) decay over distance and occlusions onto arbitrary meshes.",
-              "Enzyme", "Environmental")
+              "Enzyme", "Site Analysis")
         {
         }
 
-        public override GH_Exposure Exposure => GH_Exposure.primary;
+        public override GH_Exposure Exposure => GH_Exposure.septenary;
 
         protected override System.Drawing.Bitmap Icon => IconLoader.Load("FastNoiseAnalyzer.png");
 
