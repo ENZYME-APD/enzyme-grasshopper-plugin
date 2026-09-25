@@ -97,7 +97,7 @@ namespace Enzyme.Components
             }
             
             stopwatch.Stop();
-            this.Message = $"Group Colours\n{stopwatch.ElapsedMilliseconds} ms\n---\nCase-insensitive\nMulti-separator";
+            this.Message = $"Group Colours\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\nCase-insensitive\nMulti-separator";
         }
 
         public override void AddedToDocument(GH_Document document)

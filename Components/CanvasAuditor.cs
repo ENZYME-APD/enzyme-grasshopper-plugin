@@ -111,7 +111,7 @@ namespace Enzyme.Components
             DA.SetData(0, report);
         
             stopwatch.Stop();
-            Message = $"{this.NickName}\n{stopwatch.ElapsedMilliseconds} ms\n---\nDone";
+            Message = $"{this.NickName}\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\nDone";
         }
 
         public override void AddedToDocument(GH_Document document)

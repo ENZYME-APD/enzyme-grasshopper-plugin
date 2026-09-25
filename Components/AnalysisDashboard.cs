@@ -187,7 +187,7 @@ namespace Enzyme.Components
                     }
 
                     stopwatch.Stop();
-                    this.Message = $"{this.NickName}\n{stopwatch.ElapsedMilliseconds} ms\n---\nHUD ACTIVE\n" + _title;
+                    this.Message = $"{this.NickName}\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\nHUD ACTIVE\n" + _title;
                 }
                 catch (Exception ex)
                 {

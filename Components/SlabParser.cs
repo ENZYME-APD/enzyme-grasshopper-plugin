@@ -156,7 +156,7 @@ namespace Enzyme.Components
 
                 sw.Stop();
                 string searchMode = exactToggle ? "Exact" : "Flexible";
-                this.Message = $"{this.NickName}\nTime: {sw.ElapsedMilliseconds} ms\n---\nReturned: {matchCount}\nMode: {searchMode}";
+                this.Message = $"{this.NickName}\nTime: {sw.Elapsed.TotalMilliseconds:F2} ms\n---\nReturned: {matchCount}\nMode: {searchMode}";
                 
                 DA.SetDataTree(0, outBounds);
                 DA.SetDataTree(1, outAreas);

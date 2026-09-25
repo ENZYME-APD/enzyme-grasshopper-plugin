@@ -211,7 +211,7 @@ namespace Enzyme.Components
             {
                 string msg = string.Format(
                     "MOD: HORIZONTAL BANDS\nTime: {0} ms\nSill: {1:0.0#}m | Drop: {2:0.0#}m\n---\nGlass: {3:N0} SQM\nSolid: {4:N0} SQM",
-                    watch.ElapsedMilliseconds, SillHeight, HeaderDrop, glassArea, spandrelArea);
+                    watch.Elapsed.TotalMilliseconds, SillHeight, HeaderDrop, glassArea, spandrelArea);
                     
                 if (mullionCount > 0) msg += string.Format("\nMullions: {0}", mullionCount);
                 

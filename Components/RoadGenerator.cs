@@ -467,7 +467,7 @@ namespace Enzyme.Components
             DA.SetDataList(6, fillVols);
             
             stopwatch.Stop();
-            Message = $"Road Generator\nTime: {stopwatch.ElapsedMilliseconds} ms\n---\nLanes: {totalLanes}\nWidth: {totalHalfWidth*2:F1}m\n---\nCut: {totalCutM3:N0} m3\nFill: {totalFillM3:N0} m3";
+            Message = $"Road Generator\nTime: {stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\nLanes: {totalLanes}\nWidth: {totalHalfWidth*2:F1}m\n---\nCut: {totalCutM3:N0} m3\nFill: {totalFillM3:N0} m3";
         }
 
         private class RoadData

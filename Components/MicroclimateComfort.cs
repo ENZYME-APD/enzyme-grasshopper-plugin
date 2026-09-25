@@ -152,7 +152,7 @@ namespace Enzyme.Components
             DA.SetData(4, legendObj.ToString());
         
             stopwatch.Stop();
-            Message = $"{this.NickName}\n{stopwatch.ElapsedMilliseconds} ms\n---\nDone";
+            Message = $"{this.NickName}\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\nDone";
         }
 
         private Color GetComfortColor(double temp)

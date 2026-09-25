@@ -78,7 +78,7 @@ namespace Enzyme.Components
             }
             
             stopwatch.Stop();
-            Message = $"{this.NickName}\n{stopwatch.ElapsedMilliseconds} ms\n---\n" + msg;
+            Message = $"{this.NickName}\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\n" + msg;
             
             DA.SetData(0, jsonStr);
         }

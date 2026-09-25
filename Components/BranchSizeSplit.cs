@@ -102,7 +102,7 @@ namespace Enzyme.Components
             DA.SetDataTree(2, treeC);
 
             stopwatch.Stop();
-            Message = $"BranchSizeSplit\n{stopwatch.ElapsedMilliseconds} ms\n---\n" +
+            Message = $"BranchSizeSplit\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\n" +
                       countA + " branches in A (<" + minThreshold + " items)\n" +
                       countB + " branches in B (" + minThreshold + "-" + maxThreshold + " items)\n" +
                       countC + " branches in C (>" + maxThreshold + " items)";

@@ -284,7 +284,7 @@ namespace Enzyme.Components
             string lsText = string.IsNullOrEmpty(layerState) ? "ACTIVE" : layerState.ToUpper();
             string dsText = string.IsNullOrEmpty(displayStyle) ? "ACTIVE" : displayStyle.ToUpper();
             
-            this.Message = $"EXPORT NAMED VIEWS\nTime: {sw.ElapsedMilliseconds} ms\n---\nVIEW: {viewText}\nLAYER: {lsText}\nSTYLE: {dsText}";
+            this.Message = $"EXPORT NAMED VIEWS\nTime: {sw.Elapsed.TotalMilliseconds:F2} ms\n---\nVIEW: {viewText}\nLAYER: {lsText}\nSTYLE: {dsText}";
         }
 
 

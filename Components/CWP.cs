@@ -68,7 +68,7 @@ namespace Enzyme.Components
             string version = "v1.0";
             string filletMessage = R == 0 ? "No fillet" : $"R={R}";
             stopwatch.Stop();
-            Message = $"CWProfile {version}\n{stopwatch.ElapsedMilliseconds} ms\n---\n{A}x{B}\n{filletMessage}";
+            Message = $"CWProfile {version}\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\n{A}x{B}\n{filletMessage}";
 
             if (A <= 0 || B <= 0)
             {

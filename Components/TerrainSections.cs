@@ -436,7 +436,7 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
             
             t_start.Stop();
             string layoutStatus = layoutFlat ? "ON" : "OFF";
-            Message = $"TERRAIN SECTIONS\nTime: {t_start.ElapsedMilliseconds:F2} ms\n---\nSections X: {totalSectionsX}\nSections Y: {totalSectionsY}\nXY Layout: {layoutStatus}";
+            Message = $"TERRAIN SECTIONS\nTime: {t_start.Elapsed.TotalMilliseconds:F2} ms\n---\nSections X: {totalSectionsX}\nSections Y: {totalSectionsY}\nXY Layout: {layoutStatus}";
         }
 
         protected override System.Drawing.Bitmap Icon

@@ -43,7 +43,7 @@ namespace Enzyme.Components
             if (DA.GetData(0, ref msg))
             {
                 stopwatch.Stop();
-                CurrentMessage = $"{this.NickName}\n{stopwatch.ElapsedMilliseconds} ms\n---\n" + msg;
+                CurrentMessage = $"{this.NickName}\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\n" + msg;
             }
             else
             {

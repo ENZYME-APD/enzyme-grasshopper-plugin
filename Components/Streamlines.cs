@@ -124,7 +124,7 @@ namespace Enzyme.Components
                 
             DA.SetData(1, infoStr);
 
-            Message = $"STREAMLINES\nTime: {sw.ElapsedMilliseconds} ms\n---\nLines: {outCurves.Count}";
+            Message = $"STREAMLINES\nTime: {sw.Elapsed.TotalMilliseconds:F2} ms\n---\nLines: {outCurves.Count}";
         }
 
         private bool SampleVector2D(Point3d p, RTree tree, List<Point3d> fPts, List<Vector3d> fVecs, double radius, out Vector3d outVec, out double outZ)

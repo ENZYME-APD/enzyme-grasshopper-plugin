@@ -67,7 +67,7 @@ namespace Enzyme.Components
             DA.SetDataList(0, outColors);
             
             stopwatch.Stop();
-            Message = $"Gradient Generator\n{stopwatch.ElapsedMilliseconds} ms\n---\nInput Colors: {inColors.Count}\nSteps: {steps}";
+            Message = $"Gradient Generator\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\nInput Colors: {inColors.Count}\nSteps: {steps}";
         }
 
         private Color GetInterpolatedColor(double t, List<Color> palette)

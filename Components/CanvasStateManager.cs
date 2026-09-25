@@ -175,7 +175,7 @@ namespace Enzyme.Components
             } catch { }
 
             sw.Stop();
-            this.Message = $"STATE MANAGER\nTime: {sw.ElapsedMilliseconds} ms\n---\n{_lastAction}\nSaved: {_states.Count}";
+            this.Message = $"STATE MANAGER\nTime: {sw.Elapsed.TotalMilliseconds:F2} ms\n---\n{_lastAction}\nSaved: {_states.Count}";
         }
 
         public override bool Write(GH_IWriter writer)

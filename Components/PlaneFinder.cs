@@ -119,12 +119,12 @@ namespace Enzyme.Components
                     DA.SetData(2, plane);
 
                     stopwatch.Stop();
-                    this.Message = $"{component_name} {component_version}\n{stopwatch.ElapsedMilliseconds} ms\n---\nSurface is planar.";
+                    this.Message = $"{component_name} {component_version}\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\nSurface is planar.";
                 }
                 else
                 {
                     stopwatch.Stop();
-                    this.Message = $"{component_name} {component_version}\n{stopwatch.ElapsedMilliseconds} ms\n---\nSurface is NOT planar.";
+                    this.Message = $"{component_name} {component_version}\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\nSurface is NOT planar.";
                 }
             }
         }

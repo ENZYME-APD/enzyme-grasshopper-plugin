@@ -198,7 +198,7 @@ namespace Enzyme.Components
             DA.SetData(2, info);
             
             sw.Stop();
-            this.Message = $"ADVANCED EXPORT VIEWS\nTime: {sw.ElapsedMilliseconds} ms\n---\n{_statusInfo}";
+            this.Message = $"ADVANCED EXPORT VIEWS\nTime: {sw.Elapsed.TotalMilliseconds:F2} ms\n---\n{_statusInfo}";
         }
 
         private void CaptureCurrentViews(string ghStateName)

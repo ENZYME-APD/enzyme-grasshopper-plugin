@@ -375,7 +375,7 @@ namespace Enzyme.Components
             DA.SetData(6, infoStr);
 
             sw.Stop();
-            Message = $"FAST CFD\nTime: {sw.ElapsedMilliseconds} ms\n---\nGrid: {cols}x{rows}\nMax: {maxSpeed:F1} | Min: {minSpeed:F1} | Avg: {avgSpeed:F1}\nComfort: {pctComfort:F1}%";
+            Message = $"FAST CFD\nTime: {sw.Elapsed.TotalMilliseconds:F2} ms\n---\nGrid: {cols}x{rows}\nMax: {maxSpeed:F1} | Min: {minSpeed:F1} | Avg: {avgSpeed:F1}\nComfort: {pctComfort:F1}%";
         }
 
         private Color GetColor(double normalized, List<Color> palette)

@@ -201,7 +201,7 @@ namespace Enzyme.Components
                 }
 
                 stopwatch.Stop();
-                this.Message = $"{this.NickName}\nTime: {stopwatch.ElapsedMilliseconds} ms\n---\nReturned: {matchCount}\nMode: {searchMode}";
+                this.Message = $"{this.NickName}\nTime: {stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\nReturned: {matchCount}\nMode: {searchMode}";
 
                 DA.SetDataTree(0, outSlabs);
                 DA.SetDataTree(1, outTowers);

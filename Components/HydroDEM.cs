@@ -152,7 +152,7 @@ namespace Enzyme.Components
             }
 
             stopwatch.Stop();
-            Message = $"Hydro-DEM\n{stopwatch.ElapsedMilliseconds} ms\n---\nThreshold: {threshold}\nStreams: {streams.Count}";
+            Message = $"Hydro-DEM\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\nThreshold: {threshold}\nStreams: {streams.Count}";
             
             JObject payload = new JObject();
             payload["Title"] = "HYDRO DEM";

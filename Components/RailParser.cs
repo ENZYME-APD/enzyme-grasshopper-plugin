@@ -144,7 +144,7 @@ namespace Enzyme.Components
 
                 sw.Stop();
                 string searchMode = exactMatch ? "Exact" : "Flexible";
-                this.Message = $"{this.NickName}\nTime: {sw.ElapsedMilliseconds} ms\n---\nReturned: {matchCount}\nMode: {searchMode}";
+                this.Message = $"{this.NickName}\nTime: {sw.Elapsed.TotalMilliseconds:F2} ms\n---\nReturned: {matchCount}\nMode: {searchMode}";
 
                 DA.SetDataTree(0, outCurves);
                 DA.SetDataTree(1, outLabels);

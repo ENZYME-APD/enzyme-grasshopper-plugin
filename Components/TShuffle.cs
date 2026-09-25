@@ -96,7 +96,7 @@ namespace Enzyme.Components
             }
 
             stopwatch.Stop();
-            Message = $"{this.NickName}\n{stopwatch.ElapsedMilliseconds} ms\n---\nBranches: {tree.PathCount}\nItems: {total_items}";
+            Message = $"{this.NickName}\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\nBranches: {tree.PathCount}\nItems: {total_items}";
             
             DA.SetDataTree(0, result);
         }

@@ -95,7 +95,7 @@ namespace Enzyme.Components
             finally
             {
                 sw.Stop();
-                this.Message = $"SAVE NAMED VIEW\nTime: {sw.ElapsedMilliseconds} ms\n---\n{_lastAction}";
+                this.Message = $"SAVE NAMED VIEW\nTime: {sw.Elapsed.TotalMilliseconds:F2} ms\n---\n{_lastAction}";
             }
         }
 

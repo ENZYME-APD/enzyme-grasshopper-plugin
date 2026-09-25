@@ -180,7 +180,7 @@ namespace Enzyme.Components
             DA.SetDataList(2, mainContours);
         
             stopwatch.Stop();
-            Message = $"{this.NickName}\n{stopwatch.ElapsedMilliseconds} ms\n---\nContours: {normContours.Count}\nMain: {mainContours.Count}";
+            Message = $"{this.NickName}\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\nContours: {normContours.Count}\nMain: {mainContours.Count}";
         }
 
         private Color GetGradientColor(double t, List<Color> colors)

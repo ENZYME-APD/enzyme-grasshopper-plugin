@@ -44,7 +44,7 @@ namespace Enzyme.Components
             DA.SetDataList(0, outputMeshes);
         
             stopwatch.Stop();
-            Message = $"{this.NickName}\n{stopwatch.ElapsedMilliseconds} ms\n---\nMeshes: {outputMeshes.Count}";
+            Message = $"{this.NickName}\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\nMeshes: {outputMeshes.Count}";
         }
 
         public override void AddedToDocument(GH_Document document)

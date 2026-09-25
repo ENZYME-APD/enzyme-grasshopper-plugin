@@ -165,7 +165,7 @@ namespace Enzyme.Components
             if (run && savedFiles.Count > 0)
             {
                 _lastExportDate = DateTime.Now.ToString("dd MMM yyyy HH:mm");
-                _lastExportDuration = timer.ElapsedMilliseconds.ToString() + " ms";
+                _lastExportDuration = timer.Elapsed.TotalMilliseconds.ToString() + " ms";
                 _lastExportFrames = savedFiles.Count;
             }
 

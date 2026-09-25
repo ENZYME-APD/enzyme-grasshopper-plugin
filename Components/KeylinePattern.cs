@@ -104,7 +104,7 @@ namespace Enzyme.Components
             }
 
             stopwatch.Stop();
-            Message = $"Keyline Pattern\n{stopwatch.ElapsedMilliseconds} ms\n---\nSpacing: {spacing}m\nCount: {count}\nGenerated: {keylines.Count}";
+            Message = $"Keyline Pattern\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\nSpacing: {spacing}m\nCount: {count}\nGenerated: {keylines.Count}";
             
             double totalLen = 0;
             foreach (var crv in keylines) if (crv != null) totalLen += crv.GetLength();

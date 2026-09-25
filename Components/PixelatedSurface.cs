@@ -445,7 +445,7 @@ namespace Enzyme.Components
             
             List<string> ui_lines = new List<string>();
             ui_lines.Add("PIXEL IMAGE");
-            ui_lines.Add($"Time: {t_start.ElapsedMilliseconds:F2} ms");
+            ui_lines.Add($"Time: {t_start.Elapsed.TotalMilliseconds:F2} ms");
             ui_lines.Add("---");
             for (int i = 0; i < palette.Count; i++)
             {
@@ -459,7 +459,7 @@ namespace Enzyme.Components
             ui_lines.Add($"Total Tiles: {total_panels}{bake_status}");
 
             stopwatch.Stop();
-            Message = $"{this.NickName}\n{stopwatch.ElapsedMilliseconds} ms\n---\n" + string.Join("\n", ui_lines);
+            Message = $"{this.NickName}\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\n" + string.Join("\n", ui_lines);
         }
 
         protected override System.Drawing.Bitmap Icon

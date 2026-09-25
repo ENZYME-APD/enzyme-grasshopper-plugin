@@ -130,7 +130,7 @@ namespace Enzyme.Components
 
             sw.Stop();
             string typeName = type == 0 ? "Bar Chart" : (type == 1 ? "Flat Dot" : "Sphere");
-            Message = $"DATA VISUALIZER\nTime: {sw.ElapsedMilliseconds} ms\n---\nType: {typeName}\nBounds: {originalMin:F1} to {originalMax:F1}";
+            Message = $"DATA VISUALIZER\nTime: {sw.Elapsed.TotalMilliseconds:F2} ms\n---\nType: {typeName}\nBounds: {originalMin:F1} to {originalMax:F1}";
             DA.SetData(0, masterMesh);
             DA.SetDataList(1, outVals);
             DA.SetDataList(2, outColors);

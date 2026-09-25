@@ -15,7 +15,7 @@ namespace Enzyme.Components
         private Mesh _cachedMesh = new Mesh();
         private List<System.Drawing.Color> _cachedColors = new List<System.Drawing.Color>();
         private string _cachedJson = "";
-        private long _cachedTime = 0;
+        private double _cachedTime = 0;
         private int _cachedRays = 0;
 
         public SunHoursAnalysis()
@@ -87,7 +87,7 @@ namespace Enzyme.Components
                     if (_cachedMesh != null && _cachedMesh.IsValid) DA.SetData(3, _cachedMesh);
                     DA.SetDataList(4, _cachedColors);
                     DA.SetData(5, _cachedJson);
-                    Message = $"Sun Hours\n{_cachedTime} ms (Cached)\n---\nPoints: {_cachedPoints.Count}\nRays: {_cachedRays}";
+                    Message = $"Sun Hours\n{_cachedTime:F2} ms (Cached)\n---\nPoints: {_cachedPoints.Count}\nRays: {_cachedRays}";
                 }
                 else
                 {
@@ -258,10 +258,10 @@ namespace Enzyme.Components
             _cachedMesh = isWorkflow1 ? displayMesh : null;
             _cachedColors = new List<System.Drawing.Color>(outColors);
             _cachedJson = jsonOut;
-            _cachedTime = sw.ElapsedMilliseconds;
+            _cachedTime = sw.Elapsed.TotalMilliseconds;
             _cachedRays = totalRays;
 
-            Message = $"Sun Hours\n{_cachedTime} ms\n---\nPoints: {_cachedPoints.Count}\nRays: {_cachedRays}";
+            Message = $"Sun Hours\n{_cachedTime:F2} ms\n---\nPoints: {_cachedPoints.Count}\nRays: {_cachedRays}";
 
             DA.SetDataList(0, _cachedHits);
             DA.SetDataList(1, _cachedExposures);

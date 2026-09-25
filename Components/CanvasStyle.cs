@@ -43,7 +43,7 @@ namespace Enzyme.Components
             Grasshopper.Instances.ActiveCanvas?.Refresh();
 
             stopwatch.Stop();
-            this.Message = $"Canvas Style\n{stopwatch.ElapsedMilliseconds} ms\n---\nLove your style!";
+            this.Message = $"Canvas Style\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\nLove your style!";
         }
 
         public override void AddedToDocument(GH_Document document)

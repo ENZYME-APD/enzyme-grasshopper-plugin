@@ -106,7 +106,7 @@ namespace Enzyme.Components
             }
 
             stopwatch.Stop();
-            this.Message = $"{this.NickName}\n{stopwatch.ElapsedMilliseconds} ms\n---\n{msg}";
+            this.Message = $"{this.NickName}\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\n{msg}";
         }
 
         protected override Bitmap Icon => IconLoader.Load("ConfigJSON.png");

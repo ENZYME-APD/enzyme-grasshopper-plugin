@@ -181,7 +181,7 @@ namespace Enzyme.Components
             }
 
             sw.Stop();
-            long execTime = sw.ElapsedMilliseconds;
+            double execTime = sw.Elapsed.TotalMilliseconds;
 
             _cachedMsg = $"{this.NickName}\n{execTime} ms\n---\n{statusLine}";
             _cachedLog = log;

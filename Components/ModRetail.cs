@@ -367,8 +367,8 @@ namespace Enzyme.Components
             if (glassArea > 0 || solidArea > 0)
             {
                 string msg = string.Format(
-                    "{0}\nTime: {1} ms\nWall Matrix: [{2}]\nCanopy Rhythm: [{3}]\n---\nGlass: {4:N0} SQM\nSolid: {5:N0} SQM\nHead:  {6:N0} SQM",
-                    this.NickName, watch.ElapsedMilliseconds, vStr, cStr, glassArea, solidArea, headerArea);
+                    "{0}\nTime: {1:F2} ms\nWall Matrix: [{2}]\nCanopy Rhythm: [{3}]\n---\nGlass: {4:N0} SQM\nSolid: {5:N0} SQM\nHead:  {6:N0} SQM",
+                    this.NickName, watch.Elapsed.TotalMilliseconds, vStr, cStr, glassArea, solidArea, headerArea);
                     
                 if (colCount > 0) msg += string.Format("\nCols:  {0}", colCount);
                 

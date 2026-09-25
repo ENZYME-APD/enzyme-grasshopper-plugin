@@ -358,7 +358,7 @@ namespace Enzyme.Components
             {
                 this.Message = this.NickName + "\n" + string.Format(
                     "Time: {0} ms\nGrid: {1:0.0#}m x {2:0.0#}m\n---\nCols:    {3}\nFins:    {4}\nGlass:   {5:N0} SQM\nSolid:   {6:N0} SQM",
-                    watch.ElapsedMilliseconds, BayWidth, displayHeight, colCount, finCount, glassArea, solidArea);
+                    watch.Elapsed.TotalMilliseconds, BayWidth, displayHeight, colCount, finCount, glassArea, solidArea);
             }
             else
             {

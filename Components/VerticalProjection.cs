@@ -89,7 +89,7 @@ namespace Enzyme.Components
 
             // HUD Message
             stopwatch.Stop();
-            this.Message = $"{this.NickName}\n{stopwatch.ElapsedMilliseconds} ms\n---\n" + message;
+            this.Message = $"{this.NickName}\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\n" + message;
 
             DA.SetData(0, isContained);
             DA.SetData(1, projectedPt);

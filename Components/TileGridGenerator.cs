@@ -274,7 +274,7 @@ namespace Enzyme.Components
 
             string capGridType = gridType.Length > 0 ? char.ToUpper(gridType[0]) + gridType.Substring(1).ToLower() : gridType;
             stopwatch.Stop();
-            Message = $"TILE PATTERN\n{stopwatch.ElapsedMilliseconds} ms\n---\nDone";
+            Message = $"TILE PATTERN\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\nDone";
             Message += $"\nTime: {executionTime:F3}s";
             Message += "\n---";
             Message += $"\n{capGridType} Grid";

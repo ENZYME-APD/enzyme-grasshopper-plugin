@@ -92,7 +92,7 @@ namespace Enzyme.Components
             int branchCount = keyToIndex.Count;
 
             stopwatch.Stop();
-            Message = $"GroupByKey\n{stopwatch.ElapsedMilliseconds} ms\n---\n{itemCount} values\n{branchCount} groups";
+            Message = $"GroupByKey\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\n{itemCount} values\n{branchCount} groups";
         }
 
         protected override Bitmap Icon

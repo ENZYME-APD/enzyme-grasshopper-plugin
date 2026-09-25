@@ -151,7 +151,7 @@ namespace Enzyme.Components
             }
 
             sw.Stop();
-            long execTime = sw.ElapsedMilliseconds;
+            double execTime = sw.Elapsed.TotalMilliseconds;
 
             string finalMsg = $"{this.NickName}\nTime: {execTime} ms\n---\n" + string.Join("\n", statusMsg);
             this.Message = finalMsg;

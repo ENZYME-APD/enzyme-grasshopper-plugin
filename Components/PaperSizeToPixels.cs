@@ -105,7 +105,7 @@ namespace Enzyme.Components
             DA.SetData(2, dpi);
         
             stopwatch.Stop();
-            Message = $"{this.NickName}\n{stopwatch.ElapsedMilliseconds} ms\n---\nDone";
+            Message = $"{this.NickName}\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\nDone";
         }
 
         public override void AppendAdditionalMenuItems(System.Windows.Forms.ToolStripDropDown menu)

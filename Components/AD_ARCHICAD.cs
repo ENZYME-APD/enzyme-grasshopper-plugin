@@ -267,7 +267,7 @@ namespace Enzyme.Components
             DA.SetData(0, JSON_Payload);
 
             stopwatch.Stop();
-            this.Message = $"ARCHICAD ADAPTER\n{stopwatch.ElapsedMilliseconds} ms\n---\nBuildings: {output_buildings.Count}\nFloors: {healed_blocks}\nHeals Applied: {total_heals_applied}";
+            this.Message = $"ARCHICAD ADAPTER\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\nBuildings: {output_buildings.Count}\nFloors: {healed_blocks}\nHeals Applied: {total_heals_applied}";
         }
 
         private List<Dictionary<string, object>> SerializeExactCurve(Curve crv)

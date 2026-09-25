@@ -205,7 +205,7 @@ namespace Enzyme.Components
             DA.SetData(3, info);
 
             sw.Stop();
-            Message = $"{this.NickName}\nTime: {sw.ElapsedMilliseconds} ms\n---\n● Flooded: {floodedVertexCount} | ○ Dry: {numVertices - floodedVertexCount}";
+            Message = $"{this.NickName}\nTime: {sw.Elapsed.TotalMilliseconds:F2} ms\n---\n● Flooded: {floodedVertexCount} | ○ Dry: {numVertices - floodedVertexCount}";
         }
         
         public override void AddedToDocument(GH_Document document)

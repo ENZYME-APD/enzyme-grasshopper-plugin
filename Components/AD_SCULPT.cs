@@ -254,7 +254,7 @@ namespace Enzyme.Components
             DA.SetData(0, jsonPayload);
 
             stopwatch.Stop();
-            this.Message = $"SCULPTOR ADAPTER\n{stopwatch.ElapsedMilliseconds} ms\n---\nBuildings: {output_buildings.Count}\nFloors Sliced: {total_sliced_floors}";
+            this.Message = $"SCULPTOR ADAPTER\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\nBuildings: {output_buildings.Count}\nFloors Sliced: {total_sliced_floors}";
         }
 
         // ==============================================================================

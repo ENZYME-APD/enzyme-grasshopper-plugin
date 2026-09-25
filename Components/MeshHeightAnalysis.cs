@@ -369,8 +369,8 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
             double meanElevation = totalVerticesCount > 0 ? Math.Round(totalZSum / totalVerticesCount, 2) : 0.0;
             
             stopwatch.Stop();
-            Message = $"TERRAIN HEIGHT\n{stopwatch.ElapsedMilliseconds} ms\n---\nDone";
-            Message += $"Time: {t_start.ElapsedMilliseconds:F2} ms\n";
+            Message = $"TERRAIN HEIGHT\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\nDone";
+            Message += $"Time: {t_start.Elapsed.TotalMilliseconds:F2} ms\n";
             Message += "---\n";
             Message += $"Area: {Math.Round(totalTerrainArea, 2)}\n";
             Message += $"Relief (ΔZ): {terrainRelief}\n";

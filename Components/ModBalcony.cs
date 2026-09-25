@@ -355,7 +355,7 @@ namespace Enzyme.Components
             {
                 this.Message = string.Format(
                     "{8}\nTime: {0} ms\nFirst Balcony: {1}\nCorner Offset: {2}\n---\nGlass:   {3:N0} SQM\nSolid:   {4:N0} SQM\nHead:    {5:N0} SQM\nCorner:  {6:N0} SQM\nTerrace: {7:N0} SQM",
-                    watch.ElapsedMilliseconds, fbStatus, coStatus, glassArea, solidArea, headerArea, cornerArea, slabArea, this.NickName);
+                    watch.Elapsed.TotalMilliseconds, fbStatus, coStatus, glassArea, solidArea, headerArea, cornerArea, slabArea, this.NickName);
             }
             else
             {

@@ -156,7 +156,7 @@ namespace Enzyme.Components
             }
 
             stopwatch.Stop();
-            Message = $"Keypoint Finder\n{stopwatch.ElapsedMilliseconds} ms\n---\nSmoothing: {window}\nFound: {keypoints.Count}";
+            Message = $"Keypoint Finder\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\nSmoothing: {window}\nFound: {keypoints.Count}";
             
             JObject payload = new JObject();
             payload["Title"] = "KEYPOINT FINDER";

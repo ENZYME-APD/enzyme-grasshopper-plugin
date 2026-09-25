@@ -71,7 +71,7 @@ namespace Enzyme.Components
             DA.SetData(1, buildDate);
         
             stopwatch.Stop();
-            Message = $"{this.NickName}\n{stopwatch.ElapsedMilliseconds} ms\n---\nDone";
+            Message = $"{this.NickName}\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\nDone";
         }
 
         protected override System.Drawing.Bitmap Icon

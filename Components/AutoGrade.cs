@@ -158,7 +158,7 @@ namespace Enzyme.Components
             }
 
             stopwatch.Stop();
-            Message = $"Auto-Grade\n{stopwatch.ElapsedMilliseconds} ms\n---\nMax Grade: {(maxActualSlope*100):F1}%\nMax Cut: {maxCut:F1}m\nMax Fill: {maxFill:F1}m";
+            Message = $"Auto-Grade\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\nMax Grade: {(maxActualSlope*100):F1}%\nMax Cut: {maxCut:F1}m\nMax Fill: {maxFill:F1}m";
         }
 
         protected override System.Drawing.Bitmap Icon => Enzyme.IconLoader.Load("AutoGrade.png");

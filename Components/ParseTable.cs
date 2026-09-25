@@ -57,7 +57,7 @@ namespace Enzyme.Components
             if (string.IsNullOrWhiteSpace(text))
             {
                 stopwatch.Stop();
-                this.Message = $"{this.NickName}\n{stopwatch.ElapsedMilliseconds} ms\n---\n{msg}";
+                this.Message = $"{this.NickName}\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\n{msg}";
                 DA.SetDataTree(0, tree);
                 return;
             }
@@ -82,7 +82,7 @@ namespace Enzyme.Components
             {
                 msg = "No valid data found.";
                 stopwatch.Stop();
-                this.Message = $"{this.NickName}\n{stopwatch.ElapsedMilliseconds} ms\n---\n{msg}";
+                this.Message = $"{this.NickName}\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\n{msg}";
                 DA.SetDataTree(0, tree);
                 return;
             }
@@ -117,7 +117,7 @@ namespace Enzyme.Components
             }
 
             stopwatch.Stop();
-                this.Message = $"{this.NickName}\n{stopwatch.ElapsedMilliseconds} ms\n---\n{msg}";
+                this.Message = $"{this.NickName}\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\n{msg}";
             DA.SetDataTree(0, tree);
         }
 

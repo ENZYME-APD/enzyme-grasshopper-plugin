@@ -398,8 +398,8 @@ namespace Enzyme.Components
                     double worstPct = (double)worstPoints.Count / tagPoints.Count * 100.0;
                     
                     stopwatch.Stop();
-                    Message = $"HIGROTHERMAL COMFORT\n{stopwatch.ElapsedMilliseconds} ms\n---\n" +
-                              $"Time: {sw.ElapsedMilliseconds} ms\n" +
+                    Message = $"HIGROTHERMAL COMFORT\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\n" +
+                              $"Time: {sw.Elapsed.TotalMilliseconds:F2} ms\n" +
                               "---\n" +
                               $"Ideal Temp: {idealTemperature:F1} °C\n" +
                               $"Tolerance: {comfortTolerance * 100.0:F0}%\n" +
@@ -409,8 +409,8 @@ namespace Enzyme.Components
                 else
                 {
                     stopwatch.Stop();
-                    Message = $"HIGROTHERMAL COMFORT\n{stopwatch.ElapsedMilliseconds} ms\n---\n" +
-                              $"Time: {sw.ElapsedMilliseconds} ms\n" +
+                    Message = $"HIGROTHERMAL COMFORT\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\n" +
+                              $"Time: {sw.Elapsed.TotalMilliseconds:F2} ms\n" +
                               "---\n" +
                               "No valid input data";
                 }
@@ -418,8 +418,8 @@ namespace Enzyme.Components
             else
             {
                 stopwatch.Stop();
-                    Message = $"HIGROTHERMAL COMFORT\n{stopwatch.ElapsedMilliseconds} ms\n---\n" +
-                          $"Time: {sw.ElapsedMilliseconds} ms\n" +
+                    Message = $"HIGROTHERMAL COMFORT\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\n" +
+                          $"Time: {sw.Elapsed.TotalMilliseconds:F2} ms\n" +
                           "---\n" +
                           "STATUS: OFF";
             }

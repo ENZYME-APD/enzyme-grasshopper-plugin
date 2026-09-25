@@ -299,7 +299,7 @@ namespace Enzyme.Components
             DA.SetData(0, finalJson);
 
             stopwatch.Stop();
-            Message = $"LEGO ADAPTER\n{stopwatch.ElapsedMilliseconds} ms\n---\nTotal Floors: {totalGeneratedFloors}\nStretched Tops: {stretchedFloorsCreated}";
+            Message = $"LEGO ADAPTER\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\nTotal Floors: {totalGeneratedFloors}\nStretched Tops: {stretchedFloorsCreated}";
         }
 
         private class BuildingData

@@ -128,7 +128,7 @@ namespace Enzyme.Components
             DA.SetData(0, info);
 
             sw.Stop();
-            this.Message = $"ACTIVATE SETTINGS\nTime: {sw.ElapsedMilliseconds} ms\n---\nVIEW: {statusView}\nSTYLE: {statusStyle}\nLAYER: {statusLayer}";
+            this.Message = $"ACTIVATE SETTINGS\nTime: {sw.Elapsed.TotalMilliseconds:F2} ms\n---\nVIEW: {statusView}\nSTYLE: {statusStyle}\nLAYER: {statusLayer}";
         }
 
         public override void AppendAdditionalMenuItems(System.Windows.Forms.ToolStripDropDown menu)

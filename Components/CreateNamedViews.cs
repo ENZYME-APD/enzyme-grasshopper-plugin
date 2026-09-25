@@ -101,7 +101,7 @@ namespace Enzyme.Components
             DA.SetDataList(0, generatedNames);
 
             string status = run ? $"Generated {generatedNames.Count} Named Views" : "Sleeping (Run is False)";
-            Message = $"{this.NickName}\nTime: {timer.ElapsedMilliseconds} ms\n---\n{status}";
+            Message = $"{this.NickName}\nTime: {timer.Elapsed.TotalMilliseconds:F2} ms\n---\n{status}";
             
             DA.SetData(1, "CREATE NAMED VIEWS\n"
                 + "\n"

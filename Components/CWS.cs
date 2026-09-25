@@ -342,7 +342,7 @@ namespace Enzyme.Components
 
             if (totalGlassArea > 0)
             {
-                this.Message = $"CWS {version}\nTime: {sw.ElapsedMilliseconds} ms\n---\nMullions: {totalMullions}\nTransoms: {totalTransoms}\nGlass: {totalGlassArea:F1} SQM";
+                this.Message = $"CWS {version}\nTime: {sw.Elapsed.TotalMilliseconds:F2} ms\n---\nMullions: {totalMullions}\nTransoms: {totalTransoms}\nGlass: {totalGlassArea:F1} SQM";
             }
             else
             {

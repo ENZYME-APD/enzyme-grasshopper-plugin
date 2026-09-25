@@ -437,7 +437,7 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
             DA.SetDataList(3, treesOut);
 
             double area = Rhino.Geometry.AreaMassProperties.Compute(boundary).Area;
-            Message = $"{this.NickName}\n{stopwatch.ElapsedMilliseconds} ms\n---\nArea: {area:N0} m2\nTrees: {treesOut.Count}";
+            Message = $"{this.NickName}\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\nArea: {area:N0} m2\nTrees: {treesOut.Count}";
                     DA.SetData(4, "TERRAIN GENERATOR PRO\n" + "\n" + "HOW IT WORKS:\n" + "A procedural terrain generator developed specifically to test different analysis components across a wide variety of topographic conditions.\n\n" + "INTERPRETATION & IMPORTANCE:\n" + "Generates synthetic, highly controllable terrains (ridges, valleys, noise). This allows designers to rigorously test and calibrate drainage, slope, and wind analysis tools before applying them to real-world GIS data.");
         }
 

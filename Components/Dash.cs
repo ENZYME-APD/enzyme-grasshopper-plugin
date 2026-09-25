@@ -241,7 +241,7 @@ namespace Enzyme.Components
 
                     string modeMsg = _groupByBldg ? "Per-Building Mode" : "Global Mode";
                     stopwatch.Stop();
-                    this.Message = $"{this.NickName}\n{stopwatch.ElapsedMilliseconds} ms\n---\nHUD ACTIVE\n{modeMsg}";
+                    this.Message = $"{this.NickName}\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\nHUD ACTIVE\n{modeMsg}";
                 }
                 catch (Exception ex)
                 {

@@ -61,7 +61,7 @@ namespace Enzyme.Components
 
             stopwatch.Stop();
             string convStr = convType ? "SQM > SQFT" : "SQFT > SQM";
-            Message = $"{this.NickName}\n{stopwatch.ElapsedMilliseconds} ms\n---\n{convStr}";
+            Message = $"{this.NickName}\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\n{convStr}";
 
             GH_Structure<IGH_Goo> resultTree = new GH_Structure<IGH_Goo>();
             double factor = 10.7639104;

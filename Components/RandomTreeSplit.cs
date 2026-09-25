@@ -119,7 +119,7 @@ namespace Enzyme.Components
             DA.SetDataTree(2, treeC);
 
             stopwatch.Stop();
-            Message = $"RandomTreeSplit\n{stopwatch.ElapsedMilliseconds} ms\n---\n" + totalBranches + " branches split\nA:" + countA + " B:" + countB + " C:" + (totalBranches - countA - countB);
+            Message = $"RandomTreeSplit\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\n" + totalBranches + " branches split\nA:" + countA + " B:" + countB + " C:" + (totalBranches - countA - countB);
         }
 
         protected override System.Drawing.Bitmap Icon

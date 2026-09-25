@@ -182,7 +182,7 @@ namespace Enzyme.Components
 
                 sw.Stop();
                 string search_mode = exact_toggle ? "Exact" : "Flexible";
-                this.Message = $"{this.NickName}\nTime: {sw.ElapsedMilliseconds} ms\n---\nVolumes: {match_count}\nMode: {search_mode}";
+                this.Message = $"{this.NickName}\nTime: {sw.Elapsed.TotalMilliseconds:F2} ms\n---\nVolumes: {match_count}\nMode: {search_mode}";
 
                 DA.SetDataTree(0, out_volumes);
                 DA.SetDataTree(1, out_bounds);
