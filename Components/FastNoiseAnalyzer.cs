@@ -224,8 +224,8 @@ namespace Enzyme.Components
             var dashData = new
             {
                 Title = "Noise Analysis (dB)",
-                LegendType = "Gradient",
-                Colors = colors.Select(c => $"rgba({c.R},{c.G},{c.B},1)").ToList(),
+                Type = "Gradient",
+                Colors = colors.Select(c => new { R = c.R, G = c.G, B = c.B }).ToList(),
                 Labels = new List<string> { $"{globalMinDb:F1} dB", $"{globalMaxDb:F1} dB" },
                 Metrics = new List<object>
                 {
