@@ -321,5 +321,41 @@ namespace Enzyme.Components
         protected override Bitmap Icon => Enzyme.IconLoader.Load("Analysis Dashboard.png");
 
         public override Guid ComponentGuid => new Guid("B5A3E1C2-88B1-4A55-9B2D-C1A4328FF1A9");
+    
+    
+
+    public class CustomColorAttributes : Grasshopper.Kernel.Attributes.GH_ComponentAttributes
+    {
+        public System.Drawing.Color FillColor { get; set; }
+
+        public CustomColorAttributes(IGH_Component owner, System.Drawing.Color color) : base(owner)
+        {
+            FillColor = color;
+        }
+
+        protected override void Render(Grasshopper.GUI.Canvas.GH_Canvas canvas, System.Drawing.Graphics graphics, Grasshopper.GUI.Canvas.GH_CanvasChannel channel)
+        {
+            if (channel == Grasshopper.GUI.Canvas.GH_CanvasChannel.Objects)
+            {
+                Grasshopper.GUI.Canvas.GH_PaletteStyle originalStyle = Grasshopper.GUI.Canvas.GH_Skin.palette_normal_standard;
+                Grasshopper.GUI.Canvas.GH_PaletteStyle customStyle = new Grasshopper.GUI.Canvas.GH_PaletteStyle(FillColor, System.Drawing.Color.FromArgb(40, 40, 40), System.Drawing.Color.White);
+                Grasshopper.GUI.Canvas.GH_Skin.palette_normal_standard = customStyle;
+                
+                base.Render(canvas, graphics, channel);
+                
+                Grasshopper.GUI.Canvas.GH_Skin.palette_normal_standard = originalStyle;
+            }
+            else
+            {
+                base.Render(canvas, graphics, channel);
+            }
+        }
     }
+
+    public override void CreateAttributes()
+    {
+        m_attributes = new CustomColorAttributes(this, System.Drawing.Color.FromArgb(20, 20, 25)); // Dark blue-gray
+    }
+
+}
 }
