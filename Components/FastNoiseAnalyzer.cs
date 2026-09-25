@@ -13,14 +13,14 @@ namespace Enzyme.Components
     {
         public FastNoiseAnalyzer()
           : base("Fast Noise Analyzer", "NoiseEnv",
-              "A rapid pseudo-acoustic noise analysis component. Maps decibel (dB) decay over distance and hard occlusions.",
+              "A rapid pseudo-acoustic noise analysis component. Maps decibel (dB) decay over distance and occlusions.",
               "Enzyme", "Environmental")
         {
         }
 
         public override GH_Exposure Exposure => GH_Exposure.primary;
 
-        protected override System.Drawing.Bitmap Icon => null; // Let GH use default or add IconLoader later
+        protected override System.Drawing.Bitmap Icon => null;
 
         public override Guid ComponentGuid => new Guid("11112222-3333-4444-5555-666677778888");
 
@@ -28,16 +28,18 @@ namespace Enzyme.Components
         {
             pManager.AddBooleanParameter("Run", "Run", "Global execution toggle switch", GH_ParamAccess.item, false);
             pManager.AddMeshParameter("TerrainMesh", "Terrain", "The underlying site topography", GH_ParamAccess.item);
-            pManager.AddMeshParameter("ContextBuildings", "Context", "Lightweight mesh context structures for sound occlusion", GH_ParamAccess.list);
+            pManager.AddMeshParameter("ContextBuildings", "HardCtx", "Solid meshes for hard sound occlusion (-15dB)", GH_ParamAccess.list);
             pManager[2].Optional = true;
+            pManager.AddMeshParameter("SoftContext", "SoftCtx", "Vegetation/porous meshes for minor occlusion (-5dB)", GH_ParamAccess.list);
+            pManager[3].Optional = true;
             pManager.AddPointParameter("Emitters", "Emitters", "Noise source points (e.g., roads, machinery)", GH_ParamAccess.list);
             pManager.AddNumberParameter("EmitterPower", "Power(dB)", "Decibel level per emitter at 1m (default 85dB)", GH_ParamAccess.list, 85.0);
-            pManager.AddPointParameter("AnalysisPoints", "PtsIn", "Specific discrete test locations (e.g. windows/facades) to test individually", GH_ParamAccess.list);
-            pManager[5].Optional = true;
+            pManager.AddPointParameter("AnalysisPoints", "PtsIn", "Specific discrete test locations (e.g. windows) to test individually", GH_ParamAccess.list);
+            pManager[6].Optional = true;
             pManager.AddNumberParameter("AnalysisHeight", "Height", "Pedestrian offset from terrain (m)", GH_ParamAccess.item, 1.5);
             pManager.AddNumberParameter("GridSpacing", "Grid", "Resolution of pixel elements (m)", GH_ParamAccess.item, 5.0);
             pManager.AddColourParameter("CustomColors", "Colors", "Color spectrum override (Quiet -> Loud)", GH_ParamAccess.list);
-            pManager[8].Optional = true;
+            pManager[9].Optional = true;
         }
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
@@ -62,35 +64,39 @@ namespace Enzyme.Components
             Mesh terrain = null;
             if (!DA.GetData(1, ref terrain)) return;
 
-            List<Mesh> context = new List<Mesh>();
-            DA.GetDataList(2, context);
+            List<Mesh> hardContext = new List<Mesh>();
+            DA.GetDataList(2, hardContext);
+
+            List<Mesh> softContext = new List<Mesh>();
+            DA.GetDataList(3, softContext);
 
             List<Point3d> emitters = new List<Point3d>();
-            if (!DA.GetDataList(3, emitters)) return;
+            if (!DA.GetDataList(4, emitters)) return;
             if (emitters.Count == 0) return;
 
             List<double> power = new List<double>();
-            DA.GetDataList(4, power);
+            DA.GetDataList(5, power);
             if (power.Count == 0) power.Add(85.0);
 
             List<Point3d> testPointsIn = new List<Point3d>();
-            DA.GetDataList(5, testPointsIn);
+            DA.GetDataList(6, testPointsIn);
 
             double height = 1.5;
-            DA.GetData(6, ref height);
+            DA.GetData(7, ref height);
 
             double spacing = 5.0;
-            DA.GetData(7, ref spacing);
+            DA.GetData(8, ref spacing);
 
             List<Color> colors = new List<Color>();
-            DA.GetDataList(8, colors);
+            DA.GetDataList(9, colors);
 
             string disclaimer = "METHODOLOGY & INACCURACIES:\n" +
                                 "- Propagation uses standard Free-Field Inverse-Square Law (-20*log10(r)).\n" +
                                 "- Addition is strictly energetic (logarithmic summation).\n" +
-                                "- Occlusion is binary raycasting: strict -15dB penalty if line of sight is obstructed.\n" +
+                                "- Hard Occlusion (Buildings/Terrain): strict -15dB penalty.\n" +
+                                "- Soft Occlusion (Vegetation): minor -5dB penalty.\n" +
                                 "- NO complex bouncing, diffraction (Fresnel zones), reverberation, or material absorption is computed.\n" +
-                                "- Best used for rapid early-stage urban blocking, not for final certified acoustic engineering.";
+                                "- Best used for rapid early-stage urban blocking, not for certified acoustic engineering.";
             DA.SetData(7, disclaimer);
 
             if (!run)
@@ -101,12 +107,11 @@ namespace Enzyme.Components
 
             this.Message = "Computing...";
 
-            // Optimize BVH context
-            List<Mesh> colliders = new List<Mesh>(context);
-            if (terrain != null) colliders.Add(terrain);
-            
+            List<Mesh> collidersHard = new List<Mesh>(hardContext);
+            if (terrain != null) collidersHard.Add(terrain);
 
-            // 1. GENERATE PIXEL GRID
+            List<Mesh> collidersSoft = new List<Mesh>(softContext);
+
             BoundingBox bbox = terrain.GetBoundingBox(false);
             int nx = (int)Math.Ceiling((bbox.Max.X - bbox.Min.X) / spacing);
             int ny = (int)Math.Ceiling((bbox.Max.Y - bbox.Min.Y) / spacing);
@@ -142,7 +147,6 @@ namespace Enzyme.Components
                 }
             }
 
-            // ACOUSTIC FUNCTION
             Func<Point3d, double> CalculateDB = (pt) =>
             {
                 double totalEnergy = 0.0;
@@ -154,20 +158,37 @@ namespace Enzyme.Components
                     double pwr = power[k % power.Count];
                     double rawDb = pwr - 20 * Math.Log10(d);
 
-                    // Raycast
                     Ray3d toEmitter = new Ray3d(pt, emitters[k] - pt);
-                    bool occluded = false;
-                    foreach (var m in colliders)
+                    bool hitHard = false;
+                    bool hitSoft = false;
+                    
+                    foreach (var m in collidersHard)
                     {
                         double thit = Rhino.Geometry.Intersect.Intersection.MeshRay(m, toEmitter);
                         if (thit >= 0.0 && thit < d)
                         {
-                            occluded = true;
+                            hitHard = true;
                             break;
                         }
                     }
-
-                    if (occluded) rawDb -= 15.0; // Hard penalty
+                    
+                    if (hitHard)
+                    {
+                        rawDb -= 15.0; // Hard penalty
+                    }
+                    else if (collidersSoft.Count > 0)
+                    {
+                        foreach (var m in collidersSoft)
+                        {
+                            double thit = Rhino.Geometry.Intersect.Intersection.MeshRay(m, toEmitter);
+                            if (thit >= 0.0 && thit < d)
+                            {
+                                hitSoft = true;
+                                break;
+                            }
+                        }
+                        if (hitSoft) rawDb -= 5.0; // Soft penalty
+                    }
 
                     if (rawDb > 0)
                         totalEnergy += Math.Pow(10, rawDb / 10.0);
@@ -175,14 +196,12 @@ namespace Enzyme.Components
                 return totalEnergy > 0 ? 10 * Math.Log10(totalEnergy) : 0;
             };
 
-            // 2. PARALLEL COMPUTE MESH
             double[] dbValues = new double[gridCenters.Count];
             Parallel.For(0, gridCenters.Count, i =>
             {
                 dbValues[i] = CalculateDB(gridCenters[i]);
             });
 
-            // 3. PARALLEL COMPUTE TEST POINTS
             double[] testDbValues = new double[testPointsIn.Count];
             if (testPointsIn.Count > 0)
             {
@@ -192,7 +211,6 @@ namespace Enzyme.Components
                 });
             }
 
-            // Determine Min/Max
             double minDb = dbValues.Length > 0 ? dbValues.Min() : 0;
             double maxDb = dbValues.Length > 0 ? dbValues.Max() : 0;
             double avgDb = dbValues.Length > 0 ? dbValues.Average() : 0;
@@ -227,7 +245,6 @@ namespace Enzyme.Components
                 heatMesh.VertexColors.Add(c); heatMesh.VertexColors.Add(c);
             }
 
-            // JSON Dashboard Data
             var dashData = new
             {
                 Title = "Noise Analysis (dB)",
@@ -276,12 +293,11 @@ namespace Enzyme.Components
             return Color.FromArgb(255, r, g, b);
         }
 
-        // Standard Auto-Wiring Implementation
         private void AutoWireDefaultInputs(GH_Document document)
         {
             Enzyme.Utils.AutoWireHelper.WireBooleanToggle(this, document, 0, false, 200, -80);
-            Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 6, 0.0, 5.0, 1.5, 200, 40);
-            Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 7, 1.0, 20.0, 5.0, 200, 80);
+            Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 7, 0.0, 5.0, 1.5, 200, 40);
+            Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 8, 1.0, 20.0, 5.0, 200, 80);
         }
 
         protected override void AppendAdditionalComponentMenuItems(System.Windows.Forms.ToolStripDropDown menu)
