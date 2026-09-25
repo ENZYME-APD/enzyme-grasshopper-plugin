@@ -324,6 +324,9 @@ namespace Enzyme.Components
     
     
 
+    
+
+
     public class CustomColorAttributes : Grasshopper.Kernel.Attributes.GH_ComponentAttributes
     {
         public System.Drawing.Color FillColor { get; set; }
@@ -337,13 +340,45 @@ namespace Enzyme.Components
         {
             if (channel == Grasshopper.GUI.Canvas.GH_CanvasChannel.Objects)
             {
-                Grasshopper.GUI.Canvas.GH_PaletteStyle originalStyle = Grasshopper.GUI.Canvas.GH_Skin.palette_normal_standard;
-                Grasshopper.GUI.Canvas.GH_PaletteStyle customStyle = new Grasshopper.GUI.Canvas.GH_PaletteStyle(FillColor, System.Drawing.Color.FromArgb(40, 40, 40), System.Drawing.Color.White);
-                Grasshopper.GUI.Canvas.GH_Skin.palette_normal_standard = customStyle;
+                Grasshopper.GUI.Canvas.GH_Palette palette = Grasshopper.GUI.Canvas.GH_Palette.Normal;
+                if (Owner.RuntimeMessageLevel == GH_RuntimeMessageLevel.Warning) palette = Grasshopper.GUI.Canvas.GH_Palette.Warning;
+                if (Owner.RuntimeMessageLevel == GH_RuntimeMessageLevel.Error) palette = Grasshopper.GUI.Canvas.GH_Palette.Error;
+                if (Owner.Locked) palette = Grasshopper.GUI.Canvas.GH_Palette.Locked;
+                if (Owner.Hidden) palette = Grasshopper.GUI.Canvas.GH_Palette.Hidden;
+
+                Grasshopper.GUI.Canvas.GH_PaletteStyle standardStyle = Grasshopper.GUI.Canvas.GH_Skin.palette_normal_standard;
+                switch (palette)
+                {
+                    case Grasshopper.GUI.Canvas.GH_Palette.Normal:
+                        standardStyle = Selected ? Grasshopper.GUI.Canvas.GH_Skin.palette_normal_selected : Grasshopper.GUI.Canvas.GH_Skin.palette_normal_standard;
+                        break;
+                    case Grasshopper.GUI.Canvas.GH_Palette.Warning:
+                        standardStyle = Selected ? Grasshopper.GUI.Canvas.GH_Skin.palette_warning_selected : Grasshopper.GUI.Canvas.GH_Skin.palette_warning_standard;
+                        break;
+                    case Grasshopper.GUI.Canvas.GH_Palette.Error:
+                        standardStyle = Selected ? Grasshopper.GUI.Canvas.GH_Skin.palette_error_selected : Grasshopper.GUI.Canvas.GH_Skin.palette_error_standard;
+                        break;
+                    case Grasshopper.GUI.Canvas.GH_Palette.Hidden:
+                        standardStyle = Selected ? Grasshopper.GUI.Canvas.GH_Skin.palette_hidden_selected : Grasshopper.GUI.Canvas.GH_Skin.palette_hidden_standard;
+                        break;
+                    case Grasshopper.GUI.Canvas.GH_Palette.Locked:
+                        standardStyle = Selected ? Grasshopper.GUI.Canvas.GH_Skin.palette_locked_selected : Grasshopper.GUI.Canvas.GH_Skin.palette_locked_standard;
+                        break;
+                }
+
+                Grasshopper.GUI.Canvas.GH_PaletteStyle customStyle = new Grasshopper.GUI.Canvas.GH_PaletteStyle(FillColor, standardStyle.Edge, standardStyle.Text);
+
+                Grasshopper.GUI.Canvas.GH_Capsule capsule = Grasshopper.GUI.Canvas.GH_Capsule.CreateCapsule(Bounds, palette, 2, 0);
                 
-                base.Render(canvas, graphics, channel);
-                
-                Grasshopper.GUI.Canvas.GH_Skin.palette_normal_standard = originalStyle;
+                foreach (IGH_Param param in Owner.Params.Input)
+                    capsule.AddInputGrip(param.Attributes.InputGrip.Y);
+                foreach (IGH_Param param in Owner.Params.Output)
+                    capsule.AddOutputGrip(param.Attributes.OutputGrip.Y);
+
+                capsule.Render(graphics, customStyle);
+                capsule.Dispose();
+
+                RenderComponentParameters(canvas, graphics, Owner, customStyle);
             }
             else
             {
@@ -354,8 +389,7 @@ namespace Enzyme.Components
 
     public override void CreateAttributes()
     {
-        m_attributes = new CustomColorAttributes(this, System.Drawing.Color.FromArgb(20, 20, 25)); // Dark blue-gray
+        m_attributes = new CustomColorAttributes(this, System.Drawing.Color.FromArgb(20, 20, 25));
     }
-
 }
 }
