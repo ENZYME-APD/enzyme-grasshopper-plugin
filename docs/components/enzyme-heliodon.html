@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enzyme Heliodon - Enzyme Plugin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="../index.html" class="nav-brand">
+            <img src="../images/enzyme_logo.png" alt="Enzyme Logo" class="logo-img">
+        </a>
+        <div class="nav-links">
+            <a href="../index.html#components">Components</a>
+            <a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank">GitHub</a>
+        </div>
+    </nav>
+
+    <main class="container doc-page">
+        <div class="doc-header" style="display: flex; align-items: center;">
+            <div>
+                <h1>Enzyme Heliodon</h1>
+                <p class="doc-subtitle">Generates a 3D solar dome and calculates annual sun vectors for environmental analysis.</p>
+                <div class="doc-meta">
+                    <span class="badge site-analysis">Site Analysis</span>
+                    <span>Nickname: <strong>Heliodon</strong></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="doc-content">
+            <h2>Overview</h2>
+            <p>Generates a 3D solar dome and calculates annual sun vectors for environmental analysis.</p>
+            
+            <div class="io-grid">
+                <div class="io-col">
+                    <h3>Inputs (7)</h3>
+                    <ul>
+                        <li><strong>Latitude</strong> (Number): Location latitude (-90 to 90)</li>
+                        <li><strong>Longitude</strong> (Number): Location longitude (-180 to 180)</li>
+                        <li><strong>Time Zone</strong> (Number): Time zone offset from GMT</li>
+                        <li><strong>Radius</strong> (Number): Visual radius of the heliodon dome</li>
+                        <li><strong>Center</strong> (Point): Center point of the heliodon</li>
+                        <li><strong>Months</strong> (Interval): Domain of months to evaluate (e.g., 1 to 12).</li>
+                        <li><strong>Hours</strong> (Interval): Domain of hours to evaluate (e.g., 8 to 17).</li>
+                    </ul>
+                </div>
+                <div class="io-col">
+                    <h3>Outputs (4)</h3>
+                    <ul>
+                        <li><strong>Sun Vectors</strong> (Vector): All solar vectors above the horizon (pointing TO the sun).</li>
+                        <li><strong>Daily Arcs</strong> (Curve): Visual sun path curves for the 21st of each month.</li>
+                        <li><strong>Sun Points</strong> (Point): Visual hourly sun positions.</li>
+                        <li><strong>Base Circle</strong> (Curve): A flat circle framing the heliodon radius.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p><a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank" style="color: #a1a1aa; text-decoration: none; border-bottom: 1px solid #3f3f46; padding-bottom: 2px;">View on GitHub</a></p>
+    </footer>
+</body>
+</html>

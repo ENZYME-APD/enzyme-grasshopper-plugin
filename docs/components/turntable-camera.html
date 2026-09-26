@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Turntable Camera - Enzyme Plugin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="../index.html" class="nav-brand">
+            <img src="../images/enzyme_logo.png" alt="Enzyme Logo" class="logo-img">
+        </a>
+        <div class="nav-links">
+            <a href="../index.html#components">Components</a>
+            <a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank">GitHub</a>
+        </div>
+    </nav>
+
+    <main class="container doc-page">
+        <div class="doc-header" style="display: flex; align-items: center;">
+            <div>
+                <h1>Turntable Camera</h1>
+                <p class="doc-subtitle">Automated camera rotation and sequence rendering for 360° product/site views.</p>
+                <div class="doc-meta">
+                    <span class="badge utilities">Utilities</span>
+                    <span>Nickname: <strong>Turntable</strong></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="doc-content">
+            <h2>Overview</h2>
+            <p>Automated camera rotation and sequence rendering for 360° product/site views.</p>
+            
+            <div class="io-grid">
+                <div class="io-col">
+                    <h3>Inputs (12)</h3>
+                    <ul>
+                        <li><strong>Target</strong> (Point): Focal point for camera center axis</li>
+                        <li><strong>Radius</strong> (Number): Orbital distance to camera location</li>
+                        <li><strong>Elevation</strong> (Number): Z-axis elevation offset of camera relative to target</li>
+                        <li><strong>Frames</strong> (Integer): Number of frame captures per 360 loop</li>
+                        <li><strong>Directory</strong> (Text): Output directory where images are saved</li>
+                        <li><strong>Prefix</strong> (Text): Prefix for the image files</li>
+                        <li><strong>Width</strong> (Integer): Export width in pixels</li>
+                        <li><strong>Height</strong> (Integer): Export height in pixels</li>
+                        <li><strong>DPI</strong> (Integer): Print resolution in Dots Per Inch</li>
+                        <li><strong>Transparent</strong> (Boolean): Export with a transparent background</li>
+                        <li><strong>Scale Items</strong> (Boolean): Scale lineweights and screen items</li>
+                        <li><strong>Run</strong> (Boolean): Trigger the export loop</li>
+                    </ul>
+                </div>
+                <div class="io-col">
+                    <h3>Outputs (5)</h3>
+                    <ul>
+                        <li><strong>Orbit Path</strong> (Curve): The circular path of the camera.</li>
+                        <li><strong>Camera Points</strong> (Point): Calculated 3D camera coordinates.</li>
+                        <li><strong>Target Out</strong> (Point): Passthrough of the focal target point.</li>
+                        <li><strong>File Paths</strong> (Text): Paths of exported PNG frames.</li>
+                        <li><strong>Info</strong> (Text): Component execution HUD.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p><a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank" style="color: #a1a1aa; text-decoration: none; border-bottom: 1px solid #3f3f46; padding-bottom: 2px;">View on GitHub</a></p>
+    </footer>
+</body>
+</html>

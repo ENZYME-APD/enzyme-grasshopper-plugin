@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tile Pattern - Enzyme Plugin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="../index.html" class="nav-brand">
+            <img src="../images/enzyme_logo.png" alt="Enzyme Logo" class="logo-img">
+        </a>
+        <div class="nav-links">
+            <a href="../index.html#components">Components</a>
+            <a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank">GitHub</a>
+        </div>
+    </nav>
+
+    <main class="container doc-page">
+        <div class="doc-header" style="display: flex; align-items: center;">
+            <div>
+                <h1>Tile Pattern</h1>
+                <p class="doc-subtitle">Generates a grid pattern (rectangular, hexagonal, triangular) within a boundary and trims cells to fit.</p>
+                <div class="doc-meta">
+                    <span class="badge facade">Facade</span>
+                    <span>Nickname: <strong>TilePat</strong></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="doc-content">
+            <h2>Overview</h2>
+            <p>Generates a grid pattern (rectangular, hexagonal, triangular) within a boundary and trims cells to fit.</p>
+            
+            <div class="io-grid">
+                <div class="io-col">
+                    <h3>Inputs (8)</h3>
+                    <ul>
+                        <li><strong>Base Geometry</strong> (Geometry): Planar Surface, Brep, or closed Curve to fill.</li>
+                        <li><strong>Setout Point</strong> (Point): Optional origin point for the grid alignment. If not supplied, the centroid is used.</li>
+                        <li><strong>Grid Type</strong> (Text): Grid type: rectangular, offset_rectangular, hexagonal, triangular</li>
+                        <li><strong>Cell Width</strong> (Number): Cell width</li>
+                        <li><strong>Cell Height</strong> (Number): Cell height</li>
+                        <li><strong>Grout Width</strong> (Number): Width of the grout joint between tiles. Default 0.</li>
+                        <li><strong>Direction</strong> (Vector): Optional vector to align the grid's X-axis. Projects to the base plane.</li>
+                        <li><strong>Rotation</strong> (Number): Optional rotation angle (in degrees) applied after alignment.</li>
+                    </ul>
+                </div>
+                <div class="io-col">
+                    <h3>Outputs (6)</h3>
+                    <ul>
+                        <li><strong>Tile Status</strong> (Integer): 0 = full, 1 = trimmed</li>
+                        <li><strong>Full Count</strong> (Integer): Number of full tiles</li>
+                        <li><strong>Trimmed Count</strong> (Integer): Number of trimmed tiles</li>
+                        <li><strong>All Tiles</strong> (Curve): All grid tiles (trimmed and full)</li>
+                        <li><strong>Full Tiles</strong> (Curve): Tiles fully inside the boundary</li>
+                        <li><strong>Trimmed Tiles</strong> (Curve): Tiles partially inside the boundary</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p><a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank" style="color: #a1a1aa; text-decoration: none; border-bottom: 1px solid #3f3f46; padding-bottom: 2px;">View on GitHub</a></p>
+    </footer>
+</body>
+</html>

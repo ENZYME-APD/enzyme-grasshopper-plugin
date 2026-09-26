@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Named Views - Enzyme Plugin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="../index.html" class="nav-brand">
+            <img src="../images/enzyme_logo.png" alt="Enzyme Logo" class="logo-img">
+        </a>
+        <div class="nav-links">
+            <a href="../index.html#components">Components</a>
+            <a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank">GitHub</a>
+        </div>
+    </nav>
+
+    <main class="container doc-page">
+        <div class="doc-header" style="display: flex; align-items: center;">
+            <div>
+                <h1>Create Named Views</h1>
+                <p class="doc-subtitle">Converts a list of camera locations and targets into Rhino Named Views. Combine with Advanced Export Views for flythroughs and animations.</p>
+                <div class="doc-meta">
+                    <span class="badge utilities">Utilities</span>
+                    <span>Nickname: <strong>NamedViews</strong></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="doc-content">
+            <h2>Overview</h2>
+            <p>Converts a list of camera locations and targets into Rhino Named Views. Combine with Advanced Export Views for flythroughs and animations.</p>
+            
+            <div class="io-grid">
+                <div class="io-col">
+                    <h3>Inputs (5)</h3>
+                    <ul>
+                        <li><strong>Locations</strong> (Point): List of 3D points for the camera positions.</li>
+                        <li><strong>Targets</strong> (Point): List of 3D points for the camera targets. If only one is provided, the camera will always look at it.</li>
+                        <li><strong>Lens Length</strong> (Number): Camera lens length in mm (e.g. 50).</li>
+                        <li><strong>Prefix</strong> (Text): Prefix for the generated Named Views.</li>
+                        <li><strong>Run</strong> (Boolean): Trigger to generate the views in the Rhino document.</li>
+                    </ul>
+                </div>
+                <div class="io-col">
+                    <h3>Outputs (2)</h3>
+                    <ul>
+                        <li><strong>View Names</strong> (Text): List of generated Named View names (Plug this into Advanced Export Views!)</li>
+                        <li><strong>Info</strong> (Text): Component execution HUD.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p><a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank" style="color: #a1a1aa; text-decoration: none; border-bottom: 1px solid #3f3f46; padding-bottom: 2px;">View on GitHub</a></p>
+    </footer>
+</body>
+</html>

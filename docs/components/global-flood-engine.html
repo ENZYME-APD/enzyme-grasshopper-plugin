@@ -20,10 +20,9 @@
 
     <main class="container doc-page">
         <div class="doc-header" style="display: flex; align-items: center;">
-            <img src="../images/icons/GlobalFlood.png" alt="Global Flood Engine Icon" class="comp-icon" style="width: 48px; height: 48px; margin-right: 1rem; border-radius: 8px;">
             <div>
                 <h1>Global Flood Engine</h1>
-                <p class="doc-subtitle">Simulates global terrain flooding based on a target water volume and generates a depth heatmap.</p>
+                <p class="doc-subtitle">Simulates rainfall accumulation pooling into local valleys and depressions.</p>
                 <div class="doc-meta">
                     <span class="badge site-analysis">Site Analysis</span>
                     <span>Nickname: <strong>GlobalFlood</strong></span>
@@ -33,22 +32,27 @@
 
         <div class="doc-content">
             <h2>Overview</h2>
-            <p>Simulates global terrain flooding based on a target water volume and generates a depth heatmap.</p>
+            <p>Simulates rainfall accumulation pooling into local valleys and depressions.</p>
             
             <div class="io-grid">
                 <div class="io-col">
-                    <h3>Inputs (3)</h3>
+                    <h3>Inputs (6)</h3>
                     <ul>
                         <li><strong>TerrainMesh</strong> (Mesh): Input Terrain Mesh</li>
-                        <li><strong>TargetVolume</strong> (Number): Target volume of water</li>
-                        <li><strong>ZStep</strong> (Number): Iteration step for Z level</li>
+                        <li><strong>Rainfall</strong> (Number): Rainfall intensity in Liters/m2/hour (mm/h)</li>
+                        <li><strong>Duration</strong> (Number): Duration of the rain event in hours</li>
+                        <li><strong>Iterations</strong> (Integer): Simulation steps for water flow</li>
+                        <li><strong>Runoff Coefficient</strong> (Number): Multiplier for rainfall (0.0 to 1.0). 1.0 = concrete (no absorption). Can be a single value or a list matching the mesh vertices.</li>
+                        <li><strong>Boundary Condition</strong> (Integer): 0 = Closed (water pools at edges), 1 = Open (water drains off edges)</li>
                     </ul>
                 </div>
                 <div class="io-col">
-                    <h3>Outputs (2)</h3>
+                    <h3>Outputs (4)</h3>
                     <ul>
                         <li><strong>FloodMesh</strong> (Mesh): Flooded terrain heatmap mesh</li>
-                        <li><strong>WaterLevel</strong> (Number): Final water elevation</li>
+                        <li><strong>WaterDepths</strong> (Number): Water depths at each vertex in meters</li>
+                        <li><strong>AnalysisPoints</strong> (Point): Points corresponding to the water depth values</li>
+                        <li><strong>Info</strong> (Text): Component information and interpretation</li>
                     </ul>
                 </div>
             </div>

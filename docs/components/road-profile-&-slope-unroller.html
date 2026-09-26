@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Road Profile & Slope Unroller - Enzyme Plugin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="../index.html" class="nav-brand">
+            <img src="../images/enzyme_logo.png" alt="Enzyme Logo" class="logo-img">
+        </a>
+        <div class="nav-links">
+            <a href="../index.html#components">Components</a>
+            <a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank">GitHub</a>
+        </div>
+    </nav>
+
+    <main class="container doc-page">
+        <div class="doc-header" style="display: flex; align-items: center;">
+            <div>
+                <h1>Road Profile & Slope Unroller</h1>
+                <p class="doc-subtitle">Unrolls a 3D road centerline into a 2D profile graph (elevation vs. distance) alongside its segmented slope analysis.</p>
+                <div class="doc-meta">
+                    <span class="badge masterplan">Masterplan</span>
+                    <span>Nickname: <strong>ProfileUnroll</strong></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="doc-content">
+            <h2>Overview</h2>
+            <p>Unrolls a 3D road centerline into a 2D profile graph (elevation vs. distance) alongside its segmented slope analysis.</p>
+            
+            <div class="io-grid">
+                <div class="io-col">
+                    <h3>Inputs (7)</h3>
+                    <ul>
+                        <li><strong>Curves</strong> (Curve): 3D curves representing road centerlines</li>
+                        <li><strong>Threshold</strong> (Number): Slope threshold</li>
+                        <li><strong>Segment Size</strong> (Number): Size of segments for analysis</li>
+                        <li><strong>Threshold Mode</strong> (Integer): 0: Degrees, 1: Percentage, 2: Ratio 1:X</li>
+                        <li><strong>Z Exaggeration</strong> (Number): Vertical scale multiplier for the profile graph</li>
+                        <li><strong>Reference Y</strong> (Number): Base elevation (Y-coordinate) to drop alignment lines down to</li>
+                        <li><strong>Base Plane</strong> (Plane): Origin plane for the unrolled profile graph</li>
+                    </ul>
+                </div>
+                <div class="io-col">
+                    <h3>Outputs (10)</h3>
+                    <ul>
+                        <li><strong>Profile Curves</strong> (Curve): Continuous unrolled 2D profile curve</li>
+                        <li><strong>Analyzed Segments</strong> (Curve): 2D lines representing the slope segments</li>
+                        <li><strong>Slope Values</strong> (Number): Slope values for each segment</li>
+                        <li><strong>Center Points 2D</strong> (Point): 2D center points for tagging</li>
+                        <li><strong>Segment Status</strong> (Text): Status (Compliant / Non-Compliant)</li>
+                        <li><strong>Compliance Percentage</strong> (Number): Overall compliance percentage</li>
+                        <li><strong>Dashboard Data</strong> (Text): JSON legend data</li>
+                        <li><strong>Alignment Lines</strong> (Curve): Vertical lines dropping from breakpoints to Ref Y</li>
+                        <li><strong>Alignment Labels</strong> (Text): Structural geometry labels (Line, Arc, Spline)</li>
+                        <li><strong>Alignment Points</strong> (Point): Placement points for alignment labels</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p><a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank" style="color: #a1a1aa; text-decoration: none; border-bottom: 1px solid #3f3f46; padding-bottom: 2px;">View on GitHub</a></p>
+    </footer>
+</body>
+</html>

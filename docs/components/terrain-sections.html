@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terrain Sections - Enzyme Plugin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="../index.html" class="nav-brand">
+            <img src="../images/enzyme_logo.png" alt="Enzyme Logo" class="logo-img">
+        </a>
+        <div class="nav-links">
+            <a href="../index.html#components">Components</a>
+            <a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank">GitHub</a>
+        </div>
+    </nav>
+
+    <main class="container doc-page">
+        <div class="doc-header" style="display: flex; align-items: center;">
+            <div>
+                <h1>Terrain Sections</h1>
+                <p class="doc-subtitle">Slices meshes into sections and unrolls them for layout.</p>
+                <div class="doc-meta">
+                    <span class="badge site-analysis">Site Analysis</span>
+                    <span>Nickname: <strong>TerrSec</strong></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="doc-content">
+            <h2>Overview</h2>
+            <p>Slices meshes into sections and unrolls them for layout.</p>
+            
+            <div class="io-grid">
+                <div class="io-col">
+                    <h3>Inputs (7)</h3>
+                    <ul>
+                        <li><strong>TargetMeshes</strong> (Mesh): The meshes to section.</li>
+                        <li><strong>RotationPlane</strong> (Plane): Orientation plane for the bounding box sectioning.</li>
+                        <li><strong>SectionsX</strong> (Integer): Number of sections running parallel to the X-axis.</li>
+                        <li><strong>SectionsY</strong> (Integer): Number of sections running parallel to the Y-axis.</li>
+                        <li><strong>LayoutFlat</strong> (Boolean): Toggle to generate 2D XY print layouts next to the mesh.</li>
+                        <li><strong>Bake</strong> (Boolean): Bake trigger</li>
+                        <li><strong>BakeName</strong> (Text): Bake group/layer name</li>
+                    </ul>
+                </div>
+                <div class="io-col">
+                    <h3>Outputs (10)</h3>
+                    <ul>
+                        <li><strong>SectionOutlinesX</strong> (Curve): 3D Polylines running parallel to the X-axis.</li>
+                        <li><strong>SectionOutlinesY</strong> (Curve): 3D Polylines running parallel to the Y-axis.</li>
+                        <li><strong>LabelText3D</strong> (Text): Text strings for 3D section labels.</li>
+                        <li><strong>LabelPlanes3D</strong> (Plane): Planes for 3D section labels.</li>
+                        <li><strong>FlatSectionsX</strong> (Curve): 2D X-Sections stacked downwards (-Y direction).</li>
+                        <li><strong>FlatSectionsY</strong> (Curve): 2D Y-Sections stacked leftwards (-X direction).</li>
+                        <li><strong>LabelTextFlat</strong> (Text): Text strings for the flattened section layout.</li>
+                        <li><strong>LabelPlanesFlat</strong> (Plane): Planes for the flattened section layout.</li>
+                        <li><strong>SectionMetadata</strong> (Text): Dictionary keys containing spatial transform & ID data.</li>
+                        <li><strong>Info</strong> (Text): Component information and interpretation</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p><a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank" style="color: #a1a1aa; text-decoration: none; border-bottom: 1px solid #3f3f46; padding-bottom: 2px;">View on GitHub</a></p>
+    </footer>
+</body>
+</html>

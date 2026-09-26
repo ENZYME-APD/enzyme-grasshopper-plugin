@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canvas State Manager - Enzyme Plugin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="../index.html" class="nav-brand">
+            <img src="../images/enzyme_logo.png" alt="Enzyme Logo" class="logo-img">
+        </a>
+        <div class="nav-links">
+            <a href="../index.html#components">Components</a>
+            <a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank">GitHub</a>
+        </div>
+    </nav>
+
+    <main class="container doc-page">
+        <div class="doc-header" style="display: flex; align-items: center;">
+            <div>
+                <h1>Canvas State Manager</h1>
+                <p class="doc-subtitle">Saves and restores the Enabled/Disabled (Locked) and Preview (Hidden) state of all components on the canvas.</p>
+                <div class="doc-meta">
+                    <span class="badge utilities">Utilities</span>
+                    <span>Nickname: <strong>StateMgr</strong></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="doc-content">
+            <h2>Overview</h2>
+            <p>Saves and restores the Enabled/Disabled (Locked) and Preview (Hidden) state of all components on the canvas.</p>
+            
+            <div class="io-grid">
+                <div class="io-col">
+                    <h3>Inputs (6)</h3>
+                    <ul>
+                        <li><strong>Save State</strong> (Boolean): Button to save current canvas state</li>
+                        <li><strong>Save Name</strong> (Text): Name to save the state under</li>
+                        <li><strong>Load State</strong> (Boolean): Button to load the specified canvas state</li>
+                        <li><strong>Load Name</strong> (Text): Name of the state to load</li>
+                        <li><strong>Turn Off New Nodes</strong> (Boolean): If true, new nodes added after the state was saved will have preview disabled (hidden).</li>
+                        <li><strong>Import JSON</strong> (Text): Optional JSON string from another State Manager to merge states.</li>
+                    </ul>
+                </div>
+                <div class="io-col">
+                    <h3>Outputs (3)</h3>
+                    <ul>
+                        <li><strong>Available States</strong> (Text): List of saved states</li>
+                        <li><strong>Info</strong> (Text): Status output</li>
+                        <li><strong>Export JSON</strong> (Text): Serialized JSON of all saved states. Plug this into 'Import JSON' of another State Manager to share states.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p><a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank" style="color: #a1a1aa; text-decoration: none; border-bottom: 1px solid #3f3f46; padding-bottom: 2px;">View on GitHub</a></p>
+    </footer>
+</body>
+</html>

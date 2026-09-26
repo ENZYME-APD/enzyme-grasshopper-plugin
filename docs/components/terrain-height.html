@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terrain Height - Enzyme Plugin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="../index.html" class="nav-brand">
+            <img src="../images/enzyme_logo.png" alt="Enzyme Logo" class="logo-img">
+        </a>
+        <div class="nav-links">
+            <a href="../index.html#components">Components</a>
+            <a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank">GitHub</a>
+        </div>
+    </nav>
+
+    <main class="container doc-page">
+        <div class="doc-header" style="display: flex; align-items: center;">
+            <div>
+                <h1>Terrain Height</h1>
+                <p class="doc-subtitle">Analyzes mesh extremes, unrolls sections bi-directionally, and generates 3D/2D metadata labels.</p>
+                <div class="doc-meta">
+                    <span class="badge site-analysis">Site Analysis</span>
+                    <span>Nickname: <strong>TerrainHeight</strong></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="doc-content">
+            <h2>Overview</h2>
+            <p>Analyzes mesh extremes, unrolls sections bi-directionally, and generates 3D/2D metadata labels.</p>
+            
+            <div class="io-grid">
+                <div class="io-col">
+                    <h3>Inputs (7)</h3>
+                    <ul>
+                        <li><strong>TargetMeshes</strong> (Mesh): The meshes to analyze.</li>
+                        <li><strong>SearchRings</strong> (Integer): Topological radius in rings.</li>
+                        <li><strong>ProminenceLimit</strong> (Number): Minimum Z-delta to be considered a peak/valley.</li>
+                        <li><strong>CustomColors</strong> (Colour): Custom colormap list.</li>
+                        <li><strong>CullGlobals</strong> (Boolean): Toggle to remove the absolute highest/lowest points.</li>
+                        <li><strong>AvoidBoundaries</strong> (Boolean): Toggle to ignore naked edge vertices.</li>
+                        <li><strong>EnableHeatmap</strong> (Boolean): Toggle to compute and output the vertex heatmap mesh.</li>
+                    </ul>
+                </div>
+                <div class="io-col">
+                    <h3>Outputs (12)</h3>
+                    <ul>
+                        <li><strong>Instructions</strong> (Text): Component documentation and usage manual.</li>
+                        <li><strong>LocalPeaks</strong> (Point): Output points for local highs.</li>
+                        <li><strong>PeakElevations</strong> (Number): Z-values for local highs.</li>
+                        <li><strong>GlobalMaxPoint</strong> (Point): Absolute highest point on the mesh.</li>
+                        <li><strong>GlobalMaxElevation</strong> (Number): Absolute highest Z-value.</li>
+                        <li><strong>LocalValleys</strong> (Point): Output points for local lows.</li>
+                        <li><strong>ValleyElevations</strong> (Number): Z-values for local lows.</li>
+                        <li><strong>GlobalMinPoint</strong> (Point): Absolute lowest point on the mesh.</li>
+                        <li><strong>GlobalMinElevation</strong> (Number): Absolute lowest Z-value.</li>
+                        <li><strong>HeatmapMeshes</strong> (Mesh): The vertex-colored duplicate mesh.</li>
+                        <li><strong>Dashboard Data</strong> (Text): JSON Legend Data</li>
+                        <li><strong>Info</strong> (Text): Component information and interpretation</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p><a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank" style="color: #a1a1aa; text-decoration: none; border-bottom: 1px solid #3f3f46; padding-bottom: 2px;">View on GitHub</a></p>
+    </footer>
+</body>
+</html>

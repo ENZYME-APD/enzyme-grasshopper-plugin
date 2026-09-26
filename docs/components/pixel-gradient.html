@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel Gradient - Enzyme Plugin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="../index.html" class="nav-brand">
+            <img src="../images/enzyme_logo.png" alt="Enzyme Logo" class="logo-img">
+        </a>
+        <div class="nav-links">
+            <a href="../index.html#components">Components</a>
+            <a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank">GitHub</a>
+        </div>
+    </nav>
+
+    <main class="container doc-page">
+        <div class="doc-header" style="display: flex; align-items: center;">
+            <div>
+                <h1>Pixel Gradient</h1>
+                <p class="doc-subtitle">BIM-ready Idempotent Engine. Consolidates Mega-Meshes per surface and binds them into Rhino Groups.</p>
+                <div class="doc-meta">
+                    <span class="badge facade">Facade</span>
+                    <span>Nickname: <strong>PixGrad</strong></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="doc-content">
+            <h2>Overview</h2>
+            <p>BIM-ready Idempotent Engine. Consolidates Mega-Meshes per surface and binds them into Rhino Groups.</p>
+            
+            <div class="io-grid">
+                <div class="io-col">
+                    <h3>Inputs (9)</h3>
+                    <ul>
+                        <li><strong>Grid Cells</strong> (Curve): Tree of grid cells</li>
+                        <li><strong>gradient_colors</strong> (Colour): List of gradient colors</li>
+                        <li><strong>accent_color</strong> (Colour): Accent color</li>
+                        <li><strong>axis</strong> (Integer): Axis (0=X, 1=Y, 2=Z)</li>
+                        <li><strong>jitter_pct</strong> (Number): Jitter percentage</li>
+                        <li><strong>accent_pct</strong> (Number): Accent percentage</li>
+                        <li><strong>inset_factor</strong> (Number): Inset factor</li>
+                        <li><strong>bake_trigger</strong> (Boolean): Bake trigger</li>
+                        <li><strong>bake_name</strong> (Text): Bake name</li>
+                    </ul>
+                </div>
+                <div class="io-col">
+                    <h3>Outputs (4)</h3>
+                    <ul>
+                        <li><strong>panel_mesh</strong> (Mesh): Consolidated panels</li>
+                        <li><strong>panel_colors</strong> (Colour): Panel colors</li>
+                        <li><strong>panel_tags</strong> (Text): Panel tags</li>
+                        <li><strong>panel_geometry</strong> (Curve): Panel geometry curves</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p><a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank" style="color: #a1a1aa; text-decoration: none; border-bottom: 1px solid #3f3f46; padding-bottom: 2px;">View on GitHub</a></p>
+    </footer>
+</body>
+</html>

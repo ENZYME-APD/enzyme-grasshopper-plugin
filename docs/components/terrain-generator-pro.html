@@ -20,7 +20,6 @@
 
     <main class="container doc-page">
         <div class="doc-header" style="display: flex; align-items: center;">
-            <img src="../images/icons/TRN-P.png" alt="Terrain Generator Pro Icon" class="comp-icon" style="width: 48px; height: 48px; margin-right: 1rem; border-radius: 8px;">
             <div>
                 <h1>Terrain Generator Pro</h1>
                 <p class="doc-subtitle">Generates topography with noise-masked procedural forest scattering and strict elevation limits.</p>
@@ -56,19 +55,20 @@
                         <li><strong>Solid</strong> (Boolean): Toggle closed mesh extrusion</li>
                         <li><strong>BaseCol</strong> (Colour): Color for the extruded solid base section</li>
                         <li><strong>TreeMsk</strong> (Number): Coverage mask threshold 0.0 to 1.0</li>
-                        <li><strong>TreeDns</strong> (Number): Density multiplier inside mask areas</li>
+                        <li><strong>TreeDns</strong> (Number): Density multiplier inside mask areas 0.0 to 1.0</li>
                         <li><strong>TreeSeed</strong> (Integer): Dedicated seed for the forest noise map</li>
                         <li><strong>TreeZMin</strong> (Number): Minimum relative elevation for trees 0.0 to 1.0</li>
                         <li><strong>TreeZMax</strong> (Number): Maximum relative elevation for trees 0.0 to 1.0</li>
                     </ul>
                 </div>
                 <div class="io-col">
-                    <h3>Outputs (4)</h3>
+                    <h3>Outputs (5)</h3>
                     <ul>
                         <li><strong>Mesh</strong> (Mesh): Gradient colored terrain geometry</li>
                         <li><strong>NormContours</strong> (Curve): Standard contour lines</li>
                         <li><strong>MainContours</strong> (Curve): Major interval contour lines</li>
                         <li><strong>Trees</strong> (Point): Scattered point coordinates for trees</li>
+                        <li><strong>Info</strong> (Text): Component information and interpretation</li>
                     </ul>
                 </div>
             </div>

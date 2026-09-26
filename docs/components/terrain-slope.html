@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terrain Slope - Enzyme Plugin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="../index.html" class="nav-brand">
+            <img src="../images/enzyme_logo.png" alt="Enzyme Logo" class="logo-img">
+        </a>
+        <div class="nav-links">
+            <a href="../index.html#components">Components</a>
+            <a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank">GitHub</a>
+        </div>
+    </nav>
+
+    <main class="container doc-page">
+        <div class="doc-header" style="display: flex; align-items: center;">
+            <div>
+                <h1>Terrain Slope</h1>
+                <p class="doc-subtitle">Ultra-fast mesh slope analyzer using raw C# sequential array processing and safe UI automation.</p>
+                <div class="doc-meta">
+                    <span class="badge site-analysis">Site Analysis</span>
+                    <span>Nickname: <strong>TerrainSlope</strong></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="doc-content">
+            <h2>Overview</h2>
+            <p>Ultra-fast mesh slope analyzer using raw C# sequential array processing and safe UI automation.</p>
+            
+            <div class="io-grid">
+                <div class="io-col">
+                    <h3>Inputs (5)</h3>
+                    <ul>
+                        <li><strong>TargetMeshes</strong> (Mesh): Meshes to analyze</li>
+                        <li><strong>ThresholdValue</strong> (Number): Threshold for slope analysis</li>
+                        <li><strong>ThresholdMode</strong> (Integer): 0: Degrees, 1: Percentage, 2: Ratio</li>
+                        <li><strong>Custom Colors</strong> (Colour): List of colors for gradient or binary mapping</li>
+                        <li><strong>EnableBinaryMode</strong> (Boolean): If true, snaps to binary colors (Under/Over threshold)</li>
+                    </ul>
+                </div>
+                <div class="io-col">
+                    <h3>Outputs (3)</h3>
+                    <ul>
+                        <li><strong>AnalyzedMeshes</strong> (Mesh): Colored Meshes</li>
+                        <li><strong>Dashboard Data</strong> (Text): JSON Legend Data</li>
+                        <li><strong>Info</strong> (Text): Component information and interpretation</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p><a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank" style="color: #a1a1aa; text-decoration: none; border-bottom: 1px solid #3f3f46; padding-bottom: 2px;">View on GitHub</a></p>
+    </footer>
+</body>
+</html>

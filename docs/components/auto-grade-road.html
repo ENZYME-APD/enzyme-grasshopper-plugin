@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto-Grade Road - Enzyme Plugin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="../index.html" class="nav-brand">
+            <img src="../images/enzyme_logo.png" alt="Enzyme Logo" class="logo-img">
+        </a>
+        <div class="nav-links">
+            <a href="../index.html#components">Components</a>
+            <a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank">GitHub</a>
+        </div>
+    </nav>
+
+    <main class="container doc-page">
+        <div class="doc-header" style="display: flex; align-items: center;">
+            <div>
+                <h1>Auto-Grade Road</h1>
+                <p class="doc-subtitle">Procedurally drapes and slope-constrains a 2D centerline into a smooth 3D road profile.</p>
+                <div class="doc-meta">
+                    <span class="badge masterplan">Masterplan</span>
+                    <span>Nickname: <strong>AutoGrade</strong></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="doc-content">
+            <h2>Overview</h2>
+            <p>Procedurally drapes and slope-constrains a 2D centerline into a smooth 3D road profile.</p>
+            
+            <div class="io-grid">
+                <div class="io-col">
+                    <h3>Inputs (5)</h3>
+                    <ul>
+                        <li><strong>Centerline</strong> (Curve): Flat 2D Centerline</li>
+                        <li><strong>Terrain</strong> (Mesh): Existing Ground Mesh</li>
+                        <li><strong>Max Slope</strong> (Number): Maximum longitudinal slope (e.g. 0.08 for 8%)</li>
+                        <li><strong>Resolution</strong> (Number): Subdivision distance in meters</li>
+                        <li><strong>Smoothing</strong> (Integer): Smoothing iterations for vertical curvature</li>
+                    </ul>
+                </div>
+                <div class="io-col">
+                    <h3>Outputs (2)</h3>
+                    <ul>
+                        <li><strong>3D Road</strong> (Curve): The optimized, slope-constrained 3D centerline</li>
+                        <li><strong>Existing Ground</strong> (Curve): The raw draped profile on the terrain</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p><a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank" style="color: #a1a1aa; text-decoration: none; border-bottom: 1px solid #3f3f46; padding-bottom: 2px;">View on GitHub</a></p>
+    </footer>
+</body>
+</html>

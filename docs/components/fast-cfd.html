@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fast CFD - Enzyme Plugin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="../index.html" class="nav-brand">
+            <img src="../images/enzyme_logo.png" alt="Enzyme Logo" class="logo-img">
+        </a>
+        <div class="nav-links">
+            <a href="../index.html#components">Components</a>
+            <a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank">GitHub</a>
+        </div>
+    </nav>
+
+    <main class="container doc-page">
+        <div class="doc-header" style="display: flex; align-items: center;">
+            <div>
+                <h1>Fast CFD</h1>
+                <p class="doc-subtitle">A 2.5D Terrain-Following Grid Fluid Solver for fast urban wind analysis.</p>
+                <div class="doc-meta">
+                    <span class="badge site-analysis">Site Analysis</span>
+                    <span>Nickname: <strong>FastCFD</strong></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="doc-content">
+            <h2>Overview</h2>
+            <p>A 2.5D Terrain-Following Grid Fluid Solver for fast urban wind analysis.</p>
+            
+            <div class="io-grid">
+                <div class="io-col">
+                    <h3>Inputs (12)</h3>
+                    <ul>
+                        <li><strong>TerrainMesh</strong> (Mesh): Input Terrain Mesh</li>
+                        <li><strong>ContextMeshes</strong> (Mesh): Buildings and context as closed meshes</li>
+                        <li><strong>WindVector</strong> (Vector): Wind direction</li>
+                        <li><strong>WindSpeed</strong> (Number): Baseline wind velocity (m/s)</li>
+                        <li><strong>CellSize</strong> (Number): Resolution of the grid in meters.</li>
+                        <li><strong>Iterations</strong> (Integer): Simulation steps</li>
+                        <li><strong>AnalysisHeight</strong> (Number): Drape offset above terrain (m)</li>
+                        <li><strong>Viscosity</strong> (Number): Kinematic viscosity (diffusion/turbulence)</li>
+                        <li><strong>Friction</strong> (Number): Surface drag (0.0 to 1.0). Accepts item or list.</li>
+                        <li><strong>ComfortThreshold</strong> (Number): Threshold for pedestrian comfort (m/s)</li>
+                        <li><strong>BoundaryMask</strong> (Curve): Optional closed curve to crop the simulation domain and filter statistics.</li>
+                        <li><strong>Colors</strong> (Colour): Custom color spectrum override (min to max)</li>
+                    </ul>
+                </div>
+                <div class="io-col">
+                    <h3>Outputs (7)</h3>
+                    <ul>
+                        <li><strong>WindMesh</strong> (Mesh): Heatmap of wind speeds mapped to the terrain</li>
+                        <li><strong>Points</strong> (Point): Grid points corresponding to the vectors</li>
+                        <li><strong>WindVectors</strong> (Vector): Wind velocity vectors for visualization</li>
+                        <li><strong>Colors</strong> (Colour): The color assigned to each point/vector</li>
+                        <li><strong>Speeds</strong> (Number): Wind speed magnitude (m/s) at each point</li>
+                        <li><strong>Dashboard Data</strong> (Text): JSON string for Dashboard and Legend</li>
+                        <li><strong>Info</strong> (Text): Simulation data and timing</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p><a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank" style="color: #a1a1aa; text-decoration: none; border-bottom: 1px solid #3f3f46; padding-bottom: 2px;">View on GitHub</a></p>
+    </footer>
+</body>
+</html>

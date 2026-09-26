@@ -22,7 +22,7 @@
         <div class="doc-header" style="display: flex; align-items: center;">
             <div>
                 <h1>Fast Noise Analyzer</h1>
-                <p class="doc-subtitle">Calculates pseudo-acoustic noise propagation from emitter points onto analysis meshes, outputting a vertex-colored heatmap.</p>
+                <p class="doc-subtitle">A rapid pseudo-acoustic noise analysis component. Maps decibel (dB) decay over distance and occlusions onto arbitrary meshes.</p>
                 <div class="doc-meta">
                     <span class="badge site-analysis">Site Analysis</span>
                     <span>Nickname: <strong>NoiseEnv</strong></span>
@@ -32,33 +32,33 @@
 
         <div class="doc-content">
             <h2>Overview</h2>
-            <p>Calculates pseudo-acoustic noise propagation from emitter points onto analysis meshes, outputting a vertex-colored heatmap.</p>
+            <p>A rapid pseudo-acoustic noise analysis component. Maps decibel (dB) decay over distance and occlusions onto arbitrary meshes.</p>
             
             <div class="io-grid">
                 <div class="io-col">
                     <h3>Inputs (9)</h3>
                     <ul>
-                        <li><strong>AnalysisMeshes</strong> (Mesh): The target meshes to colorize with noise values (e.g. context buildings or terrain)</li>
-                        <li><strong>NoiseEmitters</strong> (Point): Point locations of noise sources</li>
-                        <li><strong>EmitterdB</strong> (Number): Decibel levels corresponding to each noise emitter</li>
-                        <li><strong>HardContext</strong> (Mesh): Solid objects (like buildings) that block noise heavily (-15dB attenuation)</li>
-                        <li><strong>SoftContext</strong> (Mesh): Porous objects (like vegetation) that block noise slightly (-5dB attenuation)</li>
-                        <li><strong>AnalysisPoints</strong> (Point): Optional specific discrete points to analyze</li>
-                        <li><strong>Run</strong> (Boolean): Toggle to run the analysis</li>
-                        <li><strong>CustomColors</strong> (Colour): Optional gradient palette for the heatmap</li>
-                        <li><strong>SensorOffset</strong> (Number): Distance to push the sensors off the mesh to avoid self-occlusion (m)</li>
+                        <li><strong>Run</strong> (Boolean): Global execution toggle switch</li>
+                        <li><strong>AnalysisMeshes</strong> (Mesh): Building masses or terrain to project heatmap onto</li>
+                        <li><strong>ContextBuildings</strong> (Mesh): Solid meshes for hard sound occlusion (-15dB)</li>
+                        <li><strong>SoftContext</strong> (Mesh): Vegetation/porous meshes for minor occlusion (-5dB)</li>
+                        <li><strong>Emitters</strong> (Point): Noise source points (e.g., roads, machinery)</li>
+                        <li><strong>EmitterPower</strong> (Number): Decibel level per emitter at 1m (default 85dB)</li>
+                        <li><strong>AnalysisPoints</strong> (Point): Specific discrete test locations (e.g. windows) to test individually</li>
+                        <li><strong>SensorOffset</strong> (Number): Distance to offset sensors from surfaces to avoid self-occlusion (m)</li>
+                        <li><strong>CustomColors</strong> (Colour): Color spectrum override (Quiet -> Loud)</li>
                     </ul>
                 </div>
                 <div class="io-col">
                     <h3>Outputs (7)</h3>
                     <ul>
                         <li><strong>NoiseMeshes</strong> (Mesh): Vertex-colored meshes representing the noise heatmap</li>
-                        <li><strong>MeshPts</strong> (Point): The evaluated vertex coordinates of the analysis meshes</li>
-                        <li><strong>Mesh_dB</strong> (Number): The decibel values matching the MeshPoints</li>
-                        <li><strong>PtsOut</strong> (Point): Pass-through for AnalysisPoints input</li>
-                        <li><strong>Pts_dB</strong> (Number): Raw dB values precisely at the AnalysisPoints</li>
-                        <li><strong>Dashboard</strong> (Text): JSON legend data for the Analysis Dashboard</li>
-                        <li><strong>Info</strong> (Text): Disclaimer on methodology and limitations</li>
+                        <li><strong>MeshPoints</strong> (Point): The evaluated vertex coordinates of the analysis meshes</li>
+                        <li><strong>MeshValues</strong> (Number): The decibel values matching the MeshPoints</li>
+                        <li><strong>AnalysisPtsOut</strong> (Point): Pass-through for AnalysisPoints input</li>
+                        <li><strong>AnalysisPtsValues</strong> (Number): Raw dB values precisely at the AnalysisPoints</li>
+                        <li><strong>DashboardData</strong> (Text): JSON legend data</li>
+                        <li><strong>Info</strong> (Text): Disclaimer on methodology and pseudo-acoustic limitations</li>
                     </ul>
                 </div>
             </div>

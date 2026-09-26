@@ -22,7 +22,7 @@
         <div class="doc-header" style="display: flex; align-items: center;">
             <div>
                 <h1>Keypoint Engine</h1>
-                <p class="doc-subtitle">Analyzes stream slopes to mathematically isolate the inflection point (Keypoint) and extracts the Master Keyline contour.</p>
+                <p class="doc-subtitle">Analyzes stream slopes to find the inflection point (Keypoint) and extracts the Master Keyline contour.</p>
                 <div class="doc-meta">
                     <span class="badge site-analysis">Site Analysis</span>
                     <span>Nickname: <strong>Keypoint</strong></span>
@@ -32,20 +32,7 @@
 
         <div class="doc-content">
             <h2>Overview</h2>
-            <p>Analyzes stream slopes to mathematically isolate the inflection point (Keypoint) and extracts the Master Keyline contour.</p>
-            
-            <div class="workflow-section" style="margin: 2rem 0; padding: 1.5rem; background: #27272a; border-radius: 8px; border-left: 4px solid #3b82f6;">
-                <h3 style="margin-top: 0; color: #60a5fa;">Workflow & Methodology</h3>
-                <p><strong>Phase: Prepare (TNFD/LEAP)</strong></p>
-        <p>In regenerative agriculture (specifically P.A. Yeomans' Keyline Design), the "Keypoint" is the critical inflection point in a primary valley where the slope transitions from steep (convex) to flat (concave). Identifying this manually on a jagged surveyor mesh is highly error-prone.</p>
-        <p><strong>How it works:</strong></p>
-        <ol>
-            <li><strong>Slope Analysis:</strong> The component walks down the stream polyline (from the Hydro-DEM engine) and calculates the exact gradient of every geometric segment.</li>
-            <li><strong>Noise Filtering:</strong> Using a moving-average window, it smooths out minor mesh bumps and artifacts to prevent "false" keypoints.</li>
-            <li><strong>Inflection Isolation:</strong> It isolates the specific vertex experiencing the maximum deceleration (the greatest steep-to-flat transition) and outputs this as the <code>Keypoint</code>.</li>
-            <li><strong>Master Keyline Extraction:</strong> If the Terrain mesh is provided, it slices the site horizontally at the exact elevation of the Keypoint, filters out disconnected site contours, and outputs the true Master Keyline contour.</li>
-        </ol>
-            </div>
+            <p>Analyzes stream slopes to find the inflection point (Keypoint) and extracts the Master Keyline contour.</p>
             
             <div class="io-grid">
                 <div class="io-col">
@@ -57,10 +44,12 @@
                     </ul>
                 </div>
                 <div class="io-col">
-                    <h3>Outputs (2)</h3>
+                    <h3>Outputs (4)</h3>
                     <ul>
                         <li><strong>Keypoints</strong> (Point): The identified points of inflection (steep to flat)</li>
                         <li><strong>Master Keylines</strong> (Curve): The specific horizontal terrain contours passing through the Keypoints</li>
+                        <li><strong>Info</strong> (Text): Component information and methodology</li>
+                        <li><strong>Dashboard Data</strong> (Text): Unified JSON payload containing legend and key analysis metrics for the Analysis Dashboard</li>
                     </ul>
                 </div>
             </div>

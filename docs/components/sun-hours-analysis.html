@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sun Hours Analysis - Enzyme Plugin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="../index.html" class="nav-brand">
+            <img src="../images/enzyme_logo.png" alt="Enzyme Logo" class="logo-img">
+        </a>
+        <div class="nav-links">
+            <a href="../index.html#components">Components</a>
+            <a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank">GitHub</a>
+        </div>
+    </nav>
+
+    <main class="container doc-page">
+        <div class="doc-header" style="display: flex; align-items: center;">
+            <div>
+                <h1>Sun Hours Analysis</h1>
+                <p class="doc-subtitle">Multi-threaded raycaster. Analyzes arbitrary 3D massing or custom points for sun exposure.</p>
+                <div class="doc-meta">
+                    <span class="badge site-analysis">Site Analysis</span>
+                    <span>Nickname: <strong>SunHours</strong></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="doc-content">
+            <h2>Overview</h2>
+            <p>Multi-threaded raycaster. Analyzes arbitrary 3D massing or custom points for sun exposure.</p>
+            
+            <div class="io-grid">
+                <div class="io-col">
+                    <h3>Inputs (8)</h3>
+                    <ul>
+                        <li><strong>Test Points</strong> (Point): (Workflow 2) High LOD: Specific points to test (e.g., window centroids). Overrides Massing.</li>
+                        <li><strong>Geometry</strong> (Geometry): (Workflow 1) Low LOD: 3D Massing (Breps) or Terrain (Meshes) to analyze.</li>
+                        <li><strong>Grid Size</strong> (Number): Subdivision size for auto-meshing the Massing.</li>
+                        <li><strong>Context</strong> (Mesh): Environment geometry (buildings, terrain) as shadow casters.</li>
+                        <li><strong>Sun Vectors</strong> (Vector): Solar vectors from the Heliodon.</li>
+                        <li><strong>Gradient</strong> (Colour): Optional custom color gradient (list of colors from 0% to 100%).</li>
+                        <li><strong>Run</strong> (Boolean): Trigger the analysis.</li>
+                        <li><strong>Offset</strong> (Number): Offset distance for output points.</li>
+                    </ul>
+                </div>
+                <div class="io-col">
+                    <h3>Outputs (7)</h3>
+                    <ul>
+                        <li><strong>Sun Hours</strong> (Integer): Total number of sun rays that reached the point.</li>
+                        <li><strong>Exposure %</strong> (Number): Percentage of time in the sun (0.0 to 1.0).</li>
+                        <li><strong>Points Out</strong> (Point): The analyzed points.</li>
+                        <li><strong>Analysis Mesh</strong> (Mesh): The auto-subdivided Massing mesh (for easy gradient coloring).</li>
+                        <li><strong>Colors</strong> (Colour): Color mapped to each point.</li>
+                        <li><strong>Dashboard Data</strong> (Text): JSON legend data</li>
+                        <li><strong>Colors</strong> (Colour): Color mapped to each point based on exposure.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p><a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank" style="color: #a1a1aa; text-decoration: none; border-bottom: 1px solid #3f3f46; padding-bottom: 2px;">View on GitHub</a></p>
+    </footer>
+</body>
+</html>

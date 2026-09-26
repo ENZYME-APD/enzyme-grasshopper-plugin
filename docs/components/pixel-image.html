@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel Image - Enzyme Plugin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="../index.html" class="nav-brand">
+            <img src="../images/enzyme_logo.png" alt="Enzyme Logo" class="logo-img">
+        </a>
+        <div class="nav-links">
+            <a href="../index.html#components">Components</a>
+            <a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank">GitHub</a>
+        </div>
+    </nav>
+
+    <main class="container doc-page">
+        <div class="doc-header" style="display: flex; align-items: center;">
+            <div>
+                <h1>Pixel Image</h1>
+                <p class="doc-subtitle">Creates a tiled surface that pixelates an image with a posterized color palette.</p>
+                <div class="doc-meta">
+                    <span class="badge facade">Facade</span>
+                    <span>Nickname: <strong>PixImg</strong></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="doc-content">
+            <h2>Overview</h2>
+            <p>Creates a tiled surface that pixelates an image with a posterized color palette.</p>
+            
+            <div class="io-grid">
+                <div class="io-col">
+                    <h3>Inputs (11)</h3>
+                    <ul>
+                        <li><strong>Image Path</strong> (Text): Absolute path to the image file</li>
+                        <li><strong>Grid Cells</strong> (Curve): Pre-generated grid cells</li>
+                        <li><strong>Mapping Plane</strong> (Plane): Optional plane for UV mapping. Auto-detected if empty.</li>
+                        <li><strong>Colors</strong> (Colour): List of colors mapped to brightness (dark to light)</li>
+                        <li><strong>Accent Color</strong> (Colour): Accent color</li>
+                        <li><strong>Jitter Pct</strong> (Number): Jitter percentage (0-100)</li>
+                        <li><strong>Accent Pct</strong> (Number): Accent percentage (0-100)</li>
+                        <li><strong>Inset Factor</strong> (Number): Inset factor (0.0-1.0)</li>
+                        <li><strong>Bake</strong> (Boolean): Bake trigger</li>
+                        <li><strong>Bake Name</strong> (Text): Bake group/layer name</li>
+                        <li><strong>Rotation</strong> (Number): Rotate image map in degrees</li>
+                    </ul>
+                </div>
+                <div class="io-col">
+                    <h3>Outputs (4)</h3>
+                    <ul>
+                        <li><strong>panel_mesh</strong> (Mesh): Meshes colored by palette</li>
+                        <li><strong>panel_colors</strong> (Colour): Colors of panels</li>
+                        <li><strong>panel_tags</strong> (Text): Panel tags</li>
+                        <li><strong>panel_geometry</strong> (Curve): Panel boundary curves</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p><a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank" style="color: #a1a1aa; text-decoration: none; border-bottom: 1px solid #3f3f46; padding-bottom: 2px;">View on GitHub</a></p>
+    </footer>
+</body>
+</html>

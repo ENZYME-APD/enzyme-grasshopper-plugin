@@ -20,7 +20,6 @@
 
     <main class="container doc-page">
         <div class="doc-header" style="display: flex; align-items: center;">
-            <img src="../images/icons/road_slope_icon.png" alt="Road Slope Analyzer Icon" class="comp-icon" style="width: 48px; height: 48px; margin-right: 1rem; border-radius: 8px;">
             <div>
                 <h1>Road Slope Analyzer</h1>
                 <p class="doc-subtitle">Analyzes road slopes by projecting 2D curves onto a terrain mesh</p>
@@ -41,13 +40,13 @@
                     <ul>
                         <li><strong>Curves</strong> (Curve): 2D curves representing roads</li>
                         <li><strong>Terrain</strong> (Mesh): Terrain mesh for projection</li>
-                        <li><strong>Threshold</strong> (Number): Slope threshold in percentage</li>
+                        <li><strong>Threshold</strong> (Number): Slope threshold</li>
                         <li><strong>Segment Size</strong> (Number): Size of segments for analysis</li>
-                        <li><strong>Ray Upward</strong> (Boolean): Cast rays upward instead of both directions</li>
+                        <li><strong>Threshold Mode</strong> (Integer): 0: Degrees, 1: Percentage, 2: Ratio 1:X</li>
                     </ul>
                 </div>
                 <div class="io-col">
-                    <h3>Outputs (6)</h3>
+                    <h3>Outputs (7)</h3>
                     <ul>
                         <li><strong>Analyzed Segments</strong> (Curve): Road segments with slope analysis</li>
                         <li><strong>Slope Values</strong> (Number): Slope values for each segment</li>
@@ -55,6 +54,7 @@
                         <li><strong>Compliance Percentage</strong> (Number): Percentage of compliant/non-compliant segments</li>
                         <li><strong>Projected Points</strong> (Point): Points projected onto terrain</li>
                         <li><strong>Projection Lines</strong> (Line): Lines showing projection from original to terrain</li>
+                        <li><strong>Dashboard Data</strong> (Text): JSON legend data</li>
                     </ul>
                 </div>
             </div>

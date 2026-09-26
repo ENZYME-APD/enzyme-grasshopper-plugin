@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Streamlines - Enzyme Plugin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="../index.html" class="nav-brand">
+            <img src="../images/enzyme_logo.png" alt="Enzyme Logo" class="logo-img">
+        </a>
+        <div class="nav-links">
+            <a href="../index.html#components">Components</a>
+            <a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank">GitHub</a>
+        </div>
+    </nav>
+
+    <main class="container doc-page">
+        <div class="doc-header" style="display: flex; align-items: center;">
+            <div>
+                <h1>Streamlines</h1>
+                <p class="doc-subtitle">Generates smooth streamlines (particle traces) through any vector field using Inverse Distance Weighting.</p>
+                <div class="doc-meta">
+                    <span class="badge site-analysis">Site Analysis</span>
+                    <span>Nickname: <strong>Streamlines</strong></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="doc-content">
+            <h2>Overview</h2>
+            <p>Generates smooth streamlines (particle traces) through any vector field using Inverse Distance Weighting.</p>
+            
+            <div class="io-grid">
+                <div class="io-col">
+                    <h3>Inputs (7)</h3>
+                    <ul>
+                        <li><strong>FieldPoints</strong> (Point): The locations of the vector field data</li>
+                        <li><strong>FieldVectors</strong> (Vector): The vectors corresponding to each FieldPoint</li>
+                        <li><strong>SeedPoints</strong> (Point): The starting locations for the streamlines</li>
+                        <li><strong>StepSize</strong> (Number): Distance to move per integration step</li>
+                        <li><strong>MaxSteps</strong> (Integer): Maximum number of steps per streamline</li>
+                        <li><strong>SearchRadius</strong> (Number): Radius to search for blending local vectors</li>
+                        <li><strong>MoveUp</strong> (Number): Visual Z-offset to prevent clashing with the analysis mesh</li>
+                    </ul>
+                </div>
+                <div class="io-col">
+                    <h3>Outputs (2)</h3>
+                    <ul>
+                        <li><strong>Streamlines</strong> (Curve): The generated streamline curves</li>
+                        <li><strong>Info</strong> (Text): Component documentation and stats</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p><a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank" style="color: #a1a1aa; text-decoration: none; border-bottom: 1px solid #3f3f46; padding-bottom: 2px;">View on GitHub</a></p>
+    </footer>
+</body>
+</html>

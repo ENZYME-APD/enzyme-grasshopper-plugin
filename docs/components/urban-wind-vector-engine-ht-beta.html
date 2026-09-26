@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Urban Wind Vector Engine HT (Beta) - Enzyme Plugin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="../index.html" class="nav-brand">
+            <img src="../images/enzyme_logo.png" alt="Enzyme Logo" class="logo-img">
+        </a>
+        <div class="nav-links">
+            <a href="../index.html#components">Components</a>
+            <a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank">GitHub</a>
+        </div>
+    </nav>
+
+    <main class="container doc-page">
+        <div class="doc-header" style="display: flex; align-items: center;">
+            <div>
+                <h1>Urban Wind Vector Engine HT (Beta)</h1>
+                <p class="doc-subtitle">Simulates urban wind fields using terrain-parallel raycasting. Outputs a perfectly flat, crisp XY pixel-screen heatmap at a custom elevation.</p>
+                <div class="doc-meta">
+                    <span class="badge site-analysis">Site Analysis</span>
+                    <span>Nickname: <strong>WindEngineHTVer</strong></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="doc-content">
+            <h2>Overview</h2>
+            <p>Simulates urban wind fields using terrain-parallel raycasting. Outputs a perfectly flat, crisp XY pixel-screen heatmap at a custom elevation.</p>
+            
+            <div class="io-grid">
+                <div class="io-col">
+                    <h3>Inputs (19)</h3>
+                    <ul>
+                        <li><strong>Run</strong> (Boolean): Global execution toggle switch</li>
+                        <li><strong>TerrainMesh</strong> (Mesh): The underlying site topography</li>
+                        <li><strong>ContextBuildings</strong> (Mesh): Lightweight mesh context structures</li>
+                        <li><strong>WindDirection</strong> (Vector): Travel vector of incoming air</li>
+                        <li><strong>WindSpeed</strong> (Number): Baseline velocity metric</li>
+                        <li><strong>AnalysisHeight</strong> (Number): Human pedestrian offset</li>
+                        <li><strong>GridSpacing</strong> (Number): Resolution size of pixel elements</li>
+                        <li><strong>CustomColors</strong> (Colour): Custom color spectrum override</li>
+                        <li><strong>HeatmapHeight</strong> (Number): Z offset applied to the heatmap: added to the terrain bounding box top in Flat mode (DrapeHeatmap=false), or added to each point's own local terrain height in Drape mode (DrapeHeatmap=true)</li>
+                        <li><strong>WakeLengthRatio</strong> (Number): Wake length as a multiple of the obstructing building's height (typical near-wake range 6-8x)</li>
+                        <li><strong>SlopeSpeedup</strong> (Number): Coefficient controlling how much upward terrain slope accelerates wind (0 = no slope effect)</li>
+                        <li><strong>CornerTangency</strong> (Number): How tangent (0-1) wind must be to a wall before corner-channeling kicks in; lower = stricter</li>
+                        <li><strong>CornerBoost</strong> (Number): Speed boost coefficient applied when wind channels around a building corner</li>
+                        <li><strong>GapBoost</strong> (Number): Extra speed boost applied when a point is squeezed between two facing building walls (venturi/tunneling), scaled by how narrow the gap is</li>
+                        <li><strong>Iterations</strong> (Integer): Relaxation passes per point: each pass re-evaluates wake/corner/gap using the previous pass's own direction, letting a point settle through multiple sequential building interactions instead of a single snapshot. 1 = original single-pass behavior</li>
+                        <li><strong>Damping</strong> (Number): Blend factor (0-1) between a point's previous iteration and its newly computed one. Lower = slower, more stable convergence; 1.0 = no damping (replace outright each pass)</li>
+                        <li><strong>DrapeHeatmap</strong> (Boolean): true = heatmap follows terrain relief, offset from each point's own local ground height. false = a single flat plane, offset from the terrain's bounding-box top</li>
+                        <li><strong>SeedBox</strong> (Box): Optional bounding box - every valid analysis grid point inside it is used as a streamline seed instead of the default sparse grid sampling</li>
+                        <li><strong>StreamlineMaxSteps</strong> (Integer): Safety ceiling on streamline length. A streamline normally stops on its own once it exits the mesh, goes solid, or its speed dies out - this only guards against a pathological case looping forever</li>
+                    </ul>
+                </div>
+                <div class="io-col">
+                    <h3>Outputs (9)</h3>
+                    <ul>
+                        <li><strong>VelocityHeatmap</strong> (Mesh): Flat, unwelded crisp horizontal pixel-tile matrix</li>
+                        <li><strong>WindVectors</strong> (Line): Spatial direction markers</li>
+                        <li><strong>VectorColors</strong> (Colour): Velocity color map matching lines</li>
+                        <li><strong>Streamlines</strong> (Curve): Continuous particle flow paths</li>
+                        <li><strong>TagPoints</strong> (Point): Anchor coordinates for Text Tag</li>
+                        <li><strong>PlainMesh</strong> (Mesh): Original topography mesh without vertex colors</li>
+                        <li><strong>VelocityValues</strong> (Number): Raw unformatted velocity values, aligned with WindVectors</li>
+                        <li><strong>Info</strong> (Text): Component information and interpretation</li>
+                        <li><strong>Dashboard Data</strong> (Text): JSON legend payload (min/max speed + the actual color ramp in use) - feed directly into the Legend Geometry component's Color Legend input</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p><a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank" style="color: #a1a1aa; text-decoration: none; border-bottom: 1px solid #3f3f46; padding-bottom: 2px;">View on GitHub</a></p>
+    </footer>
+</body>
+</html>

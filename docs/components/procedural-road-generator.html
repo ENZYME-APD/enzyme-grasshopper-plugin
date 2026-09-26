@@ -22,7 +22,7 @@
         <div class="doc-header" style="display: flex; align-items: center;">
             <div>
                 <h1>Procedural Road Generator</h1>
-                <p class="doc-subtitle">Procedurally generates a full road corridor (asphalt mesh, lanes, railings, bridge pillars) by projecting a centerline onto a terrain mesh. Includes accurate quad-splitting cut/fill volumetric solids.</p>
+                <p class="doc-subtitle">Generates procedural roads, bridges, and terrain cuts/fills using a blazing fast 2.5D approach.</p>
                 <div class="doc-meta">
                     <span class="badge masterplan">Masterplan</span>
                     <span>Nickname: <strong>RoadGen</strong></span>
@@ -32,16 +32,23 @@
 
         <div class="doc-content">
             <h2>Overview</h2>
-            <p>Procedurally generates a full road corridor (asphalt mesh, lanes, railings, bridge pillars) by projecting a centerline onto a terrain mesh. Includes accurate quad-splitting cut/fill volumetric solids.</p>
+            <p>Generates procedural roads, bridges, and terrain cuts/fills using a blazing fast 2.5D approach.</p>
             
             <div class="io-grid">
                 <div class="io-col">
-                    <h3>Inputs (4)</h3>
+                    <h3>Inputs (11)</h3>
                     <ul>
-                        <li><strong>Terrain</strong> (Mesh): Base topography mesh</li>
-                        <li><strong>Network</strong> (Curve): Centerline curve(s) of the road</li>
-                        <li><strong>Parameters</strong> (Text): Road parameters JSON from Spec Component</li>
-                        <li><strong>Exclusions</strong> (Point): Points to exclude from generation</li>
+                        <li><strong>Centerlines</strong> (Curve): List of 3D road centerlines</li>
+                        <li><strong>Terrain</strong> (Mesh): Base landscape mesh</li>
+                        <li><strong>Directions</strong> (Integer): Number of directions (1 or 2)</li>
+                        <li><strong>Lanes/Dir</strong> (Integer): Number of lanes per direction</li>
+                        <li><strong>Lane Width</strong> (Number): Width of an individual lane</li>
+                        <li><strong>Shoulder</strong> (Number): Width of the hard shoulder</li>
+                        <li><strong>Threshold</strong> (Number): Max vertical distance before becoming a bridge</li>
+                        <li><strong>Pillar Sep</strong> (Number): Distance between bridge pillars</li>
+                        <li><strong>Blend Angle</strong> (Number): Embankment cut/fill slope angle (degrees)</li>
+                        <li><strong>Subdivide</strong> (Number): Resolution along the road for terrain modification</li>
+                        <li><strong>Colorize</strong> (Boolean): Colorize terrain/volumes for Cut (Red) and Fill (Blue)</li>
                     </ul>
                 </div>
                 <div class="io-col">
@@ -61,5 +68,9 @@
             </div>
         </div>
     </main>
+
+    <footer>
+        <p><a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank" style="color: #a1a1aa; text-decoration: none; border-bottom: 1px solid #3f3f46; padding-bottom: 2px;">View on GitHub</a></p>
+    </footer>
 </body>
 </html>

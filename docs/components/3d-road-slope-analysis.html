@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Road Slope Analysis - Enzyme Plugin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="../index.html" class="nav-brand">
+            <img src="../images/enzyme_logo.png" alt="Enzyme Logo" class="logo-img">
+        </a>
+        <div class="nav-links">
+            <a href="../index.html#components">Components</a>
+            <a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank">GitHub</a>
+        </div>
+    </nav>
+
+    <main class="container doc-page">
+        <div class="doc-header" style="display: flex; align-items: center;">
+            <div>
+                <h1>3D Road Slope Analysis</h1>
+                <p class="doc-subtitle">Analyzes road slopes directly from 3D centerline curves without needing a terrain mesh.</p>
+                <div class="doc-meta">
+                    <span class="badge masterplan">Masterplan</span>
+                    <span>Nickname: <strong>RoadSlope3D</strong></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="doc-content">
+            <h2>Overview</h2>
+            <p>Analyzes road slopes directly from 3D centerline curves without needing a terrain mesh.</p>
+            
+            <div class="io-grid">
+                <div class="io-col">
+                    <h3>Inputs (5)</h3>
+                    <ul>
+                        <li><strong>Curves</strong> (Curve): 3D curves representing road centerlines</li>
+                        <li><strong>Threshold</strong> (Number): Slope threshold</li>
+                        <li><strong>Segment Size</strong> (Number): Size of segments for analysis</li>
+                        <li><strong>Threshold Mode</strong> (Integer): 0: Degrees, 1: Percentage, 2: Ratio 1:X</li>
+                        <li><strong>Colors</strong> (Colour): Custom colors (Compliant, Non-Compliant)</li>
+                    </ul>
+                </div>
+                <div class="io-col">
+                    <h3>Outputs (7)</h3>
+                    <ul>
+                        <li><strong>Analyzed Segments</strong> (Curve): Segmented 3D road curves</li>
+                        <li><strong>Slope Values</strong> (Number): Slope values for each segment</li>
+                        <li><strong>Center Points</strong> (Point): Center points of segments</li>
+                        <li><strong>Segment Status</strong> (Text): Status (Compliant / Non-Compliant) per segment</li>
+                        <li><strong>Compliance Percentage</strong> (Number): Overall compliance percentage</li>
+                        <li><strong>Dashboard Data</strong> (Text): JSON legend data</li>
+                        <li><strong>Info</strong> (Text): Component information</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p><a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank" style="color: #a1a1aa; text-decoration: none; border-bottom: 1px solid #3f3f46; padding-bottom: 2px;">View on GitHub</a></p>
+    </footer>
+</body>
+</html>

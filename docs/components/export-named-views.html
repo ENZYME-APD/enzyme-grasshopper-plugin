@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Export Named Views - Enzyme Plugin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="../index.html" class="nav-brand">
+            <img src="../images/enzyme_logo.png" alt="Enzyme Logo" class="logo-img">
+        </a>
+        <div class="nav-links">
+            <a href="../index.html#components">Components</a>
+            <a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank">GitHub</a>
+        </div>
+    </nav>
+
+    <main class="container doc-page">
+        <div class="doc-header" style="display: flex; align-items: center;">
+            <div>
+                <h1>Export Named Views</h1>
+                <p class="doc-subtitle">Exports Rhino Named Views to image files with custom ViewCapture settings.</p>
+                <div class="doc-meta">
+                    <span class="badge utilities">Utilities</span>
+                    <span>Nickname: <strong>ExportViews</strong></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="doc-content">
+            <h2>Overview</h2>
+            <p>Exports Rhino Named Views to image files with custom ViewCapture settings.</p>
+            
+            <div class="io-grid">
+                <div class="io-col">
+                    <h3>Inputs (15)</h3>
+                    <ul>
+                        <li><strong>Run</strong> (Boolean): Set to true to export the views.</li>
+                        <li><strong>Views</strong> (Text): Names of the views to export. If empty, exports ALL named views.</li>
+                        <li><strong>Display Style</strong> (Text): Optional. Name of the Display Mode (e.g., 'Rendered'). Leaves active if empty.</li>
+                        <li><strong>Layer State</strong> (Text): Optional. Name of the saved Layer State to restore. Leaves active if empty.</li>
+                        <li><strong>Directory</strong> (Text): Folder path to save the images.</li>
+                        <li><strong>Prefix</strong> (Text): Prefix for the output filenames (optional).</li>
+                        <li><strong>Suffix</strong> (Text): Suffix for the output filenames (optional).</li>
+                        <li><strong>Format</strong> (Text): Image format: png, jpg, bmp, tiff.</li>
+                        <li><strong>Width</strong> (Integer): Image width in pixels.</li>
+                        <li><strong>Height</strong> (Integer): Image height in pixels.</li>
+                        <li><strong>DPI</strong> (Integer): Print DPI metadata embedded into the image.</li>
+                        <li><strong>Grid</strong> (Boolean): Show Grid.</li>
+                        <li><strong>World Axes</strong> (Boolean): Show World Axes.</li>
+                        <li><strong>CPlane Axes</strong> (Boolean): Show CPlane Axes.</li>
+                        <li><strong>Transparent</strong> (Boolean): Transparent background (PNG only).</li>
+                    </ul>
+                </div>
+                <div class="io-col">
+                    <h3>Outputs (2)</h3>
+                    <ul>
+                        <li><strong>Saved Files</strong> (Text): Paths to the saved image files.</li>
+                        <li><strong>Info</strong> (Text): Component information and interpretation</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p><a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank" style="color: #a1a1aa; text-decoration: none; border-bottom: 1px solid #3f3f46; padding-bottom: 2px;">View on GitHub</a></p>
+    </footer>
+</body>
+</html>

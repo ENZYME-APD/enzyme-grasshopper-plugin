@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Size to Pixels - Enzyme Plugin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="../index.html" class="nav-brand">
+            <img src="../images/enzyme_logo.png" alt="Enzyme Logo" class="logo-img">
+        </a>
+        <div class="nav-links">
+            <a href="../index.html#components">Components</a>
+            <a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank">GitHub</a>
+        </div>
+    </nav>
+
+    <main class="container doc-page">
+        <div class="doc-header" style="display: flex; align-items: center;">
+            <div>
+                <h1>Document Size to Pixels</h1>
+                <p class="doc-subtitle">Converts standard document sizes (A4, A3, 16:9, etc.) into pixel dimensions for use with Export Named Views.</p>
+                <div class="doc-meta">
+                    <span class="badge utilities">Utilities</span>
+                    <span>Nickname: <strong>Doc2Px</strong></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="doc-content">
+            <h2>Overview</h2>
+            <p>Converts standard document sizes (A4, A3, 16:9, etc.) into pixel dimensions for use with Export Named Views.</p>
+            
+            <div class="io-grid">
+                <div class="io-col">
+                    <h3>Inputs (3)</h3>
+                    <ul>
+                        <li><strong>Format</strong> (Text): Paper format (e.g., A4, A3, 16:9 FHD).</li>
+                        <li><strong>Landscape</strong> (Boolean): True for Landscape, False for Portrait. (Applies to A-series paper).</li>
+                        <li><strong>DPI</strong> (Integer): Print DPI to use for the calculation (default 300).</li>
+                    </ul>
+                </div>
+                <div class="io-col">
+                    <h3>Outputs (3)</h3>
+                    <ul>
+                        <li><strong>Width</strong> (Integer): Width in pixels.</li>
+                        <li><strong>Height</strong> (Integer): Height in pixels.</li>
+                        <li><strong>DPI</strong> (Integer): Pass-through DPI to wire into Export Views.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p><a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank" style="color: #a1a1aa; text-decoration: none; border-bottom: 1px solid #3f3f46; padding-bottom: 2px;">View on GitHub</a></p>
+    </footer>
+</body>
+</html>

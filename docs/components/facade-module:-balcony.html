@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facade Module: Balcony - Enzyme Plugin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="../index.html" class="nav-brand">
+            <img src="../images/enzyme_logo.png" alt="Enzyme Logo" class="logo-img">
+        </a>
+        <div class="nav-links">
+            <a href="../index.html#components">Components</a>
+            <a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank">GitHub</a>
+        </div>
+    </nav>
+
+    <main class="container doc-page">
+        <div class="doc-header" style="display: flex; align-items: center;">
+            <div>
+                <h1>Facade Module: Balcony</h1>
+                <p class="doc-subtitle">Continuous balconies with 2D wall patterns and intelligent corners.</p>
+                <div class="doc-meta">
+                    <span class="badge json-masterplan-beta">JSON Masterplan (Beta)</span>
+                    <span>Nickname: <strong>Mod_Balcony</strong></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="doc-content">
+            <h2>Overview</h2>
+            <p>Continuous balconies with 2D wall patterns and intelligent corners.</p>
+            
+            <div class="io-grid">
+                <div class="io-col">
+                    <h3>Inputs (15)</h3>
+                    <ul>
+                        <li><strong>Bounds</strong> (Curve): Boundary curves</li>
+                        <li><strong>Heights</strong> (Number): Floor heights</li>
+                        <li><strong>BayWidth</strong> (Number): Width of each bay</li>
+                        <li><strong>Depth</strong> (Number): Depth of the balcony</li>
+                        <li><strong>RailHeight</strong> (Number): Height of the railing</li>
+                        <li><strong>SillHeight</strong> (Number): Height of the sill</li>
+                        <li><strong>HeaderDrop</strong> (Number): Header drop distance</li>
+                        <li><strong>HorizPattern</strong> (Text): Horizontal pattern array</li>
+                        <li><strong>VertPattern</strong> (Text): Vertical pattern</li>
+                        <li><strong>BalconyPattern</strong> (Text): Balcony pattern</li>
+                        <li><strong>FlipDir</strong> (Boolean): Flip direction</li>
+                        <li><strong>FirstBalcony</strong> (Boolean): Toggle first balcony</li>
+                        <li><strong>CornerWindow</strong> (Boolean): Toggle corner window</li>
+                        <li><strong>CornerOffset</strong> (Number): Corner offset distance</li>
+                        <li><strong>SegLength</strong> (Boolean): Segment length bypass</li>
+                    </ul>
+                </div>
+                <div class="io-col">
+                    <h3>Outputs (6)</h3>
+                    <ul>
+                        <li><strong>Slabs</strong> (Brep): Slab Breps</li>
+                        <li><strong>Railings</strong> (Brep): Railing Breps</li>
+                        <li><strong>Glass</strong> (Brep): Vision glass Breps</li>
+                        <li><strong>SolidPanels</strong> (Brep): Solid wall Breps</li>
+                        <li><strong>HeaderPanels</strong> (Brep): Header drop Breps</li>
+                        <li><strong>CornerPanels</strong> (Brep): Corner window Breps</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p><a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank" style="color: #a1a1aa; text-decoration: none; border-bottom: 1px solid #3f3f46; padding-bottom: 2px;">View on GitHub</a></p>
+    </footer>
+</body>
+</html>
