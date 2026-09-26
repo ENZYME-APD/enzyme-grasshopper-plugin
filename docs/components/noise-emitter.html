@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Noise Emitter From Curves - Enzyme Plugin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="../index.html" class="nav-brand">
+            <img src="../images/enzyme_logo.png" alt="Enzyme Logo" class="logo-img">
+        </a>
+        <div class="nav-links">
+            <a href="../index.html#components">Components</a>
+            <a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank">GitHub</a>
+        </div>
+    </nav>
+
+    <main class="container doc-page">
+        <div class="doc-header" style="display: flex; align-items: center;">
+            <div>
+                <h1>Noise Emitter From Curves</h1>
+                <p class="doc-subtitle">Converts line/curve paths (like roads or railways) into discrete noise emitter points with associated dB values.</p>
+                <div class="doc-meta">
+                    <span class="badge site-analysis">Site Analysis</span>
+                    <span>Nickname: <strong>NoiseLines</strong></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="doc-content">
+            <h2>Overview</h2>
+            <p>Converts line/curve paths (like roads or railways) into discrete noise emitter points with associated dB values.</p>
+            
+            <div class="io-grid">
+                <div class="io-col">
+                    <h3>Inputs (3)</h3>
+                    <ul>
+                        <li><strong>Curve Paths</strong> (Curve): Lines/Curves representing noise sources (e.g. roads, railways)</li>
+                        <li><strong>Average Noises</strong> (Number): Average noise levels matching the roads (dB).</li>
+                        <li><strong>Divide Length</strong> (Number): Distance (m) between emitter points along the curve</li>
+                    </ul>
+                </div>
+                <div class="io-col">
+                    <h3>Outputs (2)</h3>
+                    <ul>
+                        <li><strong>Points</strong> (Point): Generated discrete noise emitter points</li>
+                        <li><strong>Noise Values</strong> (Number): Decibel values mapped exactly to the points</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p><a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank" style="color: #a1a1aa; text-decoration: none; border-bottom: 1px solid #3f3f46; padding-bottom: 2px;">View on GitHub</a></p>
+    </footer>
+</body>
+</html>

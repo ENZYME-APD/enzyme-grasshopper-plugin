@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keypoint Finder - Enzyme Plugin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="../index.html" class="nav-brand">
+            <img src="../images/enzyme_logo.png" alt="Enzyme Logo" class="logo-img">
+        </a>
+        <div class="nav-links">
+            <a href="../index.html#components">Components</a>
+            <a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank">GitHub</a>
+        </div>
+    </nav>
+
+    <main class="container doc-page">
+        <div class="doc-header" style="display: flex; align-items: center;">
+            <div>
+                <h1>Keypoint Finder</h1>
+                <p class="doc-subtitle">Analyzes stream slopes to mathematically isolate the inflection point (Keypoint) and extracts the Master Keyline contour.</p>
+                <div class="doc-meta">
+                    <span class="badge leap">LEAP</span>
+                    <span>Nickname: <strong>Keypoint</strong></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="doc-content">
+            <h2>Overview</h2>
+            <p>Analyzes stream slopes to mathematically isolate the inflection point (Keypoint) and extracts the Master Keyline contour.</p>
+            
+            <div class="workflow-section" style="margin: 2rem 0; padding: 1.5rem; background: #27272a; border-radius: 8px; border-left: 4px solid #3b82f6;">
+                <h3 style="margin-top: 0; color: #60a5fa;">Workflow & Methodology</h3>
+                <p><strong>Phase: Prepare (TNFD/LEAP)</strong></p>
+        <p>In regenerative agriculture (specifically P.A. Yeomans' Keyline Design), the "Keypoint" is the critical inflection point in a primary valley where the slope transitions from steep (convex) to flat (concave). Identifying this manually on a jagged surveyor mesh is highly error-prone.</p>
+        <p><strong>How it works:</strong></p>
+        <ol>
+            <li><strong>Slope Analysis:</strong> The component walks down the stream polyline (from the Hydro-DEM engine) and calculates the exact gradient of every geometric segment.</li>
+            <li><strong>Noise Filtering:</strong> Using a moving-average window, it smooths out minor mesh bumps and artifacts to prevent "false" keypoints.</li>
+            <li><strong>Inflection Isolation:</strong> It isolates the specific vertex experiencing the maximum deceleration (the greatest steep-to-flat transition) and outputs this as the <code>Keypoint</code>.</li>
+            <li><strong>Master Keyline Extraction:</strong> If the Terrain mesh is provided, it slices the site horizontally at the exact elevation of the Keypoint, filters out disconnected site contours, and outputs the true Master Keyline contour.</li>
+        </ol>
+            </div>
+            
+            <div class="io-grid">
+                <div class="io-col">
+                    <h3>Inputs (3)</h3>
+                    <ul>
+                        <li><strong>Terrain</strong> (Mesh): The base topography mesh</li>
+                        <li><strong>Streams</strong> (Curve): Stream curves from Hydro-DEM</li>
+                        <li><strong>Smoothing</strong> (Integer): Smoothing window for slope analysis (helps ignore mesh noise)</li>
+                    </ul>
+                </div>
+                <div class="io-col">
+                    <h3>Outputs (2)</h3>
+                    <ul>
+                        <li><strong>Keypoints</strong> (Point): The identified points of inflection (steep to flat)</li>
+                        <li><strong>Master Keylines</strong> (Curve): The specific horizontal terrain contours passing through the Keypoints</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p><a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank" style="color: #a1a1aa; text-decoration: none; border-bottom: 1px solid #3f3f46; padding-bottom: 2px;">View on GitHub</a></p>
+    </footer>
+</body>
+</html>

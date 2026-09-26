@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fast Noise Analyzer - Enzyme Plugin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="../index.html" class="nav-brand">
+            <img src="../images/enzyme_logo.png" alt="Enzyme Logo" class="logo-img">
+        </a>
+        <div class="nav-links">
+            <a href="../index.html#components">Components</a>
+            <a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank">GitHub</a>
+        </div>
+    </nav>
+
+    <main class="container doc-page">
+        <div class="doc-header" style="display: flex; align-items: center;">
+            <div>
+                <h1>Fast Noise Analyzer</h1>
+                <p class="doc-subtitle">Calculates pseudo-acoustic noise propagation from emitter points onto analysis meshes, outputting a vertex-colored heatmap.</p>
+                <div class="doc-meta">
+                    <span class="badge site-analysis">Site Analysis</span>
+                    <span>Nickname: <strong>NoiseEnv</strong></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="doc-content">
+            <h2>Overview</h2>
+            <p>Calculates pseudo-acoustic noise propagation from emitter points onto analysis meshes, outputting a vertex-colored heatmap.</p>
+            
+            <div class="io-grid">
+                <div class="io-col">
+                    <h3>Inputs (9)</h3>
+                    <ul>
+                        <li><strong>AnalysisMeshes</strong> (Mesh): The target meshes to colorize with noise values (e.g. context buildings or terrain)</li>
+                        <li><strong>NoiseEmitters</strong> (Point): Point locations of noise sources</li>
+                        <li><strong>EmitterdB</strong> (Number): Decibel levels corresponding to each noise emitter</li>
+                        <li><strong>HardContext</strong> (Mesh): Solid objects (like buildings) that block noise heavily (-15dB attenuation)</li>
+                        <li><strong>SoftContext</strong> (Mesh): Porous objects (like vegetation) that block noise slightly (-5dB attenuation)</li>
+                        <li><strong>AnalysisPoints</strong> (Point): Optional specific discrete points to analyze</li>
+                        <li><strong>Run</strong> (Boolean): Toggle to run the analysis</li>
+                        <li><strong>CustomColors</strong> (Colour): Optional gradient palette for the heatmap</li>
+                        <li><strong>SensorOffset</strong> (Number): Distance to push the sensors off the mesh to avoid self-occlusion (m)</li>
+                    </ul>
+                </div>
+                <div class="io-col">
+                    <h3>Outputs (7)</h3>
+                    <ul>
+                        <li><strong>NoiseMeshes</strong> (Mesh): Vertex-colored meshes representing the noise heatmap</li>
+                        <li><strong>MeshPts</strong> (Point): The evaluated vertex coordinates of the analysis meshes</li>
+                        <li><strong>Mesh_dB</strong> (Number): The decibel values matching the MeshPoints</li>
+                        <li><strong>PtsOut</strong> (Point): Pass-through for AnalysisPoints input</li>
+                        <li><strong>Pts_dB</strong> (Number): Raw dB values precisely at the AnalysisPoints</li>
+                        <li><strong>Dashboard</strong> (Text): JSON legend data for the Analysis Dashboard</li>
+                        <li><strong>Info</strong> (Text): Disclaimer on methodology and limitations</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p><a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank" style="color: #a1a1aa; text-decoration: none; border-bottom: 1px solid #3f3f46; padding-bottom: 2px;">View on GitHub</a></p>
+    </footer>
+</body>
+</html>
