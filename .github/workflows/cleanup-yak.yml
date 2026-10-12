@@ -1,0 +1,24 @@
+name: Cleanup Yak Versions
+
+on:
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download Yak CLI
+        run: |
+          curl -L -o yak "https://files.mcneel.com/yak/tools/0.13.0/mac/yak"
+          chmod +x yak
+
+      - name: Run Yank Cleanup Script
+        env:
+          YAK_TOKEN: ${{ secrets.YAK_TOKEN }}
+        run: |
+          python3 dev_scripts/yank_versions.py
