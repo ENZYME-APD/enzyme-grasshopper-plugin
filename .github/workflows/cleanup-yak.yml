@@ -12,6 +12,11 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
       - name: Download Yak CLI
         run: |
           curl -L -o yak "https://files.mcneel.com/yak/tools/0.13.0/mac/yak"
