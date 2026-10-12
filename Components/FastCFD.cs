@@ -425,20 +425,28 @@ namespace Enzyme.Components
             string infoStr = 
                 "FAST CFD (2.5D MULTI-THREADED EULERIAN SOLVER)\n" +
                 "============================================\n\n" +
-                "PHYSICS & SPEED UPGRADES:\n" +
-                "- Multi-core Parallel Processing: Grid draping, Advection, Diffusion, and Poisson projection run in parallel.\n" +
-                "- Pre-cached Bounding Box Index: Context building collision checks bypass redundant 3D raycasting.\n" +
-                "- Zero-gradient Neumann Boundaries: Fluid hitting facades accurately develops stagnation pressure and deflects outward instead of being artificially absorbed.\n" +
-                "- Dynamic Poisson Scaling: Convergence passes dynamically adapt to domain scale for true wake formation.\n" +
-                "- Pedestrian Comfort Scale: Local velocity gradients quantify Turbulence Intensity (TI) and Lawson comfort criteria.\n\n" +
-                "LAWSON COMFORT DISTRIBUTION:\n" +
-                $"- Sitting / Cafe (<4 m/s): {pctSitting:F1}%\n" +
-                $"- Standing / Waiting (<6 m/s): {pctStanding:F1}%\n" +
-                $"- Strolling / Walking (<8 m/s): {pctStrolling:F1}%\n" +
-                $"- Uncomfortable / High Gust (>8 m/s): {pctUncomfort:F1}%\n" +
-                $"- Peak Turbulence Intensity: {maxTurbulenceIntensity:P1}\n\n" +
-                "LIMITATIONS:\n" +
-                "Calculates a terrain-following 2.5D layer. Simulates horizontal tunneling (Venturi) and recirculating eddies, but does not simulate 3D skyscraper vertical downwash vortices.";
+                "SIMULATION SUMMARY:\n" +
+                $"- Domain Grid: {cols} x {rows} ({validCells:N0} active cells)\n" +
+                $"- Cell Resolution: {cellSize:F1} m | Drape Offset: {analysisHeight:F1} m\n" +
+                $"- Inlet Wind: {windSpeed:F1} m/s @ ({windDir.X:F2}, {windDir.Y:F2})\n" +
+                $"- Iterations: {iterations} time steps (dt = {dt:F3}s) | Poisson: {poissonIterations} relaxation passes\n" +
+                $"- Velocity: Avg = {avgSpeed:F1} m/s | Min = {minSpeed:F1} m/s | Max = {maxSpeed:F1} m/s\n\n" +
+                "PEDESTRIAN COMFORT & TURBULENCE (LAWSON CRITERIA):\n" +
+                $"- Sitting / Outdoor Dining (<4.0 m/s): {pctSitting:F1}%\n" +
+                $"- Standing / Pedestrian Waiting (<6.0 m/s): {pctStanding:F1}%\n" +
+                $"- Strolling / Leisure Walking (<8.0 m/s): {pctStrolling:F1}%\n" +
+                $"- Uncomfortable / High Gusts (>8.0 m/s): {pctUncomfort:F1}%\n" +
+                $"- Custom Threshold Comfort (<= {comfortThreshold:F1} m/s): {pctComfort:F1}%\n" +
+                $"- Peak Local Turbulence Intensity (TI): {maxTurbulenceIntensity:P1}\n\n" +
+                "PHYSICS & ENGINE SPECIFICATIONS:\n" +
+                "1. Multi-Core Eulerian Solver: Resolves incompressible Navier-Stokes equations via Advection, Diffusion, and Poisson Pressure Projection using Parallel.For multi-threading.\n" +
+                "2. Neumann Obstacle Boundary: Enforces zero normal pressure gradient (dp/dn = 0) at solid building facades. Air hitting obstacles forms stagnation pressure and naturally deflects into wake zones rather than being artificially absorbed.\n" +
+                "3. Spatial Index Pre-Caching: Bounding boxes of context meshes are pre-filtered and pre-cached once to avoid redundant 3D point-in-mesh raycasting overhead.\n" +
+                "4. Dynamic Poisson Scaling: Pressure projection relaxation passes dynamically adapt to domain scale to guarantee far-field wake propagation.\n" +
+                "5. Subgrid Turbulence Model: Estimates local turbulent kinetic energy (k) and gust velocity from velocity gradients (shear stress tensor).\n\n" +
+                "LIMITATIONS & BEST PRACTICES:\n" +
+                "- 2.5D Assumption: The grid drapes over topography to follow terrain contours. It accurately simulates horizontal Venturi channeling and wake recirculation, but does not capture 3D vertical skyscraper downdrafts.\n" +
+                "- Grid Alignment: Always plug in a consistent BoundaryMask curve when comparing architectural massing options to ensure grid cells remain mathematically aligned.";
             
             DA.SetData(6, infoStr);
 

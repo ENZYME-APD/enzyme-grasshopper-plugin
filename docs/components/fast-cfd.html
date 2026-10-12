@@ -19,51 +19,111 @@
     </nav>
 
     <main class="container doc-page">
-        <div class="doc-header" style="display: flex; align-items: center;">
+        <div class="doc-header" style="display: flex; align-items: center; justify-content: space-between;">
             <div>
                 <h1>Fast CFD</h1>
-                <p class="doc-subtitle">A 2.5D Terrain-Following Grid Fluid Solver for fast urban wind analysis.</p>
-                <div class="doc-meta">
+                <p class="doc-subtitle">A multi-threaded 2.5D Terrain-Following Grid Fluid Solver for fast urban aerodynamic and pedestrian wind comfort analysis.</p>
+                <div class="doc-meta" style="margin-top: 10px;">
                     <span class="badge site-analysis">Site Analysis</span>
                     <span>Nickname: <strong>FastCFD</strong></span>
+                    <span>Version: <strong>1.10.75+</strong></span>
                 </div>
             </div>
         </div>
 
         <div class="doc-content">
             <h2>Overview</h2>
-            <p>A 2.5D Terrain-Following Grid Fluid Solver for fast urban wind analysis.</p>
-            
+            <p>
+                <strong>Fast CFD</strong> is an ultra-fast Eulerian fluid dynamics simulator written directly in native C# for Rhino and Grasshopper. 
+                It numerically resolves the incompressible Navier-Stokes equations across a 2.5D terrain-following grid, accurately predicting 
+                <strong>Venturi channeling</strong>, <strong>corner accelerations</strong>, <strong>stagnation zones</strong>, and <strong>recirculating wake eddies</strong> around urban structures.
+            </p>
+            <p>
+                Designed specifically for early-stage massing design and site planning, Fast CFD runs in tens of milliseconds rather than hours, 
+                allowing interactive manipulation via Grasshopper sliders without locking the Rhino interface.
+            </p>
+
+            <h2>Key Features & Numerical Physics</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin: 1.5rem 0;">
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">⚡ Multi-Core Parallelization</h3>
+                    <p style="font-size: 0.9rem; color: var(--text-secondary);">
+                        Employs thread-safe <code>Parallel.For</code> loops across all solver stages (Grid Draping, Advection, Diffusion, and Poisson Pressure Projection) 
+                        with deterministic ping-pong buffers, delivering 5x–15x speedups on multi-core systems.
+                    </p>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">🏢 Zero-Gradient Neumann Boundaries</h3>
+                    <p style="font-size: 0.9rem; color: var(--text-secondary);">
+                        Enforces <code>&part;p/&part;n = 0</code> at building obstacle facets. Incoming air forms realistic physical stagnation pressure 
+                        and smoothly deflects around corners, completely eliminating artificial boundary vacuum sinks.
+                    </p>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">🚶 Pedestrian Comfort (Lawson Scale)</h3>
+                    <p style="font-size: 0.9rem; color: var(--text-secondary);">
+                        Computes local shear strain tensors to estimate sub-grid Turbulent Kinetic Energy (TKE) and Turbulence Intensity (TI), 
+                        categorizing urban spaces into Sitting, Standing, Strolling, and Uncomfortable pedestrian zones.
+                    </p>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">📦 Pre-Cached Spatial Indexing</h3>
+                    <p style="font-size: 0.9rem; color: var(--text-secondary);">
+                        Context geometry bounding boxes are cached once before grid construction, bypassing hundreds of thousands of redundant 3D 
+                        point-in-mesh raycasts and eliminating UI lag during initial grid draping.
+                    </p>
+                </div>
+            </div>
+
+            <h2>Lawson Pedestrian Comfort Categories</h2>
+            <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 2rem;">
+                <ul style="list-style-type: none; padding-left: 0; display: flex; flex-direction: column; gap: 0.75rem;">
+                    <li><strong>☕ Sitting / Outdoor Dining (&lt; 4.0 m/s):</strong> Calm microclimate suitable for long-term sedentary activities, cafes, and restaurant terraces.</li>
+                    <li><strong>🧍 Standing / Pedestrian Waiting (&lt; 6.0 m/s):</strong> Gentle breeze suitable for building entrances, bus stops, and plazas.</li>
+                    <li><strong>🚶 Strolling / Leisure Walking (&lt; 8.0 m/s):</strong> Comfortable for pedestrian boulevards, promenades, and shopping streets.</li>
+                    <li><strong>⚠️ Uncomfortable / High Gusts (&gt; 8.0 m/s):</strong> Strong winds with potential wind turbulence that may compromise pedestrian comfort or safety.</li>
+                </ul>
+            </div>
+
             <div class="io-grid">
                 <div class="io-col">
                     <h3>Inputs (12)</h3>
                     <ul>
-                        <li><strong>TerrainMesh</strong> (Mesh): Input Terrain Mesh</li>
-                        <li><strong>ContextMeshes</strong> (Mesh): Buildings and context as closed meshes</li>
-                        <li><strong>WindVector</strong> (Vector): Wind direction</li>
-                        <li><strong>WindSpeed</strong> (Number): Baseline wind velocity (m/s)</li>
-                        <li><strong>CellSize</strong> (Number): Resolution of the grid in meters.</li>
-                        <li><strong>Iterations</strong> (Integer): Simulation steps</li>
-                        <li><strong>AnalysisHeight</strong> (Number): Drape offset above terrain (m)</li>
-                        <li><strong>Viscosity</strong> (Number): Kinematic viscosity (diffusion/turbulence)</li>
-                        <li><strong>Friction</strong> (Number): Surface drag (0.0 to 1.0). Accepts item or list.</li>
-                        <li><strong>ComfortThreshold</strong> (Number): Threshold for pedestrian comfort (m/s)</li>
-                        <li><strong>BoundaryMask</strong> (Curve): Optional closed curve to crop the simulation domain and filter statistics.</li>
-                        <li><strong>Colors</strong> (Colour): Custom color spectrum override (min to max)</li>
+                        <li><strong>TerrainMesh</strong> (Mesh): Input topography mesh over which the 2.5D simulation sheet drapes.</li>
+                        <li><strong>ContextMeshes</strong> (Mesh list, optional): Closed building and site massing meshes acting as aerodynamic obstacles.</li>
+                        <li><strong>WindVector</strong> (Vector): Cardinal orientation of the prevailing wind (e.g. <code>(1, 1, 0)</code> for NE wind).</li>
+                        <li><strong>WindSpeed</strong> (Number): Baseline meteorological wind speed magnitude in m/s (default: <code>10.0</code>).</li>
+                        <li><strong>CellSize</strong> (Number): Spatial resolution of the Eulerian grid in meters (default: <code>4.0</code>). Smaller cells increase spatial resolution.</li>
+                        <li><strong>Iterations</strong> (Integer): Advection and diffusion time steps (default: <code>50</code>). Higher values develop longer downstream wake eddies.</li>
+                        <li><strong>AnalysisHeight</strong> (Number): Offset in meters above terrain level for pedestrian comfort evaluation (default: <code>1.5m</code>).</li>
+                        <li><strong>Viscosity</strong> (Number): Fluid kinematic viscosity (default: <code>0.1</code>). Lower values produce sharper vortices; higher values produce laminar flow.</li>
+                        <li><strong>Friction</strong> (Number / List, optional): Surface aerodynamic drag coefficient (0.0 to 1.0) simulating rough terrain, vegetation, or paving.</li>
+                        <li><strong>ComfortThreshold</strong> (Number): User-defined comfort threshold in m/s (default: <code>5.0</code>).</li>
+                        <li><strong>BoundaryMask</strong> (Curve, optional): Closed curve to restrict the simulation domain and lock grid coordinates.</li>
+                        <li><strong>Colors</strong> (Colour list, optional): Custom gradient palette for velocity heatmap visualization.</li>
                     </ul>
                 </div>
                 <div class="io-col">
                     <h3>Outputs (7)</h3>
                     <ul>
-                        <li><strong>WindMesh</strong> (Mesh): Heatmap of wind speeds mapped to the terrain</li>
-                        <li><strong>Points</strong> (Point): Grid points corresponding to the vectors</li>
-                        <li><strong>WindVectors</strong> (Vector): Wind velocity vectors for visualization</li>
-                        <li><strong>Colors</strong> (Colour): The color assigned to each point/vector</li>
-                        <li><strong>Speeds</strong> (Number): Wind speed magnitude (m/s) at each point</li>
-                        <li><strong>Dashboard Data</strong> (Text): JSON string for Dashboard and Legend</li>
-                        <li><strong>Info</strong> (Text): Simulation data and timing</li>
+                        <li><strong>WindMesh</strong> (Mesh): Continuous vertex-colored mesh displaying the terrain-projected wind velocity heatmap.</li>
+                        <li><strong>Points</strong> (Point list): Evaluated grid point positions at pedestrian analysis height.</li>
+                        <li><strong>WindVectors</strong> (Vector list): Local velocity vectors (m/s) indicating local direction and speed.</li>
+                        <li><strong>Colors</strong> (Colour list): Color values assigned to each grid point and vector.</li>
+                        <li><strong>Speeds</strong> (Number list): Scalar wind speed magnitude (m/s) at each grid cell.</li>
+                        <li><strong>Dashboard Data</strong> (Text / JSON): Structured JSON payload compatible with the <code>Analysis Dashboard</code> HUD component.</li>
+                        <li><strong>Info</strong> (Text): Detailed performance log, domain statistics, Lawson comfort breakdown, and scientific notes.</li>
                     </ul>
                 </div>
+            </div>
+
+            <h2 style="margin-top: 2rem;">Best Practices & Guidelines</h2>
+            <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem;">
+                <ul style="padding-left: 1.5rem; line-height: 1.8;">
+                    <li><strong>Anchor with BoundaryMask:</strong> The Eulerian grid anchors to the bounding box of your geometry. When comparing architectural massing options, always supply a fixed <code>BoundaryMask</code> curve so that cell boundaries do not shift between iterations.</li>
+                    <li><strong>Resolution vs. Speed:</strong> For quick massing sweeps, a <code>CellSize</code> of 3.0m–5.0m provides near-instant interactive updates. For final presentation graphics, reduce <code>CellSize</code> to 1.5m–2.0m.</li>
+                    <li><strong>2.5D Assumption:</strong> The solver computes a terrain-following 2D layer. It excels at simulating horizontal Venturi effects, gap flows, and wake eddies, but does not capture 3D vertical downwash vortices from tall skyscrapers.</li>
+                </ul>
             </div>
         </div>
     </main>
