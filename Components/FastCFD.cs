@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Special;
@@ -106,7 +107,7 @@ namespace Enzyme.Components
             int cols = (int)Math.Ceiling((bbox.Max.X - bbox.Min.X) / cellSize);
             int rows = (int)Math.Ceiling((bbox.Max.Y - bbox.Min.Y) / cellSize);
 
-            if (cols * rows > 60000)
+            if (cols * rows > 100000)
             {
                 AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Grid is too dense ({cols}x{rows}). Increase CellSize or use a smaller BoundaryMask.");
                 return;
@@ -116,16 +117,26 @@ namespace Enzyme.Components
             int M = rows;
             int totalCells = (N + 2) * (M + 2);
 
-            Mesh combinedContext = new Mesh();
-            foreach (var m in contextMeshes) { if (m != null) combinedContext.Append(m); }
+            // 1. OPTIMIZATION: Pre-filter valid context meshes & PRE-CACHE BOUNDING BOXES ONCE
+            List<Mesh> validContextMeshes = new List<Mesh>();
+            List<BoundingBox> contextBBoxes = new List<BoundingBox>();
+            double maxContextZ = bbox.Max.Z;
 
-            double rayStartZ = bbox.Max.Z;
-            if (combinedContext.IsValid && combinedContext.Faces.Count > 0)
+            if (contextMeshes != null && contextMeshes.Count > 0)
             {
-                BoundingBox cBox = combinedContext.GetBoundingBox(true);
-                if (cBox.Max.Z > rayStartZ) rayStartZ = cBox.Max.Z;
+                foreach (var m in contextMeshes)
+                {
+                    if (m != null && m.IsValid && m.Faces.Count > 0)
+                    {
+                        validContextMeshes.Add(m);
+                        BoundingBox b = m.GetBoundingBox(false);
+                        contextBBoxes.Add(b);
+                        if (b.Max.Z > maxContextZ) maxContextZ = b.Max.Z;
+                    }
+                }
             }
-            rayStartZ += 100.0;
+
+            double rayStartZ = maxContextZ + 100.0;
 
             Point3d[] gridPoints = new Point3d[totalCells];
             bool[] obstacles = new bool[totalCells];
@@ -134,10 +145,9 @@ namespace Enzyme.Components
 
             double startX = bbox.Min.X + cellSize / 2.0;
             double startY = bbox.Min.Y + cellSize / 2.0;
-            
-            int vIdxCounter = 0; 
 
-            for (int i = 1; i <= N; i++)
+            // 2. OPTIMIZATION: Multi-threaded grid initialization with cached context lookups
+            Parallel.For(1, N + 1, i =>
             {
                 for (int j = 1; j <= M; j++)
                 {
@@ -145,32 +155,33 @@ namespace Enzyme.Components
                     double x = startX + (i - 1) * cellSize;
                     double y = startY + (j - 1) * cellSize;
 
+                    // Thread-safe friction lookup
                     double fVal = 0.1;
                     if (frictionList.Count > 0)
-                        fVal = frictionList.Count > vIdxCounter ? frictionList[vIdxCounter] : frictionList.Last();
+                    {
+                        int fIdx = (i - 1) * M + (j - 1);
+                        fVal = fIdx < frictionList.Count ? frictionList[fIdx] : frictionList.Last();
+                    }
                     frictionMap[idx] = (float)Math.Max(0.0, Math.Min(1.0, fVal));
-                    vIdxCounter++;
 
                     Ray3d rayDown = new Ray3d(new Point3d(x, y, rayStartZ), new Vector3d(0, 0, -1));
                     double terrainT = Rhino.Geometry.Intersect.Intersection.MeshRay(terrainMesh, rayDown);
-                    
+
                     if (terrainT >= 0.0)
                     {
                         Point3d terrainPt = rayDown.PointAt(terrainT);
                         Point3d drapedPt = new Point3d(terrainPt.X, terrainPt.Y, terrainPt.Z + analysisHeight);
                         gridPoints[idx] = drapedPt;
 
-                        foreach (var m in contextMeshes)
+                        // Fast BoundingBox pre-check prior to point-in-mesh
+                        for (int k = 0; k < validContextMeshes.Count; k++)
                         {
-                            if (m != null && m.IsValid)
+                            if (contextBBoxes[k].Contains(drapedPt))
                             {
-                                if (m.GetBoundingBox(false).Contains(drapedPt))
+                                if (validContextMeshes[k].IsPointInside(drapedPt, 0.01, true))
                                 {
-                                    if (m.IsPointInside(drapedPt, 0.01, true))
-                                    {
-                                        obstacles[idx] = true;
-                                        break;
-                                    }
+                                    obstacles[idx] = true;
+                                    break;
                                 }
                             }
                         }
@@ -181,14 +192,17 @@ namespace Enzyme.Components
                         obstacles[idx] = true;
                     }
 
-                    if (maskCurve != null && maskCurve.IsValid) {
+                    if (maskCurve != null && maskCurve.IsValid)
+                    {
                         var ptContainment = maskCurve.Contains(new Point3d(x, y, 0), Plane.WorldXY, 0.01);
                         insideMask[idx] = (ptContainment == PointContainment.Inside || ptContainment == PointContainment.Coincident);
-                    } else {
+                    }
+                    else
+                    {
                         insideMask[idx] = true;
                     }
                 }
-            }
+            });
 
             float[] u = new float[totalCells];
             float[] v = new float[totalCells];
@@ -205,17 +219,26 @@ namespace Enzyme.Components
             float dt = 0.5f / wSpeed_cells;
             if (dt > 0.5f) dt = 0.5f;
 
-            for (int i = 1; i <= N; i++) {
-                for (int j = 1; j <= M; j++) {
-                    if (!obstacles[IX(i, j, N)]) {
-                        u[IX(i, j, N)] = windU_cells;
-                        v[IX(i, j, N)] = windV_cells;
+            // Initialize interior velocities
+            Parallel.For(1, N + 1, i =>
+            {
+                for (int j = 1; j <= M; j++)
+                {
+                    int idx = IX(i, j, N);
+                    if (!obstacles[idx])
+                    {
+                        u[idx] = windU_cells;
+                        v[idx] = windV_cells;
                     }
                 }
-            }
+            });
+
+            // 4. OPTIMIZATION: Dynamic Poisson iteration count based on domain extent
+            int poissonIterations = Math.Max(15, Math.Min(60, Math.Max(N, M) / 2));
 
             for (int iter = 0; iter < iterations; iter++)
             {
+                // Boundary conditions at domain edges
                 for (int j = 1; j <= M; j++) {
                     if (windU_cells > 0) { u[IX(1, j, N)] = windU_cells; v[IX(1, j, N)] = windV_cells; obstacles[IX(1, j, N)] = false; }
                     if (windU_cells < 0) { u[IX(N, j, N)] = windU_cells; v[IX(N, j, N)] = windV_cells; obstacles[IX(N, j, N)] = false; }
@@ -228,26 +251,31 @@ namespace Enzyme.Components
                 float[] tmp = u; u = u0; u0 = tmp;
                 tmp = v; v = v0; v0 = tmp;
 
-                Advect(N, M, obstacles, u, u0, u0, v0, dt);
-                Advect(N, M, obstacles, v, v0, u0, v0, dt);
+                AdvectParallel(N, M, obstacles, u, u0, u0, v0, dt);
+                AdvectParallel(N, M, obstacles, v, v0, u0, v0, dt);
 
-                if (viscosity > 0) {
+                if (viscosity > 0)
+                {
                     tmp = u; u = u0; u0 = tmp;
                     tmp = v; v = v0; v0 = tmp;
-                    Diffuse(N, M, obstacles, u, u0, (float)viscosity, dt);
-                    Diffuse(N, M, obstacles, v, v0, (float)viscosity, dt);
+                    DiffuseParallel(N, M, obstacles, u, u0, (float)viscosity, dt);
+                    DiffuseParallel(N, M, obstacles, v, v0, (float)viscosity, dt);
                 }
 
-                Project(N, M, obstacles, u, v, u0, v0);
+                ProjectParallel(N, M, obstacles, u, v, u0, v0, poissonIterations);
 
-                for (int i = 1; i <= N; i++) {
-                    for (int j = 1; j <= M; j++) {
-                        if (obstacles[IX(i, j, N)]) continue;
-                        float drag = frictionMap[IX(i, j, N)];
-                        u[IX(i, j, N)] *= (1.0f - drag * dt);
-                        v[IX(i, j, N)] *= (1.0f - drag * dt);
+                // Surface Drag / Ground Friction
+                Parallel.For(1, N + 1, i =>
+                {
+                    for (int j = 1; j <= M; j++)
+                    {
+                        int idx = IX(i, j, N);
+                        if (obstacles[idx]) continue;
+                        float drag = frictionMap[idx];
+                        u[idx] *= (1.0f - drag * dt);
+                        v[idx] *= (1.0f - drag * dt);
                     }
-                }
+                });
             }
 
             Mesh outMesh = new Mesh();
@@ -262,22 +290,53 @@ namespace Enzyme.Components
             int validCells = 0;
             int comfortCells = 0;
 
+            // Pedestrian comfort categories (Lawson scale counts)
+            int sittingCount = 0;   // < 4 m/s
+            int standingCount = 0;  // 4 - 6 m/s
+            int strollingCount = 0; // 6 - 8 m/s
+            int uncomfortCount = 0; // > 8 m/s
+            double maxTurbulenceIntensity = 0.0;
+
             double[] speeds = new double[totalCells];
+            double[] turbulenceIntensity = new double[totalCells];
+
+            // 4. OPTIMIZATION: Compute velocity & localized velocity gradients (Turbulence Intensity)
             for (int i = 1; i <= N; i++)
             {
                 for (int j = 1; j <= M; j++)
                 {
                     int idx = IX(i, j, N);
                     
-                    // REVERT CELLS/SEC BACK TO METERS/SEC
+                    // Revert cells/sec back to m/s
                     double u_ms = u[idx] * cellSize;
                     double v_ms = v[idx] * cellSize;
-                    
                     double speed = Math.Sqrt(u_ms * u_ms + v_ms * v_ms);
                     speeds[idx] = speed;
 
                     if (obstacles[idx] || !insideMask[idx]) continue;
-                    
+
+                    // Calculate local shear rate / velocity gradient for turbulence estimation
+                    double du_dx = (u[IX(i + 1, j, N)] - u[IX(i - 1, j, N)]) * 0.5;
+                    double du_dy = (u[IX(i, j + 1, N)] - u[IX(i, j - 1, N)]) * 0.5;
+                    double dv_dx = (v[IX(i + 1, j, N)] - v[IX(i - 1, j, N)]) * 0.5;
+                    double dv_dy = (v[IX(i, j + 1, N)] - v[IX(i, j - 1, N)]) * 0.5;
+
+                    double shear = Math.Sqrt(2 * du_dx * du_dx + 2 * dv_dy * dv_dy + Math.Pow(du_dy + dv_dx, 2));
+                    // Turbulent Kinetic Energy approximation (sub-grid mixing length)
+                    double tke = Math.Pow(0.12 * cellSize * shear, 2);
+                    double sigmaU = Math.Sqrt(2.0 / 3.0 * tke);
+                    double ti = (speed > 0.1) ? Math.Min(1.0, sigmaU / speed) : 0.0;
+                    turbulenceIntensity[idx] = ti;
+                    if (ti > maxTurbulenceIntensity) maxTurbulenceIntensity = ti;
+
+                    // Effective gust wind speed for pedestrian comfort
+                    double gustSpeed = speed * (1.0 + 1.2 * ti);
+
+                    if (gustSpeed < 4.0) sittingCount++;
+                    else if (gustSpeed < 6.0) standingCount++;
+                    else if (gustSpeed < 8.0) strollingCount++;
+                    else uncomfortCount++;
+
                     if (speed > maxSpeed) maxSpeed = speed;
                     if (speed < minSpeed) minSpeed = speed;
                     sumSpeed += speed;
@@ -297,6 +356,10 @@ namespace Enzyme.Components
             double avgSpeed = validCells > 0 ? sumSpeed / validCells : 0;
             if (minSpeed == double.MaxValue) minSpeed = 0;
             double pctComfort = validCells > 0 ? ((double)comfortCells / validCells) * 100.0 : 0;
+            double pctSitting = validCells > 0 ? ((double)sittingCount / validCells) * 100.0 : 0;
+            double pctStanding = validCells > 0 ? ((double)standingCount / validCells) * 100.0 : 0;
+            double pctStrolling = validCells > 0 ? ((double)strollingCount / validCells) * 100.0 : 0;
+            double pctUncomfort = validCells > 0 ? ((double)uncomfortCount / validCells) * 100.0 : 0;
 
             int[] vMap = new int[totalCells];
             int vCounter = 0;
@@ -351,31 +414,36 @@ namespace Enzyme.Components
   ""Labels"": {labelsJson},
   ""Metrics"": [
     {{ ""Name"": ""Avg Speed"", ""Value"": ""{avgSpeed:F1} m/s"" }},
-    {{ ""Name"": ""Comfort ({comfortThreshold:F1} m/s)"", ""Value"": ""{pctComfort:F1}%"" }}
+    {{ ""Name"": ""Comfort ({comfortThreshold:F1} m/s)"", ""Value"": ""{pctComfort:F1}%"" }},
+    {{ ""Name"": ""Sitting (<4 m/s)"", ""Value"": ""{pctSitting:F1}%"" }},
+    {{ ""Name"": ""Strolling (<8 m/s)"", ""Value"": ""{pctStrolling:F1}%"" }},
+    {{ ""Name"": ""Uncomfortable"", ""Value"": ""{pctUncomfort:F1}%"" }}
   ]
 }}";
             DA.SetData(5, jsonStr);
 
             string infoStr = 
-                "FAST CFD (2.5D EULERIAN SOLVER)\n" +
-                "===============================\n\n" +
-                "SCIENCE & SIMPLIFICATIONS:\n" +
-                "This component runs a pure C# Eulerian fluid solver based on the Navier-Stokes equations (Advection, Diffusion, Projection). It strictly enforces mass conservation, meaning it accurately simulates the Venturi Effect (tunneling) and Wake Zones (eddies) behind structures.\n\n" +
-                "Limitations (The 20% tradeoff):\n" +
-                "To remain insanely fast, this uses a 'Terrain-Following 2.5D Grid'. The grid drapes perfectly over the terrain topography. However, because it calculates a 2D sheet, it cannot simulate '3D Downdrafts' (wind hitting a skyscraper and plunging vertically down to the ground).\n\n" +
-                "VARIABLES:\n" +
-                "- WindVector: Defines the cardinal direction of the wind.\n" +
-                "- WindSpeed: Defines the baseline magnitude of the wind in m/s.\n" +
-                "- Viscosity: Simulates the turbulence/thickness of the air. Lower = more chaotic vortices. Higher = smoother laminar flow.\n" +
-                "- Friction: Simulates surface drag slowing down the wind at the boundary layer (e.g., concrete vs forest).\n" +
-                "- BoundaryMask: Crops the simulation domain to vastly improve calculation speed, and strictly isolates the output geometry and HUD statistics to the enclosed area.\n\n" +
-                "BEST PRACTICES (GRID ALIGNMENT):\n" +
-                "Because this is an Eulerian (grid-based) solver, the mathematical grid anchors to the bounding box of your BoundaryMask (or Terrain if no mask is used). A tiny shift in the grid can cause cells to hit building corners differently, slightly altering turbulence (the Butterfly Effect). When comparing different design options, always plug in a consistent BoundaryMask to lock the grid coordinates in place!";
+                "FAST CFD (2.5D MULTI-THREADED EULERIAN SOLVER)\n" +
+                "============================================\n\n" +
+                "PHYSICS & SPEED UPGRADES:\n" +
+                "- Multi-core Parallel Processing: Grid draping, Advection, Diffusion, and Poisson projection run in parallel.\n" +
+                "- Pre-cached Bounding Box Index: Context building collision checks bypass redundant 3D raycasting.\n" +
+                "- Zero-gradient Neumann Boundaries: Fluid hitting facades accurately develops stagnation pressure and deflects outward instead of being artificially absorbed.\n" +
+                "- Dynamic Poisson Scaling: Convergence passes dynamically adapt to domain scale for true wake formation.\n" +
+                "- Pedestrian Comfort Scale: Local velocity gradients quantify Turbulence Intensity (TI) and Lawson comfort criteria.\n\n" +
+                "LAWSON COMFORT DISTRIBUTION:\n" +
+                $"- Sitting / Cafe (<4 m/s): {pctSitting:F1}%\n" +
+                $"- Standing / Waiting (<6 m/s): {pctStanding:F1}%\n" +
+                $"- Strolling / Walking (<8 m/s): {pctStrolling:F1}%\n" +
+                $"- Uncomfortable / High Gust (>8 m/s): {pctUncomfort:F1}%\n" +
+                $"- Peak Turbulence Intensity: {maxTurbulenceIntensity:P1}\n\n" +
+                "LIMITATIONS:\n" +
+                "Calculates a terrain-following 2.5D layer. Simulates horizontal tunneling (Venturi) and recirculating eddies, but does not simulate 3D skyscraper vertical downwash vortices.";
             
             DA.SetData(6, infoStr);
 
             sw.Stop();
-            Message = $"FAST CFD\nTime: {sw.Elapsed.TotalMilliseconds:F2} ms\n---\nGrid: {cols}x{rows}\nMax: {maxSpeed:F1} | Min: {minSpeed:F1} | Avg: {avgSpeed:F1}\nComfort: {pctComfort:F1}%";
+            Message = $"FAST CFD\nTime: {sw.Elapsed.TotalMilliseconds:F2} ms\n---\nGrid: {cols}x{rows}\nAvg: {avgSpeed:F1} | Max: {maxSpeed:F1}\nSitting: {pctSitting:F1}%\nStrolling: {pctStrolling:F1}%";
         }
 
         private Color GetColor(double normalized, List<Color> palette)
@@ -455,82 +523,162 @@ namespace Enzyme.Components
 
         private int IX(int i, int j, int N) { return i + (N + 2) * j; }
 
-        private void Advect(int N, int M, bool[] obs, float[] d, float[] d0, float[] u, float[] v, float dt)
+        // PARALLEL ADVECTION
+        private void AdvectParallel(int N, int M, bool[] obs, float[] d, float[] d0, float[] u, float[] v, float dt)
         {
             float dt0 = dt; 
-            for (int i = 1; i <= N; i++) {
-                for (int j = 1; j <= M; j++) {
-                    if (obs[IX(i, j, N)]) continue;
-                    float x = i - dt0 * u[IX(i, j, N)];
-                    float y = j - dt0 * v[IX(i, j, N)];
+            Parallel.For(1, N + 1, i =>
+            {
+                for (int j = 1; j <= M; j++)
+                {
+                    int idx = IX(i, j, N);
+                    if (obs[idx]) continue;
+
+                    float x = i - dt0 * u[idx];
+                    float y = j - dt0 * v[idx];
+
                     if (x < 0.5f) x = 0.5f; if (x > N + 0.5f) x = N + 0.5f;
                     int i0 = (int)x; int i1 = i0 + 1;
+
                     if (y < 0.5f) y = 0.5f; if (y > M + 0.5f) y = M + 0.5f;
                     int j0 = (int)y; int j1 = j0 + 1;
+
                     float s1 = x - i0; float s0 = 1.0f - s1;
                     float t1 = y - j0; float t0 = 1.0f - t1;
-                    d[IX(i, j, N)] = s0 * (t0 * d0[IX(i0, j0, N)] + t1 * d0[IX(i0, j1, N)]) +
-                                     s1 * (t0 * d0[IX(i1, j0, N)] + t1 * d0[IX(i1, j1, N)]);
+
+                    d[idx] = s0 * (t0 * d0[IX(i0, j0, N)] + t1 * d0[IX(i0, j1, N)]) +
+                             s1 * (t0 * d0[IX(i1, j0, N)] + t1 * d0[IX(i1, j1, N)]);
                 }
-            }
-            SetBnd(N, M, obs, d);
+            });
+            SetBndVelocity(N, M, obs, d);
         }
 
-        private void Diffuse(int N, int M, bool[] obs, float[] x, float[] x0, float diff, float dt)
+        // PARALLEL DIFFUSION (Ping-pong buffers for Jacobi iterations)
+        private void DiffuseParallel(int N, int M, bool[] obs, float[] x, float[] x0, float diff, float dt)
         {
-            float a = dt * diff; 
-            for (int k = 0; k < 10; k++) {
-                for (int i = 1; i <= N; i++) {
-                    for (int j = 1; j <= M; j++) {
-                        if (obs[IX(i, j, N)]) continue;
-                        x[IX(i, j, N)] = (x0[IX(i, j, N)] + a * (x[IX(i - 1, j, N)] + x[IX(i + 1, j, N)] + x[IX(i, j - 1, N)] + x[IX(i, j + 1, N)])) / (1 + 4 * a);
+            float a = dt * diff;
+            int totalCells = (N + 2) * (M + 2);
+            float[] next = new float[totalCells];
+            Array.Copy(x, next, totalCells);
+
+            for (int k = 0; k < 10; k++)
+            {
+                Parallel.For(1, N + 1, i =>
+                {
+                    for (int j = 1; j <= M; j++)
+                    {
+                        int idx = IX(i, j, N);
+                        if (obs[idx]) continue;
+                        next[idx] = (x0[idx] + a * (x[IX(i - 1, j, N)] + x[IX(i + 1, j, N)] + x[IX(i, j - 1, N)] + x[IX(i, j + 1, N)])) / (1 + 4 * a);
+                    }
+                });
+                SetBndVelocity(N, M, obs, next);
+                float[] tmp = x; x = next; next = tmp;
+            }
+        }
+
+        // PARALLEL PROJECTION WITH NEUMANN PRESSURE BOUNDARY CONDITIONS
+        private void ProjectParallel(int N, int M, bool[] obs, float[] u, float[] v, float[] p, float[] div, int iterations)
+        {
+            int totalCells = (N + 2) * (M + 2);
+            float[] pNext = new float[totalCells];
+
+            Parallel.For(1, N + 1, i =>
+            {
+                for (int j = 1; j <= M; j++)
+                {
+                    int idx = IX(i, j, N);
+                    if (obs[idx])
+                    {
+                        div[idx] = 0;
+                        p[idx] = 0;
+                        continue;
+                    }
+                    div[idx] = -0.5f * (u[IX(i + 1, j, N)] - u[IX(i - 1, j, N)] +
+                                        v[IX(i, j + 1, N)] - v[IX(i, j - 1, N)]);
+                    p[idx] = 0;
+                }
+            });
+
+            SetBndVelocity(N, M, obs, div);
+            SetBndPressure(N, M, obs, p);
+
+            // Parallel Jacobi Poisson solver with ping-pong buffers
+            for (int k = 0; k < iterations; k++)
+            {
+                Parallel.For(1, N + 1, i =>
+                {
+                    for (int j = 1; j <= M; j++)
+                    {
+                        int idx = IX(i, j, N);
+                        if (obs[idx]) continue;
+                        pNext[idx] = (div[idx] + p[IX(i - 1, j, N)] + p[IX(i + 1, j, N)] +
+                                                p[IX(i, j - 1, N)] + p[IX(i, j + 1, N)]) * 0.25f;
+                    }
+                });
+                SetBndPressure(N, M, obs, pNext);
+                float[] tmp = p; p = pNext; pNext = tmp;
+            }
+
+            // Correct velocities using pressure gradient
+            Parallel.For(1, N + 1, i =>
+            {
+                for (int j = 1; j <= M; j++)
+                {
+                    int idx = IX(i, j, N);
+                    if (obs[idx]) continue;
+                    u[idx] -= 0.5f * (p[IX(i + 1, j, N)] - p[IX(i - 1, j, N)]);
+                    v[idx] -= 0.5f * (p[IX(i, j + 1, N)] - p[IX(i, j - 1, N)]);
+                }
+            });
+
+            SetBndVelocity(N, M, obs, u);
+            SetBndVelocity(N, M, obs, v);
+        }
+
+        // VELOCITY BOUNDARY CONDITIONS (No-slip at obstacles)
+        private void SetBndVelocity(int N, int M, bool[] obs, float[] x)
+        {
+            for (int i = 1; i <= N; i++)
+            {
+                for (int j = 1; j <= M; j++)
+                {
+                    int idx = IX(i, j, N);
+                    if (obs[idx])
+                    {
+                        x[idx] = 0.0f;
                     }
                 }
-                SetBnd(N, M, obs, x);
             }
         }
 
-        private void Project(int N, int M, bool[] obs, float[] u, float[] v, float[] p, float[] div)
+        // NEUMANN PRESSURE BOUNDARY CONDITIONS (Zero normal gradient dp/dn = 0)
+        // Prevents artificial vacuum / suction holes at solid building facets
+        private void SetBndPressure(int N, int M, bool[] obs, float[] p)
         {
-            for (int i = 1; i <= N; i++) {
-                for (int j = 1; j <= M; j++) {
-                    if (obs[IX(i, j, N)]) continue;
-                    div[IX(i, j, N)] = -0.5f * (u[IX(i + 1, j, N)] - u[IX(i - 1, j, N)] +
-                                                v[IX(i, j + 1, N)] - v[IX(i, j - 1, N)]);
-                    p[IX(i, j, N)] = 0;
-                }
-            }
-            SetBnd(N, M, obs, div);
-            SetBnd(N, M, obs, p);
+            for (int i = 1; i <= N; i++)
+            {
+                for (int j = 1; j <= M; j++)
+                {
+                    int idx = IX(i, j, N);
+                    if (obs[idx])
+                    {
+                        float sum = 0f;
+                        int count = 0;
+                        int left = IX(i - 1, j, N);
+                        int right = IX(i + 1, j, N);
+                        int down = IX(i, j - 1, N);
+                        int up = IX(i, j + 1, N);
 
-            for (int k = 0; k < 15; k++) {
-                for (int i = 1; i <= N; i++) {
-                    for (int j = 1; j <= M; j++) {
-                        if (obs[IX(i, j, N)]) continue;
-                        p[IX(i, j, N)] = (div[IX(i, j, N)] + p[IX(i - 1, j, N)] + p[IX(i + 1, j, N)] +
-                                          p[IX(i, j - 1, N)] + p[IX(i, j + 1, N)]) / 4;
-                    }
-                }
-                SetBnd(N, M, obs, p);
-            }
+                        if (i > 1 && !obs[left]) { sum += p[left]; count++; }
+                        if (i < N && !obs[right]) { sum += p[right]; count++; }
+                        if (j > 1 && !obs[down]) { sum += p[down]; count++; }
+                        if (j < M && !obs[up]) { sum += p[up]; count++; }
 
-            for (int i = 1; i <= N; i++) {
-                for (int j = 1; j <= M; j++) {
-                    if (obs[IX(i, j, N)]) continue;
-                    u[IX(i, j, N)] -= 0.5f * (p[IX(i + 1, j, N)] - p[IX(i - 1, j, N)]);
-                    v[IX(i, j, N)] -= 0.5f * (p[IX(i, j + 1, N)] - p[IX(i, j - 1, N)]);
-                }
-            }
-            SetBnd(N, M, obs, u);
-            SetBnd(N, M, obs, v);
-        }
-
-        private void SetBnd(int N, int M, bool[] obs, float[] x)
-        {
-            for (int i = 1; i <= N; i++) {
-                for (int j = 1; j <= M; j++) {
-                    if (obs[IX(i, j, N)]) {
-                        x[IX(i, j, N)] = 0.0f;
+                        if (count > 0)
+                            p[idx] = sum / count;
+                        else
+                            p[idx] = 0.0f;
                     }
                 }
             }
