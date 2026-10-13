@@ -19,11 +19,11 @@
     </nav>
 
     <main class="container doc-page">
-        <div class="doc-header" style="display: flex; align-items: center;">
+        <div class="doc-header" style="display: flex; align-items: center; justify-content: space-between;">
             <div>
                 <h1>Noise Emitter From Curves</h1>
-                <p class="doc-subtitle">Converts line/curve paths (like roads or railways) into discrete noise emitter points with associated dB values.</p>
-                <div class="doc-meta">
+                <p class="doc-subtitle">Converts line/curve paths (roads, railways) into calibrated discrete point emitters whose source levels preserve total road acoustic energy independent of divide spacing.</p>
+                <div class="doc-meta" style="margin-top: 10px;">
                     <span class="badge site-analysis">Site Analysis</span>
                     <span>Nickname: <strong>NoiseLines</strong></span>
                 </div>
@@ -32,22 +32,41 @@
 
         <div class="doc-content">
             <h2>Overview</h2>
-            <p>Converts line/curve paths (like roads or railways) into discrete noise emitter points with associated dB values.</p>
-            
+            <p>
+                <strong>Noise Emitter From Curves</strong> transforms linear infrastructure (motorways, urban arterials, local streets, railways) into discrete point emitters ready for acoustic propagation simulation.
+            </p>
+            <p>
+                Unlike naive subdivision where dividing curves into more points artificially inflates noise, this component employs <strong>analytical line-source calibration</strong>. Each discretized segment's sound power is calibrated such that the energetic summation of all points precisely reconstructs the road's true equivalent continuous level (<em>L<sub>Aeq</sub></em>) at the specified reference distance (e.g. 10 m), exhibiting true cylindrical line-source decay (&minus;3 dB per doubling of distance).
+            </p>
+
+            <h2>Presets & Calibration Physics</h2>
+            <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 2rem;">
+                <p style="margin-bottom: 0.75rem;"><strong>Built-in Road Presets (<em>L<sub>Aeq</sub></em> at 10 m):</strong></p>
+                <ul style="list-style-type: none; padding-left: 0; display: flex; flex-direction: column; gap: 0.5rem; color: var(--text-secondary);">
+                    <li>🚗 <strong>Highway / Expressway:</strong> <code>78.0 dB(A)</code></li>
+                    <li>🚙 <strong>Arterial Road:</strong> <code>70.0 dB(A)</code></li>
+                    <li>🚐 <strong>Local Street:</strong> <code>60.0 dB(A)</code></li>
+                    <li>🚶 <strong>Pedestrian / Slow Zone:</strong> <code>50.0 dB(A)</code></li>
+                    <li>🚆 <strong>Railway:</strong> <code>80.0 dB(A)</code></li>
+                </ul>
+            </div>
+
             <div class="io-grid">
                 <div class="io-col">
-                    <h3>Inputs (3)</h3>
+                    <h3>Inputs (4)</h3>
                     <ul>
-                        <li><strong>Curve Paths</strong> (Curve): Lines/Curves representing noise sources (e.g. roads, railways)</li>
-                        <li><strong>Average Noises</strong> (Number): Average noise levels matching the roads (dB). Re-uses last value if list is shorter.</li>
-                        <li><strong>Divide Length</strong> (Number): Distance (m) between emitter points along the curve</li>
+                        <li><strong>Curve Paths</strong> (Curve list): Centerlines representing roads, avenues, or rail corridors.</li>
+                        <li><strong>Average Noises</strong> (Number list): Equivalent continuous level <em>L<sub>Aeq</sub></em> [dB(A)] at the reference distance from each road. Automatically matches list length or re-uses the last value.</li>
+                        <li><strong>Divide Length</strong> (Number): Target spacing in meters between emitter points. Thanks to analytical calibration, results are invariant to this setting.</li>
+                        <li><strong>Reference Distance</strong> (Number, optional): Perpendicular distance in meters from the road centerline at which the input dB level applies (default: <code>10.0 m</code>).</li>
                     </ul>
                 </div>
                 <div class="io-col">
-                    <h3>Outputs (2)</h3>
+                    <h3>Outputs (3)</h3>
                     <ul>
-                        <li><strong>Points</strong> (Point): Generated discrete noise emitter points</li>
-                        <li><strong>Noise Values</strong> (Number): Decibel values mapped exactly to the points</li>
+                        <li><strong>Points</strong> (Point list): Generated 3D emitter points along the road corridors.</li>
+                        <li><strong>Noise Values</strong> (Number list): Calibrated point source levels <em>L<sub>p</sub></em> at 1 m [dB(A)], ready to connect directly into the <code>Power(dB)</code> input of <em>Fast Noise Analyzer</em>.</li>
+                        <li><strong>Info</strong> (Text): Detailed calibration notes, active point count, and acoustic methodology.</li>
                     </ul>
                 </div>
             </div>

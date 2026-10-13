@@ -75,32 +75,34 @@
                 </div>
             </div>
 
-            <h2>Lawson Pedestrian Comfort Categories</h2>
+            <h2>Lawson Pedestrian Comfort Categories (LDDC Criteria)</h2>
             <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 2rem;">
                 <ul style="list-style-type: none; padding-left: 0; display: flex; flex-direction: column; gap: 0.75rem;">
                     <li><strong>☕ Sitting / Outdoor Dining (&lt; 4.0 m/s):</strong> Calm microclimate suitable for long-term sedentary activities, cafes, and restaurant terraces.</li>
                     <li><strong>🧍 Standing / Pedestrian Waiting (&lt; 6.0 m/s):</strong> Gentle breeze suitable for building entrances, bus stops, and plazas.</li>
                     <li><strong>🚶 Strolling / Leisure Walking (&lt; 8.0 m/s):</strong> Comfortable for pedestrian boulevards, promenades, and shopping streets.</li>
-                    <li><strong>⚠️ Uncomfortable / High Gusts (&gt; 8.0 m/s):</strong> Strong winds with potential wind turbulence that may compromise pedestrian comfort or safety.</li>
+                    <li><strong>💼 Business Walking / Transit (&lt; 10.0 m/s):</strong> Fast-paced walking along transit corridors, office thoroughfares, and commuter routes.</li>
+                    <li><strong>⚠️ Uncomfortable / High Gusts (&gt; 10.0 m/s):</strong> Strong winds with potential wind turbulence that compromise pedestrian comfort.</li>
                 </ul>
             </div>
 
             <div class="io-grid">
                 <div class="io-col">
-                    <h3>Inputs (12)</h3>
+                    <h3>Inputs (13)</h3>
                     <ul>
                         <li><strong>TerrainMesh</strong> (Mesh): Input topography mesh over which the 2.5D simulation sheet drapes.</li>
                         <li><strong>ContextMeshes</strong> (Mesh list, optional): Closed building and site massing meshes acting as aerodynamic obstacles.</li>
                         <li><strong>WindVector</strong> (Vector): Cardinal orientation of the prevailing wind (e.g. <code>(1, 1, 0)</code> for NE wind).</li>
                         <li><strong>WindSpeed</strong> (Number): Baseline meteorological wind speed magnitude in m/s (default: <code>10.0</code>).</li>
                         <li><strong>CellSize</strong> (Number): Spatial resolution of the Eulerian grid in meters (default: <code>4.0</code>). Smaller cells increase spatial resolution.</li>
-                        <li><strong>Iterations</strong> (Integer): Advection and diffusion time steps (default: <code>50</code>). Higher values develop longer downstream wake eddies.</li>
+                        <li><strong>Iterations</strong> (Integer): Advection and diffusion time steps (default: <code>50</code>). Automatically adapts to domain scale if lower than minimum domain flush.</li>
                         <li><strong>AnalysisHeight</strong> (Number): Offset in meters above terrain level for pedestrian comfort evaluation (default: <code>1.5m</code>).</li>
-                        <li><strong>Viscosity</strong> (Number): Fluid kinematic viscosity (default: <code>0.1</code>). Lower values produce sharper vortices; higher values produce laminar flow.</li>
+                        <li><strong>Viscosity</strong> (Number): Fluid kinematic viscosity in m²/s (default: <code>0.1</code>). Scaled independently of grid cell size.</li>
                         <li><strong>Friction</strong> (Number / List, optional): Surface aerodynamic drag coefficient (0.0 to 1.0) simulating rough terrain, vegetation, or paving.</li>
                         <li><strong>ComfortThreshold</strong> (Number): User-defined comfort threshold in m/s (default: <code>5.0</code>).</li>
                         <li><strong>BoundaryMask</strong> (Curve, optional): Closed curve to restrict the simulation domain and lock grid coordinates.</li>
                         <li><strong>Colors</strong> (Colour list, optional): Custom gradient palette for velocity heatmap visualization.</li>
+                        <li><strong>WindRefHeight</strong> (Number, optional): Meteorological measurement height for input WindSpeed in meters (default: <code>10.0m</code>). Scales to pedestrian level via atmospheric boundary layer (ABL) power law.</li>
                     </ul>
                 </div>
                 <div class="io-col">

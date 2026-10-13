@@ -19,11 +19,11 @@
     </nav>
 
     <main class="container doc-page">
-        <div class="doc-header" style="display: flex; align-items: center;">
+        <div class="doc-header" style="display: flex; align-items: center; justify-content: space-between;">
             <div>
                 <h1>Fast Noise Analyzer</h1>
-                <p class="doc-subtitle">A rapid pseudo-acoustic noise analysis component. Maps decibel (dB) decay over distance and occlusions onto arbitrary meshes.</p>
-                <div class="doc-meta">
+                <p class="doc-subtitle">High-speed pseudo-acoustic noise propagation engine inspired by ISO 9613-2: geometric spreading, air absorption, ground effect, Maekawa barrier diffraction, and foliage attenuation.</p>
+                <div class="doc-meta" style="margin-top: 10px;">
                     <span class="badge site-analysis">Site Analysis</span>
                     <span>Nickname: <strong>NoiseEnv</strong></span>
                 </div>
@@ -32,33 +32,66 @@
 
         <div class="doc-content">
             <h2>Overview</h2>
-            <p>A rapid pseudo-acoustic noise analysis component. Maps decibel (dB) decay over distance and occlusions onto arbitrary meshes.</p>
-            
+            <p>
+                <strong>Fast Noise Analyzer</strong> simulates environmental outdoor noise propagation from multiple emitter sources (roads, machinery, trains) onto arbitrary target meshes (building façades, terrain, public realm surfaces) and discrete probe locations.
+            </p>
+            <p>
+                The engine uses an <strong>ISO 9613-2</strong> inspired engineering framework:
+            </p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin: 1.5rem 0;">
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">📐 Maekawa Barrier Diffraction</h3>
+                    <p style="font-size: 0.9rem; color: var(--text-secondary);">
+                        Calculates path-length difference (&delta;) over obstacle rooflines and berms using rubber-band convex hull profiles: <code>D<sub>z</sub> = 10 log<sub>10</sub>(3 + 20N)</code>.
+                    </p>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">🌿 ISO 9613-2 Foliage Attenuation</h3>
+                    <p style="font-size: 0.9rem; color: var(--text-secondary);">
+                        Evaluates actual ray penetration length through porous tree/vegetation volumes (Soft Context), applying continuous path-length attenuation.
+                    </p>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">🌱 Ground Absorption Effect</h3>
+                    <p style="font-size: 0.9rem; color: var(--text-secondary);">
+                        Incorporates ground interference attenuation <em>A<sub>gr</sub></em> based on mean propagation height over terrain and acoustic ground factor <em>G</em> (hard vs. porous soil).
+                    </p>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">⚡ Unified Mesh Collider & Culling</h3>
+                    <p style="font-size: 0.9rem; color: var(--text-secondary);">
+                        Pre-merges context meshes into single accelerated spatial structures and culls distant emitters (&gt;45 dB below dominant sources) for order-of-magnitude faster solving.
+                    </p>
+                </div>
+            </div>
+
             <div class="io-grid">
                 <div class="io-col">
-                    <h3>Inputs (9)</h3>
+                    <h3>Inputs (11)</h3>
                     <ul>
-                        <li><strong>Run</strong> (Boolean): Global execution toggle switch</li>
-                        <li><strong>AnalysisMeshes</strong> (Mesh): Building masses or terrain to project heatmap onto</li>
-                        <li><strong>ContextBuildings</strong> (Mesh): Solid meshes for hard sound occlusion (-15dB)</li>
-                        <li><strong>SoftContext</strong> (Mesh): Vegetation/porous meshes for minor occlusion (-5dB)</li>
-                        <li><strong>Emitters</strong> (Point): Noise source points (e.g., roads, machinery)</li>
-                        <li><strong>EmitterPower</strong> (Number): Decibel level per emitter at 1m (default 85dB)</li>
-                        <li><strong>AnalysisPoints</strong> (Point): Specific discrete test locations (e.g. windows) to test individually</li>
-                        <li><strong>SensorOffset</strong> (Number): Distance to offset sensors from surfaces to avoid self-occlusion (m)</li>
-                        <li><strong>CustomColors</strong> (Colour): Color spectrum override (Quiet -> Loud)</li>
+                        <li><strong>Run</strong> (Boolean): Execution toggle switch (displays OFF when disabled to save compute).</li>
+                        <li><strong>AnalysisMeshes</strong> (Mesh list): Building massing or terrain meshes to receive the vertex-colored noise heatmap.</li>
+                        <li><strong>ContextBuildings</strong> (Mesh list, optional): Solid obstacle meshes (buildings, barriers, berms) causing acoustic diffraction.</li>
+                        <li><strong>SoftContext</strong> (Mesh list, optional): Vegetation volumes for foliage path attenuation.</li>
+                        <li><strong>Emitters</strong> (Point list): Source coordinates (e.g. from <em>Noise Emitter From Curves</em>).</li>
+                        <li><strong>EmitterPower</strong> (Number list): Sound pressure level <em>L<sub>p</sub></em> at 1 m in dB(A) (default: <code>85.0</code>).</li>
+                        <li><strong>AnalysisPoints</strong> (Point list, optional): Discrete inspection probe points (e.g. window centers, balconies).</li>
+                        <li><strong>SensorOffset</strong> (Number): Normal offset distance in meters to prevent self-shadowing by the target mesh (default: <code>0.2 m</code>).</li>
+                        <li><strong>CustomColors</strong> (Colour list, optional): Gradient color spectrum (quiet to loud).</li>
+                        <li><strong>Ground</strong> (Mesh, optional): Terrain mesh used to determine propagation height for ground effect calculations.</li>
+                        <li><strong>GroundFactor</strong> (Number, optional): Ground factor <em>G</em>: <code>0.0</code> = hard paving/water, <code>1.0</code> = soft turf/lawn (default: <code>0.5</code>).</li>
                     </ul>
                 </div>
                 <div class="io-col">
                     <h3>Outputs (7)</h3>
                     <ul>
-                        <li><strong>NoiseMeshes</strong> (Mesh): Vertex-colored meshes representing the noise heatmap</li>
-                        <li><strong>MeshPoints</strong> (Point): The evaluated vertex coordinates of the analysis meshes</li>
-                        <li><strong>MeshValues</strong> (Number): The decibel values matching the MeshPoints</li>
-                        <li><strong>AnalysisPtsOut</strong> (Point): Pass-through for AnalysisPoints input</li>
-                        <li><strong>AnalysisPtsValues</strong> (Number): Raw dB values precisely at the AnalysisPoints</li>
-                        <li><strong>DashboardData</strong> (Text): JSON legend data</li>
-                        <li><strong>Info</strong> (Text): Disclaimer on methodology and pseudo-acoustic limitations</li>
+                        <li><strong>NoiseMeshes</strong> (Mesh list): Heatmap meshes with continuous vertex colors.</li>
+                        <li><strong>MeshPoints</strong> (Point list): Evaluated vertex coordinate points.</li>
+                        <li><strong>MeshValues</strong> (Number list): Sound pressure levels in dB(A) corresponding to each mesh point.</li>
+                        <li><strong>AnalysisPtsOut</strong> (Point list): Pass-through of discrete test probe points.</li>
+                        <li><strong>AnalysisPtsValues</strong> (Number list): Evaluated dB(A) levels at the discrete probe locations.</li>
+                        <li><strong>DashboardData</strong> (Text / JSON): Unified JSON data payload with min, max, energetic average, and arithmetic average for the <em>Analysis Dashboard</em>.</li>
+                        <li><strong>Info</strong> (Text): Detailed acoustic disclaimer, calculation metrics, and active attenuation breakdown.</li>
                     </ul>
                 </div>
             </div>
