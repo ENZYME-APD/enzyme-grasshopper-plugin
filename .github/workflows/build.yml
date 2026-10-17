@@ -1,13 +1,57 @@
 name: Build Enzyme Grasshopper Plugin
 
+# Releases are automatic: bump <Version> in enzGhPlugin.csproj and push to main.
+# If tag v<Version> does not exist yet, this workflow creates it, builds, publishes
+# to Yak and creates the GitHub Release. Pushing a v* tag by hand still works too.
 on:
   push:
+    branches:
+      - main
     tags:
       - 'v*'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
 jobs:
+  check:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.v.outputs.version }}
+      tag: ${{ steps.v.outputs.tag }}
+      release: ${{ steps.v.outputs.release }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Decide whether this push is a release
+        id: v
+        run: |
+          version=$(grep -o '<Version>[^<]*</Version>' enzGhPlugin.csproj | sed 's/<[^>]*>//g')
+          if [ -z "$version" ]; then echo "Version not found in csproj" && exit 1; fi
+          tag="v$version"
+          echo "version=$version" >> $GITHUB_OUTPUT
+          echo "tag=$tag" >> $GITHUB_OUTPUT
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            # Manual tag push: release only if the tag matches the csproj version
+            if [ "$GITHUB_REF_NAME" != "$tag" ]; then
+              echo "::error::Tag $GITHUB_REF_NAME does not match csproj version $version"; exit 1
+            fi
+            echo "release=true" >> $GITHUB_OUTPUT
+          elif git ls-remote --exit-code --tags origin "refs/tags/$tag" >/dev/null; then
+            echo "$tag already released - nothing to do (bump <Version> to release)"
+            echo "release=false" >> $GITHUB_OUTPUT
+          else
+            echo "New version $version on ${GITHUB_REF_NAME} - releasing"
+            echo "release=true" >> $GITHUB_OUTPUT
+          fi
+
   build:
+    needs: check
+    if: needs.check.outputs.release == 'true'
     runs-on: macos-latest
     steps:
       - name: Checkout repository
@@ -85,9 +129,8 @@ jobs:
       - name: Push package (.yak) to Yak server
         env:
           YAK_TOKEN: ${{ secrets.YAK_TOKEN }}
-        # Only publish on tagged releases. A failed push now fails the run,
-        # so a green release always means the package is on Yak.
-        if: env.YAK_TOKEN != '' && startsWith(github.ref, 'refs/tags/')
+        # A failed push fails the run, so a green release always means the package is on Yak.
+        if: env.YAK_TOKEN != ''
         run: |
           yak_filename="${{ steps.package_yak.outputs.yak_file }}"
           if [ -z "$yak_filename" ]; then echo "No .yak filename provided" && exit 1; fi
@@ -115,11 +158,11 @@ jobs:
           fi
 
       - name: Create GitHub Release with .gha file
-        if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
           name: Enzyme Plugin v${{ steps.get_version.outputs.version }}
-          tag_name: ${{ github.ref_name }}
+          tag_name: ${{ needs.check.outputs.tag }}
+          target_commitish: ${{ github.sha }}
           body: |
             Automated release for Enzyme Grasshopper plugin v${{ steps.get_version.outputs.version }}
 

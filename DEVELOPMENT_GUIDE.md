@@ -26,18 +26,16 @@ To spawn default UI elements (sliders, panels, swatches, relays) when a componen
 
 *   **Build Pipeline:** The plugin is compiled via `dotnet build enzGhPlugin.csproj -c Release` on the cloud runner.
 *   **Workflows:**
-    *   `ci-check.yml` — compile-only check on every branch push / PR. Nothing is packaged or published. Use it to validate work before a release.
-    *   `build.yml` — runs on a `v*` tag: builds, packages the `.yak`, publishes to Yak, creates the GitHub Release. A failed Yak push **fails the run** (no more silent green builds).
+    *   `ci-check.yml` — compile-only check (plus docs-sync check) on every branch push / PR. Nothing is packaged or published.
+    *   `build.yml` — **automatic release.** Runs on every push to `main`: if tag `v<Version>` doesn't exist yet, it builds, packages the `.yak`, publishes to Yak, then creates the GitHub Release and the tag. If the tag already exists it does nothing. A failed Yak push fails the run.
     *   `deploy-docs.yml` — redeploys the docs site (GitHub Pages) whenever `docs/**` changes on `main`.
     *   `cleanup-yak.yml` — manual: yanks old Yak versions via `dev_scripts/yank_versions.py`.
-*   **Version Bumping:** The pipeline and YAK distribution are driven by the `<Version>` tag inside `enzGhPlugin.csproj`. Increment it (e.g. `1.10.77` -> `1.10.78`) before tagging. Yak rejects a version that already exists.
+*   **Version Bumping:** `<Version>` in `enzGhPlugin.csproj` is the release switch. Bump it (e.g. `1.10.78` -> `1.10.79`) only when you want a release; pushes to `main` without a bump don't publish anything. Yak rejects a version that already exists.
 *   **Release Workflow:**
     1. Work on a branch; push and wait for **CI Check** to go green.
-    2. Run `python3 dev_scripts/gen_docs.py` to sync the docs site with the code (new pages/cards, changed ports, names, descriptions). Hand-written sections and port descriptions are kept unless the ports changed. CI fails if this was forgotten.
-    3. Merge to `main`, bump `<Version>` in `.csproj`, commit `build: bump version to X.Y.Z`.
-    4. `git tag -a vX.Y.Z -m "Release vX.Y.Z"`
-    5. `git push origin main && git push origin vX.Y.Z`
-    6. Confirm both **Build Enzyme Grasshopper Plugin** (tag) and **Deploy Docs** (main) runs are green.
+    2. Run `python3 dev_scripts/gen_docs.py` to sync the docs site with the code. Hand-written sections and port descriptions are kept unless the ports changed. CI fails if this was forgotten.
+    3. Bump `<Version>` in `.csproj`, commit `build: bump version to X.Y.Z`, merge to `main` and push.
+    4. Confirm **Build Enzyme Grasshopper Plugin** and **Deploy Docs** are green. No manual tagging needed (pushing a matching `vX.Y.Z` tag by hand still works, but don't do both).
 *   **Debugging Actions:** Use the GitHub CLI (`gh run list` and `gh run view <run_id> --log-failed`) to quickly diagnose cloud compilation errors without leaving the terminal.
 
 ## 4. YAK (Rhino Package Manager) Quirks
