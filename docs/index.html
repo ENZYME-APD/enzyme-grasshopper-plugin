@@ -69,7 +69,7 @@
             <a href="components/adapter:-the-lego-builder.html" class="card" data-category="json-masterplan-beta">
                 <span class="badge json-masterplan-beta">JSON Masterplan (Beta)</span>
                 <h3>Adapter: The Lego Builder</h3>
-                <p>STAGE 1 ADAPTER: THE LEGO BUILDER (METHOD 3) - VERBOSE DIAGNOSTICS & FIXED STACKING</p>
+                <p>STAGE 1 ADAPTER: THE LEGO BUILDER (METHOD 3) - VERBOSE DIAGNOSTICS &amp; FIXED STACKING</p>
                 <div class="card-meta">
                     <span>6 Inputs</span>
                     <span>1 Outputs</span>
@@ -409,7 +409,7 @@
             <a href="components/fast-cfd.html" class="card" data-category="site-analysis">
                 <span class="badge site-analysis">Site Analysis</span>
                 <h3>Fast CFD</h3>
-                <p>A 2.5D Terrain-Following Grid Fluid Solver for fast urban wind analysis.</p>
+                <p>A multi-threaded 2.5D Terrain-Following Grid Fluid Solver for fast urban wind and pedestrian comfort analysis.</p>
                 <div class="card-meta">
                     <span>13 Inputs</span>
                     <span>7 Outputs</span>
@@ -419,7 +419,7 @@
             <a href="components/fast-noise-analyzer.html" class="card" data-category="site-analysis">
                 <span class="badge site-analysis">Site Analysis</span>
                 <h3>Fast Noise Analyzer</h3>
-                <p>A rapid pseudo-acoustic noise analysis component. Maps decibel (dB) decay over distance and occlusions onto arbitrary meshes.</p>
+                <p>Rapid engineering-style noise mapping (ISO 9613-2 inspired): geometric spreading, air absorption, ground effect, Maekawa barrier diffraction and foliage attenuation, mapped onto arbitrary meshes.</p>
                 <div class="card-meta">
                     <span>11 Inputs</span>
                     <span>7 Outputs</span>
@@ -709,7 +709,7 @@
             <a href="components/noise-emitter-from-curves.html" class="card" data-category="site-analysis">
                 <span class="badge site-analysis">Site Analysis</span>
                 <h3>Noise Emitter From Curves</h3>
-                <p>Converts curve paths into calibrated discrete point emitters preserving total road acoustic energy independent of divide spacing.</p>
+                <p>Converts line/curve paths (roads, railways) into discrete point emitters whose source levels are calibrated so the summed field reproduces the road's level at the reference distance, independent of the divide length.</p>
                 <div class="card-meta">
                     <span>4 Inputs</span>
                     <span>3 Outputs</span>
@@ -828,7 +828,7 @@
             </a>
             <a href="components/road-profile-&-slope-unroller.html" class="card" data-category="masterplan">
                 <span class="badge masterplan">Masterplan</span>
-                <h3>Road Profile & Slope Unroller</h3>
+                <h3>Road Profile &amp; Slope Unroller</h3>
                 <p>Unrolls a 3D road centerline into a 2D profile graph (elevation vs. distance) alongside its segmented slope analysis.</p>
                 <div class="card-meta">
                     <span>7 Inputs</span>
@@ -932,7 +932,7 @@
                 <p>Multi-threaded raycaster. Analyzes arbitrary 3D massing or custom points for sun exposure.</p>
                 <div class="card-meta">
                     <span>8 Inputs</span>
-                    <span>7 Outputs</span>
+                    <span>6 Outputs</span>
                 </div>
                 <span class="card-link">View docs &rarr;</span>
             </a>
@@ -1043,6 +1043,46 @@
                 <div class="card-meta">
                     <span>19 Inputs</span>
                     <span>9 Outputs</span>
+                </div>
+                <span class="card-link">View docs &rarr;</span>
+            </a>
+            <a href="components/conditional-fillet.html" class="card" data-category="curve">
+                <span class="badge curve">Curve</span>
+                <h3>Conditional Fillet</h3>
+                <p>Standard fillet components apply a single radius to an entire curve, which fails if any segment is too short. This "smart" solver evaluates and fillets a curve corner by corner.</p>
+                <div class="card-meta">
+                    <span>5 Inputs</span>
+                    <span>2 Outputs</span>
+                </div>
+                <span class="card-link">View docs &rarr;</span>
+            </a>
+            <a href="components/false-start-toggle.html" class="card" data-category="utilities">
+                <span class="badge utilities">Utilities</span>
+                <h3>False Start Toggle</h3>
+                <p>A boolean toggle that always initializes as False when the Grasshopper document opens. Prevents heavy scripts from auto-running on open.</p>
+                <div class="card-meta">
+                    <span>0 Inputs</span>
+                    <span>0 Outputs</span>
+                </div>
+                <span class="card-link">View docs &rarr;</span>
+            </a>
+            <a href="components/grid-types.html" class="card" data-category="facade">
+                <span class="badge facade">Facade</span>
+                <h3>Grid Types</h3>
+                <p>Pre-configured grid options: Rectangular, Offset, Hexagonal, Triangular.</p>
+                <div class="card-meta">
+                    <span>0 Inputs</span>
+                    <span>0 Outputs</span>
+                </div>
+                <span class="card-link">View docs &rarr;</span>
+            </a>
+            <a href="components/higrothermal-comfort.html" class="card" data-category="site-analysis">
+                <span class="badge site-analysis">Site Analysis</span>
+                <h3>Higrothermal Comfort</h3>
+                <p>Maps wind-engine velocity samples onto apparent ("feels like") temperature and locates the best/worst comfort points, without requiring a regular grid.</p>
+                <div class="card-meta">
+                    <span>9 Inputs</span>
+                    <span>10 Outputs</span>
                 </div>
                 <span class="card-link">View docs &rarr;</span>
             </a>

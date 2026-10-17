@@ -33,7 +33,7 @@ To spawn default UI elements (sliders, panels, swatches, relays) when a componen
 *   **Version Bumping:** The pipeline and YAK distribution are driven by the `<Version>` tag inside `enzGhPlugin.csproj`. Increment it (e.g. `1.10.77` -> `1.10.78`) before tagging. Yak rejects a version that already exists.
 *   **Release Workflow:**
     1. Work on a branch; push and wait for **CI Check** to go green.
-    2. Update the component's docs page in `docs/components/` (inputs, outputs, HUD lines) and its card in `docs/index.html` if the name/category changed.
+    2. Run `python3 dev_scripts/gen_docs.py` to sync the docs site with the code (new pages/cards, changed ports, names, descriptions). Hand-written sections and port descriptions are kept unless the ports changed. CI fails if this was forgotten.
     3. Merge to `main`, bump `<Version>` in `.csproj`, commit `build: bump version to X.Y.Z`.
     4. `git tag -a vX.Y.Z -m "Release vX.Y.Z"`
     5. `git push origin main && git push origin vX.Y.Z`

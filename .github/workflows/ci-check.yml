@@ -18,6 +18,8 @@ jobs:
     runs-on: ubuntu-latest   # faster queue; macOS is only needed for packaging in build.yml
     steps:
       - uses: actions/checkout@v4
+      - name: Docs in sync with components
+        run: python3 dev_scripts/gen_docs.py --check
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
