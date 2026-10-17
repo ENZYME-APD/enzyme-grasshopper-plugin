@@ -212,7 +212,7 @@ namespace Enzyme.Components
         }
 
         public override GH_Exposure Exposure => GH_Exposure.primary;
-        protected override System.Drawing.Bitmap Icon => null;
+        protected override System.Drawing.Bitmap Icon => Enzyme.IconLoader.Load("RoadSlope3DAnalyzer.png");
         public override Guid ComponentGuid => new Guid("5c6978b2-654e-4f12-9c17-90c74b10547d");
     }
 }

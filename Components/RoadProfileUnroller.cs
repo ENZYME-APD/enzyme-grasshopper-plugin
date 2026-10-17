@@ -294,7 +294,7 @@ public override void AddedToDocument(GH_Document document)
         }
 
         public override GH_Exposure Exposure => GH_Exposure.primary;
-        protected override System.Drawing.Bitmap Icon => null;
+        protected override System.Drawing.Bitmap Icon => Enzyme.IconLoader.Load("RoadProfileUnroller.png");
         public override Guid ComponentGuid => new Guid("78E89D42-B12A-4F33-9111-5A8D3F9A1E4B");
     }
 }

@@ -51,7 +51,6 @@ namespace Enzyme.Components
             pManager.AddMeshParameter("Analysis Mesh", "Mesh", "The auto-subdivided Massing mesh (for easy gradient coloring).", GH_ParamAccess.item);
             pManager.AddColourParameter("Colors", "Colors", "Color mapped to each point.", GH_ParamAccess.list);
             pManager.AddTextParameter("Dashboard Data", "Dashboard", "JSON legend data", GH_ParamAccess.item);
-            pManager.AddColourParameter("Colors", "Colors", "Color mapped to each point based on exposure.", GH_ParamAccess.list);
         }
 
                         protected override void SolveInstance(IGH_DataAccess DA)
@@ -87,11 +86,11 @@ namespace Enzyme.Components
                     if (_cachedMesh != null && _cachedMesh.IsValid) DA.SetData(3, _cachedMesh);
                     DA.SetDataList(4, _cachedColors);
                     DA.SetData(5, _cachedJson);
-                    Message = $"Sun Hours\n{_cachedTime:F2} ms (Cached)\n---\nPoints: {_cachedPoints.Count}\nRays: {_cachedRays}";
+                    Enzyme.Utils.Hud.Cached(this, _cachedTime, Enzyme.Utils.Hud.Metric("Points", _cachedPoints.Count), Enzyme.Utils.Hud.Metric("Rays", _cachedRays));
                 }
                 else
                 {
-                    Message = "Paused";
+                    Enzyme.Utils.Hud.Off(this);
                 }
                 return;
             }
@@ -261,7 +260,7 @@ namespace Enzyme.Components
             _cachedTime = sw.Elapsed.TotalMilliseconds;
             _cachedRays = totalRays;
 
-            Message = $"Sun Hours\n{_cachedTime:F2} ms\n---\nPoints: {_cachedPoints.Count}\nRays: {_cachedRays}";
+            Enzyme.Utils.Hud.Done(this, _cachedTime, Enzyme.Utils.Hud.Metric("Points", _cachedPoints.Count), Enzyme.Utils.Hud.Metric("Rays", _cachedRays));
 
             DA.SetDataList(0, _cachedHits);
             DA.SetDataList(1, _cachedExposures);

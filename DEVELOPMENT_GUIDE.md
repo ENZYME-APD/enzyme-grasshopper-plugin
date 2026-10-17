@@ -25,16 +25,49 @@ To spawn default UI elements (sliders, panels, swatches, relays) when a componen
 ## 3. GitHub Actions & CI/CD
 
 *   **Build Pipeline:** The plugin is compiled via `dotnet build enzGhPlugin.csproj -c Release` on the cloud runner.
-*   **Version Bumping:** The pipeline and YAK distribution are driven by the `<Version>` tag inside `enzGhPlugin.csproj`. You must manually increment this (e.g., `1.8.18` -> `1.8.19`) before tagging and pushing a release.
-*   **Release Workflow:** 
-    1. Update code.
-    2. Bump version in `.csproj`.
-    3. `git commit -m "..."`
-    4. `git tag -a v1.8.X -m "Release v1.8.X"`
-    5. `git push origin main && git push origin v1.8.X`
+*   **Workflows:**
+    *   `ci-check.yml` — compile-only check on every branch push / PR. Nothing is packaged or published. Use it to validate work before a release.
+    *   `build.yml` — runs on a `v*` tag: builds, packages the `.yak`, publishes to Yak, creates the GitHub Release. A failed Yak push **fails the run** (no more silent green builds).
+    *   `deploy-docs.yml` — redeploys the docs site (GitHub Pages) whenever `docs/**` changes on `main`.
+    *   `cleanup-yak.yml` — manual: yanks old Yak versions via `dev_scripts/yank_versions.py`.
+*   **Version Bumping:** The pipeline and YAK distribution are driven by the `<Version>` tag inside `enzGhPlugin.csproj`. Increment it (e.g. `1.10.77` -> `1.10.78`) before tagging. Yak rejects a version that already exists.
+*   **Release Workflow:**
+    1. Work on a branch; push and wait for **CI Check** to go green.
+    2. Update the component's docs page in `docs/components/` (inputs, outputs, HUD lines) and its card in `docs/index.html` if the name/category changed.
+    3. Merge to `main`, bump `<Version>` in `.csproj`, commit `build: bump version to X.Y.Z`.
+    4. `git tag -a vX.Y.Z -m "Release vX.Y.Z"`
+    5. `git push origin main && git push origin vX.Y.Z`
+    6. Confirm both **Build Enzyme Grasshopper Plugin** (tag) and **Deploy Docs** (main) runs are green.
 *   **Debugging Actions:** Use the GitHub CLI (`gh run list` and `gh run view <run_id> --log-failed`) to quickly diagnose cloud compilation errors without leaving the terminal.
 
 ## 4. YAK (Rhino Package Manager) Quirks
 
 *   **Canvas Caching:** When a user updates the plugin version via Yak, existing components already placed on their Grasshopper canvas *retain their legacy Input/Output port mappings, names, and internal states*. 
 *   **Applying Updates:** To see updated port structures, modified descriptions, or to trigger newly added auto-wiring logic, the user *must* delete the old component and place a fresh one from the toolbar. Reloading Rhino does not update legacy components embedded in a saved `.gh` script.
+
+## 5. HUD Standard (component message block)
+
+Every component shows a HUD under its body via `this.Message`. **Always set it through `Enzyme.Utils.Hud`**, never by hand, so all components read the same way.
+
+```
+{NickName}            <- title: always the component NickName (never a hard-coded string)
+12.34 ms              <- solve time; "1.20 s" above 1000 ms; "(cached)" suffix when re-emitting cache
+---                   <- separator
+Points: 1,204         <- up to 6 metric lines, "Label: value", SI units, 40 chars max
+Rays: 38,520
+```
+
+| State | Call | Shows |
+|---|---|---|
+| Solved | `Hud.Done(this, sw, lines…)` | title / time / --- / metrics |
+| Re-emitting cached outputs | `Hud.Cached(this, ms, lines…)` | time with `(cached)` |
+| Required input missing | `Hud.Waiting(this)` or `Hud.Waiting(this, "payload")` | `Awaiting data` |
+| Run toggle false, nothing cached | `Hud.Off(this)` | `Off` |
+| Exception / invalid input | `Hud.Error(this, ex.Message)` | `Error: …` + runtime error balloon |
+
+Rules:
+*   Time every solve with a `Stopwatch` started at the top of `SolveInstance`.
+*   Metric helpers: `Hud.Metric("Points", n)` (thousands separators), `Hud.Metric("Area", a, "m²", 0)`, `Hud.Metric("Mode", "Grid")`.
+*   Pick the 2–4 numbers a designer checks at a glance (counts, totals, min/max, % compliant). Detailed reports go to an `Info` / `Dashboard` output, not the HUD.
+*   Invariant culture formatting (handled by the helper) so Spanish-locale machines show the same decimals.
+*   Sentence case for status words (`Awaiting data`, `Off`), not ALL CAPS.

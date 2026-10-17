@@ -21,6 +21,8 @@ namespace Enzyme.Components
 
         public override GH_Exposure Exposure => GH_Exposure.primary;
 
+        protected override System.Drawing.Bitmap Icon => Enzyme.IconLoader.Load("FalseStartToggle.png");
+
         public override bool Read(GH_IReader reader)
         {
             bool result = base.Read(reader);

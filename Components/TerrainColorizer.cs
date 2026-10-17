@@ -214,13 +214,7 @@ namespace Enzyme.Components
             return Color.FromArgb(r, g, b);
         }
 
-        protected override System.Drawing.Bitmap Icon
-        {
-            get
-            {
-                return null;
-            }
-        }
+        protected override System.Drawing.Bitmap Icon => Enzyme.IconLoader.Load("TerrainColorizer.png");
 
         public override Guid ComponentGuid
         {

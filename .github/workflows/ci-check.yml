@@ -1,0 +1,27 @@
+name: CI Check (compile only)
+
+# Compiles the plugin on every branch push and PR without packaging or publishing.
+# Releases still go through build.yml on a v* tag.
+on:
+  push:
+    branches-ignore:
+      - 'gh-pages'
+    tags-ignore:
+      - '*'
+    paths-ignore:
+      - 'docs/**'
+      - '**/*.md'
+  pull_request:
+
+jobs:
+  compile:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Restore
+        run: dotnet restore enzGhPlugin.csproj
+      - name: Build (Release)
+        run: dotnet build enzGhPlugin.csproj -c Release --no-restore

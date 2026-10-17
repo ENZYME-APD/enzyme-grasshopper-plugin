@@ -23,5 +23,7 @@ namespace Enzyme.Components
 
         public override Guid ComponentGuid => new Guid("A4B56C78-1D2E-4F3B-A9B1-2C3D4E5F6A7B");
         public override GH_Exposure Exposure => GH_Exposure.tertiary;
+
+        protected override System.Drawing.Bitmap Icon => Enzyme.IconLoader.Load("GridTypeValueList.png");
     }
 }

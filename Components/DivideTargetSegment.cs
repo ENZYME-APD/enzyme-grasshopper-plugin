@@ -121,7 +121,7 @@ namespace Enzyme.Components
         }
 
         public override GH_Exposure Exposure => GH_Exposure.primary;
-        protected override System.Drawing.Bitmap Icon => null;
+        protected override System.Drawing.Bitmap Icon => Enzyme.IconLoader.Load("DivideTargetSegment.png");
         public override Guid ComponentGuid => new Guid("4A983B1E-F3C2-4B2E-8E5A-71B62C9D3F8C");
     }
 }

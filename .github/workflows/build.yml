@@ -85,13 +85,23 @@ jobs:
       - name: Push package (.yak) to Yak server
         env:
           YAK_TOKEN: ${{ secrets.YAK_TOKEN }}
-        if: env.YAK_TOKEN != ''
-        continue-on-error: true
+        # Only publish on tagged releases. A failed push now fails the run,
+        # so a green release always means the package is on Yak.
+        if: env.YAK_TOKEN != '' && startsWith(github.ref, 'refs/tags/')
         run: |
           yak_filename="${{ steps.package_yak.outputs.yak_file }}"
           if [ -z "$yak_filename" ]; then echo "No .yak filename provided" && exit 1; fi
           echo "Pushing: $yak_filename"
-          ./yak push "$yak_filename"
+          set +e
+          out=$(./yak push "$yak_filename" 2>&1); code=$?
+          set -e
+          echo "$out"
+          if [ $code -ne 0 ]; then
+            if echo "$out" | grep -qi "already exists"; then
+              echo "::warning::Version already on Yak - bump <Version> in enzGhPlugin.csproj"
+            fi
+            exit $code
+          fi
 
       - name: Determine prerelease status
         id: prerelease_check
