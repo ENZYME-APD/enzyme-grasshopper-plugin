@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Higrothermal Comfort - Enzyme Plugin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="../index.html" class="nav-brand">
+            <img src="../images/enzyme_logo.png" alt="Enzyme Logo" class="logo-img">
+        </a>
+        <div class="nav-links">
+            <a href="../index.html#components">Components</a>
+            <a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank">GitHub</a>
+        </div>
+    </nav>
+
+    <main class="container doc-page">
+        <div class="doc-header" style="display: flex; align-items: center;">
+            <div>
+                <h1>Higrothermal Comfort</h1>
+                <p class="doc-subtitle">Maps wind-engine velocity samples onto apparent ("feels like") temperature and locates the best/worst comfort points, without requiring a regular grid.</p>
+                <div class="doc-meta">
+                    <span class="badge site-analysis">Site Analysis</span>
+                    <span>Nickname: <strong>HigroComfort</strong></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="doc-content">
+            <h2>Overview</h2>
+            <p>Maps wind-engine velocity samples onto apparent ("feels like") temperature and locates the best/worst comfort points, without requiring a regular grid.</p>
+
+            <div class="io-grid">
+                <div class="io-col">
+                    <h3>Inputs (9)</h3>
+                    <ul>
+                        <li><strong>Run</strong> (Boolean): Global execution toggle switch</li>
+                        <li><strong>TerrainMesh</strong> (Mesh): The underlying site topography - its own vertices/connectivity are reused directly for ComfortMesh, no separate grid is built</li>
+                        <li><strong>VelocityValues</strong> (Number): Raw wind speeds (m/s), aligned index-for-index with TagPoints - e.g. from the wind engine's VelocityValues output</li>
+                        <li><strong>TagPoints</strong> (Point): Sample points matching VelocityValues index-for-index - e.g. from the wind engine's TagPoints output</li>
+                        <li><strong>Humidity</strong> (Number): Relative humidity (%), currently a single constant across the whole site</li>
+                        <li><strong>Temperature</strong> (Number): Ambient dry-bulb air temperature (deg C), currently a single constant across the whole site</li>
+                        <li><strong>IdealTemperature</strong> (Number): The apparent temperature (deg C) considered ideal/neutral comfort - deviation from this defines best/worst</li>
+                        <li><strong>ComfortTolerance</strong> (Number): Fraction (0-1) of the observed deviation-from-ideal range within which a point still counts as Best (near the minimum) or Worst (near the maximum)</li>
+                        <li><strong>CustomColors</strong> (Colour): Custom color spectrum override for the comfort mesh</li>
+                    </ul>
+                </div>
+                <div class="io-col">
+                    <h3>Outputs (10)</h3>
+                    <ul>
+                        <li><strong>BestComfortPoints</strong> (Point): Point(s) with apparent temperature closest to IdealTemperature, within ComfortTolerance of the single best</li>
+                        <li><strong>BestComfortValues</strong> (Number): The apparent temperatures for the BestComfortPoints</li>
+                        <li><strong>WorstComfortPoints</strong> (Point): Point(s) with apparent temperature furthest from IdealTemperature, within ComfortTolerance of the single worst</li>
+                        <li><strong>WorstComfortValues</strong> (Number): The apparent temperatures for the WorstComfortPoints</li>
+                        <li><strong>ComfortMesh</strong> (Mesh): The input terrain mesh, vertex-colored by comfort deviation</li>
+                        <li><strong>TagPoints</strong> (Point): Pass-through of the input tag points</li>
+                        <li><strong>ComfortValues</strong> (Number): Raw apparent temperature (deg C) per terrain vertex</li>
+                        <li><strong>ComfortColors</strong> (Colour): List of colors corresponding to each vertex on the mesh</li>
+                        <li><strong>Info</strong> (Text): Component information and interpretation</li>
+                        <li><strong>Dashboard Data</strong> (Text): Unified JSON payload containing legend and key analysis metrics for the Analysis Dashboard</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p><a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank" style="color: #a1a1aa; text-decoration: none; border-bottom: 1px solid #3f3f46; padding-bottom: 2px;">View on GitHub</a></p>
+    </footer>
+</body>
+</html>

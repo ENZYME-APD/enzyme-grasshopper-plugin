@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conditional Fillet - Enzyme Plugin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="../index.html" class="nav-brand">
+            <img src="../images/enzyme_logo.png" alt="Enzyme Logo" class="logo-img">
+        </a>
+        <div class="nav-links">
+            <a href="../index.html#components">Components</a>
+            <a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank">GitHub</a>
+        </div>
+    </nav>
+
+    <main class="container doc-page">
+        <div class="doc-header" style="display: flex; align-items: center;">
+            <div>
+                <h1>Conditional Fillet</h1>
+                <p class="doc-subtitle">Standard fillet components apply a single radius to an entire curve, which fails if any segment is too short. This "smart" solver evaluates and fillets a curve corner by corner.</p>
+                <div class="doc-meta">
+                    <span class="badge curve">Curve</span>
+                    <span>Nickname: <strong>CondFillet</strong></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="doc-content">
+            <h2>Overview</h2>
+            <p>Standard fillet components apply a single radius to an entire curve, which fails if any segment is too short. This "smart" solver evaluates and fillets a curve corner by corner.</p>
+
+            <div class="io-grid">
+                <div class="io-col">
+                    <h3>Inputs (5)</h3>
+                    <ul>
+                        <li><strong>curves</strong> (Curve): Input geometry (Polylines, Curves, Arcs)</li>
+                        <li><strong>radius</strong> (Number): The ideal fillet size you want.</li>
+                        <li><strong>threshold_pct</strong> (Number): Max % of a segment the fillet can consume.</li>
+                        <li><strong>skip</strong> (Boolean): True to skip tight corners; False to clamp.</li>
+                        <li><strong>round_dec</strong> (Integer): [Optional] Decimals to round down to.</li>
+                    </ul>
+                </div>
+                <div class="io-col">
+                    <h3>Outputs (2)</h3>
+                    <ul>
+                        <li><strong>out_curves</strong> (Curve): The final filleted geometry. (Preserves empty branches)</li>
+                        <li><strong>radii</strong> (Number): The exact radius applied to each specific corner.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p><a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank" style="color: #a1a1aa; text-decoration: none; border-bottom: 1px solid #3f3f46; padding-bottom: 2px;">View on GitHub</a></p>
+    </footer>
+</body>
+</html>
