@@ -108,6 +108,8 @@ namespace Enzyme.Components
                 };
             }
 
+            System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew(); // includes auto-meshing
+
             Mesh displayMesh = new Mesh();
             List<Vector3d> normals = new List<Vector3d>();
             bool isWorkflow1 = false;
@@ -162,8 +164,6 @@ namespace Enzyme.Components
                 return;
             }
 
-            System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
-
             Mesh combinedContext = new Mesh();
             foreach (Mesh cm in context)
             {
@@ -174,7 +174,8 @@ namespace Enzyme.Components
                 combinedContext.Append(displayMesh);
             }
             combinedContext.Compact();
-            
+            MeshPrep.WarmUp(combinedContext); // build ray-acceleration data once, before the parallel loop
+
             int[] sunHits = new int[testPoints.Count];
             double[] exposures = new double[testPoints.Count];
             Point3d[] offsetPoints = new Point3d[testPoints.Count];

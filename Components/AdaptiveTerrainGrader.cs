@@ -174,6 +174,7 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
             int xCount = (int)Math.Ceiling((bbox.Max.X - bbox.Min.X) / MeshResolution);
             int yCount = (int)Math.Ceiling((bbox.Max.Y - bbox.Min.Y) / MeshResolution);
 
+            MeshPrep.WarmUp(Mesh);
             System.Threading.Tasks.Parallel.For(0, xCount + 1, i =>
             {
                 for (int j = 0; j <= yCount; j++)
@@ -270,6 +271,7 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
             Mesh resultMesh = Rhino.Geometry.Mesh.CreateFromTessellation(modifiedPoints, null, Plane.WorldXY, false);
             resultMesh.Normals.ComputeNormals();
             resultMesh.Compact();
+            MeshPrep.WarmUp(resultMesh);
 
             double cutAcc = 0.0;
             double fillAcc = 0.0;

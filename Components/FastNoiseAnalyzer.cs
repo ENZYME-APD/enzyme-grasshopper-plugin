@@ -97,6 +97,7 @@ namespace Enzyme.Components
                 hf.Ny = (int)Math.Ceiling((bb.Max.Y - bb.Min.Y) / res) + 2;
                 hf.H = new float[hf.Nx * hf.Ny];
                 double zTop = bb.Max.Z + 10.0;
+                MeshPrep.WarmUp(m);
 
                 Parallel.For(0, hf.Ny, iy =>
                 {
@@ -168,6 +169,7 @@ namespace Enzyme.Components
             Mesh softAll = new Mesh();
             foreach (var m in softContext) if (m != null && m.IsValid) softAll.Append(m);
             bool hasSoft = softAll.Faces.Count > 0;
+            MeshPrep.WarmUp(hardAll, softAll); // shared by every receiver thread below
 
             HeightField hf = hasHard ? HeightField.Build(hardAll) : null;
 
