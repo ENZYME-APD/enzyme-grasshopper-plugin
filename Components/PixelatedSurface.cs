@@ -16,7 +16,6 @@ namespace Enzyme.Components
     {
         private Bitmap _cachedBitmap = null;
         private string _cachedImagePath = "";
-        private int _cachedRotation = 0;
 
         public PixelatedSurface()
           : base("Pixel Image", "PixImg",
