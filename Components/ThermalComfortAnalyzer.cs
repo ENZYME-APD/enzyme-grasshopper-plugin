@@ -9,8 +9,10 @@ using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
-    public class ThermalComfortAnalyzer : GH_Component
+    public class ThermalComfortAnalyzer : EnzymeComponent
     {
+        protected override bool UsesRunGate => true;
+
         // Apparent Temperature (Steadman 1994), as used by the Australian Bureau of
         // Meteorology - a real, documented "feels like" formula combining air temperature,
         // humidity, and wind speed into a single value, rather than an invented score.
@@ -132,7 +134,7 @@ namespace Enzyme.Components
             return tempC + (AT_HUMIDITY_COEFFICIENT * vaporPressure) - (AT_WIND_COEFFICIENT * windSpeedMs) - AT_CONSTANT;
         }
 
-        protected override void SolveInstance(IGH_DataAccess DA)
+        protected override void Solve(IGH_DataAccess DA, System.Diagnostics.Stopwatch hudSw)
         {
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             var sw = System.Diagnostics.Stopwatch.StartNew();

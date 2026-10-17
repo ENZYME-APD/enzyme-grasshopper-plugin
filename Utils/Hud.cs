@@ -39,6 +39,16 @@ namespace Enzyme.Utils
         public static void Cached(GH_Component c, double ms, params string[] lines)
             => Set(c, FormatTime(ms) + " (cached)", lines);
 
+        /// <summary>Re-label a previously built HUD string as cached (adds "(cached)" to its time line).</summary>
+        public static string MarkCached(string hud)
+        {
+            if (string.IsNullOrEmpty(hud)) return hud;
+            var lines = hud.Split('\n');
+            if (lines.Length > 1 && lines[1] != Separator && !lines[1].EndsWith("(cached)"))
+                lines[1] += " (cached)";
+            return string.Join("\n", lines);
+        }
+
         /// <summary>Required input missing. what = "data", "payload", "curves"...</summary>
         public static void Waiting(GH_Component c, string what = "data")
             => Set(c, null, "Awaiting " + what);

@@ -11,7 +11,7 @@ using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
-    public class FastCFD : GH_Component
+    public class FastCFD : EnzymeComponent
     {
         public FastCFD()
           : base("Fast CFD", "FastCFD",
@@ -56,7 +56,7 @@ namespace Enzyme.Components
             pManager.AddTextParameter("Info", "Info", "Simulation data, Lawson comfort criteria, and timing", GH_ParamAccess.item);
         }
 
-        protected override void SolveInstance(IGH_DataAccess DA)
+        protected override void Solve(IGH_DataAccess DA, System.Diagnostics.Stopwatch hudSw)
         {
             Mesh terrainMesh = null;
             if (!DA.GetData(0, ref terrainMesh)) return;

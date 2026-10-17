@@ -13,8 +13,10 @@ using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
-    public class WindEngineHTVer : GH_Component
+    public class WindEngineHTVer : EnzymeComponent
     {
+        protected override bool UsesRunGate => true;
+
         // --- Tunable model constants (previously unnamed magic numbers) ---
         // Wake length is expressed as a multiple of the obstructing building's height,
         // following simplified urban-wind wake-length rules of thumb (~6-8x obstacle height
@@ -273,7 +275,7 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
             pManager.AddTextParameter("Dashboard Data", "Dashboard Data", "JSON legend payload (min/max speed + the actual color ramp in use) - feed directly into the Legend Geometry component's Color Legend input", GH_ParamAccess.item);
         }
 
-        protected override void SolveInstance(IGH_DataAccess DA)
+        protected override void Solve(IGH_DataAccess DA, System.Diagnostics.Stopwatch hudSw)
         {
             bool execute = false;
             DA.GetData(0, ref execute);

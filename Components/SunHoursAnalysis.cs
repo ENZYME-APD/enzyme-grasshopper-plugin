@@ -8,8 +8,10 @@ using Rhino.Geometry;
 
 namespace Enzyme.Components
 {
-    public class SunHoursAnalysis : GH_Component
+    public class SunHoursAnalysis : EnzymeComponent
     {
+        protected override bool UsesRunGate => true;
+
         private List<int> _cachedHits = new List<int>();
         private List<double> _cachedExposures = new List<double>();
         private List<Point3d> _cachedPoints = new List<Point3d>();
@@ -54,7 +56,7 @@ namespace Enzyme.Components
             pManager.AddTextParameter("Dashboard Data", "Dashboard", "JSON legend data", GH_ParamAccess.item);
         }
 
-                        protected override void SolveInstance(IGH_DataAccess DA)
+                        protected override void Solve(IGH_DataAccess DA, System.Diagnostics.Stopwatch hudSw)
         {
             List<Point3d> testPoints = new List<Point3d>();
             List<Grasshopper.Kernel.Types.IGH_GeometricGoo> geos = new List<Grasshopper.Kernel.Types.IGH_GeometricGoo>();
@@ -77,24 +79,7 @@ namespace Enzyme.Components
             double offset = 0.1;
             DA.GetData(7, ref offset);
 
-            if (!run)
-            {
-                if (_cachedHits.Count > 0)
-                {
-                    DA.SetDataList(0, _cachedHits);
-                    DA.SetDataList(1, _cachedExposures);
-                    DA.SetDataList(2, _cachedPoints);
-                    if (_cachedMesh != null && _cachedMesh.IsValid) DA.SetData(3, _cachedMesh);
-                    DA.SetDataList(4, _cachedColors);
-                    DA.SetData(5, _cachedJson);
-                    Enzyme.Utils.Hud.Cached(this, _cachedTime, Enzyme.Utils.Hud.Metric("Points", _cachedPoints.Count), Enzyme.Utils.Hud.Metric("Rays", _cachedRays));
-                }
-                else
-                {
-                    Enzyme.Utils.Hud.Off(this);
-                }
-                return;
-            }
+            // Run = false is handled by EnzymeComponent (replays the last results).
 
             if (vectors.Count == 0) return;
 

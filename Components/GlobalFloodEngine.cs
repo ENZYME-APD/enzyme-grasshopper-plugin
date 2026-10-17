@@ -6,7 +6,7 @@ using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
-    public class GlobalFloodEngine : GH_Component
+    public class GlobalFloodEngine : EnzymeComponent
     {
         public GlobalFloodEngine()
             : base("Global Flood Engine", "GlobalFlood",
@@ -39,7 +39,7 @@ namespace Enzyme.Components
             pManager.AddTextParameter("Info", "Info", "Component information and interpretation", GH_ParamAccess.item);
         }
 
-        protected override void SolveInstance(IGH_DataAccess DA)
+        protected override void Solve(IGH_DataAccess DA, System.Diagnostics.Stopwatch hudSw)
         {
             Mesh TerrainMesh = null;
             if (!DA.GetData(0, ref TerrainMesh)) return;

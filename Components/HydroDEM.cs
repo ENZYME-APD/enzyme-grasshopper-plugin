@@ -8,7 +8,7 @@ using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
-    public class HydroDEM : GH_Component
+    public class HydroDEM : EnzymeComponent
     {
         public HydroDEM()
           : base("Hydro-DEM Engine", "HydroDEM",
@@ -48,7 +48,7 @@ namespace Enzyme.Components
             pManager.AddTextParameter("Dashboard Data", "Dashboard Data", "Unified JSON payload containing legend and key analysis metrics for the Analysis Dashboard", GH_ParamAccess.item);
         }
 
-        protected override void SolveInstance(IGH_DataAccess DA)
+        protected override void Solve(IGH_DataAccess DA, System.Diagnostics.Stopwatch hudSw)
         {
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             Mesh mesh = null;

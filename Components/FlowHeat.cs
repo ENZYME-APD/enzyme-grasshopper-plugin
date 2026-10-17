@@ -12,7 +12,7 @@ using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
-    public class FlowHeat : GH_Component
+    public class FlowHeat : EnzymeComponent
     {
         public FlowHeat()
           : base("Flow Accumulation Heatmap", "FlowHeat",
@@ -53,7 +53,7 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
             pManager.AddTextParameter("Info", "Info", "Component information and interpretation", GH_ParamAccess.item);
         }
 
-        protected override void SolveInstance(IGH_DataAccess DA)
+        protected override void Solve(IGH_DataAccess DA, System.Diagnostics.Stopwatch hudSw)
         {
             var watch = System.Diagnostics.Stopwatch.StartNew();
             

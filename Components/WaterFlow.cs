@@ -11,7 +11,7 @@ using Enzyme.Utils;
 
 namespace Enzyme.Terrain
 {
-    public class WaterFlow : GH_Component
+    public class WaterFlow : EnzymeComponent
     {
         public WaterFlow()
           : base("Raindrop Flow Engine", "WaterFlow",
@@ -52,7 +52,7 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
             pManager.AddPointParameter("DropPoints", "DP", "The valid starting grid points on the mesh.", GH_ParamAccess.tree);
         }
 
-        protected override void SolveInstance(IGH_DataAccess DA)
+        protected override void Solve(IGH_DataAccess DA, System.Diagnostics.Stopwatch hudSw)
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
 

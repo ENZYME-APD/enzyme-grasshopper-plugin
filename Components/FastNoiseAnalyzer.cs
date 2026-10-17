@@ -11,8 +11,10 @@ using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
-    public class FastNoiseAnalyzer : GH_Component
+    public class FastNoiseAnalyzer : EnzymeComponent
     {
+        protected override bool UsesRunGate => true;
+
         // Representative frequency for broadband A-weighted traffic noise
         private const double FreqHz = 500.0;
         private const double Lambda = 343.0 / FreqHz;          // wavelength (m)
@@ -113,7 +115,7 @@ namespace Enzyme.Components
             }
         }
 
-        protected override void SolveInstance(IGH_DataAccess DA)
+        protected override void Solve(IGH_DataAccess DA, System.Diagnostics.Stopwatch hudSw)
         {
             var sw = System.Diagnostics.Stopwatch.StartNew();
 

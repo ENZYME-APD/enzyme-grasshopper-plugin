@@ -10,7 +10,7 @@ using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
-    public class AdaptiveTerrainGrader : GH_Component
+    public class AdaptiveTerrainGrader : EnzymeComponent
     {
         public AdaptiveTerrainGrader()
             : base("Terrain Grader", "TERRAIN GRADER",
@@ -94,7 +94,7 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
                     pManager.AddTextParameter("Info", "Info", "Component information and interpretation", GH_ParamAccess.item);
         }
 
-        protected override void SolveInstance(IGH_DataAccess DA)
+        protected override void Solve(IGH_DataAccess DA, System.Diagnostics.Stopwatch hudSw)
         {
             Mesh Mesh = null;
             if (!DA.GetData(0, ref Mesh)) return;
