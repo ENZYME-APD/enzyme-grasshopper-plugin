@@ -209,7 +209,7 @@ OUTPUTS:
 
         private Layer FindLayer(RhinoDoc doc, string name)
         {
-            int idx = doc.Layers.FindByFullPath(name, true);
+            int idx = doc.Layers.FindByFullPath(name, -1);
             if (idx >= 0) return doc.Layers[idx];
 
             foreach (var layer in doc.Layers)

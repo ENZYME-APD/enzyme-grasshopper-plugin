@@ -4,12 +4,28 @@ authors:
   - Dushyant Basson
   - Jorge Beneitez
   - Hendriko Teguh
-description: Enzyme Grasshopper plugin
-url: https://github.com/enzyme-apd/enzyme-grasshopper-plugin
+description: >-
+  Enzyme APD's toolkit for urban design in Grasshopper. 100+ components for
+  masterplanning and urban prototyping, site and terrain analysis (slope, flood,
+  hydrology, sun hours, wind CFD, noise), road network modelling with cut and fill,
+  facade design, sustainability metrics and canvas utilities.
+url: https://enzyme-apd.github.io/enzyme-grasshopper-plugin/
 keywords:
   - grasshopper
-  - data
-  - manipulation
+  - urban-design
+  - masterplanning
+  - site-analysis
+  - terrain
+  - roads
+  - cut-and-fill
+  - facade
+  - sustainability
+  - cfd
+  - wind
+  - noise
+  - sun-hours
+  - flood
+  - hydrology
 icon: Resources/enzyme_logo.png
 compatibility:
   rhinocommon:

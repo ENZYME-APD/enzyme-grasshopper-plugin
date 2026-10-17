@@ -144,8 +144,6 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
             double totalZSum = 0.0;
             int totalVerticesCount = 0;
             double totalTerrainArea = 0.0;
-            int totalSectionsX = 0;
-            int totalSectionsY = 0;
 
             BoundingBox globalBB = BoundingBox.Empty;
             foreach (var path in targetMeshes.Paths)

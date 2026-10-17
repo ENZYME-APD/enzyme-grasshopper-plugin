@@ -378,7 +378,7 @@ namespace Enzyme.Components
                             string f_tag = branch_tags[j].Value;
 
                             string parent_name = "Tiles";
-                            int parent_idx = doc.Layers.Find(parent_name, true);
+                            int parent_idx = doc.Layers.FindByFullPath(parent_name, -1);
                             if (parent_idx < 0)
                             {
                                 var parent_layer = new Rhino.DocObjects.Layer();

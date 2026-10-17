@@ -34,9 +34,6 @@ namespace Enzyme.Components
             List<GeometryBase> xList = new List<GeometryBase>();
             if (!DA.GetDataList(0, xList)) return;
 
-            string component_name = "Surface Plane Finder";
-            string component_version = "v1.0";
-
             GeometryBase input_item = null;
             if (xList.Count > 0 && xList[0] != null)
             {

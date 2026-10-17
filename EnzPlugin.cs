@@ -26,7 +26,9 @@ namespace Enzyme
             }
         }
 
-        public override string Description => "Enzyme Grasshopper plugin";
+        public override string Description => "Enzyme APD urban design toolkit: masterplanning and urban prototyping, site and terrain analysis, road network modelling, facade design, sustainability and canvas utilities.";
+        public override string AuthorName => "Enzyme APD";
+        public override string AuthorContact => "hello@weareenzyme.com | https://www.weareenzyme.com";
         public override Guid Id => new Guid("8dfb3e6b-73c9-40f6-b03f-4343c789749b");
     }
 }

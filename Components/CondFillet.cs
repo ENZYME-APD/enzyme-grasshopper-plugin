@@ -227,7 +227,7 @@ namespace Enzyme.Components
                         Point3d A = arc.PointAtStart;
                         Point3d B = arc.PointAtEnd;
 
-                        double tA1, tB1, t_cut_c2_dummy;
+                        double tA1, tB1;
                         bool sA1 = c1.ClosestPoint(A, out tA1);
                         bool sB1 = c1.ClosestPoint(B, out tB1);
 

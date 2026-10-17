@@ -317,7 +317,7 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 labels.Add("Error parsing JSON legend");
                 labelPositions.Add(basePoint);

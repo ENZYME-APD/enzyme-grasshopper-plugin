@@ -13,11 +13,6 @@ namespace Enzyme.Components
 {
     public class RoadGenerator : GH_Component
     {
-        private struct ExclusionNode
-        {
-            public Point3d Pt2D;
-            public double Radius;
-        }
         public RoadGenerator()
           : base("Procedural Road Generator", "RoadGen",
               "Generates procedural roads, bridges, and terrain cuts/fills using a blazing fast 2.5D approach.",

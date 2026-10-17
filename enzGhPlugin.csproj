@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Version>1.10.78</Version>
     <Title>Enzyme</Title>
-    <Description>Enzyme Grasshopper plugin</Description>
+    <Description>Enzyme APD urban design toolkit for Grasshopper: masterplanning, site analysis, roads, facades and sustainability.</Description>
     <AssemblyName>enzyme</AssemblyName>
     <RootNamespace>Enzyme</RootNamespace>
     <TargetExt>.gha</TargetExt>
