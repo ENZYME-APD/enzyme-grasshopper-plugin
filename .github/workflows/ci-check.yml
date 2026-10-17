@@ -15,7 +15,7 @@ on:
 
 jobs:
   compile:
-    runs-on: ubuntu-latest   # faster queue; macOS is only needed for packaging in build.yml
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - name: Docs in sync with components

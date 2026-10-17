@@ -69,3 +69,31 @@ Rules:
 *   Pick the 2–4 numbers a designer checks at a glance (counts, totals, min/max, % compliant). Detailed reports go to an `Info` / `Dashboard` output, not the HUD.
 *   Invariant culture formatting (handled by the helper) so Spanish-locale machines show the same decimals.
 *   Sentence case for status words (`Awaiting data`, `Off`), not ALL CAPS.
+
+## 6. EnzymeComponent base class
+
+New and migrated components inherit `Enzyme.Utils.EnzymeComponent` instead of `GH_Component`:
+
+```csharp
+public class MyTool : EnzymeComponent
+{
+    protected override bool UsesRunGate => true;   // only for analysis tools with a "Run" input
+
+    protected override void Solve(IGH_DataAccess DA, Stopwatch sw)
+    {
+        // ...work...
+        Hud.Done(this, sw, Hud.Metric("Points", n));
+    }
+
+    protected override void AutoWire(GH_Document doc)   // optional: default sliders on a fresh drop
+    {
+        AutoWireHelper.WireSlider(this, doc, 2, 0.5, 10, 2, 200, 0);
+    }
+}
+```
+
+*   **Errors:** any exception escaping `Solve()` becomes `Hud.Error` + a red balloon.
+*   **Run gate (opt-in):** with `UsesRunGate => true`, `Run = false` skips `Solve()` and replays the last computed outputs with a `(cached)` HUD, or shows `Off` if nothing has run yet. Only for tools where Run means "compute"; tools where Run means "do an action" (export, bake, draw a HUD) keep their own logic.
+*   **Run inputs are not added to tools that don't already have one** — a Run toggle exists only where it was put on purpose.
+*   **Auto-wiring:** override `AutoWire(doc)`; the base already ensures Attributes exist and skips wiring when any input is already connected.
+*   **CI runners:** all workflows run on Linux (`ubuntu-24.04`); the `.gha` is platform-independent .NET, and the Linux Yak CLI packages it. Resource file names are case-sensitive on Linux — keep `IconLoader.Load("Name.png")` exactly matching the file.

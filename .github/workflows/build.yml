@@ -20,7 +20,7 @@ concurrency:
 
 jobs:
   check:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       version: ${{ steps.v.outputs.version }}
       tag: ${{ steps.v.outputs.tag }}
@@ -52,7 +52,7 @@ jobs:
   build:
     needs: check
     if: needs.check.outputs.release == 'true'
-    runs-on: macos-latest
+    runs-on: ubuntu-24.04   # Linux: no queue for Mac runners; .gha is platform-independent IL
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -81,7 +81,7 @@ jobs:
 
       - name: Download Yak CLI
         run: |
-          curl -L -o yak "https://files.mcneel.com/yak/tools/0.13.0/mac/yak"
+          curl -L -o yak "https://files.mcneel.com/yak/tools/0.13.0/linux-x64/yak"
           chmod +x yak
 
       - name: Build plugin
@@ -113,7 +113,7 @@ jobs:
           # Substitute $version token in manifest
           version="${{ steps.get_version.outputs.version }}"
           echo "Building package for version: $version"
-          sed -i '' "s/\$version/$version/" yakdir/manifest.yml
+          sed -i "s/\$version/$version/" yakdir/manifest.yml
 
           # Build the .yak package
           cd yakdir

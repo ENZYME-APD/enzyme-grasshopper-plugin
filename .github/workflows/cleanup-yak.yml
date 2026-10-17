@@ -5,7 +5,7 @@ on:
 
 jobs:
   cleanup:
-    runs-on: macos-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -19,7 +19,7 @@ jobs:
 
       - name: Download Yak CLI
         run: |
-          curl -L -o yak "https://files.mcneel.com/yak/tools/0.13.0/mac/yak"
+          curl -L -o yak "https://files.mcneel.com/yak/tools/0.13.0/linux-x64/yak"
           chmod +x yak
 
       - name: Run Yank Cleanup Script
