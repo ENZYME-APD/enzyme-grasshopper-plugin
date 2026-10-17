@@ -21,10 +21,6 @@ namespace Enzyme.Components
             get
             {
                 Bitmap icon = IconLoader.Load("legend_icon.png");
-                if (icon == null)
-                {
-                    this.Message = $"{this.NickName}\n---\nIcon missing";
-                }
                 return icon;
             }
         }
@@ -144,13 +140,14 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            var hudSw = System.Diagnostics.Stopwatch.StartNew();
             // Input variables
             object legendData = null;
             Rhino.Geometry.Point3d basePoint = new Rhino.Geometry.Point3d(0, 0, 0);
             double scale = 1.0;
 
             // Get input data
-            if (!DA.GetData(0, ref legendData)) return;
+            if (!DA.GetData(0, ref legendData)) { Hud.Waiting(this, "legend data"); return; }
             if (!DA.GetData(1, ref basePoint)) return;
             if (!DA.GetData(2, ref scale)) return;
 
@@ -197,6 +194,7 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
             DA.SetDataList(1, result.Labels);
             DA.SetDataList(2, result.LabelPositions);
             DA.SetDataList(3, result.Colors);
+            Hud.Done(this, hudSw, Hud.Metric("Swatches", result.Rectangles.Count), Hud.Metric("Scale", scale, "", 2));
                     DA.SetData(4, "LEGEND GEOMETRY\n" + "\n" + "HOW IT WORKS:\n" + "Reads the domains and color gradients from the analysis components (Slope, Height, Flow) and bakes a scaled 3D legend into the Rhino scene.\n\n" + "INTERPRETATION & IMPORTANCE:\n" + "Ensures that visual diagrams are scientifically readable. Without a legend, a heatmap is just pretty colors with it, it becomes an actionable data map.");
         }
 

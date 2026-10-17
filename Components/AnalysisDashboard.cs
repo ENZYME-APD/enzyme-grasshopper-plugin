@@ -5,6 +5,7 @@ using System.Drawing;
 using Grasshopper.Kernel;
 using Rhino.Display;
 using Rhino.Geometry;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -187,20 +188,20 @@ namespace Enzyme.Components
                     }
 
                     stopwatch.Stop();
-                    this.Message = $"{this.NickName}\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\nHUD ACTIVE\n" + _title;
+                    Hud.Done(this, stopwatch, "HUD active", _title);
                 }
                 catch (Exception ex)
                 {
-                    this.Message = $"{this.NickName}\n---\nJSON Error: " + ex.Message;
+                    Hud.Error(this, "JSON: " + ex.Message, false);
                     Unsubscribe();
                 }
             }
             else
             {
                 if (!_run)
-                    this.Message = $"{this.NickName}\n---\nSTATE: OFF";
+                    Hud.Off(this);
                 else
-                    this.Message = $"{this.NickName}\n---\nWAITING FOR DATA";
+                    Hud.Waiting(this);
                 
                 Unsubscribe();
             }

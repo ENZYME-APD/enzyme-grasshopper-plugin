@@ -6,6 +6,7 @@ using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
 using Newtonsoft.Json;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -56,6 +57,7 @@ namespace Enzyme.Components
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            var hudSw = System.Diagnostics.Stopwatch.StartNew();
             List<Brep> floorBreps = new List<Brep>();
             if (!DA.GetDataList(0, floorBreps)) return;
 
@@ -238,7 +240,7 @@ namespace Enzyme.Components
 
             DA.SetData(0, jsonPayload);
 
-            this.Message = $"SLICED CAKE ADAPTER\n---\nBuildings: {outputBuildings.Count}\nFloors: {healed_blocks}\nHeals Applied: {total_heals_applied}";
+            Hud.Done(this, hudSw, Hud.Metric("Buildings", outputBuildings.Count), $"Floors: {healed_blocks}", $"Heals applied: {total_heals_applied}");
         }
 
         private List<object> SerializeExactCurve(Curve crv)

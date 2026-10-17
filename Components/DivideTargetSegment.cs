@@ -4,6 +4,7 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -117,7 +118,7 @@ namespace Enzyme.Components
             DA.SetDataTree(2, outLens);
         
             stopwatch.Stop();
-            Message = $"{this.NickName}\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\nDone";
+            Hud.Done(this, stopwatch.Elapsed.TotalMilliseconds);
         }
 
         public override GH_Exposure Exposure => GH_Exposure.primary;

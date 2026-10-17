@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -152,7 +153,7 @@ namespace Enzyme.Components
             }
 
             stopwatch.Stop();
-            Message = $"Hydro-DEM\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\nThreshold: {threshold}\nStreams: {streams.Count}";
+            Hud.Done(this, stopwatch.Elapsed.TotalMilliseconds, $"Threshold: {threshold}\nStreams: {streams.Count}");
             
             JObject payload = new JObject();
             payload["Title"] = "HYDRO DEM";

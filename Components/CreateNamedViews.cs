@@ -5,6 +5,7 @@ using Rhino.Geometry;
 using Rhino.Display;
 using Rhino.DocObjects;
 using Grasshopper.Kernel;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -101,7 +102,7 @@ namespace Enzyme.Components
             DA.SetDataList(0, generatedNames);
 
             string status = run ? $"Generated {generatedNames.Count} Named Views" : "Sleeping (Run is False)";
-            Message = $"{this.NickName}\nTime: {timer.Elapsed.TotalMilliseconds:F2} ms\n---\n{status}";
+            Hud.Done(this, timer.Elapsed.TotalMilliseconds, $"{status}");
             
             DA.SetData(1, "CREATE NAMED VIEWS\n"
                 + "\n"

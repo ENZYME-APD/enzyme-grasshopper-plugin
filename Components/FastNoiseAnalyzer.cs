@@ -7,6 +7,7 @@ using Grasshopper.Kernel;
 using Rhino.Geometry;
 using Rhino.Geometry.Intersect;
 using Newtonsoft.Json;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -155,7 +156,7 @@ namespace Enzyme.Components
             if (!run)
             {
                 DA.SetData(6, BuildInfo(null));
-                this.Message = $"{this.NickName}\nOFF";
+                Hud.Off(this);
                 return;
             }
 
@@ -398,7 +399,7 @@ namespace Enzyme.Components
             DA.SetData(5, jsonOut);
             DA.SetData(6, BuildInfo(stats));
 
-            this.Message = $"NoiseEnv\n{sw.Elapsed.TotalMilliseconds:F2} ms\n---\nMax: {globalMaxDb:F1} dB(A)\nMin: {globalMinDb:F1} dB(A)";
+            Hud.Done(this, sw.Elapsed.TotalMilliseconds, $"Max: {globalMaxDb:F1} dB(A)\nMin: {globalMinDb:F1} dB(A)");
         }
 
         // ------------------------------------------------------------------

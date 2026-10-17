@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -111,7 +112,7 @@ namespace Enzyme.Components
             DA.SetDataList(2, points);
             DA.SetData(3, new Rhino.Geometry.Circle(new Rhino.Geometry.Plane(center, Rhino.Geometry.Vector3d.ZAxis), radius).ToNurbsCurve());
             
-            Message = $"Heliodon\n{sw.Elapsed.TotalMilliseconds:F2} ms\n---\nLat: {lat:F1}\nLon: {lon:F1}\nVectors: {vectors.Count}";
+            Hud.Done(this, sw.Elapsed.TotalMilliseconds, $"Lat: {lat:F1}\nLon: {lon:F1}\nVectors: {vectors.Count}");
         }
 
         private Vector3d GetSunVector(double lat, double lon, int dayOfYear, double hour, double tz)

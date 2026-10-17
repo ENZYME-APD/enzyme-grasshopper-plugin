@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Special;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -97,7 +98,7 @@ namespace Enzyme.Components
             }
             
             stopwatch.Stop();
-            this.Message = $"Group Colours\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\nCase-insensitive\nMulti-separator";
+            Hud.Done(this, stopwatch.Elapsed.TotalMilliseconds, "Case-insensitive\nMulti-separator");
         }
 
         public override void AddedToDocument(GH_Document document)

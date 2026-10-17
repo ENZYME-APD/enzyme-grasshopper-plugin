@@ -3,6 +3,7 @@ using System.Linq;
 using Grasshopper.Kernel;
 using Rhino;
 using Rhino.Geometry;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -68,7 +69,7 @@ namespace Enzyme.Components
             string version = "v1.0";
             string filletMessage = R == 0 ? "No fillet" : $"R={R}";
             stopwatch.Stop();
-            Message = $"CWProfile {version}\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\n{A}x{B}\n{filletMessage}";
+            Hud.Done(this, stopwatch.Elapsed.TotalMilliseconds, $"Version: {version}", $"Profile: {A}x{B}", filletMessage);
 
             if (A <= 0 || B <= 0)
             {

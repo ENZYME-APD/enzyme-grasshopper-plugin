@@ -7,6 +7,7 @@ using Grasshopper.Kernel.Data;
 using Rhino.Geometry;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -254,7 +255,7 @@ namespace Enzyme.Components
             DA.SetData(0, jsonPayload);
 
             stopwatch.Stop();
-            this.Message = $"SCULPTOR ADAPTER\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\nBuildings: {output_buildings.Count}\nFloors Sliced: {total_sliced_floors}";
+            Hud.Done(this, stopwatch.Elapsed.TotalMilliseconds, $"Buildings: {output_buildings.Count}\nFloors Sliced: {total_sliced_floors}");
         }
 
         // ==============================================================================

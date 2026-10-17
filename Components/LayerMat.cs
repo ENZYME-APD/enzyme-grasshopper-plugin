@@ -8,6 +8,7 @@ using Rhino;
 using Rhino.DocObjects;
 using System.Drawing;
 using Enzyme;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -56,7 +57,7 @@ namespace Enzyme.Components
         private string _logOutput = "Connect a boolean to RunScript.";
         private int _updatedCount = 0;
         private int _skippedCount = 0;
-        private string _hudMessage = "LAYERMAT\nMode: --\n-- WAITING --\n---\n● Assigned: 0\n○ Skipped: 0";
+        private string _hudMessage = null;
 
         private const string Instructions = @"Grasshopper C# Component — Assign Layer Materials
 ======================================================
@@ -186,12 +187,7 @@ OUTPUTS:
                     sw.Stop();
                     double elapsedMs = Math.Round(sw.Elapsed.TotalMilliseconds, 2);
 
-                    _hudMessage = $@"LAYERMAT
-Mode: {modeStr}
-Time: {elapsedMs} ms
----
-● Assigned: {updated}
-○ Skipped: {skipped}";
+                    _hudMessage = Hud.Build(this.NickName, Hud.FormatTime(elapsedMs), new[] { $"Mode: {modeStr}", $"● Assigned: {updated}", $"○ Skipped: {skipped}" });
 
                     _logOutput = string.Join("\n", messages);
                     _updatedCount = updated;
@@ -199,7 +195,7 @@ Time: {elapsedMs} ms
                 }
             }
 
-            Message = _hudMessage;
+            if (_hudMessage == null) Hud.Waiting(this); else Message = _hudMessage;
             
             DA.SetData(1, _logOutput);
             DA.SetData(2, _updatedCount);

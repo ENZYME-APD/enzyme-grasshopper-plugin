@@ -7,6 +7,7 @@ using Grasshopper.Kernel;
 using Rhino.Geometry;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -91,7 +92,7 @@ namespace Enzyme.Components
 
             if (clean_crvs.Count == 0)
             {
-                Message = "FACADE_DIST\nTime: 0.0 ms\n---\nAwaiting Curves";
+                Hud.Waiting(this, "curves");
                 return;
             }
 
@@ -103,7 +104,7 @@ namespace Enzyme.Components
             {
                 if (string.IsNullOrWhiteSpace(local_path_in) || (!File.Exists(local_path_in) && !Directory.Exists(local_path_in)))
                 {
-                    Message = "FACADE_DIST\nTime: 0.0 ms\n---\nInvalid Local Path";
+                    Hud.Error(this, "Invalid local path", false);
                     return;
                 }
                 
@@ -134,7 +135,7 @@ namespace Enzyme.Components
                     {
                         if (!File.Exists(source_file_path))
                         {
-                            Message = "FACADE_DIST\nTime: 0.0 ms\n---\nSync Error";
+                            Hud.Error(this, "Sync error", false);
                             return;
                         }
                     }
@@ -168,7 +169,7 @@ namespace Enzyme.Components
             }
             catch
             {
-                Message = "FACADE_DIST\nTime: 0.0 ms\n---\nCompile Error";
+                Hud.Error(this, "Compile error", false);
                 return;
             }
 
@@ -198,13 +199,13 @@ namespace Enzyme.Components
             }
             catch
             {
-                Message = "FACADE_DIST\nTime: 0.0 ms\n---\nCompile Error";
+                Hud.Error(this, "Compile error", false);
                 return;
             }
 
             watch.Stop();
             double exec_time = watch.Elapsed.TotalMilliseconds;
-            Message = $"FACADE_DIST\nTime: {exec_time:F1} ms\n---\n{mode_label} [{cache_status}]\nProfiles: {clean_crvs.Count}";
+            Hud.Done(this, exec_time, $"{mode_label} [{cache_status}]\nProfiles: {clean_crvs.Count}");
         }
 
         

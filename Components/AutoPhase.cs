@@ -5,13 +5,14 @@ using System.Diagnostics;
 using Grasshopper.Kernel;
 using Rhino;
 using Rhino.DocObjects;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
     public class AutoPhaseComponent : GH_Component
     {
         private List<string> _cachedLog = new List<string> { "Awaiting execution. Click the 'Run' button." };
-        private string _cachedMsg = "Auto_Phase\n---\nAwaiting Run";
+        private string _cachedMsg = null;
 
         public AutoPhaseComponent()
           : base("Auto-Phase Assigner by Z", "Auto_Phase",
@@ -59,16 +60,16 @@ namespace Enzyme.Components
             if (!run)
             {
                 DA.SetDataList(0, _cachedLog);
-                Message = _cachedMsg;
+                if (_cachedMsg == null) Hud.Off(this); else Message = _cachedMsg; // built with Hud.Build
                 return;
             }
 
             if (goos == null || goos.Count == 0)
             {
-                _cachedMsg = $"{this.NickName}\n---\nNo Guids";
+                _cachedMsg = Hud.Build(this.NickName, null, new[] { "Awaiting guids" });
                 _cachedLog = new List<string> { "No Guids provided." };
                 DA.SetDataList(0, _cachedLog);
-                Message = _cachedMsg;
+                Message = _cachedMsg; // built with Hud.Build
                 return;
             }
 
@@ -183,10 +184,10 @@ namespace Enzyme.Components
             sw.Stop();
             double execTime = sw.Elapsed.TotalMilliseconds;
 
-            _cachedMsg = $"{this.NickName}\n{execTime} ms\n---\n{statusLine}";
+            _cachedMsg = Hud.Build(this.NickName, Hud.FormatTime(execTime), new[] { statusLine });
             _cachedLog = log;
 
-            Message = _cachedMsg;
+            Message = _cachedMsg; // built with Hud.Build
             DA.SetDataList(0, _cachedLog);
         }
 

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
 using Rhino.Geometry.Intersect;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -104,7 +105,7 @@ namespace Enzyme.Components
             }
 
             stopwatch.Stop();
-            Message = $"Keyline Pattern\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\nSpacing: {spacing}m\nCount: {count}\nGenerated: {keylines.Count}";
+            Hud.Done(this, stopwatch.Elapsed.TotalMilliseconds, $"Spacing: {spacing}m\nCount: {count}\nGenerated: {keylines.Count}");
             
             double totalLen = 0;
             foreach (var crv in keylines) if (crv != null) totalLen += crv.GetLength();

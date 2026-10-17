@@ -8,6 +8,7 @@ using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
 using Rhino.Collections;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -139,7 +140,7 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
             watch.Stop();
             double durationMs = watch.Elapsed.TotalMilliseconds;
 
-            this.Message = $"{this.NickName}\nTime: {durationMs:F1} ms\n---\nPaths Evaluated: {pathCount}\nPeak Accumulation: {maxAccum}\n● Visual Scale: {visualScale}";
+            Hud.Done(this, durationMs, $"Paths Evaluated: {pathCount}\nPeak Accumulation: {maxAccum}\n● Visual Scale: {visualScale}");
         }
 
         protected override Bitmap Icon

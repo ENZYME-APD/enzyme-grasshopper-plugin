@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
 using Rhino.Geometry.Intersect;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -156,7 +157,7 @@ namespace Enzyme.Components
             }
 
             stopwatch.Stop();
-            Message = $"Keypoint Finder\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\nSmoothing: {window}\nFound: {keypoints.Count}";
+            Hud.Done(this, stopwatch.Elapsed.TotalMilliseconds, $"Smoothing: {window}\nFound: {keypoints.Count}");
             
             JObject payload = new JObject();
             payload["Title"] = "KEYPOINT FINDER";

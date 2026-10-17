@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using Grasshopper.Kernel;
 using Newtonsoft.Json;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -53,7 +54,7 @@ namespace Enzyme.Components
             if (!hasProgs || !hasColors || progs.Count == 0 || colors.Count == 0)
             {
                 DA.SetData(0, "{\n}");
-                Message = $"{this.NickName}\n---\nAwaiting Data";
+                Hud.Waiting(this);
                 return;
             }
 
@@ -78,7 +79,7 @@ namespace Enzyme.Components
             }
             
             stopwatch.Stop();
-            Message = $"{this.NickName}\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\n" + msg;
+            Hud.Done(this, stopwatch, msg);
             
             DA.SetData(0, jsonStr);
         }

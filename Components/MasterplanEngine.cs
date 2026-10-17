@@ -7,6 +7,7 @@ using Grasshopper.Kernel;
 using Rhino.Geometry;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -61,7 +62,7 @@ namespace Enzyme.Components
 
             if (!DA.GetData(0, ref jsonIn))
             {
-                this.Message = this.NickName + "\nTime: 0.0 ms\n---\nAwaiting Payload";
+                Hud.Waiting(this, "payload");
                 return;
             }
             DA.GetData(1, ref paletteIn);
@@ -95,7 +96,7 @@ namespace Enzyme.Components
 
             if (string.IsNullOrEmpty(jsonIn))
             {
-                this.Message = this.NickName + "\nTime: 0.0 ms\n---\nAwaiting Payload";
+                Hud.Waiting(this, "payload");
             }
             else
             {
@@ -186,17 +187,12 @@ namespace Enzyme.Components
 
                 sw.Stop();
                 double execTime = sw.Elapsed.TotalMilliseconds;
-                List<string> msgLines = new List<string> {
-                    this.NickName,
-                    $"Time: {execTime:F1} ms",
-                    "---",
-                    $"Gross Area: {dashTotalArea:N1} SQM"
-                };
+                List<string> msgLines = new List<string> { Hud.Metric("Gross area", dashTotalArea, "m²") };
                 foreach (var kvp in dashPrograms)
                 {
-                    msgLines.Add($"  • {kvp.Key}: {kvp.Value:N1} SQM");
+                    msgLines.Add($"• {kvp.Key}: {kvp.Value:N1} m²");
                 }
-                this.Message = string.Join("\n", msgLines);
+                Hud.Done(this, execTime, msgLines.ToArray());
             }
 
             var dashProgramsObj = new JObject();

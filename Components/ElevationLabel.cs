@@ -9,6 +9,7 @@ using Grasshopper.Kernel.Types;
 using Rhino;
 using Rhino.DocObjects;
 using Rhino.Geometry;
+using Enzyme.Utils;
 
 namespace Enzyme.Terrain
 {
@@ -478,7 +479,7 @@ Outputs:
 
             stopwatch.Stop();
             double elapsed = stopwatch.Elapsed.TotalMilliseconds;
-            Message = $"ELEVATION LABEL\nTime: {elapsed:0.00} ms\n---\nBranches: {pointsTree.PathCount}\nTotal Items: {totalItems}\n● Baked Geo: {bakeCount}";
+            Hud.Done(this, elapsed, $"Branches: {pointsTree.PathCount}\nTotal Items: {totalItems}\n● Baked Geo: {bakeCount}");
         }
 
         protected override System.Drawing.Bitmap Icon => IconLoader.Load("ELEV_LABEL.png");

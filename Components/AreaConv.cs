@@ -4,6 +4,7 @@ using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -55,13 +56,13 @@ namespace Enzyme.Components
 
             if (areaTree == null || areaTree.DataCount == 0)
             {
-                Message = $"{this.NickName}\n---\nEmpty Tree";
+                Hud.Waiting(this);
                 return;
             }
 
             stopwatch.Stop();
             string convStr = convType ? "SQM > SQFT" : "SQFT > SQM";
-            Message = $"{this.NickName}\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\n{convStr}";
+            Hud.Done(this, stopwatch.Elapsed.TotalMilliseconds, $"{convStr}");
 
             GH_Structure<IGH_Goo> resultTree = new GH_Structure<IGH_Goo>();
             double factor = 10.7639104;

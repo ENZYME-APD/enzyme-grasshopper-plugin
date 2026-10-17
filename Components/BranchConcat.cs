@@ -4,6 +4,7 @@ using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -89,7 +90,7 @@ namespace Enzyme.Components
             DA.SetDataTree(0, result);
         
             stopwatch.Stop();
-            Message = $"{this.NickName}\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\nDone";
+            Hud.Done(this, stopwatch.Elapsed.TotalMilliseconds);
         }
 
         protected override System.Drawing.Bitmap Icon

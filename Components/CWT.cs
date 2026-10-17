@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Enzyme.Utils;
 
 using Rhino;
 using Rhino.Geometry;
@@ -275,7 +276,7 @@ namespace Enzyme.Components
             DA.SetDataTree(1, divisionLinesTree);
         
             stopwatch.Stop();
-            Message = $"{this.NickName}\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\nDone";
+            Hud.Done(this, stopwatch.Elapsed.TotalMilliseconds);
         }
 
         private double GetDoubleValue(object obj, double fallback)

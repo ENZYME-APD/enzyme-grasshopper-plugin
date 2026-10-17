@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using Grasshopper.Kernel;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -67,7 +68,7 @@ namespace Enzyme.Components
             DA.SetDataList(0, outColors);
             
             stopwatch.Stop();
-            Message = $"Gradient Generator\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\nInput Colors: {inColors.Count}\nSteps: {steps}";
+            Hud.Done(this, stopwatch.Elapsed.TotalMilliseconds, $"Input Colors: {inColors.Count}\nSteps: {steps}");
         }
 
         private Color GetInterpolatedColor(double t, List<Color> palette)

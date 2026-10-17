@@ -5,6 +5,7 @@ using Grasshopper.GUI;
 using Grasshopper.GUI.Canvas;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Attributes;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -43,11 +44,11 @@ namespace Enzyme.Components
             if (DA.GetData(0, ref msg))
             {
                 stopwatch.Stop();
-                CurrentMessage = $"{this.NickName}\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\n" + msg;
+                CurrentMessage = Hud.Build(this.NickName, Hud.FormatTime(stopwatch.Elapsed.TotalMilliseconds), new[] { msg });
             }
             else
             {
-                CurrentMessage = $"{this.NickName}\n---\nReady";
+                CurrentMessage = Hud.Build(this.NickName, null, new[] { "Ready" });
             }
         }
 

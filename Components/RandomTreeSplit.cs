@@ -4,6 +4,7 @@ using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -119,7 +120,7 @@ namespace Enzyme.Components
             DA.SetDataTree(2, treeC);
 
             stopwatch.Stop();
-            Message = $"RandomTreeSplit\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\n" + totalBranches + " branches split\nA:" + countA + " B:" + countB + " C:" + (totalBranches - countA - countB);
+            Hud.Done(this, stopwatch, Hud.Metric("Branches split", totalBranches), $"A: {countA} | B: {countB} | C: {totalBranches - countA - countB}");
         }
 
         protected override System.Drawing.Bitmap Icon

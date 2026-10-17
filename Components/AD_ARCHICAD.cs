@@ -6,6 +6,7 @@ using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
 using Newtonsoft.Json;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -267,7 +268,7 @@ namespace Enzyme.Components
             DA.SetData(0, JSON_Payload);
 
             stopwatch.Stop();
-            this.Message = $"ARCHICAD ADAPTER\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\nBuildings: {output_buildings.Count}\nFloors: {healed_blocks}\nHeals Applied: {total_heals_applied}";
+            Hud.Done(this, stopwatch.Elapsed.TotalMilliseconds, $"Buildings: {output_buildings.Count}\nFloors: {healed_blocks}\nHeals Applied: {total_heals_applied}");
         }
 
         private List<Dictionary<string, object>> SerializeExactCurve(Curve crv)

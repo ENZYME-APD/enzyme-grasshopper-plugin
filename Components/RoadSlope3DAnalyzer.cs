@@ -5,6 +5,7 @@ using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
 using Newtonsoft.Json.Linq;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -181,7 +182,7 @@ namespace Enzyme.Components
             string statMin = countVal > 0 ? $"{prefix}{System.Math.Round((mode == 2 ? maxVal : minVal), 1)}{unitStr}" : "N/A";
             string statAvg = countVal > 0 ? $"{prefix}{System.Math.Round(avgVal, 1)}{unitStr}" : "N/A";
             
-            Message = $"3D Road Slope\n{sw.Elapsed.TotalMilliseconds:F2} ms\n---\nMode: {modeName}\nMax: {statMax}\nMin: {statMin}\nAvg: {statAvg}\nCompliance: {compliancePct}%";
+            Hud.Done(this, sw.Elapsed.TotalMilliseconds, $"Mode: {modeName}\nMax: {statMax}\nMin: {statMin}\nAvg: {statAvg}\nCompliance: {compliancePct}%");
 
 
             DA.SetDataTree(0, outSegments);

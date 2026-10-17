@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Windows.Forms;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -81,7 +82,7 @@ namespace Enzyme.Components
             DA.SetData(0, list[index]);
         
             stopwatch.Stop();
-            Message = $"{this.NickName}\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\nDone";
+            Hud.Done(this, stopwatch.Elapsed.TotalMilliseconds);
         }
 
         protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)

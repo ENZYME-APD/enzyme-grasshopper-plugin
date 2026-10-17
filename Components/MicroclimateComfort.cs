@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -152,7 +153,7 @@ namespace Enzyme.Components
             DA.SetData(4, legendObj.ToString());
         
             stopwatch.Stop();
-            Message = $"{this.NickName}\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\nDone";
+            Hud.Done(this, stopwatch.Elapsed.TotalMilliseconds);
         }
 
         private Color GetComfortColor(double temp)

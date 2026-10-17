@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -299,7 +300,7 @@ namespace Enzyme.Components
             DA.SetData(0, finalJson);
 
             stopwatch.Stop();
-            Message = $"LEGO ADAPTER\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\nTotal Floors: {totalGeneratedFloors}\nStretched Tops: {stretchedFloorsCreated}";
+            Hud.Done(this, stopwatch.Elapsed.TotalMilliseconds, $"Total Floors: {totalGeneratedFloors}\nStretched Tops: {stretchedFloorsCreated}");
         }
 
         private class BuildingData

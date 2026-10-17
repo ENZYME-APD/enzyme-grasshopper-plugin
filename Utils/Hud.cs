@@ -13,7 +13,7 @@ namespace Enzyme.Utils
     ///   {NickName}
     ///   {time}            e.g. "12.34 ms", "1.20 s", "12.34 ms (cached)"
     ///   ---
-    ///   {status / metric lines}   "Label: value", max 6 lines
+    ///   {status / metric lines}   "Label: value", aim for <=6 lines (hard cap 8)
     ///
     /// Idle states (Awaiting / Off / Error) omit the time line.
     /// See DEVELOPMENT_GUIDE.md, section "HUD Standard".
@@ -21,7 +21,7 @@ namespace Enzyme.Utils
     public static class Hud
     {
         public const string Separator = "---";
-        public const int MaxLines = 6;
+        public const int MaxLines = 8;
         public const int MaxLineLength = 40;
 
         static readonly CultureInfo Inv = CultureInfo.InvariantCulture;

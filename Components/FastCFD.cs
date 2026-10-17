@@ -7,6 +7,7 @@ using System.Windows.Forms;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Special;
 using Rhino.Geometry;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -530,7 +531,7 @@ namespace Enzyme.Components
             DA.SetData(6, infoStr);
 
             sw.Stop();
-            Message = $"FAST CFD\n{sw.Elapsed.TotalMilliseconds:F2} ms\n---\nGrid: {cols}x{rows}\nAvg: {avgSpeed:F1} | Max: {maxSpeed:F1}\nComfort: {pctComfort:F1}%";
+            Hud.Done(this, sw.Elapsed.TotalMilliseconds, $"Grid: {cols}x{rows}\nAvg: {avgSpeed:F1} | Max: {maxSpeed:F1}\nComfort: {pctComfort:F1}%");
         }
 
         private Color GetColor(double normalized, List<Color> palette)

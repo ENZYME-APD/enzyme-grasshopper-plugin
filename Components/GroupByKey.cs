@@ -92,7 +92,7 @@ namespace Enzyme.Components
             int branchCount = keyToIndex.Count;
 
             stopwatch.Stop();
-            Message = $"GroupByKey\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\n{itemCount} values\n{branchCount} groups";
+            Hud.Done(this, stopwatch.Elapsed.TotalMilliseconds, $"{itemCount} values\n{branchCount} groups");
         }
 
         protected override Bitmap Icon
@@ -100,10 +100,6 @@ namespace Enzyme.Components
             get
             {
                 Bitmap icon = IconLoader.Load("gk_icon.png");
-                if (icon == null)
-                {
-                    this.Message = "Icon missing";
-                }
                 return icon;
             }
         }

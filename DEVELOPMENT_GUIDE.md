@@ -53,7 +53,7 @@ Every component shows a HUD under its body via `this.Message`. **Always set it t
 {NickName}            <- title: always the component NickName (never a hard-coded string)
 12.34 ms              <- solve time; "1.20 s" above 1000 ms; "(cached)" suffix when re-emitting cache
 ---                   <- separator
-Points: 1,204         <- up to 6 metric lines, "Label: value", SI units, 40 chars max
+Points: 1,204         <- aim for <=6 metric lines (hard cap 8), "Label: value", SI units, 40 chars max
 Rays: 38,520
 ```
 

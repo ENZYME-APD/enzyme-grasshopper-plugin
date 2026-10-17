@@ -6,6 +6,7 @@ using Grasshopper;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
+using Enzyme.Utils;
 
 namespace Enzyme.Masterplan
 {
@@ -430,13 +431,15 @@ namespace Enzyme.Masterplan
 
             if (glassArea > 0 || solidArea > 0 || cornerArea > 0)
             {
-                this.Message = string.Format(
-                    "{8}\nTime: {0} ms\nGrnd Balc: {1}\nCorner Off: {2}\n---\nGlass:  {3:N0} SQM\nSolid:  {4:N0} SQM\nHead:   {5:N0} SQM\nCorner: {6:N0} SQM\nBalc:   {7}",
-                    watch.Elapsed.TotalMilliseconds, fbStatus, coStatus, glassArea, solidArea, headerArea, cornerArea, balconyCount, this.NickName);
+                Hud.Done(this, watch,
+                    $"Ground balc: {fbStatus} | Corner: {coStatus}",
+                    Hud.Metric("Glass", glassArea, "m²", 0), Hud.Metric("Solid", solidArea, "m²", 0),
+                    Hud.Metric("Head", headerArea, "m²", 0), Hud.Metric("Corner", cornerArea, "m²", 0),
+                    Hud.Metric("Balconies", balconyCount));
             }
             else
             {
-                this.Message = this.NickName + "\nAwaiting Data";
+                Hud.Waiting(this);
             }
         }
 

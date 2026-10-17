@@ -4,6 +4,7 @@ using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -57,7 +58,7 @@ namespace Enzyme.Components
             if (string.IsNullOrWhiteSpace(text))
             {
                 stopwatch.Stop();
-                this.Message = $"{this.NickName}\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\n{msg}";
+                Hud.Done(this, stopwatch.Elapsed.TotalMilliseconds, $"{msg}");
                 DA.SetDataTree(0, tree);
                 return;
             }
@@ -82,7 +83,7 @@ namespace Enzyme.Components
             {
                 msg = "No valid data found.";
                 stopwatch.Stop();
-                this.Message = $"{this.NickName}\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\n{msg}";
+                Hud.Done(this, stopwatch.Elapsed.TotalMilliseconds, $"{msg}");
                 DA.SetDataTree(0, tree);
                 return;
             }
@@ -117,7 +118,7 @@ namespace Enzyme.Components
             }
 
             stopwatch.Stop();
-                this.Message = $"{this.NickName}\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\n{msg}";
+                Hud.Done(this, stopwatch.Elapsed.TotalMilliseconds, $"{msg}");
             DA.SetDataTree(0, tree);
         }
 

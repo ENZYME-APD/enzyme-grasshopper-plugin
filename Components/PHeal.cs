@@ -6,6 +6,7 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -77,7 +78,7 @@ namespace Enzyme.Components
             stopwatch.Stop();
             double calcTimeMs = stopwatch.Elapsed.TotalMilliseconds;
             string version = "v1.2";
-            Message = $"{version}\n{calcTimeMs:F2} ms\n---\nHealed";
+            Hud.Done(this, calcTimeMs, "Healed", $"Version: {version}");
         }
 
         private Curve HealByExtensionLogic(Curve curve, double extensionFactor)

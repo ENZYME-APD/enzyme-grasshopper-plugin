@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -59,12 +60,12 @@ namespace Enzyme.Components
             List<Line> lines = new List<Line>();
             if (!DA.GetDataList(0, lines)) 
             {
-                this.Message = "Awaiting Lines...";
+                Hud.Waiting(this, "lines");
                 return;
             }
             if (lines.Count == 0)
             {
-                this.Message = "Awaiting Lines...";
+                Hud.Waiting(this, "lines");
                 return;
             }
 
@@ -159,7 +160,7 @@ namespace Enzyme.Components
 
             sw.Stop();
             double msec = sw.Elapsed.TotalMilliseconds;
-            this.Message = $"{current_mode_str}\n{msec:F1} ms\n---\nn: {arrowMesh.Count}";
+            Hud.Done(this, msec, $"Mode: {current_mode_str}", Hud.Metric("Arrows", arrowMesh.Count));
         }
 
         protected override System.Drawing.Bitmap Icon

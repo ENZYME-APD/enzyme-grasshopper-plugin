@@ -7,6 +7,7 @@ using Grasshopper.Kernel;
 using Rhino;
 using Rhino.DocObjects;
 using Rhino.Display;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -198,7 +199,7 @@ namespace Enzyme.Components
             DA.SetData(2, info);
             
             sw.Stop();
-            this.Message = $"ADVANCED EXPORT VIEWS\nTime: {sw.Elapsed.TotalMilliseconds:F2} ms\n---\n{_statusInfo}";
+            Hud.Done(this, sw.Elapsed.TotalMilliseconds, $"{_statusInfo}");
         }
 
         private void CaptureCurrentViews(string ghStateName)

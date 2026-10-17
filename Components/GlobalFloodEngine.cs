@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -205,7 +206,7 @@ namespace Enzyme.Components
             DA.SetData(3, info);
 
             sw.Stop();
-            Message = $"{this.NickName}\nTime: {sw.Elapsed.TotalMilliseconds:F2} ms\n---\n● Flooded: {floodedVertexCount} | ○ Dry: {numVertices - floodedVertexCount}";
+            Hud.Done(this, sw.Elapsed.TotalMilliseconds, $"● Flooded: {floodedVertexCount} | ○ Dry: {numVertices - floodedVertexCount}");
         }
         
         public override void AddedToDocument(GH_Document document)

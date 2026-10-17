@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Drawing;
+using Enzyme.Utils;
 
 using Rhino;
 using Rhino.Geometry;
@@ -366,17 +367,14 @@ namespace Enzyme.Components
 
             if (glassArea > 0 || solidArea > 0)
             {
-                string msg = string.Format(
-                    "{0}\nTime: {1:F2} ms\nWall Matrix: [{2}]\nCanopy Rhythm: [{3}]\n---\nGlass: {4:N0} SQM\nSolid: {5:N0} SQM\nHead:  {6:N0} SQM",
-                    this.NickName, watch.Elapsed.TotalMilliseconds, vStr, cStr, glassArea, solidArea, headerArea);
-                    
-                if (colCount > 0) msg += string.Format("\nCols:  {0}", colCount);
-                
-                this.Message = msg;
+                Hud.Done(this, watch,
+                    $"Wall matrix: [{vStr}]", $"Canopy rhythm: [{cStr}]",
+                    Hud.Metric("Glass", glassArea, "m²", 0), Hud.Metric("Solid", solidArea, "m²", 0),
+                    Hud.Metric("Head", headerArea, "m²", 0), colCount > 0 ? Hud.Metric("Cols", colCount) : null);
             }
             else
             {
-                this.Message = "Awaiting Data";
+                Hud.Waiting(this);
             }
         }
 

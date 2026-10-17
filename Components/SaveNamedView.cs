@@ -2,6 +2,7 @@ using System;
 using Grasshopper.Kernel;
 using Rhino;
 using Rhino.DocObjects;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -95,7 +96,7 @@ namespace Enzyme.Components
             finally
             {
                 sw.Stop();
-                this.Message = $"SAVE NAMED VIEW\nTime: {sw.Elapsed.TotalMilliseconds:F2} ms\n---\n{_lastAction}";
+                Hud.Done(this, sw.Elapsed.TotalMilliseconds, $"{_lastAction}");
             }
         }
 

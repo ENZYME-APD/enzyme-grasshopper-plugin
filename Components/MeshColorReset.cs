@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -44,7 +45,7 @@ namespace Enzyme.Components
             DA.SetDataList(0, outputMeshes);
         
             stopwatch.Stop();
-            Message = $"{this.NickName}\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\nMeshes: {outputMeshes.Count}";
+            Hud.Done(this, stopwatch.Elapsed.TotalMilliseconds, $"Meshes: {outputMeshes.Count}");
         }
 
         public override void AddedToDocument(GH_Document document)

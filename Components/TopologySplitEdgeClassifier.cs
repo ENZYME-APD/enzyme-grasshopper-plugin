@@ -8,6 +8,7 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -361,7 +362,7 @@ namespace Enzyme.Components
 
             sw.Stop();
             
-            this.Message = $"TSEC\n{sw.Elapsed.TotalMilliseconds:F2} ms\n---\nZones: {countZones}\nClusters: {countClusters}\nSlabs: {countSlabs}\nInternal walls: {countInternal}\nExternal walls: {countExternal}";
+            Hud.Done(this, sw.Elapsed.TotalMilliseconds, $"Zones: {countZones}\nClusters: {countClusters}\nSlabs: {countSlabs}\nInternal walls: {countInternal}\nExternal walls: {countExternal}");
         }
 
         protected override System.Drawing.Bitmap Icon

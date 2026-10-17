@@ -4,6 +4,7 @@ using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -102,10 +103,10 @@ namespace Enzyme.Components
             DA.SetDataTree(2, treeC);
 
             stopwatch.Stop();
-            Message = $"BranchSizeSplit\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\n" +
-                      countA + " branches in A (<" + minThreshold + " items)\n" +
-                      countB + " branches in B (" + minThreshold + "-" + maxThreshold + " items)\n" +
-                      countC + " branches in C (>" + maxThreshold + " items)";
+            Hud.Done(this, stopwatch,
+                $"A (<{minThreshold}): {countA} branches",
+                $"B ({minThreshold}-{maxThreshold}): {countB} branches",
+                $"C (>{maxThreshold}): {countC} branches");
         }
 
         protected override System.Drawing.Bitmap Icon

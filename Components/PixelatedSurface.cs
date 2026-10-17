@@ -102,7 +102,7 @@ namespace Enzyme.Components
 
             if (_cachedBitmap == null)
             {
-                Message = "No Image";
+                Hud.Waiting(this, "image");
                 return;
             }
 
@@ -444,9 +444,7 @@ namespace Enzyme.Components
             t_start.Stop();
             
             List<string> ui_lines = new List<string>();
-            ui_lines.Add("PIXEL IMAGE");
-            ui_lines.Add($"Time: {t_start.Elapsed.TotalMilliseconds:F2} ms");
-            ui_lines.Add("---");
+            ui_lines.Add($"Total Tiles: {total_panels}{bake_status}");
             for (int i = 0; i < palette.Count; i++)
             {
                 ui_lines.Add($"Tile {i + 1}: {global_color_counts[palette[i]]}");
@@ -455,11 +453,9 @@ namespace Enzyme.Components
             {
                 ui_lines.Add($"Accent Tile: {global_color_counts[accent_color]}");
             }
-            ui_lines.Add("---");
-            ui_lines.Add($"Total Tiles: {total_panels}{bake_status}");
 
             stopwatch.Stop();
-            Message = $"{this.NickName}\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\n" + string.Join("\n", ui_lines);
+            Hud.Done(this, stopwatch, ui_lines.ToArray());
         }
 
         protected override System.Drawing.Bitmap Icon

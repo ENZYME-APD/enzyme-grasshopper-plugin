@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Reflection;
 using Grasshopper.Kernel;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -71,7 +72,7 @@ namespace Enzyme.Components
             DA.SetData(1, buildDate);
         
             stopwatch.Stop();
-            Message = $"{this.NickName}\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\nDone";
+            Hud.Done(this, stopwatch.Elapsed.TotalMilliseconds);
         }
 
         protected override System.Drawing.Bitmap Icon

@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Drawing;
+using Enzyme.Utils;
 
 using Rhino.Geometry;
 
@@ -212,12 +213,13 @@ namespace Enzyme.Masterplan
 
             if (glassArea > 0 || spandrelArea > 0)
             {
-                this.Message = string.Format("{0}\nTime: {1:F2} ms\nDrop: {2:0.0#}m\n---\nFins:    {3}\nGlass:   {4:N0} SQM\nSpandrel:{5:N0} SQM",
-                    this.NickName, watch.Elapsed.TotalMilliseconds, headerDrop, finCount, glassArea, spandrelArea);
+                Hud.Done(this, watch,
+                    Hud.Metric("Drop", headerDrop, "m", 2), Hud.Metric("Fins", finCount),
+                    Hud.Metric("Glass", glassArea, "m²", 0), Hud.Metric("Spandrel", spandrelArea, "m²", 0));
             }
             else
             {
-                this.Message = this.NickName + "\nAwaiting Data";
+                Hud.Waiting(this);
             }
         }
 

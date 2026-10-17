@@ -8,6 +8,7 @@ using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
 using Rhino;
 using Rhino.Geometry;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -76,7 +77,7 @@ namespace Enzyme.Components
             
             if (polylinesTree.DataCount == 0 || gradient_colors.Count == 0)
             {
-                Message = "COLORED_TILES\nSTATUS: IDLE\n---\nAWAITING DATA";
+                Hud.Waiting(this);
                 return;
             }
 
@@ -147,7 +148,7 @@ namespace Enzyme.Components
 
             if (global_keys.Count == 0)
             {
-                Message = "HME\nSTATUS: EMPTY\n---\nNO VALID CURVES";
+                Hud.Waiting(this, "valid curves");
                 return;
             }
 
@@ -401,12 +402,7 @@ namespace Enzyme.Components
             t_start.Stop();
             double execution_ms = t_start.Elapsed.TotalMilliseconds;
 
-            List<string> ui_lines = new List<string>
-            {
-                "PIXEL GRADIENT",
-                $"Time: {execution_ms:F2} ms",
-                "---"
-            };
+            List<string> ui_lines = new List<string>();
 
             for (int i = 0; i < gradient_colors.Count; i++)
             {
@@ -420,10 +416,9 @@ namespace Enzyme.Components
                 ui_lines.Add($"Accent Tile: {global_color_counts[accent_color]}");
             }
 
-            ui_lines.Add("---");
-            ui_lines.Add($"Total Tiles: {total_panels}{bake_status}");
+            ui_lines.Insert(0, $"Total Tiles: {total_panels}{bake_status}");
 
-            Message = string.Join("\n", ui_lines);
+            Hud.Done(this, execution_ms, ui_lines.ToArray());
         }
 
         protected override Bitmap Icon

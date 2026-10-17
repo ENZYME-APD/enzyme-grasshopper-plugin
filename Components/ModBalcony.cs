@@ -5,6 +5,7 @@ using Rhino.Geometry;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -353,13 +354,15 @@ namespace Enzyme.Components
 
             if (glassArea > 0 || solidArea > 0 || cornerArea > 0)
             {
-                this.Message = string.Format(
-                    "{8}\nTime: {0} ms\nFirst Balcony: {1}\nCorner Offset: {2}\n---\nGlass:   {3:N0} SQM\nSolid:   {4:N0} SQM\nHead:    {5:N0} SQM\nCorner:  {6:N0} SQM\nTerrace: {7:N0} SQM",
-                    watch.Elapsed.TotalMilliseconds, fbStatus, coStatus, glassArea, solidArea, headerArea, cornerArea, slabArea, this.NickName);
+                Hud.Done(this, watch,
+                    $"First balcony: {fbStatus} | Corner: {coStatus}",
+                    Hud.Metric("Glass", glassArea, "m²", 0), Hud.Metric("Solid", solidArea, "m²", 0),
+                    Hud.Metric("Head", headerArea, "m²", 0), Hud.Metric("Corner", cornerArea, "m²", 0),
+                    Hud.Metric("Terrace", slabArea, "m²", 0));
             }
             else
             {
-                this.Message = this.NickName + "\nAwaiting Data";
+                Hud.Waiting(this);
             }
         }
 

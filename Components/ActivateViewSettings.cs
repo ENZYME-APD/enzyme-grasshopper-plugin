@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Grasshopper.Kernel;
 using Rhino;
 using Grasshopper.Kernel.Special;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -128,7 +129,7 @@ namespace Enzyme.Components
             DA.SetData(0, info);
 
             sw.Stop();
-            this.Message = $"ACTIVATE SETTINGS\nTime: {sw.Elapsed.TotalMilliseconds:F2} ms\n---\nVIEW: {statusView}\nSTYLE: {statusStyle}\nLAYER: {statusLayer}";
+            Hud.Done(this, sw.Elapsed.TotalMilliseconds, $"View: {statusView}\nStyle: {statusStyle}\nLayer: {statusLayer}");
         }
 
         public override void AppendAdditionalMenuItems(System.Windows.Forms.ToolStripDropDown menu)

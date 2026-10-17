@@ -100,7 +100,7 @@ namespace Enzyme.Components
             DA.SetDataTree(0, outTree);
         
             stopwatch.Stop();
-            Message = $"{this.NickName}\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\nDone";
+            Hud.Done(this, stopwatch.Elapsed.TotalMilliseconds);
         }
 
         protected override System.Drawing.Bitmap Icon

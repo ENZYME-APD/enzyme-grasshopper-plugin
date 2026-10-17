@@ -8,6 +8,7 @@ using Grasshopper.Kernel.Geometry;
 using Grasshopper.Kernel.Geometry.Delaunay;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -230,7 +231,7 @@ namespace Enzyme.Components
 
             var ms = (DateTime.Now - startTime).TotalMilliseconds;
             string dynamicLegend = $"0-{l1:0} / {l1:0}-{l2:0} / >{l2:0}";
-            this.Message = $"{methodName}\n{ms:0.1} ms\n---\n{dynamicLegend}";
+            Hud.Done(this, ms, $"Method: {methodName}", dynamicLegend);
 
             DA.SetDataTree(0, distTree);
             DA.SetDataTree(1, lineTree);

@@ -22,7 +22,7 @@ namespace Enzyme.Components
                 Bitmap icon = IconLoader.Load("road_slope_icon.png");
                 if (icon == null)
                 {
-                    this.Message = "Icon missing";
+                    System.Diagnostics.Trace.WriteLine("RoadSlopeAnalyzer: icon missing");
                 }
                 return icon;
             }
@@ -162,7 +162,7 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
             string statMin = countVal > 0 ? $"{prefix}{System.Math.Round((mode == 2 ? maxVal : minVal), 1)}{unitStr}" : "N/A";
             string statAvg = countVal > 0 ? $"{prefix}{System.Math.Round(avgVal, 1)}{unitStr}" : "N/A";
             
-            Message = $"Road Slope\n{sw.Elapsed.TotalMilliseconds:F2} ms\n---\nMode: {modeName}\nMax: {statMax}\nMin: {statMin}\nAvg: {statAvg}\nCompliance: {result.CompliancePercentage}%";
+            Hud.Done(this, sw.Elapsed.TotalMilliseconds, $"Mode: {modeName}\nMax: {statMax}\nMin: {statMin}\nAvg: {statAvg}\nCompliance: {result.CompliancePercentage}%");
 
 
             DA.SetDataTree(0, result.AnalyzedSegments);

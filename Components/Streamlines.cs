@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -124,7 +125,7 @@ namespace Enzyme.Components
                 
             DA.SetData(1, infoStr);
 
-            Message = $"STREAMLINES\nTime: {sw.Elapsed.TotalMilliseconds:F2} ms\n---\nLines: {outCurves.Count}";
+            Hud.Done(this, sw.Elapsed.TotalMilliseconds, $"Lines: {outCurves.Count}");
         }
 
         private bool SampleVector2D(Point3d p, RTree tree, List<Point3d> fPts, List<Vector3d> fVecs, double radius, out Vector3d outVec, out double outZ)

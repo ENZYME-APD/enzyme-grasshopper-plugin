@@ -5,6 +5,7 @@ using System.Linq;
 using Newtonsoft.Json;
 using Grasshopper.Kernel;
 using GH_IO.Serialization;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -175,7 +176,7 @@ namespace Enzyme.Components
             } catch { }
 
             sw.Stop();
-            this.Message = $"STATE MANAGER\nTime: {sw.Elapsed.TotalMilliseconds:F2} ms\n---\n{_lastAction}\nSaved: {_states.Count}";
+            Hud.Done(this, sw.Elapsed.TotalMilliseconds, $"{_lastAction}\nSaved: {_states.Count}");
         }
 
         public override bool Write(GH_IWriter writer)

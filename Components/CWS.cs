@@ -7,6 +7,7 @@ using Grasshopper.Kernel.Types;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -342,11 +343,11 @@ namespace Enzyme.Components
 
             if (totalGlassArea > 0)
             {
-                this.Message = $"CWS {version}\nTime: {sw.Elapsed.TotalMilliseconds:F2} ms\n---\nMullions: {totalMullions}\nTransoms: {totalTransoms}\nGlass: {totalGlassArea:F1} SQM";
+                Hud.Done(this, sw.Elapsed.TotalMilliseconds, $"Version: {version}", Hud.Metric("Mullions", totalMullions), Hud.Metric("Transoms", totalTransoms), Hud.Metric("Glass", totalGlassArea, "m²"));
             }
             else
             {
-                this.Message = $"CWS {version}\nAwaiting Data";
+                Hud.Waiting(this);
             }
         }
 

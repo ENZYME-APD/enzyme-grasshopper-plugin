@@ -6,6 +6,7 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -68,11 +69,11 @@ namespace Enzyme.Components
             int round_dec = -1;
             bool hasRoundDec = DA.GetData(4, ref round_dec);
 
-            string status_msg = skip ? "SKIP: ON" : "SKIP: OFF (Clamp)";
-            string round_msg = hasRoundDec ? $"ROUND: {round_dec} dec (Floor)" : "ROUND: OFF";
+            string status_msg = skip ? "Skip: on" : "Skip: off (clamp)";
+            string round_msg = hasRoundDec ? $"Round: {round_dec} dec (floor)" : "Round: off";
             string base_msg = $"{status_msg}\n{round_msg}";
             
-            Message = $"{base_msg}\nRunning...";
+            
 
             GH_Structure<GH_Curve> out_curves = new GH_Structure<GH_Curve>();
             GH_Structure<GH_Number> radii = new GH_Structure<GH_Number>();
@@ -117,7 +118,7 @@ namespace Enzyme.Components
             
             watch.Stop();
             double elapsed_ms = watch.Elapsed.TotalMilliseconds;
-            Message = $"{base_msg}\n{elapsed_ms:F1} ms\n---\nDone";
+            Hud.Done(this, elapsed_ms, status_msg, round_msg);
 
             DA.SetDataTree(0, out_curves);
             DA.SetDataTree(1, radii);

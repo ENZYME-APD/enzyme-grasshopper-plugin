@@ -8,6 +8,7 @@ using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
 using Newtonsoft.Json.Linq;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -67,7 +68,7 @@ namespace Enzyme.Components
             string jsonIn = string.Empty;
             if (!DA.GetData(0, ref jsonIn) || string.IsNullOrWhiteSpace(jsonIn))
             {
-                this.Message = $"{this.NickName}\nTime: 0.0 ms\n---\nAwaiting Data";
+                Hud.Waiting(this);
                 return;
             }
 
@@ -201,7 +202,7 @@ namespace Enzyme.Components
                 }
 
                 stopwatch.Stop();
-                this.Message = $"{this.NickName}\nTime: {stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\nReturned: {matchCount}\nMode: {searchMode}";
+                Hud.Done(this, stopwatch.Elapsed.TotalMilliseconds, $"Returned: {matchCount}\nMode: {searchMode}");
 
                 DA.SetDataTree(0, outSlabs);
                 DA.SetDataTree(1, outTowers);
@@ -212,7 +213,7 @@ namespace Enzyme.Components
             catch (Exception ex)
             {
                 stopwatch.Stop();
-                this.Message = $"JSON Parse Error:\n{ex.Message}";
+                Hud.Error(this, "JSON: " + ex.Message, false);
                 this.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, ex.Message);
             }
         }

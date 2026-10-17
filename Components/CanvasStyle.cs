@@ -2,6 +2,7 @@ using System;
 using System.Drawing;
 using Grasshopper.Kernel;
 using Grasshopper.GUI.Canvas;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -43,7 +44,7 @@ namespace Enzyme.Components
             Grasshopper.Instances.ActiveCanvas?.Refresh();
 
             stopwatch.Stop();
-            this.Message = $"Canvas Style\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\nLove your style!";
+            Hud.Done(this, stopwatch.Elapsed.TotalMilliseconds, "Love your style!");
         }
 
         public override void AddedToDocument(GH_Document document)

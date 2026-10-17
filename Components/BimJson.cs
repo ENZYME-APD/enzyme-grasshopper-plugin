@@ -8,6 +8,7 @@ using Rhino;
 using Rhino.Geometry;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -99,7 +100,7 @@ namespace Enzyme.Components
 
             if (guids.Count == 0)
             {
-                this.Message = this.NickName + "\nTime: 0.0 ms\n---\nAwaiting Data";
+                Hud.Waiting(this);
                 return;
             }
 
@@ -261,9 +262,7 @@ namespace Enzyme.Components
             sw.Stop();
             double execTime = sw.Elapsed.TotalMilliseconds;
 
-            string uiMsg = $"{this.NickName}\nTime: {execTime:F1} ms\n---\nBldgs: {bldgDataMap.Count} | Blocks: {totalBlocks}";
-            if (movedCount > 0) uiMsg += $"\nMoved to Z: {movedCount}";
-            this.Message = uiMsg;
+            Hud.Done(this, execTime, $"Bldgs: {bldgDataMap.Count} | Blocks: {totalBlocks}", movedCount > 0 ? Hud.Metric("Moved to Z", movedCount) : null);
         }
 
         private class BuildingData

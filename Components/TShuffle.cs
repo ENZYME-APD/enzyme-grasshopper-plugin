@@ -4,6 +4,7 @@ using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -49,14 +50,14 @@ namespace Enzyme.Components
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             if (!DA.GetDataTree(0, out GH_Structure<IGH_Goo> tree))
             {
-                Message = "Waiting for data...";
+                Hud.Waiting(this);
                 return;
             }
             
             List<IGH_Goo> choices = new List<IGH_Goo>();
             if (!DA.GetDataList(1, choices) || choices.Count == 0)
             {
-                Message = "Waiting for data...";
+                Hud.Waiting(this);
                 return;
             }
             
@@ -96,7 +97,7 @@ namespace Enzyme.Components
             }
 
             stopwatch.Stop();
-            Message = $"{this.NickName}\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\nBranches: {tree.PathCount}\nItems: {total_items}";
+            Hud.Done(this, stopwatch.Elapsed.TotalMilliseconds, $"Branches: {tree.PathCount}\nItems: {total_items}");
             
             DA.SetDataTree(0, result);
         }

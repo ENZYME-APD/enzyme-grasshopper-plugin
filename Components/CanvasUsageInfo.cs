@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Special;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -107,7 +108,7 @@ namespace Enzyme.Components
             CheckOrMakePanel(doc, "All Components Used", compsText, Color.LightSkyBlue, new PointF(-345, 0), new RectangleF(-330, 0, 330, 450));
         
             stopwatch.Stop();
-            Message = $"{this.NickName}\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\nDone";
+            Hud.Done(this, stopwatch.Elapsed.TotalMilliseconds);
         }
 
         private void CheckOrMakePanel(GH_Document doc, string nickname, string text, Color color, PointF pivot, RectangleF bounds)

@@ -6,6 +6,7 @@ using Rhino;
 using Rhino.Geometry;
 using Grasshopper.Kernel;
 using Enzyme;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -141,7 +142,7 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
                 DA.SetData(3, 0.0);
                 
                 timer.Stop();
-                Message = $"{this.NickName}\nTime: {timer.Elapsed.TotalMilliseconds:F2} ms\n---\nNO PADS: PASSTHROUGH";
+                Hud.Done(this, timer.Elapsed.TotalMilliseconds, "No pads: passthrough");
                 return;
             }
 
@@ -391,7 +392,7 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
 
             double siteArea = (bbox.Max.X - bbox.Min.X) * (bbox.Max.Y - bbox.Min.Y);
 
-            Message = $"{this.NickName}\nTime: {timer.Elapsed.TotalMilliseconds:F2} ms\n---\nSITE: {siteArea:N0} m²\nGRID: {MeshResolution:N1} m\nCUT: {cutAcc:N1} m³\nFILL: {fillAcc:N1} m³";
+            Hud.Done(this, timer.Elapsed.TotalMilliseconds, $"Site: {siteArea:N0} m²\nGrid: {MeshResolution:N1} m\nCut: {cutAcc:N1} m³\nFill: {fillAcc:N1} m³");
                     DA.SetData(6, "ADAPTIVE TERRAIN GRADER\n" + "\n" + "HOW IT WORKS:\n" + "Calculates localized cut-and-fill operations by projecting building pads or roads onto the terrain mesh. It adapts the mesh topology to create flat plateaus and sloped retaining embankments.\n\n" + "INTERPRETATION & IMPORTANCE:\n" + "Essential for calculating earthworks (cut/fill volumes) early in the design phase. It shows how much soil must be moved to accommodate the masterplan, directly impacting project cost and environmental disruption.");
         }
     }

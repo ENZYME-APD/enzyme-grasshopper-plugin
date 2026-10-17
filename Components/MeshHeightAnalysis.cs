@@ -10,6 +10,7 @@ using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
 using Rhino.Geometry.Collections;
 using Rhino.Geometry.Intersect;
+using Enzyme.Utils;
 
 namespace Enzyme.Terrain
 {
@@ -369,7 +370,7 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
             double meanElevation = totalVerticesCount > 0 ? Math.Round(totalZSum / totalVerticesCount, 2) : 0.0;
             
             stopwatch.Stop();
-            Message = $"TERRAIN HEIGHT\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\nDone";
+            Hud.Done(this, stopwatch.Elapsed.TotalMilliseconds);
             Message += $"Time: {t_start.Elapsed.TotalMilliseconds:F2} ms\n";
             Message += "---\n";
             Message += $"Area: {Math.Round(totalTerrainArea, 2)}\n";

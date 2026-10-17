@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Drawing;
+using Enzyme.Utils;
 
 using Rhino.Geometry;
 using Grasshopper;
@@ -209,17 +210,14 @@ namespace Enzyme.Components
 
             if (glassArea > 0 || spandrelArea > 0)
             {
-                string msg = string.Format(
-                    "MOD: HORIZONTAL BANDS\nTime: {0} ms\nSill: {1:0.0#}m | Drop: {2:0.0#}m\n---\nGlass: {3:N0} SQM\nSolid: {4:N0} SQM",
-                    watch.Elapsed.TotalMilliseconds, SillHeight, HeaderDrop, glassArea, spandrelArea);
-                    
-                if (mullionCount > 0) msg += string.Format("\nMullions: {0}", mullionCount);
-                
-                this.Message = this.NickName + "\n" + msg;
+                Hud.Done(this, watch,
+                    string.Format(System.Globalization.CultureInfo.InvariantCulture, "Sill: {0:0.0#}m | Drop: {1:0.0#}m", SillHeight, HeaderDrop),
+                    Hud.Metric("Glass", glassArea, "m²", 0), Hud.Metric("Solid", spandrelArea, "m²", 0),
+                    mullionCount > 0 ? Hud.Metric("Mullions", mullionCount) : null);
             }
             else
             {
-                this.Message = this.NickName + "\nAwaiting Data";
+                Hud.Waiting(this);
             }
         }
 

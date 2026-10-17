@@ -9,6 +9,7 @@ using Rhino.Geometry;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -66,7 +67,7 @@ namespace Enzyme.Components
             string jsonIn = null;
             if (!DA.GetData(0, ref jsonIn) || string.IsNullOrWhiteSpace(jsonIn))
             {
-                this.Message = this.NickName + "\nTime: 0.0 ms\n---\nAwaiting Data";
+                Hud.Waiting(this);
                 return;
             }
 
@@ -172,11 +173,11 @@ namespace Enzyme.Components
 
                 sw.Stop();
                 string searchMode = exactToggle ? "Exact" : "Flexible";
-                this.Message = this.NickName + $"\nTime: {sw.Elapsed.TotalMilliseconds:F2} ms\n---\nReturned: {matchCount}\nMode: {searchMode}";
+                Hud.Done(this, sw.Elapsed.TotalMilliseconds, $"Returned: {matchCount}\nMode: {searchMode}");
             }
             catch (Exception ex)
             {
-                this.Message = "JSON Parse Error:\n" + ex.Message;
+                Hud.Error(this, "JSON: " + ex.Message, false);
             }
 
             DA.SetDataTree(0, outBoundsExt);

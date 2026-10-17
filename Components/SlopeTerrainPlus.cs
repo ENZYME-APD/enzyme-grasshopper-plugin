@@ -8,6 +8,7 @@ using Rhino;
 using Rhino.Geometry;
 using Grasshopper.Kernel;
 using Enzyme;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -259,7 +260,7 @@ namespace Enzyme.Components
             if (t_mode == 1) thresholdModeName = "Percentage";
             else if (t_mode == 2) thresholdModeName = "Ratio";
 
-            Message = $"{this.NickName}\nTime: {exec_ms:F1} ms\n---\nMode: {thresholdModeName}\nInput: {conversion_str}\n● {mode_str} | ○ Over: {final_pct_over:F1}%";
+            Hud.Done(this, exec_ms, $"Mode: {thresholdModeName}\nInput: {conversion_str}\n● {mode_str} | ○ Over: {final_pct_over:F1}%");
             
             DA.SetData(2, "TERRAIN SLOPE\n\nMETHODOLOGY:\nExtracts face normals from the un-welded mesh via the cross-product of vertex edges. The Z-component of each normal (n.Z) provides the slope angle using acos(n.Z), converting to degrees or percentage. Faces are sorted and colored dynamically to identify areas exceeding maximum gradient thresholds.\n\nINTERPRETATION & IMPORTANCE:\nHighlights severity of topography and naturally draining facets. Critical for planning accessible paths, building foundations, and managing stormwater runoff without exceeding max legal grades.");
         }

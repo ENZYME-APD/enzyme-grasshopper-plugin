@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -58,17 +59,17 @@ namespace Enzyme.Components
                     }
                     else
                     {
-                        this.Message = $"{component_name} {component_version}\nInput is a polysurface.";
+                        Hud.Error(this, "Input is a polysurface", false);
                     }
                 }
                 else
                 {
-                    this.Message = $"{component_name} {component_version}\nInvalid input type.";
+                    Hud.Error(this, "Invalid input type", false);
                 }
             }
             else if (xList.Count == 0 || xList[0] == null)
             {
-                this.Message = $"{component_name} {component_version}\nNo valid surface provided.";
+                Hud.Waiting(this, "surface");
             }
 
             if (surface != null)
@@ -119,12 +120,12 @@ namespace Enzyme.Components
                     DA.SetData(2, plane);
 
                     stopwatch.Stop();
-                    this.Message = $"{component_name} {component_version}\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\nSurface is planar.";
+                    Hud.Done(this, stopwatch.Elapsed.TotalMilliseconds, "Surface is planar.");
                 }
                 else
                 {
                     stopwatch.Stop();
-                    this.Message = $"{component_name} {component_version}\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\nSurface is NOT planar.";
+                    Hud.Done(this, stopwatch.Elapsed.TotalMilliseconds, "Surface is NOT planar.");
                 }
             }
         }

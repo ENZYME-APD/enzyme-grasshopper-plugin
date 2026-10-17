@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Rhino.Geometry;
 using Grasshopper.Kernel;
 using Newtonsoft.Json.Linq;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -30,7 +31,7 @@ namespace Enzyme.Components
                 "Maps wind-engine velocity samples onto apparent (\"feels like\") temperature and locates the best/worst comfort points, without requiring a regular grid.",
                 "Enzyme", "Site Analysis")
         {
-            this.Message = "ThermalComfort\n-- WAITING --";
+            Hud.Waiting(this);
         }
 
         public override GH_Exposure Exposure => GH_Exposure.secondary;
@@ -398,30 +399,22 @@ namespace Enzyme.Components
                     double worstPct = (double)worstPoints.Count / tagPoints.Count * 100.0;
                     
                     stopwatch.Stop();
-                    Message = $"HIGROTHERMAL COMFORT\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\n" +
-                              $"Time: {sw.Elapsed.TotalMilliseconds:F2} ms\n" +
-                              "---\n" +
-                              $"Ideal Temp: {idealTemperature:F1} °C\n" +
-                              $"Tolerance: {comfortTolerance * 100.0:F0}%\n" +
-                              $"Best: {bestPoints.Count} ({bestPct:F1}%)\n" +
-                              $"Worst: {worstPoints.Count} ({worstPct:F1}%)";
+                    Hud.Done(this, stopwatch,
+                              $"Ideal temp: {idealTemperature:F1} °C",
+                              $"Tolerance: {comfortTolerance * 100.0:F0}%",
+                              $"Best: {bestPoints.Count} ({bestPct:F1}%)",
+                              $"Worst: {worstPoints.Count} ({worstPct:F1}%)");
                 }
                 else
                 {
                     stopwatch.Stop();
-                    Message = $"HIGROTHERMAL COMFORT\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\n" +
-                              $"Time: {sw.Elapsed.TotalMilliseconds:F2} ms\n" +
-                              "---\n" +
-                              "No valid input data";
+                    Hud.Waiting(this, "valid input data");
                 }
             }
             else
             {
                 stopwatch.Stop();
-                    Message = $"HIGROTHERMAL COMFORT\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\n" +
-                          $"Time: {sw.Elapsed.TotalMilliseconds:F2} ms\n" +
-                          "---\n" +
-                          "STATUS: OFF";
+                Hud.Off(this);
             }
         }
     }

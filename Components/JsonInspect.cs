@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using Grasshopper.Kernel;
 using Newtonsoft.Json.Linq;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -52,7 +53,7 @@ namespace Enzyme.Components
             string jsonIn = string.Empty;
             if (!DA.GetData(0, ref jsonIn) || string.IsNullOrWhiteSpace(jsonIn))
             {
-                this.Message = this.NickName + "\nTime: 0.0 ms\n---\nAwaiting Data";
+                Hud.Waiting(this);
                 return;
             }
 
@@ -127,7 +128,7 @@ namespace Enzyme.Components
                 double execTime = stopwatch.Elapsed.TotalMilliseconds;
                 int totalTags = outBldgs.Count + outTowers.Count + outProgs.Count + outTypes.Count + outLevels.Count;
 
-                this.Message = this.NickName + $"\nTime: {execTime:F1} ms\n---\nTags Found: {totalTags}";
+                Hud.Done(this, execTime, $"Tags Found: {totalTags}");
 
                 DA.SetDataList(0, outBldgs);
                 DA.SetDataList(1, outTowers);
@@ -137,7 +138,7 @@ namespace Enzyme.Components
             }
             catch (Exception ex)
             {
-                this.Message = $"JSON Parse Error:\n{ex.Message}";
+                Hud.Error(this, "JSON: " + ex.Message, false);
             }
         }
 

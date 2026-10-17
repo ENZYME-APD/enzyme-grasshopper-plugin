@@ -7,6 +7,7 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Special;
 using Rhino;
 using Rhino.DocObjects;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -284,7 +285,7 @@ namespace Enzyme.Components
             string lsText = string.IsNullOrEmpty(layerState) ? "ACTIVE" : layerState.ToUpper();
             string dsText = string.IsNullOrEmpty(displayStyle) ? "ACTIVE" : displayStyle.ToUpper();
             
-            this.Message = $"EXPORT NAMED VIEWS\nTime: {sw.Elapsed.TotalMilliseconds:F2} ms\n---\nVIEW: {viewText}\nLAYER: {lsText}\nSTYLE: {dsText}";
+            Hud.Done(this, sw.Elapsed.TotalMilliseconds, $"View: {viewText}\nLayer: {lsText}\nStyle: {dsText}");
         }
 
 

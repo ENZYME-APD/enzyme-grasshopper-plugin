@@ -5,6 +5,7 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -133,10 +134,10 @@ namespace Enzyme.Components
             watch.Stop();
             double elapsedMs = watch.Elapsed.TotalMilliseconds;
 
-            string statusStr = dimToggle ? "DIMS: ON" : "DIMS: OFF";
+            string statusStr = dimToggle ? "Dims: on" : "Dims: off";
             int totalCount = treeLines.DataCount + treeArcs.DataCount;
             
-            this.Message = string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0} ({1} dec)\n{3:F0} ms\n---\n{2} Segs", statusStr, numDec, totalCount, elapsedMs);
+            Hud.Done(this, elapsedMs, $"{statusStr} ({numDec} dec)", Hud.Metric("Segments", totalCount));
 
             DA.SetDataTree(0, treeLines);
             DA.SetDataTree(1, treeArcs);

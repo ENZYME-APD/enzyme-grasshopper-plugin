@@ -6,6 +6,7 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -130,7 +131,7 @@ namespace Enzyme.Components
 
             sw.Stop();
             string typeName = type == 0 ? "Bar Chart" : (type == 1 ? "Flat Dot" : "Sphere");
-            Message = $"DATA VISUALIZER\nTime: {sw.Elapsed.TotalMilliseconds:F2} ms\n---\nType: {typeName}\nBounds: {originalMin:F1} to {originalMax:F1}";
+            Hud.Done(this, sw.Elapsed.TotalMilliseconds, $"Type: {typeName}\nBounds: {originalMin:F1} to {originalMax:F1}");
             DA.SetData(0, masterMesh);
             DA.SetDataList(1, outVals);
             DA.SetDataList(2, outColors);

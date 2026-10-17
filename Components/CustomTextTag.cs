@@ -6,6 +6,7 @@ using GH_IO.Serialization;
 using Grasshopper.Kernel;
 using Rhino.Display;
 using Rhino.Geometry;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -58,7 +59,7 @@ namespace Enzyme.Components
             _stopwatch?.Stop();
             double ms = _stopwatch != null ? _stopwatch.Elapsed.TotalMilliseconds : 0;
             string axisStr = _moveAxis == 0 ? "X" : _moveAxis == 1 ? "Y" : "Z";
-            this.Message = $"CUSTOM TEXT TAG\nTime: {ms:F2} ms\n---\nMove Axis: {axisStr}\nTags Generated: {_tags.Count}";
+            Hud.Done(this, ms, $"Move Axis: {axisStr}\nTags Generated: {_tags.Count}");
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)

@@ -9,6 +9,7 @@ using Rhino.Geometry;
 using Grasshopper.Kernel;
 using Newtonsoft.Json.Linq;
 using Enzyme;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -952,11 +953,11 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
                 double reportedMin = minObservedSpeed == double.MaxValue ? 0.0 : minObservedSpeed;
                 double reportedMax = maxObservedSpeed == double.MinValue ? 0.0 : maxObservedSpeed;
                 double finalComfortPercent = activeSensorCount > 0 ? ((double)comfortablePointCount / activeSensorCount) * 100.0 : 0.0;
-                Message = $"{this.NickName}\nTime: {sw.Elapsed.TotalMilliseconds:F2} ms\n---\n● Min Speed: {reportedMin:F1} m/s\n○ Max Speed: {reportedMax:F1} m/s\n● Comfort: {finalComfortPercent:F1}% (≤ {COMFORT_SPEED_THRESHOLD_MS:F1} m/s)";
+                Hud.Done(this, sw.Elapsed.TotalMilliseconds, $"● Min Speed: {reportedMin:F1} m/s\n○ Max Speed: {reportedMax:F1} m/s\n● Comfort: {finalComfortPercent:F1}% (≤ {COMFORT_SPEED_THRESHOLD_MS:F1} m/s)");
             }
             else
             {
-                Message = $"{this.NickName}\nSTATUS: SLEEPING";
+                Hud.Off(this);
             }
         }
     }

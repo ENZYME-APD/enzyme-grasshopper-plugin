@@ -11,6 +11,7 @@ using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -101,7 +102,7 @@ namespace Enzyme.Components
 
             if (string.IsNullOrWhiteSpace(json_in))
             {
-                this.Message = $"{this.NickName}\nTime: 0.0 ms\n---\nAwaiting Data";
+                Hud.Waiting(this);
                 DA.SetDataTree(0, out_volumes);
                 DA.SetDataTree(1, out_bounds);
                 DA.SetDataTree(2, out_areas);
@@ -182,7 +183,7 @@ namespace Enzyme.Components
 
                 sw.Stop();
                 string search_mode = exact_toggle ? "Exact" : "Flexible";
-                this.Message = $"{this.NickName}\nTime: {sw.Elapsed.TotalMilliseconds:F2} ms\n---\nVolumes: {match_count}\nMode: {search_mode}";
+                Hud.Done(this, sw.Elapsed.TotalMilliseconds, $"Volumes: {match_count}\nMode: {search_mode}");
 
                 DA.SetDataTree(0, out_volumes);
                 DA.SetDataTree(1, out_bounds);
@@ -194,7 +195,7 @@ namespace Enzyme.Components
             }
             catch (Exception e)
             {
-                this.Message = $"JSON Parse Error:\n{e.Message}";
+                Hud.Error(this, "JSON: " + e.Message, false);
                 DA.SetDataTree(0, out_volumes);
                 DA.SetDataTree(1, out_bounds);
                 DA.SetDataTree(2, out_areas);

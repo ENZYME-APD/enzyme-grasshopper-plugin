@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -180,7 +181,7 @@ namespace Enzyme.Components
             DA.SetDataList(2, mainContours);
         
             stopwatch.Stop();
-            Message = $"{this.NickName}\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\nContours: {normContours.Count}\nMain: {mainContours.Count}";
+            Hud.Done(this, stopwatch.Elapsed.TotalMilliseconds, $"Contours: {normContours.Count}\nMain: {mainContours.Count}");
         }
 
         private Color GetGradientColor(double t, List<Color> colors)

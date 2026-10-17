@@ -1,6 +1,7 @@
 using System;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -89,7 +90,7 @@ namespace Enzyme.Components
 
             // HUD Message
             stopwatch.Stop();
-            this.Message = $"{this.NickName}\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\n" + message;
+            Hud.Done(this, stopwatch, message);
 
             DA.SetData(0, isContained);
             DA.SetData(1, projectedPt);

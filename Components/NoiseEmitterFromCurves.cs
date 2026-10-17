@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -111,7 +112,7 @@ namespace Enzyme.Components
             DA.SetData(2, info);
 
             sw.Stop();
-            this.Message = $"NoiseLines\n{sw.Elapsed.TotalMilliseconds:F2} ms\n---\nPoints: {outPts.Count}";
+            Hud.Done(this, sw.Elapsed.TotalMilliseconds, $"Points: {outPts.Count}");
         }
 
         private void AutoWireDefaultInputs(GH_Document document)

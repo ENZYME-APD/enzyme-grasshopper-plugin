@@ -7,6 +7,7 @@ using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
 using Rhino.Geometry.Intersect;
+using Enzyme.Utils;
 
 namespace Enzyme.Terrain
 {
@@ -170,7 +171,7 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
             stopwatch.Stop();
             double durationMs = stopwatch.Elapsed.TotalMilliseconds;
 
-            this.Message = $"{this.NickName}\nTime: {durationMs:F1} ms\n---\nGrid Seeds: {gridPointsGenerated}\nTotal Paths: {pathCount}\n● Active: {pathCount} | ○ Stalled: {stalledCount}";
+            Hud.Done(this, durationMs, $"Grid Seeds: {gridPointsGenerated}\nTotal Paths: {pathCount}\n● Active: {pathCount} | ○ Stalled: {stalledCount}");
         }
 
         protected override System.Drawing.Bitmap Icon

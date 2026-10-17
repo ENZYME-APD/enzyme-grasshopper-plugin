@@ -4,6 +4,7 @@ using System.Linq;
 using System.Drawing;
 using Grasshopper.Kernel;
 using AnimatedGif;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -85,7 +86,7 @@ namespace Enzyme.Components
             }
         
             stopwatch.Stop();
-            Message = $"{this.NickName}\n{stopwatch.Elapsed.TotalMilliseconds:F2} ms\n---\nDone";
+            Hud.Done(this, stopwatch.Elapsed.TotalMilliseconds);
         }
         
         public override GH_Exposure Exposure => GH_Exposure.secondary;

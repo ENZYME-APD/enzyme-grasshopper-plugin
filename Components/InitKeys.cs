@@ -4,6 +4,7 @@ using System.Diagnostics;
 using Grasshopper.Kernel;
 using Rhino;
 using Rhino.DocObjects;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -153,8 +154,7 @@ namespace Enzyme.Components
             sw.Stop();
             double execTime = sw.Elapsed.TotalMilliseconds;
 
-            string finalMsg = $"{this.NickName}\nTime: {execTime} ms\n---\n" + string.Join("\n", statusMsg);
-            this.Message = finalMsg;
+            Hud.Done(this, execTime, statusMsg.ToArray());
 
             DA.SetDataList(0, cleanGuids);
         }

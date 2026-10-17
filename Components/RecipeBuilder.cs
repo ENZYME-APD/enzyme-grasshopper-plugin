@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Grasshopper.Kernel;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -43,6 +44,7 @@ namespace Enzyme.Components
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            var hudSw = System.Diagnostics.Stopwatch.StartNew();
             List<string> programs = new List<string>();
             List<double> heights = new List<double>();
             List<int> floors = new List<int>();
@@ -53,7 +55,7 @@ namespace Enzyme.Components
 
             if (programs.Count == 0 || heights.Count == 0 || floors.Count == 0)
             {
-                Message = "Awaiting Data";
+                Hud.Waiting(this);
                 return;
             }
 
@@ -89,7 +91,7 @@ namespace Enzyme.Components
             DA.SetData(0, json);
 
             // Use invariant culture for formatting the message to ensure consistent double to string conversion
-            Message = string.Format(System.Globalization.CultureInfo.InvariantCulture, "RECIPE\n---\nBlocks: {0}\nFloors: {1}\nHeight: {2:F1}m", limit, totalFloors, totalHeight);
+            Hud.Done(this, hudSw, Hud.Metric("Blocks", limit), Hud.Metric("Floors", totalFloors), Hud.Metric("Height", totalHeight, "m"));
         }
 
         protected override System.Drawing.Bitmap Icon

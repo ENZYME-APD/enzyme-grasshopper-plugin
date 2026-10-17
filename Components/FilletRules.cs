@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Grasshopper.Kernel;
 using Newtonsoft.Json;
+using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
@@ -51,6 +52,7 @@ namespace Enzyme.Components
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            var hudSw = System.Diagnostics.Stopwatch.StartNew();
             double defaultRad = 0.0;
             DA.GetData(0, ref defaultRad);
 
@@ -95,7 +97,7 @@ namespace Enzyme.Components
 
             string jsonOutput = JsonConvert.SerializeObject(configDict, Formatting.Indented);
 
-            Message = $"{this.NickName}\nRULES BUILT\n---\nValid Rules: {ruleCount}\nDefault: {defaultRad}m";
+            Hud.Done(this, hudSw, Hud.Metric("Valid rules", ruleCount), $"Default: {defaultRad}m");
 
             DA.SetData(0, jsonOutput);
 
