@@ -15,3 +15,11 @@ test_gh.exe
 test_sampler.exe
 test.svg
 test.svg.png
+
+# Local tooling / build staging (CI downloads its own Yak CLI and uses NuGet references)
+/yak
+/yakdir/
+/*.dll
+*.exe
+Library/
+node_modules/
