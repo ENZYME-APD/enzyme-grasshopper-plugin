@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Survey Outlier Cleaner - Enzyme Plugin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="../index.html" class="nav-brand">
+            <img src="../images/enzyme_logo.png" alt="Enzyme Logo" class="logo-img">
+        </a>
+        <div class="nav-links">
+            <a href="../index.html#components">Components</a>
+            <a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank">GitHub</a>
+        </div>
+    </nav>
+
+    <main class="container doc-page">
+        <div class="doc-header" style="display: flex; align-items: center;">
+            <div>
+                <h1>Survey Outlier Cleaner</h1>
+                <p class="doc-subtitle">Flags survey points that sit above or below the local ground formed by their neighbours (bad shots, Z = 0 points, canopy or roof hits). Uses a robust local plane fit, so slopes are not mistaken for errors. Nothing is deleted: mesh the Clean points and review the Outliers.</p>
+                <div class="doc-meta">
+                    <span class="badge site-analysis">Site Analysis</span>
+                    <span>Nickname: <strong>SurveyClean</strong></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="doc-content">
+            <h2>Overview</h2>
+            <p>Flags survey points that sit above or below the local ground formed by their neighbours (bad shots, Z = 0 points, canopy or roof hits). Uses a robust local plane fit, so slopes are not mistaken for errors. Nothing is deleted: mesh the Clean points and review the Outliers.</p>
+
+            <div class="io-grid">
+                <div class="io-col">
+                    <h3>Inputs (5)</h3>
+                    <ul>
+                        <li><strong>Points</strong> (Point): Survey points (e.g. from a DWG survey).</li>
+                        <li><strong>Neighbours</strong> (Integer): Neighbours used to estimate the local ground around each point. Raise (e.g. 20) for sparse surveys.</li>
+                        <li><strong>Threshold</strong> (Number): How many local scatters (robust standard deviations) a point may sit off the local ground before it is flagged.</li>
+                        <li><strong>Min Deviation</strong> (Number): Never flag deviations smaller than this (model units, e.g. metres).</li>
+                        <li><strong>Passes</strong> (Integer): Re-check passes. Pass 2 ignores points flagged in pass 1, so clustered errors cannot vouch for each other.</li>
+                    </ul>
+                </div>
+                <div class="io-col">
+                    <h3>Outputs (7)</h3>
+                    <ul>
+                        <li><strong>Clean</strong> (Point): Points that agree with their neighbours — use these to build the mesh.</li>
+                        <li><strong>Outliers</strong> (Point): Flagged points, for review.</li>
+                        <li><strong>Deviation</strong> (Number): Signed distance of every input point from its local ground (+ above, - below).</li>
+                        <li><strong>Score</strong> (Number): Deviation divided by the local scatter for every input point (flagged when &gt; Threshold).</li>
+                        <li><strong>Flags</strong> (Boolean): True for every input point that was flagged (same order as Points; use with Cull Pattern).</li>
+                        <li><strong>Colors</strong> (Colour): Preview colour per input point: grey = clean, red = above ground, blue = below ground.</li>
+                        <li><strong>Info</strong> (Text): How the component works and how to tune it.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p><a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank" style="color: #a1a1aa; text-decoration: none; border-bottom: 1px solid #3f3f46; padding-bottom: 2px;">View on GitHub</a></p>
+    </footer>
+</body>
+</html>
