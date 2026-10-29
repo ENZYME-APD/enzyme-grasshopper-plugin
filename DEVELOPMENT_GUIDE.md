@@ -97,3 +97,7 @@ public class MyTool : EnzymeComponent
 *   **Run inputs are not added to tools that don't already have one** — a Run toggle exists only where it was put on purpose.
 *   **Auto-wiring:** override `AutoWire(doc)`; the base already ensures Attributes exist and skips wiring when any input is already connected.
 *   **CI runners:** all workflows run on Linux (`ubuntu-24.04`); the `.gha` is platform-independent .NET, and the Linux Yak CLI packages it. Resource file names are case-sensitive on Linux — keep `IconLoader.Load("Name.png")` exactly matching the file.
+
+## 7. Rhino SDK version (who can see a release)
+
+`RhinoCommon` / `Grasshopper` NuGet references are **pinned to 8.0.23304.9001** (the first Rhino 8 release). Yak tags each package with the SDK it was built against (`rh8_0`, `rh8_35`…) and Package Manager only offers it to Rhinos at least that new. With `8.*` every build silently raised the minimum to the newest service release, so testers on older Rhino 8 only saw v1.2.0 (the last Rhino 7 build). Only raise the pin if a newer RhinoCommon API is genuinely needed, and note it in the release.
