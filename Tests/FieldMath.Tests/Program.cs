@@ -53,4 +53,21 @@ Check(Palettes.TryGet("viridis_r", out var vr) && vr[0].R==253, "palette lookup 
 Check(Palettes.TryGet("Viridis r", out var vr2) && vr2[0].R==253 && Palettes.TryGet("Ocean Thermal", out _) && Palettes.TryGet("Balance (diverging)", out _) && !Palettes.TryGet("Viridiss", out _), "palette names: space-r reverse, spaces, diverging tag, typo rejected");
 Check(Palettes.Utci.ClassOf(20)==5 && Palettes.Utci.ClassOf(-50)==0 && Palettes.Utci.ClassOf(50)==9 && Palettes.Lawson.ClassOf(4)==1, "class schemes");
 Check(FieldMath.NiceStep(37,10)==5, "nice step");
+
+// report metrics
+Check(Palettes.TryGetScheme("slope", out var sl) && sl.ClassOf(4)==0 && sl.ClassOf(15)==2 && sl.ClassOf(31)==3 && Palettes.TryGetScheme("Flood depth", out var fd) && fd.ClassOf(0.35)==2, "slope + flood depth schemes");
+Check(ReportMetrics.Slug("Comfort (5.0 m/s)")=="comfort_5_0_m_s" && ReportMetrics.Slug("> 30% unbuildable")=="over_30pct_unbuildable", "metric key slugs");
+Check(ReportMetrics.TryParseValue("12.5%", out var qv, out var qu) && qv==12.5 && qu=="%" && ReportMetrics.TryParseValue("+0.40 m/s", out var pv2, out var pu2) && pv2==0.4 && pu2=="m/s" && !ReportMetrics.TryParseValue("n/a", out _, out _), "value parsing");
+string dashJson = "{\"Type\":\"Blocks\",\"Metrics\":[{\"Name\":\"Avg Speed\",\"Value\":\"3.1 m/s\"},{\"Name\":\"15-30% costly\",\"Value\":\"8.4%\"}],\"BandAreas\":[{\"Name\":\"15-30% costly\",\"Area\":25000,\"Pct\":8.4}]}";
+var dm = ReportMetrics.FromDashboard(dashJson, "slope");
+Check(dm.Count==3 && dm[0].Key=="slope_avg_speed" && dm[1].Key=="slope_15_30pct_costly_pct" && dm[2].Key=="slope_15_30pct_costly_ha" && dm[2].Value==2.5, "dashboard metrics -> keys, % and ha ("+string.Join(",",dm.Select(x=>x.Key))+")");
+var rules = new List<FlagRule>{ new FlagRule{Theme="Buildability",Key="slope_15_30pct_costly_pct",Amber=5,Red=20}, new FlagRule{Theme="Comfort",Key="comfort_pct",Amber=60,Red=40} };
+var mm = new List<MetricItem>(dm){ new MetricItem{Key="comfort_pct",Value=50,Unit="%"} };
+var old = Newtonsoft.Json.Linq.JObject.Parse("{\"module\":\"C1\",\"metrics\":[{\"key\":\"elev_min_m\",\"value\":566.5,\"unit\":\"m\",\"scope\":\"site\"},{\"key\":\"comfort_pct\",\"value\":99,\"unit\":\"%\",\"scope\":\"site\"}],\"flags\":[],\"maps\":[{\"file\":\"a.png\",\"caption\":\"old\"}],\"inputs\":[{\"dataset\":\"GLO30\"}]}");
+var built = ReportMetrics.Build("C1","1.11.0",new DateTime(2026,10,30),mm,rules,new[]{"GLO30","FABDEM | 1.2 | 30 m | 2023"},new[]{"a.png","b.png"},new[]{"Slope map","Flow"},"Modelled",old);
+var fl=(Newtonsoft.Json.Linq.JArray)built["flags"]; var mets=(Newtonsoft.Json.Linq.JArray)built["metrics"];
+Check((string)fl[0]["rating"]=="amber" && (string)fl[1]["rating"]=="amber" && (string)fl[1]["threshold"]["direction"]=="lower_is_worse", "flag ratings both directions");
+Check(mets.Count==5 && (double)mets.First(m=>(string)m["key"]=="comfort_pct")["value"]==50 && mets.Any(m=>(string)m["key"]=="elev_min_m"), "merge keeps old metrics, replaces same key");
+Check(((Newtonsoft.Json.Linq.JArray)built["maps"]).Count==2 && (string)built["maps"][0]["caption"]=="Slope map" && ((Newtonsoft.Json.Linq.JArray)built["inputs"]).Count==2 && (string)built["confidence"]=="modelled" && (string)built["run_date"]=="2026-10-30", "maps, sources, confidence, date");
+Check(ReportMetrics.Rate(rules[0], double.NaN)=="n/a" && ReportMetrics.Rate(rules[0],25)=="red" && ReportMetrics.Rate(rules[1],70)=="green", "rate edge cases");
 Console.WriteLine(fails==0?"ALL PASS":$"{fails} FAILED"); return fails;

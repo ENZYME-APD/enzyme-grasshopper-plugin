@@ -190,7 +190,19 @@ namespace Enzyme.Utils
             new[] { C(160,186,191), C(184,214,209), C(206,228,204), C(226,242,191), C(243,198,131),
                     C(232,126,77), C(205,70,62), C(161,26,77) });
 
-        public static readonly ClassScheme[] Schemes = { Utci, Lawson, Noise };
+        /// <summary>Terrain slope bands used for buildability (Deep Site Analysis C1), in %.</summary>
+        public static readonly ClassScheme Slope = new ClassScheme("Slope", "%",
+            new double[] { 5, 15, 30 },
+            new[] { "0-5% flat", "5-15% buildable", "15-30% costly", "> 30% unbuildable" },
+            new[] { C(166,217,106), C(254,224,139), C(244,109,67), C(165,0,38) });
+
+        /// <summary>Ponding / flood depth bands for a design storm (Deep Site Analysis C2), in m.</summary>
+        public static readonly ClassScheme FloodDepth = new ClassScheme("Flood depth", "m",
+            new double[] { 0.1, 0.3, 0.5 },
+            new[] { "< 0.1 m", "0.1-0.3 m", "0.3-0.5 m", "> 0.5 m" },
+            new[] { C(240,240,240), C(158,202,225), C(66,146,198), C(8,48,107) });
+
+        public static readonly ClassScheme[] Schemes = { Utci, Lawson, Noise, Slope, FloodDepth };
 
         public static bool TryGetScheme(string name, out ClassScheme scheme)
         {
