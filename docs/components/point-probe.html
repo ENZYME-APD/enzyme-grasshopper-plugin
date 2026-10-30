@@ -36,15 +36,26 @@
 
             <div class="io-grid">
                 <div class="io-col">
-                    <h3>Inputs (0)</h3>
+                    <h3>Inputs (8)</h3>
                     <ul>
-                        <li><em>None</em></li>
+                        <li><strong>Mesh</strong> (Mesh): Analysis mesh</li>
+                        <li><strong>Values</strong> (Number): One value per vertex or per face. Several branches = several result sets (options, hours); each becomes a CSV column</li>
+                        <li><strong>Points</strong> (Point): Points to probe</li>
+                        <li><strong>Names</strong> (Text): Optional name per point (default P1, P2...)</li>
+                        <li><strong>SetNames</strong> (Text): Optional name per result set / branch (default from branch path)</li>
+                        <li><strong>MaxDistance</strong> (Number): Points further than this from the mesh get no value (0 = no limit)</li>
+                        <li><strong>Decimals</strong> (Integer): Decimals in labels and CSV</li>
+                        <li><strong>Unit</strong> (Text): Unit shown in the labels, e.g. m/s, dB, h</li>
                     </ul>
                 </div>
                 <div class="io-col">
-                    <h3>Outputs (0)</h3>
+                    <h3>Outputs (5)</h3>
                     <ul>
-                        <li><em>None</em></li>
+                        <li><strong>Values</strong> (Number): Probed value per point (one branch per result set, same order as Points). Empty where the point is off the mesh</li>
+                        <li><strong>MeshPoints</strong> (Point): Closest point on the mesh for each probe (label anchors)</li>
+                        <li><strong>Labels</strong> (Text): Name: value text per point (first result set; all sets when there are several)</li>
+                        <li><strong>CSV</strong> (Text): Table Name,X,Y,Z,&lt;set 1&gt;,&lt;set 2&gt;... (paste into Excel or write with a file writer)</li>
+                        <li><strong>Info</strong> (Text): Component information and interpretation</li>
                     </ul>
                 </div>
             </div>

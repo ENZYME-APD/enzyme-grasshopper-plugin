@@ -21,18 +21,18 @@ namespace Enzyme.Components
         public override GH_Exposure Exposure => GH_Exposure.tertiary;
         protected override Bitmap Icon => IconLoader.Load("color_palette.png");
 
-        protected override void RegisterInputParams(GH_InputParamManager p)
+        protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
-            p.AddTextParameter("Name", "Name", "Palette name (see Names output)", GH_ParamAccess.item, "Viridis");
-            p.AddIntegerParameter("Count", "Count", "Number of colours to return (0 = the palette's own stops)", GH_ParamAccess.item, 0);
-            p.AddBooleanParameter("Reverse", "Reverse", "Flip the gradient", GH_ParamAccess.item, false);
-            p[1].Optional = true; p[2].Optional = true;
+            pManager.AddTextParameter("Name", "Name", "Palette name (see Names output)", GH_ParamAccess.item, "Viridis");
+            pManager.AddIntegerParameter("Count", "Count", "Number of colours to return (0 = the palette's own stops)", GH_ParamAccess.item, 0);
+            pManager.AddBooleanParameter("Reverse", "Reverse", "Flip the gradient", GH_ParamAccess.item, false);
+            pManager[1].Optional = true; pManager[2].Optional = true;
         }
 
-        protected override void RegisterOutputParams(GH_OutputParamManager p)
+        protected override void RegisterOutputParams(GH_OutputParamManager pManager)
         {
-            p.AddColourParameter("Colors", "Colors", "Gradient colours, low to high", GH_ParamAccess.list);
-            p.AddTextParameter("Names", "Names", "All available palette names (diverging ones marked)", GH_ParamAccess.list);
+            pManager.AddColourParameter("Colors", "Colors", "Gradient colours, low to high", GH_ParamAccess.list);
+            pManager.AddTextParameter("Names", "Names", "All available palette names (diverging ones marked)", GH_ParamAccess.list);
         }
 
         protected override void AutoWire(GH_Document doc)

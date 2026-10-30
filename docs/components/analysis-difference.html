@@ -36,15 +36,28 @@
 
             <div class="io-grid">
                 <div class="io-col">
-                    <h3>Inputs (0)</h3>
+                    <h3>Inputs (9)</h3>
                     <ul>
-                        <li><em>None</em></li>
+                        <li><strong>Mesh</strong> (Mesh): Analysis mesh shared by both options (same grid)</li>
+                        <li><strong>ValuesA</strong> (Number): Values of option A (one per vertex or per face)</li>
+                        <li><strong>ValuesB</strong> (Number): Values of option B, same count and order as A</li>
+                        <li><strong>Threshold</strong> (Number): Changes smaller than this count as 'no change' (e.g. 0.5 m/s, 1 dB)</li>
+                        <li><strong>Range</strong> (Number): Colour scale +-Range (default: largest absolute difference). Use the same Range for every comparison</li>
+                        <li><strong>Level</strong> (Number): Optional: report the % of area above this level in A and in B (e.g. 5 m/s comfort limit, 55 dB)</li>
+                        <li><strong>BetterWhen</strong> (Text): Lower, Higher or None: names the change as improvement / worsening in the stats</li>
+                        <li><strong>Palette</strong> (Text): Diverging palette (Balance, RdBu, Delta, Vlag, PuOr, BrBG...)</li>
+                        <li><strong>Mask</strong> (Boolean): Optional: one bool per face, True = building / no data</li>
                     </ul>
                 </div>
                 <div class="io-col">
-                    <h3>Outputs (0)</h3>
+                    <h3>Outputs (6)</h3>
                     <ul>
-                        <li><em>None</em></li>
+                        <li><strong>Difference</strong> (Number): A - B for every vertex / face (feed Analysis Heatmap with Min = -Range, Max = Range for contours)</li>
+                        <li><strong>Heatmap</strong> (Mesh): Difference map on the diverging scale</li>
+                        <li><strong>Range</strong> (Number): Symmetric colour range used</li>
+                        <li><strong>Stats</strong> (Text): Area-weighted comparison, ready for a report table</li>
+                        <li><strong>Dashboard Data</strong> (Text): JSON legend payload for Legend Geometry / Analysis Dashboard</li>
+                        <li><strong>Info</strong> (Text): Component information and interpretation</li>
                     </ul>
                 </div>
             </div>

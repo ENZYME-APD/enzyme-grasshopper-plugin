@@ -919,10 +919,10 @@
             <a href="components/streamlines.html" class="card" data-category="site-analysis">
                 <span class="badge site-analysis">Site Analysis</span>
                 <h3>Streamlines</h3>
-                <p>Generates smooth streamlines (particle traces) through any vector field using Inverse Distance Weighting.</p>
+                <p>Generates smooth streamlines (particle traces) through any vector field. Regular grids (e.g. Fast CFD) are read directly with bilinear interpolation; scattered points use Inverse Distance Weighting. 4th-order Runge-Kutta integration, optional speed-coloured tubes.</p>
                 <div class="card-meta">
-                    <span>7 Inputs</span>
-                    <span>2 Outputs</span>
+                    <span>11 Inputs</span>
+                    <span>5 Outputs</span>
                 </div>
                 <span class="card-link">View docs &rarr;</span>
             </a>
@@ -1102,6 +1102,56 @@
                 <p>Builds a terrain mesh from survey points and 3D breaklines (roads, platforms, decks, plateaus). Optional site boundary trims the mesh; optional plot boundary (flat 2D curve) is draped onto the terrain and its part of the mesh extracted. Tree locations are dropped onto the ground. Optional colours shade the mesh by elevation.</p>
                 <div class="card-meta">
                     <span>9 Inputs</span>
+                    <span>5 Outputs</span>
+                </div>
+                <span class="card-link">View docs &rarr;</span>
+            </a>
+            <a href="components/analysis-difference.html" class="card" data-category="site-analysis">
+                <span class="badge site-analysis">Site Analysis</span>
+                <h3>Analysis Difference</h3>
+                <p>Compares two design options (or two hours) analysed on the same mesh: A - B map on a diverging scale centred on zero, with area-weighted % increased / decreased and the share of area above a level in each option.</p>
+                <div class="card-meta">
+                    <span>9 Inputs</span>
+                    <span>6 Outputs</span>
+                </div>
+                <span class="card-link">View docs &rarr;</span>
+            </a>
+            <a href="components/analysis-heatmap.html" class="card" data-category="site-analysis">
+                <span class="badge site-analysis">Site Analysis</span>
+                <h3>Analysis Heatmap</h3>
+                <p>Colours any analysis mesh from its values: flat cells, smooth gradient, contour bands with labelled isolines, or report classes (UTCI, Lawson wind comfort, noise, slope bands, flood depth). Also reports the % of area in each band.</p>
+                <div class="card-meta">
+                    <span>15 Inputs</span>
+                    <span>10 Outputs</span>
+                </div>
+                <span class="card-link">View docs &rarr;</span>
+            </a>
+            <a href="components/color-palette.html" class="card" data-category="site-analysis">
+                <span class="badge site-analysis">Site Analysis</span>
+                <h3>Color Palette</h3>
+                <p>Ready-made analysis gradients: perceptual (Viridis, Cividis - colour-blind safe), Turbo, Ladybug, thermal, wind and diverging sets for differences. Feed the colours to any Colors / CustomColors input.</p>
+                <div class="card-meta">
+                    <span>3 Inputs</span>
+                    <span>2 Outputs</span>
+                </div>
+                <span class="card-link">View docs &rarr;</span>
+            </a>
+            <a href="components/point-probe.html" class="card" data-category="site-analysis">
+                <span class="badge site-analysis">Site Analysis</span>
+                <h3>Point Probe</h3>
+                <p>Reads analysis values at any points (entrances, seating, play areas...). Interpolates within the mesh face, works for several result sets at once (options, hours) and writes a CSV table for reports.</p>
+                <div class="card-meta">
+                    <span>8 Inputs</span>
+                    <span>5 Outputs</span>
+                </div>
+                <span class="card-link">View docs &rarr;</span>
+            </a>
+            <a href="components/report-metrics.html" class="card" data-category="site-analysis">
+                <span class="badge site-analysis">Site Analysis</span>
+                <h3>Report Metrics</h3>
+                <p>Collects Dashboard Data from any analysis components plus your own metrics into one report module file (04_metrics/&lt;module&gt;.json: metrics, green/amber/red flags, maps, sources, plugin version), ready for the report and its scorecard.</p>
+                <div class="card-meta">
+                    <span>18 Inputs</span>
                     <span>5 Outputs</span>
                 </div>
                 <span class="card-link">View docs &rarr;</span>

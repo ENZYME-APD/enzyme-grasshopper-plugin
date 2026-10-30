@@ -27,36 +27,36 @@ namespace Enzyme.Components
         public override GH_Exposure Exposure => GH_Exposure.tertiary;
         protected override Bitmap Icon => IconLoader.Load("report_metrics.png");
 
-        protected override void RegisterInputParams(GH_InputParamManager p)
+        protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
-            p.AddTextParameter("Module", "Module", "Report module code, e.g. C1, C2, D1, F2", GH_ParamAccess.item, "C1");
-            p.AddTextParameter("Dashboard Data", "Dashboard", "Dashboard Data JSON from any Enzyme analysis components (one per item)", GH_ParamAccess.list);
-            p.AddTextParameter("Prefixes", "Prefixes", "Optional key prefix per Dashboard item, e.g. 'slope', 'wind_ne', 'storm_100y'", GH_ParamAccess.list);
-            p.AddTextParameter("Keys", "Keys", "Extra metric keys, e.g. elev_min_m, retention_volume_m3", GH_ParamAccess.list);
-            p.AddNumberParameter("Values", "Values", "Values for Keys (same order)", GH_ParamAccess.list);
-            p.AddTextParameter("Units", "Units", "Units for Keys (m, ha, %, m3...)", GH_ParamAccess.list);
-            p.AddTextParameter("Scopes", "Scopes", "Scope per key: site (default), buffer_1km, buffer_5km...", GH_ParamAccess.list);
-            p.AddTextParameter("FlagThemes", "FlagThemes", "Scorecard themes, e.g. Buildability, Flood & drainage, Climate comfort", GH_ParamAccess.list);
-            p.AddTextParameter("FlagKeys", "FlagKeys", "Metric key rated for each theme", GH_ParamAccess.list);
-            p.AddNumberParameter("Amber", "Amber", "Amber threshold per flag", GH_ParamAccess.list);
-            p.AddNumberParameter("Red", "Red", "Red threshold per flag (Red > Amber: higher is worse; Red < Amber: lower is worse)", GH_ParamAccess.list);
-            p.AddTextParameter("Sources", "Sources", "Input datasets as 'dataset | version | resolution | date'", GH_ParamAccess.list);
-            p.AddTextParameter("Maps", "Maps", "Map image files for this module (e.g. from Export Views)", GH_ParamAccess.list);
-            p.AddTextParameter("Captions", "Captions", "Caption per map", GH_ParamAccess.list);
-            p.AddTextParameter("Confidence", "Confidence", "field-verified, modelled or estimated", GH_ParamAccess.item, "modelled");
-            p.AddTextParameter("Folder", "Folder", "Project folder (04_metrics is added) or the 04_metrics folder itself", GH_ParamAccess.item);
-            p.AddBooleanParameter("Merge", "Merge", "Keep metrics already in the file from other definitions and replace only this run's keys", GH_ParamAccess.item, true);
-            p.AddBooleanParameter("Write", "Write", "Write the file (use a button)", GH_ParamAccess.item, false);
-            for (int i = 1; i < 18; i++) p[i].Optional = true;
+            pManager.AddTextParameter("Module", "Module", "Report module code, e.g. C1, C2, D1, F2", GH_ParamAccess.item, "C1");
+            pManager.AddTextParameter("Dashboard Data", "Dashboard", "Dashboard Data JSON from any Enzyme analysis components (one per item)", GH_ParamAccess.list);
+            pManager.AddTextParameter("Prefixes", "Prefixes", "Optional key prefix per Dashboard item, e.g. 'slope', 'wind_ne', 'storm_100y'", GH_ParamAccess.list);
+            pManager.AddTextParameter("Keys", "Keys", "Extra metric keys, e.g. elev_min_m, retention_volume_m3", GH_ParamAccess.list);
+            pManager.AddNumberParameter("Values", "Values", "Values for Keys (same order)", GH_ParamAccess.list);
+            pManager.AddTextParameter("Units", "Units", "Units for Keys (m, ha, %, m3...)", GH_ParamAccess.list);
+            pManager.AddTextParameter("Scopes", "Scopes", "Scope per key: site (default), buffer_1km, buffer_5km...", GH_ParamAccess.list);
+            pManager.AddTextParameter("FlagThemes", "FlagThemes", "Scorecard themes, e.g. Buildability, Flood & drainage, Climate comfort", GH_ParamAccess.list);
+            pManager.AddTextParameter("FlagKeys", "FlagKeys", "Metric key rated for each theme", GH_ParamAccess.list);
+            pManager.AddNumberParameter("Amber", "Amber", "Amber threshold per flag", GH_ParamAccess.list);
+            pManager.AddNumberParameter("Red", "Red", "Red threshold per flag (Red > Amber: higher is worse; Red < Amber: lower is worse)", GH_ParamAccess.list);
+            pManager.AddTextParameter("Sources", "Sources", "Input datasets as 'dataset | version | resolution | date'", GH_ParamAccess.list);
+            pManager.AddTextParameter("Maps", "Maps", "Map image files for this module (e.g. from Export Views)", GH_ParamAccess.list);
+            pManager.AddTextParameter("Captions", "Captions", "Caption per map", GH_ParamAccess.list);
+            pManager.AddTextParameter("Confidence", "Confidence", "field-verified, modelled or estimated", GH_ParamAccess.item, "modelled");
+            pManager.AddTextParameter("Folder", "Folder", "Project folder (04_metrics is added) or the 04_metrics folder itself", GH_ParamAccess.item);
+            pManager.AddBooleanParameter("Merge", "Merge", "Keep metrics already in the file from other definitions and replace only this run's keys", GH_ParamAccess.item, true);
+            pManager.AddBooleanParameter("Write", "Write", "Write the file (use a button)", GH_ParamAccess.item, false);
+            for (int i = 1; i < 18; i++) pManager[i].Optional = true;
         }
 
-        protected override void RegisterOutputParams(GH_OutputParamManager p)
+        protected override void RegisterOutputParams(GH_OutputParamManager pManager)
         {
-            p.AddTextParameter("JSON", "JSON", "The module file content", GH_ParamAccess.item);
-            p.AddTextParameter("Scorecard", "Scorecard", "Theme: rating (value vs thresholds)", GH_ParamAccess.list);
-            p.AddTextParameter("Metrics", "Metrics", "key = value unit, for checking", GH_ParamAccess.list);
-            p.AddTextParameter("File", "File", "Path written (empty until Write)", GH_ParamAccess.item);
-            p.AddTextParameter("Info", "Info", "Component information and interpretation", GH_ParamAccess.item);
+            pManager.AddTextParameter("JSON", "JSON", "The module file content", GH_ParamAccess.item);
+            pManager.AddTextParameter("Scorecard", "Scorecard", "Theme: rating (value vs thresholds)", GH_ParamAccess.list);
+            pManager.AddTextParameter("Metrics", "Metrics", "key = value unit, for checking", GH_ParamAccess.list);
+            pManager.AddTextParameter("File", "File", "Path written (empty until Write)", GH_ParamAccess.item);
+            pManager.AddTextParameter("Info", "Info", "Component information and interpretation", GH_ParamAccess.item);
         }
 
         protected override void AutoWire(GH_Document doc)

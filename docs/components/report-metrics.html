@@ -36,15 +36,36 @@
 
             <div class="io-grid">
                 <div class="io-col">
-                    <h3>Inputs (0)</h3>
+                    <h3>Inputs (18)</h3>
                     <ul>
-                        <li><em>None</em></li>
+                        <li><strong>Module</strong> (Text): Report module code, e.g. C1, C2, D1, F2</li>
+                        <li><strong>Dashboard Data</strong> (Text): Dashboard Data JSON from any Enzyme analysis components (one per item)</li>
+                        <li><strong>Prefixes</strong> (Text): Optional key prefix per Dashboard item, e.g. 'slope', 'wind_ne', 'storm_100y'</li>
+                        <li><strong>Keys</strong> (Text): Extra metric keys, e.g. elev_min_m, retention_volume_m3</li>
+                        <li><strong>Values</strong> (Number): Values for Keys (same order)</li>
+                        <li><strong>Units</strong> (Text): Units for Keys (m, ha, %, m3...)</li>
+                        <li><strong>Scopes</strong> (Text): Scope per key: site (default), buffer_1km, buffer_5km...</li>
+                        <li><strong>FlagThemes</strong> (Text): Scorecard themes, e.g. Buildability, Flood &amp; drainage, Climate comfort</li>
+                        <li><strong>FlagKeys</strong> (Text): Metric key rated for each theme</li>
+                        <li><strong>Amber</strong> (Number): Amber threshold per flag</li>
+                        <li><strong>Red</strong> (Number): Red threshold per flag (Red &gt; Amber: higher is worse; Red &lt; Amber: lower is worse)</li>
+                        <li><strong>Sources</strong> (Text): Input datasets as 'dataset | version | resolution | date'</li>
+                        <li><strong>Maps</strong> (Text): Map image files for this module (e.g. from Export Views)</li>
+                        <li><strong>Captions</strong> (Text): Caption per map</li>
+                        <li><strong>Confidence</strong> (Text): field-verified, modelled or estimated</li>
+                        <li><strong>Folder</strong> (Text): Project folder (04_metrics is added) or the 04_metrics folder itself</li>
+                        <li><strong>Merge</strong> (Boolean): Keep metrics already in the file from other definitions and replace only this run's keys</li>
+                        <li><strong>Write</strong> (Boolean): Write the file (use a button)</li>
                     </ul>
                 </div>
                 <div class="io-col">
-                    <h3>Outputs (0)</h3>
+                    <h3>Outputs (5)</h3>
                     <ul>
-                        <li><em>None</em></li>
+                        <li><strong>JSON</strong> (Text): The module file content</li>
+                        <li><strong>Scorecard</strong> (Text): Theme: rating (value vs thresholds)</li>
+                        <li><strong>Metrics</strong> (Text): key = value unit, for checking</li>
+                        <li><strong>File</strong> (Text): Path written (empty until Write)</li>
+                        <li><strong>Info</strong> (Text): Component information and interpretation</li>
                     </ul>
                 </div>
             </div>

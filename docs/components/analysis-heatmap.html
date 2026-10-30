@@ -36,15 +36,38 @@
 
             <div class="io-grid">
                 <div class="io-col">
-                    <h3>Inputs (0)</h3>
+                    <h3>Inputs (15)</h3>
                     <ul>
-                        <li><em>None</em></li>
+                        <li><strong>Mesh</strong> (Mesh): Analysis mesh, e.g. Fast CFD WindMesh (with its VertexSpeeds as Values and BuildingMask as Mask), Sun Hours or Noise mesh</li>
+                        <li><strong>Values</strong> (Number): One value per mesh vertex or per mesh face (detected automatically)</li>
+                        <li><strong>Mode</strong> (Text): Cells, Smooth, Contour or Classes (0-3 also accepted)</li>
+                        <li><strong>Levels</strong> (Integer): Contour: number of bands (rounded to nice steps when Min/Max are not set)</li>
+                        <li><strong>Smooth</strong> (Integer): Smoothing passes on the values (0 = none, 1-3 light, 5-10 strong). Masked cells are left out</li>
+                        <li><strong>Min</strong> (Number): Colour range minimum (default: data minimum). Set the same Min/Max on every option to compare them fairly</li>
+                        <li><strong>Max</strong> (Number): Colour range maximum (default: data maximum)</li>
+                        <li><strong>Palette</strong> (Text): Palette name (Viridis, Cividis, Turbo, Ladybug, Thermal, Wind, RdBu...). Add ' r' / '_r' to reverse</li>
+                        <li><strong>Colors</strong> (Colour): Custom gradient (overrides Palette)</li>
+                        <li><strong>Mask</strong> (Boolean): Optional: one bool per face, True = building / no data (kept grey, excluded from smoothing, contours and stats)</li>
+                        <li><strong>Scheme</strong> (Text): Classes mode: UTCI (°C), Lawson (m/s), Noise (dB), Slope (%: 0-5, 5-15, 15-30, &gt;30) or Flood depth (m: 0.1, 0.3, 0.5)</li>
+                        <li><strong>Title</strong> (Text): Legend title, e.g. 'Wind speed (m/s)'</li>
+                        <li><strong>LabelSpacing</strong> (Number): Distance between isoline labels (0 = no labels, default: 15% of the map size)</li>
+                        <li><strong>LabelSize</strong> (Number): Label text height (default: 1.2% of the map size)</li>
+                        <li><strong>Peaks</strong> (Integer): Number of high-point labels (0 = none). Negative = label low points instead</li>
                     </ul>
                 </div>
                 <div class="io-col">
-                    <h3>Outputs (0)</h3>
+                    <h3>Outputs (10)</h3>
                     <ul>
-                        <li><em>None</em></li>
+                        <li><strong>Heatmap</strong> (Mesh): Coloured mesh</li>
+                        <li><strong>Isolines</strong> (Curve): Contour lines (Contour / Classes modes)</li>
+                        <li><strong>IsoValues</strong> (Number): Value of each isoline</li>
+                        <li><strong>LabelPlanes</strong> (Plane): Isoline + peak label planes, aligned with the line and always readable (feed Text Tag 3D)</li>
+                        <li><strong>LabelText</strong> (Text): Label strings</li>
+                        <li><strong>LabelSize</strong> (Number): Text height used for the labels</li>
+                        <li><strong>BandStats</strong> (Text): % of the (unmasked) area in each band / class, for report tables</li>
+                        <li><strong>BandAreas</strong> (Number): Area of each band / class (model units²)</li>
+                        <li><strong>Dashboard Data</strong> (Text): JSON legend payload for Legend Geometry / Analysis Dashboard</li>
+                        <li><strong>Info</strong> (Text): Component information and interpretation</li>
                     </ul>
                 </div>
             </div>

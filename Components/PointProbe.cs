@@ -29,26 +29,26 @@ namespace Enzyme.Components
         public override GH_Exposure Exposure => GH_Exposure.tertiary;
         protected override Bitmap Icon => IconLoader.Load("point_probe.png");
 
-        protected override void RegisterInputParams(GH_InputParamManager p)
+        protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
-            p.AddMeshParameter("Mesh", "Mesh", "Analysis mesh", GH_ParamAccess.item);
-            p.AddNumberParameter("Values", "Values", "One value per vertex or per face. Several branches = several result sets (options, hours); each becomes a CSV column", GH_ParamAccess.tree);
-            p.AddPointParameter("Points", "Points", "Points to probe", GH_ParamAccess.list);
-            p.AddTextParameter("Names", "Names", "Optional name per point (default P1, P2...)", GH_ParamAccess.list);
-            p.AddTextParameter("SetNames", "SetNames", "Optional name per result set / branch (default from branch path)", GH_ParamAccess.list);
-            p.AddNumberParameter("MaxDistance", "MaxDistance", "Points further than this from the mesh get no value (0 = no limit)", GH_ParamAccess.item, 0.0);
-            p.AddIntegerParameter("Decimals", "Decimals", "Decimals in labels and CSV", GH_ParamAccess.item, 1);
-            p.AddTextParameter("Unit", "Unit", "Unit shown in the labels, e.g. m/s, dB, h", GH_ParamAccess.item, "");
-            for (int i = 3; i < 8; i++) p[i].Optional = true;
+            pManager.AddMeshParameter("Mesh", "Mesh", "Analysis mesh", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Values", "Values", "One value per vertex or per face. Several branches = several result sets (options, hours); each becomes a CSV column", GH_ParamAccess.tree);
+            pManager.AddPointParameter("Points", "Points", "Points to probe", GH_ParamAccess.list);
+            pManager.AddTextParameter("Names", "Names", "Optional name per point (default P1, P2...)", GH_ParamAccess.list);
+            pManager.AddTextParameter("SetNames", "SetNames", "Optional name per result set / branch (default from branch path)", GH_ParamAccess.list);
+            pManager.AddNumberParameter("MaxDistance", "MaxDistance", "Points further than this from the mesh get no value (0 = no limit)", GH_ParamAccess.item, 0.0);
+            pManager.AddIntegerParameter("Decimals", "Decimals", "Decimals in labels and CSV", GH_ParamAccess.item, 1);
+            pManager.AddTextParameter("Unit", "Unit", "Unit shown in the labels, e.g. m/s, dB, h", GH_ParamAccess.item, "");
+            for (int i = 3; i < 8; i++) pManager[i].Optional = true;
         }
 
-        protected override void RegisterOutputParams(GH_OutputParamManager p)
+        protected override void RegisterOutputParams(GH_OutputParamManager pManager)
         {
-            p.AddNumberParameter("Values", "Values", "Probed value per point (one branch per result set, same order as Points). Empty where the point is off the mesh", GH_ParamAccess.tree);
-            p.AddPointParameter("MeshPoints", "MeshPoints", "Closest point on the mesh for each probe (label anchors)", GH_ParamAccess.list);
-            p.AddTextParameter("Labels", "Labels", "Name: value text per point (first result set; all sets when there are several)", GH_ParamAccess.list);
-            p.AddTextParameter("CSV", "CSV", "Table Name,X,Y,Z,<set 1>,<set 2>... (paste into Excel or write with a file writer)", GH_ParamAccess.item);
-            p.AddTextParameter("Info", "Info", "Component information and interpretation", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Values", "Values", "Probed value per point (one branch per result set, same order as Points). Empty where the point is off the mesh", GH_ParamAccess.tree);
+            pManager.AddPointParameter("MeshPoints", "MeshPoints", "Closest point on the mesh for each probe (label anchors)", GH_ParamAccess.list);
+            pManager.AddTextParameter("Labels", "Labels", "Name: value text per point (first result set; all sets when there are several)", GH_ParamAccess.list);
+            pManager.AddTextParameter("CSV", "CSV", "Table Name,X,Y,Z,<set 1>,<set 2>... (paste into Excel or write with a file writer)", GH_ParamAccess.item);
+            pManager.AddTextParameter("Info", "Info", "Component information and interpretation", GH_ParamAccess.item);
         }
 
         protected override void AutoWire(GH_Document doc)

@@ -30,38 +30,38 @@ namespace Enzyme.Components
 
         private static readonly string[] Modes = { "Cells", "Smooth", "Contour", "Classes" };
 
-        protected override void RegisterInputParams(GH_InputParamManager p)
+        protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
-            p.AddMeshParameter("Mesh", "Mesh", "Analysis mesh, e.g. Fast CFD WindMesh (with its VertexSpeeds as Values and BuildingMask as Mask), Sun Hours or Noise mesh", GH_ParamAccess.item);
-            p.AddNumberParameter("Values", "Values", "One value per mesh vertex or per mesh face (detected automatically)", GH_ParamAccess.list);
-            p.AddTextParameter("Mode", "Mode", "Cells, Smooth, Contour or Classes (0-3 also accepted)", GH_ParamAccess.item, "Contour");
-            p.AddIntegerParameter("Levels", "Levels", "Contour: number of bands (rounded to nice steps when Min/Max are not set)", GH_ParamAccess.item, 10);
-            p.AddIntegerParameter("Smooth", "Smooth", "Smoothing passes on the values (0 = none, 1-3 light, 5-10 strong). Masked cells are left out", GH_ParamAccess.item, 0);
-            p.AddNumberParameter("Min", "Min", "Colour range minimum (default: data minimum). Set the same Min/Max on every option to compare them fairly", GH_ParamAccess.item);
-            p.AddNumberParameter("Max", "Max", "Colour range maximum (default: data maximum)", GH_ParamAccess.item);
-            p.AddTextParameter("Palette", "Palette", "Palette name (Viridis, Cividis, Turbo, Ladybug, Thermal, Wind, RdBu...). Add ' r' / '_r' to reverse", GH_ParamAccess.item, "Ladybug");
-            p.AddColourParameter("Colors", "Colors", "Custom gradient (overrides Palette)", GH_ParamAccess.list);
-            p.AddBooleanParameter("Mask", "Mask", "Optional: one bool per face, True = building / no data (kept grey, excluded from smoothing, contours and stats)", GH_ParamAccess.list);
-            p.AddTextParameter("Scheme", "Scheme", "Classes mode: UTCI (°C), Lawson (m/s), Noise (dB), Slope (%: 0-5, 5-15, 15-30, >30) or Flood depth (m: 0.1, 0.3, 0.5)", GH_ParamAccess.item, "UTCI");
-            p.AddTextParameter("Title", "Title", "Legend title, e.g. 'Wind speed (m/s)'", GH_ParamAccess.item, "Analysis");
-            p.AddNumberParameter("LabelSpacing", "LabelSpacing", "Distance between isoline labels (0 = no labels, default: 15% of the map size)", GH_ParamAccess.item);
-            p.AddNumberParameter("LabelSize", "LabelSize", "Label text height (default: 1.2% of the map size)", GH_ParamAccess.item);
-            p.AddIntegerParameter("Peaks", "Peaks", "Number of high-point labels (0 = none). Negative = label low points instead", GH_ParamAccess.item, 0);
-            for (int i = 2; i < 15; i++) p[i].Optional = true;
+            pManager.AddMeshParameter("Mesh", "Mesh", "Analysis mesh, e.g. Fast CFD WindMesh (with its VertexSpeeds as Values and BuildingMask as Mask), Sun Hours or Noise mesh", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Values", "Values", "One value per mesh vertex or per mesh face (detected automatically)", GH_ParamAccess.list);
+            pManager.AddTextParameter("Mode", "Mode", "Cells, Smooth, Contour or Classes (0-3 also accepted)", GH_ParamAccess.item, "Contour");
+            pManager.AddIntegerParameter("Levels", "Levels", "Contour: number of bands (rounded to nice steps when Min/Max are not set)", GH_ParamAccess.item, 10);
+            pManager.AddIntegerParameter("Smooth", "Smooth", "Smoothing passes on the values (0 = none, 1-3 light, 5-10 strong). Masked cells are left out", GH_ParamAccess.item, 0);
+            pManager.AddNumberParameter("Min", "Min", "Colour range minimum (default: data minimum). Set the same Min/Max on every option to compare them fairly", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Max", "Max", "Colour range maximum (default: data maximum)", GH_ParamAccess.item);
+            pManager.AddTextParameter("Palette", "Palette", "Palette name (Viridis, Cividis, Turbo, Ladybug, Thermal, Wind, RdBu...). Add ' r' / '_r' to reverse", GH_ParamAccess.item, "Ladybug");
+            pManager.AddColourParameter("Colors", "Colors", "Custom gradient (overrides Palette)", GH_ParamAccess.list);
+            pManager.AddBooleanParameter("Mask", "Mask", "Optional: one bool per face, True = building / no data (kept grey, excluded from smoothing, contours and stats)", GH_ParamAccess.list);
+            pManager.AddTextParameter("Scheme", "Scheme", "Classes mode: UTCI (°C), Lawson (m/s), Noise (dB), Slope (%: 0-5, 5-15, 15-30, >30) or Flood depth (m: 0.1, 0.3, 0.5)", GH_ParamAccess.item, "UTCI");
+            pManager.AddTextParameter("Title", "Title", "Legend title, e.g. 'Wind speed (m/s)'", GH_ParamAccess.item, "Analysis");
+            pManager.AddNumberParameter("LabelSpacing", "LabelSpacing", "Distance between isoline labels (0 = no labels, default: 15% of the map size)", GH_ParamAccess.item);
+            pManager.AddNumberParameter("LabelSize", "LabelSize", "Label text height (default: 1.2% of the map size)", GH_ParamAccess.item);
+            pManager.AddIntegerParameter("Peaks", "Peaks", "Number of high-point labels (0 = none). Negative = label low points instead", GH_ParamAccess.item, 0);
+            for (int i = 2; i < 15; i++) pManager[i].Optional = true;
         }
 
-        protected override void RegisterOutputParams(GH_OutputParamManager p)
+        protected override void RegisterOutputParams(GH_OutputParamManager pManager)
         {
-            p.AddMeshParameter("Heatmap", "Heatmap", "Coloured mesh", GH_ParamAccess.item);
-            p.AddCurveParameter("Isolines", "Isolines", "Contour lines (Contour / Classes modes)", GH_ParamAccess.list);
-            p.AddNumberParameter("IsoValues", "IsoValues", "Value of each isoline", GH_ParamAccess.list);
-            p.AddPlaneParameter("LabelPlanes", "LabelPlanes", "Isoline + peak label planes, aligned with the line and always readable (feed Text Tag 3D)", GH_ParamAccess.list);
-            p.AddTextParameter("LabelText", "LabelText", "Label strings", GH_ParamAccess.list);
-            p.AddNumberParameter("LabelSize", "LabelSize", "Text height used for the labels", GH_ParamAccess.item);
-            p.AddTextParameter("BandStats", "BandStats", "% of the (unmasked) area in each band / class, for report tables", GH_ParamAccess.list);
-            p.AddNumberParameter("BandAreas", "BandAreas", "Area of each band / class (model units²)", GH_ParamAccess.list);
-            p.AddTextParameter("Dashboard Data", "Dashboard Data", "JSON legend payload for Legend Geometry / Analysis Dashboard", GH_ParamAccess.item);
-            p.AddTextParameter("Info", "Info", "Component information and interpretation", GH_ParamAccess.item);
+            pManager.AddMeshParameter("Heatmap", "Heatmap", "Coloured mesh", GH_ParamAccess.item);
+            pManager.AddCurveParameter("Isolines", "Isolines", "Contour lines (Contour / Classes modes)", GH_ParamAccess.list);
+            pManager.AddNumberParameter("IsoValues", "IsoValues", "Value of each isoline", GH_ParamAccess.list);
+            pManager.AddPlaneParameter("LabelPlanes", "LabelPlanes", "Isoline + peak label planes, aligned with the line and always readable (feed Text Tag 3D)", GH_ParamAccess.list);
+            pManager.AddTextParameter("LabelText", "LabelText", "Label strings", GH_ParamAccess.list);
+            pManager.AddNumberParameter("LabelSize", "LabelSize", "Text height used for the labels", GH_ParamAccess.item);
+            pManager.AddTextParameter("BandStats", "BandStats", "% of the (unmasked) area in each band / class, for report tables", GH_ParamAccess.list);
+            pManager.AddNumberParameter("BandAreas", "BandAreas", "Area of each band / class (model units²)", GH_ParamAccess.list);
+            pManager.AddTextParameter("Dashboard Data", "Dashboard Data", "JSON legend payload for Legend Geometry / Analysis Dashboard", GH_ParamAccess.item);
+            pManager.AddTextParameter("Info", "Info", "Component information and interpretation", GH_ParamAccess.item);
         }
 
         protected override void AutoWire(GH_Document doc)

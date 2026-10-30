@@ -27,28 +27,28 @@ namespace Enzyme.Components
         public override GH_Exposure Exposure => GH_Exposure.tertiary;
         protected override Bitmap Icon => IconLoader.Load("analysis_difference.png");
 
-        protected override void RegisterInputParams(GH_InputParamManager p)
+        protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
-            p.AddMeshParameter("Mesh", "Mesh", "Analysis mesh shared by both options (same grid)", GH_ParamAccess.item);
-            p.AddNumberParameter("ValuesA", "A", "Values of option A (one per vertex or per face)", GH_ParamAccess.list);
-            p.AddNumberParameter("ValuesB", "B", "Values of option B, same count and order as A", GH_ParamAccess.list);
-            p.AddNumberParameter("Threshold", "Threshold", "Changes smaller than this count as 'no change' (e.g. 0.5 m/s, 1 dB)", GH_ParamAccess.item, 0.0);
-            p.AddNumberParameter("Range", "Range", "Colour scale +-Range (default: largest absolute difference). Use the same Range for every comparison", GH_ParamAccess.item);
-            p.AddNumberParameter("Level", "Level", "Optional: report the % of area above this level in A and in B (e.g. 5 m/s comfort limit, 55 dB)", GH_ParamAccess.item);
-            p.AddTextParameter("BetterWhen", "BetterWhen", "Lower, Higher or None: names the change as improvement / worsening in the stats", GH_ParamAccess.item, "None");
-            p.AddTextParameter("Palette", "Palette", "Diverging palette (Balance, RdBu, Delta, Vlag, PuOr, BrBG...)", GH_ParamAccess.item, "Balance");
-            p.AddBooleanParameter("Mask", "Mask", "Optional: one bool per face, True = building / no data", GH_ParamAccess.list);
-            for (int i = 3; i < 9; i++) p[i].Optional = true;
+            pManager.AddMeshParameter("Mesh", "Mesh", "Analysis mesh shared by both options (same grid)", GH_ParamAccess.item);
+            pManager.AddNumberParameter("ValuesA", "A", "Values of option A (one per vertex or per face)", GH_ParamAccess.list);
+            pManager.AddNumberParameter("ValuesB", "B", "Values of option B, same count and order as A", GH_ParamAccess.list);
+            pManager.AddNumberParameter("Threshold", "Threshold", "Changes smaller than this count as 'no change' (e.g. 0.5 m/s, 1 dB)", GH_ParamAccess.item, 0.0);
+            pManager.AddNumberParameter("Range", "Range", "Colour scale +-Range (default: largest absolute difference). Use the same Range for every comparison", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Level", "Level", "Optional: report the % of area above this level in A and in B (e.g. 5 m/s comfort limit, 55 dB)", GH_ParamAccess.item);
+            pManager.AddTextParameter("BetterWhen", "BetterWhen", "Lower, Higher or None: names the change as improvement / worsening in the stats", GH_ParamAccess.item, "None");
+            pManager.AddTextParameter("Palette", "Palette", "Diverging palette (Balance, RdBu, Delta, Vlag, PuOr, BrBG...)", GH_ParamAccess.item, "Balance");
+            pManager.AddBooleanParameter("Mask", "Mask", "Optional: one bool per face, True = building / no data", GH_ParamAccess.list);
+            for (int i = 3; i < 9; i++) pManager[i].Optional = true;
         }
 
-        protected override void RegisterOutputParams(GH_OutputParamManager p)
+        protected override void RegisterOutputParams(GH_OutputParamManager pManager)
         {
-            p.AddNumberParameter("Difference", "Diff", "A - B for every vertex / face (feed Analysis Heatmap with Min = -Range, Max = Range for contours)", GH_ParamAccess.list);
-            p.AddMeshParameter("Heatmap", "Heatmap", "Difference map on the diverging scale", GH_ParamAccess.item);
-            p.AddNumberParameter("Range", "Range", "Symmetric colour range used", GH_ParamAccess.item);
-            p.AddTextParameter("Stats", "Stats", "Area-weighted comparison, ready for a report table", GH_ParamAccess.list);
-            p.AddTextParameter("Dashboard Data", "Dashboard Data", "JSON legend payload for Legend Geometry / Analysis Dashboard", GH_ParamAccess.item);
-            p.AddTextParameter("Info", "Info", "Component information and interpretation", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Difference", "Diff", "A - B for every vertex / face (feed Analysis Heatmap with Min = -Range, Max = Range for contours)", GH_ParamAccess.list);
+            pManager.AddMeshParameter("Heatmap", "Heatmap", "Difference map on the diverging scale", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Range", "Range", "Symmetric colour range used", GH_ParamAccess.item);
+            pManager.AddTextParameter("Stats", "Stats", "Area-weighted comparison, ready for a report table", GH_ParamAccess.list);
+            pManager.AddTextParameter("Dashboard Data", "Dashboard Data", "JSON legend payload for Legend Geometry / Analysis Dashboard", GH_ParamAccess.item);
+            pManager.AddTextParameter("Info", "Info", "Component information and interpretation", GH_ParamAccess.item);
         }
 
         protected override void AutoWire(GH_Document doc)
