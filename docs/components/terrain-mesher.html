@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terrain Mesher - Enzyme Plugin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="../index.html" class="nav-brand">
+            <img src="../images/enzyme_logo.png" alt="Enzyme Logo" class="logo-img">
+        </a>
+        <div class="nav-links">
+            <a href="../index.html#components">Components</a>
+            <a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank">GitHub</a>
+        </div>
+    </nav>
+
+    <main class="container doc-page">
+        <div class="doc-header" style="display: flex; align-items: center;">
+            <div>
+                <h1>Terrain Mesher</h1>
+                <p class="doc-subtitle">Builds a terrain mesh from survey points and 3D breaklines (roads, platforms, decks, plateaus). Optional site boundary trims the mesh; optional plot boundary (flat 2D curve) is draped onto the terrain and its part of the mesh extracted. Tree locations are dropped onto the ground. Optional colours shade the mesh by elevation.</p>
+                <div class="doc-meta">
+                    <span class="badge site-analysis">Site Analysis</span>
+                    <span>Nickname: <strong>TerrainMesh</strong></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="doc-content">
+            <h2>Overview</h2>
+            <p>Builds a terrain mesh from survey points and 3D breaklines (roads, platforms, decks, plateaus). Optional site boundary trims the mesh; optional plot boundary (flat 2D curve) is draped onto the terrain and its part of the mesh extracted. Tree locations are dropped onto the ground. Optional colours shade the mesh by elevation.</p>
+
+            <div class="io-grid">
+                <div class="io-col">
+                    <h3>Inputs (9)</h3>
+                    <ul>
+                        <li><strong>Points</strong> (Point): Survey points (clean them first with Survey Outlier Cleaner if needed).</li>
+                        <li><strong>Breaklines</strong> (Curve): 3D curves the terrain must follow: road edges, platform and deck outlines, plateau edges. Closed curves replace the survey points inside them (flat platforms); open curves clear survey points within Clear Radius.</li>
+                        <li><strong>Spacing</strong> (Number): Distance between points sampled along breaklines and boundaries (model units). Smaller = tighter fit, heavier mesh.</li>
+                        <li><strong>Clear Radius</strong> (Number): Survey points closer than this (in plan) to an open breakline are ignored, so the road/deck edge is not pulled out of shape.</li>
+                        <li><strong>Boundary</strong> (Curve): Optional closed curve: the mesh is trimmed to it (tested in plan).</li>
+                        <li><strong>Plot Boundary</strong> (Curve): Optional closed curve inside the site, normally flat 2D. It is draped onto the terrain and the mesh inside it is output separately.</li>
+                        <li><strong>Trees</strong> (Point): Optional tree locations (any Z); they are dropped onto the terrain.</li>
+                        <li><strong>Colors</strong> (Colour): Optional elevation gradient (low to high). Leave empty for an uncoloured mesh.</li>
+                        <li><strong>Max Edge</strong> (Number): Remove triangles with a plan edge longer than this (bridges across gaps or the convex hull). 0 = off.</li>
+                    </ul>
+                </div>
+                <div class="io-col">
+                    <h3>Outputs (5)</h3>
+                    <ul>
+                        <li><strong>Mesh</strong> (Mesh): Terrain mesh (trimmed to Boundary if given).</li>
+                        <li><strong>Plot Boundary</strong> (Curve): Plot boundary draped onto the terrain.</li>
+                        <li><strong>Plot Mesh</strong> (Mesh): Part of the terrain mesh inside the plot boundary.</li>
+                        <li><strong>Trees</strong> (Point): Tree locations on the terrain (same order as input; trees outside the mesh are snapped to its nearest point).</li>
+                        <li><strong>Info</strong> (Text): How the component works and how to tune it.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p><a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank" style="color: #a1a1aa; text-decoration: none; border-bottom: 1px solid #3f3f46; padding-bottom: 2px;">View on GitHub</a></p>
+    </footer>
+</body>
+</html>
