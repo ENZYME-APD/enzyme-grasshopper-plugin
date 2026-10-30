@@ -272,6 +272,10 @@ namespace Enzyme.Components
                 {
                     labelStr = _labels[i];
                 }
+                else if (_legendType == "Blocks" && _labels.Count == _colors.Count + 1)
+                {
+                    labelStr = _labels[i] + " - " + _labels[i + 1]; // contour band edges -> range per band
+                }
                 else if (_legendType == "Gradient" || _legendType == "Blocks")
                 {
                     if (i == _colors.Count - 1 && _labels.Count > 1) labelStr = _labels[_labels.Count - 1]; // max

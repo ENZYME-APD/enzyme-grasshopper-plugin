@@ -22,7 +22,7 @@
         <div class="doc-header" style="display: flex; align-items: center;">
             <div>
                 <h1>Streamlines</h1>
-                <p class="doc-subtitle">Generates smooth streamlines (particle traces) through any vector field using Inverse Distance Weighting.</p>
+                <p class="doc-subtitle">Generates smooth streamlines (particle traces) through any vector field. Regular grids (e.g. Fast CFD) are read directly with bilinear interpolation; scattered points use Inverse Distance Weighting. 4th-order Runge-Kutta integration, optional speed-coloured tubes.</p>
                 <div class="doc-meta">
                     <span class="badge site-analysis">Site Analysis</span>
                     <span>Nickname: <strong>Streamlines</strong></span>
@@ -36,22 +36,29 @@
             
             <div class="io-grid">
                 <div class="io-col">
-                    <h3>Inputs (7)</h3>
+                    <h3>Inputs (11)</h3>
                     <ul>
                         <li><strong>FieldPoints</strong> (Point): The locations of the vector field data</li>
                         <li><strong>FieldVectors</strong> (Vector): The vectors corresponding to each FieldPoint</li>
                         <li><strong>SeedPoints</strong> (Point): The starting locations for the streamlines</li>
                         <li><strong>StepSize</strong> (Number): Distance to move per integration step</li>
-                        <li><strong>MaxSteps</strong> (Integer): Maximum number of steps per streamline</li>
-                        <li><strong>SearchRadius</strong> (Number): Radius to search for blending local vectors</li>
+                        <li><strong>MaxSteps</strong> (Integer): Maximum number of steps per streamline (per direction)</li>
+                        <li><strong>SearchRadius</strong> (Number): Scattered points only: radius to search for blending local vectors (ignored for regular grids)</li>
                         <li><strong>MoveUp</strong> (Number): Visual Z-offset to prevent clashing with the analysis mesh</li>
+                        <li><strong>Direction</strong> (Integer): 1 = both ways from each seed (default), 0 = downstream only, -1 = upstream only</li>
+                        <li><strong>MinSpeed</strong> (Number): Lines stop where the field is slower than this (m/s)</li>
+                        <li><strong>TubeRadius</strong> (Number): Radius of the speed-coloured tube mesh (0 = no tubes)</li>
+                        <li><strong>Palette</strong> (Text): Tube colours by local speed (palette name, e.g. Wind, Turbo, Viridis)</li>
                     </ul>
                 </div>
                 <div class="io-col">
-                    <h3>Outputs (2)</h3>
+                    <h3>Outputs (5)</h3>
                     <ul>
                         <li><strong>Streamlines</strong> (Curve): The generated streamline curves</li>
                         <li><strong>Info</strong> (Text): Component documentation and stats</li>
+                        <li><strong>Speeds</strong> (Number): Local field speed at every streamline vertex (one branch per streamline)</li>
+                        <li><strong>Tubes</strong> (Mesh): One mesh of tubes coloured by local speed (needs TubeRadius &gt; 0)</li>
+                        <li><strong>Dashboard Data</strong> (Text): JSON legend payload for the tube colours</li>
                     </ul>
                 </div>
             </div>

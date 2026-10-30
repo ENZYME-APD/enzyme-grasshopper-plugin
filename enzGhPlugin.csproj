@@ -27,6 +27,8 @@
   <ItemGroup>
     <Compile Remove="ScriptsToProcess\**" />
     <Compile Remove="Archive\**" />
+    <Compile Remove="Tests\**" />
+    <None Remove="Tests\**" />
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
