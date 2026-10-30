@@ -20,7 +20,7 @@ namespace Enzyme.Components
     {
         public AnalysisHeatmap()
           : base("Analysis Heatmap", "Heatmap",
-              "Colours any analysis mesh from its values: flat cells, smooth gradient, contour bands with labelled isolines, or comfort classes (UTCI, Lawson, noise). Also reports the % of area in each band.",
+              "Colours any analysis mesh from its values: flat cells, smooth gradient, contour bands with labelled isolines, or report classes (UTCI, Lawson wind comfort, noise, slope bands, flood depth). Also reports the % of area in each band.",
               "Enzyme", "Site Analysis")
         { }
 
@@ -42,7 +42,7 @@ namespace Enzyme.Components
             p.AddTextParameter("Palette", "Palette", "Palette name (Viridis, Cividis, Turbo, Ladybug, Thermal, Wind, RdBu...). Add ' r' / '_r' to reverse", GH_ParamAccess.item, "Ladybug");
             p.AddColourParameter("Colors", "Colors", "Custom gradient (overrides Palette)", GH_ParamAccess.list);
             p.AddBooleanParameter("Mask", "Mask", "Optional: one bool per face, True = building / no data (kept grey, excluded from smoothing, contours and stats)", GH_ParamAccess.list);
-            p.AddTextParameter("Scheme", "Scheme", "Classes mode: UTCI, Lawson or Noise", GH_ParamAccess.item, "UTCI");
+            p.AddTextParameter("Scheme", "Scheme", "Classes mode: UTCI (°C), Lawson (m/s), Noise (dB), Slope (%: 0-5, 5-15, 15-30, >30) or Flood depth (m: 0.1, 0.3, 0.5)", GH_ParamAccess.item, "UTCI");
             p.AddTextParameter("Title", "Title", "Legend title, e.g. 'Wind speed (m/s)'", GH_ParamAccess.item, "Analysis");
             p.AddNumberParameter("LabelSpacing", "LabelSpacing", "Distance between isoline labels (0 = no labels, default: 15% of the map size)", GH_ParamAccess.item);
             p.AddNumberParameter("LabelSize", "LabelSize", "Label text height (default: 1.2% of the map size)", GH_ParamAccess.item);
@@ -128,7 +128,7 @@ namespace Enzyme.Components
             }
             ClassScheme scheme = null;
             if (mode == 3 && !Palettes.TryGetScheme(schemeName, out scheme))
-                throw new ArgumentException("Unknown Scheme '" + schemeName + "'. Use UTCI, Lawson or Noise.");
+                throw new ArgumentException("Unknown Scheme '" + schemeName + "'. Use UTCI, Lawson, Noise, Slope or Flood depth.");
 
             string key = string.Join("|", mode, levels, smooth, vminIn, vmaxIn, string.Join(",", stops.Select(c => c.ToArgb())),
                 scheme?.Name, mesh.Vertices.Count, mesh.Faces.Count, VertexHash(mesh), Hash(values), Hash(maskIn));
@@ -520,6 +520,11 @@ namespace Enzyme.Components
                 metrics.Add(new JObject { ["Name"] = g.BandNames[b], ["Value"] = pct.ToString("F1", CultureInfo.InvariantCulture) + "%" });
             }
             j["Metrics"] = metrics;
+            // machine-readable band areas (model units²) for Report Metrics
+            var bandArr = new JArray();
+            for (int b = 0; b < g.BandArea.Length; b++)
+                bandArr.Add(new JObject { ["Name"] = g.BandNames[b], ["Area"] = Math.Round(g.BandArea[b], 3), ["Pct"] = totalArea > 0 ? Math.Round(100.0 * g.BandArea[b] / totalArea, 2) : 0 });
+            j["BandAreas"] = bandArr;
             return j.ToString(Newtonsoft.Json.Formatting.None);
         }
 
@@ -550,7 +555,7 @@ namespace Enzyme.Components
             "- Cells: one flat colour per cell (exact values, no interpolation).\n" +
             "- Smooth: colours blended between cells.\n" +
             "- Contour: filled bands between round-number levels, plus isolines. Bands are clipped exactly, so they line up with the isolines.\n" +
-            "- Classes: named categories with standard colours: UTCI thermal stress, Lawson (LDDC) wind comfort, or noise bands.\n\n" +
+            "- Classes: named categories with standard colours: UTCI thermal stress, Lawson (LDDC) wind comfort, noise bands, slope bands (0-5 / 5-15 / 15-30 / >30 %) or flood depth (0.1 / 0.3 / 0.5 m).\n\n" +
             "LABELS:\nValues are written along the isolines at LabelSpacing, turned to read left-to-right, and never overlap each other. Peaks > 0 labels the highest points (negative: the lowest).\n\n" +
             "MASK:\nBuildings or no-data cells (Mask = True) stay grey and are left out of smoothing, contours and the area statistics.\n\n" +
             "REPORTING:\nBandStats gives the % of the site area in each band/class, ready for a report table. To compare design options fairly, set the same Min/Max (or use Classes) on every option.\n\n" +

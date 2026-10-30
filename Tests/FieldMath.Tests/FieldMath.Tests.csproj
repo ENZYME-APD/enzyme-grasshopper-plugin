@@ -10,5 +10,7 @@
     <Compile Include="..\..\Utils\FieldMath.cs" />
     <Compile Include="..\..\Utils\VectorField.cs" />
     <Compile Include="..\..\Utils\Palettes.cs" />
+    <Compile Include="..\..\Utils\ReportMetrics.cs" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 </Project>
