@@ -264,21 +264,20 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
 
                 if (legendType == "Gradient" && cArray != null && cArray.Count >= 2)
                 {
-                    Color startColor = Color.FromArgb((int)cArray[0]["R"], (int)cArray[0]["G"], (int)cArray[0]["B"]);
-                    Color endColor = Color.FromArgb((int)cArray[1]["R"], (int)cArray[1]["G"], (int)cArray[1]["B"]);
-
-                    int segments = 10;
+                    // sample across every colour stop (not just the first two), so multi-stop palettes show correctly
+                    var stops = new System.Collections.Generic.List<Color>();
+                    foreach (var c in cArray) stops.Add(Color.FromArgb((int)c["R"], (int)c["G"], (int)c["B"]));
+                    int segments = Math.Max(10, Math.Min(40, stops.Count * 4));
                     for (int i = 0; i < segments; i++)
                     {
-                        double t = i / (double)(segments - 1);
+                        double t = segments == 1 ? 0 : i / (double)(segments - 1);
                         double x = basePoint.X + i * (rectWidth / segments);
                         var rect = new Rhino.Geometry.Rectangle3d(Rhino.Geometry.Plane.WorldXY,
                             new Rhino.Geometry.Point3d(x, basePoint.Y, basePoint.Z),
                             new Rhino.Geometry.Point3d(x + rectWidth / segments, basePoint.Y + rectHeight, basePoint.Z));
                         rectangles.Add(rect.ToNurbsCurve());
-                        colors.Add(InterpolateColor(startColor, endColor, t));
+                        colors.Add(Enzyme.Utils.Palettes.Sample(stops, t));
                     }
-
                     if (lArray != null && lArray.Count >= 2)
                     {
                         labels.Add(lArray[0].ToString());
@@ -308,7 +307,27 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
                         colors.Add(Color.FromArgb((int)cArray[i]["R"], (int)cArray[i]["G"], (int)cArray[i]["B"]));
                     }
 
-                    if (lArray != null && lArray.Count >= 2)
+                    int nBlocks = cArray.Count;
+                    double segW = nBlocks > 0 ? rectWidth / nBlocks : rectWidth;
+                    if (lArray != null && nBlocks > 0 && lArray.Count == nBlocks + 1)
+                    {
+                        // one label per band edge (contour legends)
+                        for (int i = 0; i < lArray.Count; i++)
+                        {
+                            labels.Add(lArray[i].ToString());
+                            labelPositions.Add(new Rhino.Geometry.Point3d(basePoint.X + i * segW, basePoint.Y - textOffset, basePoint.Z));
+                        }
+                    }
+                    else if (lArray != null && nBlocks > 2 && lArray.Count == nBlocks)
+                    {
+                        // one name per block (class legends, e.g. UTCI / Lawson), staggered to avoid overlaps
+                        for (int i = 0; i < lArray.Count; i++)
+                        {
+                            labels.Add(lArray[i].ToString());
+                            labelPositions.Add(new Rhino.Geometry.Point3d(basePoint.X + (i + 0.5) * segW, basePoint.Y - textOffset * (1 + (i % 2)), basePoint.Z));
+                        }
+                    }
+                    else if (lArray != null && lArray.Count >= 2)
                     {
                         labels.Add(lArray[0].ToString());
                         labelPositions.Add(new Rhino.Geometry.Point3d(basePoint.X, basePoint.Y - textOffset, basePoint.Z));

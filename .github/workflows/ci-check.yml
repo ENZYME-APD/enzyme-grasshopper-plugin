@@ -27,3 +27,5 @@ jobs:
         run: dotnet restore enzGhPlugin.csproj
       - name: Build (Release)
         run: dotnet build enzGhPlugin.csproj -c Release --no-restore
+      - name: Field-maths tests (contours, isolines, streamlines, palettes)
+        run: dotnet run --project Tests/FieldMath.Tests -c Release
