@@ -111,7 +111,12 @@ namespace Enzyme.Components
             if (smin > smax) { smin = 0; smax = 1; }
 
             Mesh tubes = null;
-            Color[] stops = Palettes.Get(palette, "Wind");
+            Color[] stops;
+            if (!Palettes.TryGet(palette, out stops))
+            {
+                if (tubeR > 0) AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Unknown palette '" + palette + "' - using Wind.");
+                stops = Palettes.Get("Wind");
+            }
             if (tubeR > 0 && allPts.Count > 0)
             {
                 tubes = new Mesh();

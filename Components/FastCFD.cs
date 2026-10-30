@@ -54,6 +54,8 @@ namespace Enzyme.Components
             pManager.AddNumberParameter("Speeds", "Speeds", "Wind speed magnitude (m/s) at each point", GH_ParamAccess.list);
             pManager.AddTextParameter("Dashboard Data", "Dashboard Data", "JSON string for Dashboard and Legend", GH_ParamAccess.item);
             pManager.AddTextParameter("Info", "Info", "Simulation data, Lawson comfort criteria, and timing", GH_ParamAccess.item);
+            pManager.AddNumberParameter("VertexSpeeds", "VertexSpeeds", "Wind speed (m/s) at every WindMesh vertex (NaN inside buildings) - feed Analysis Heatmap / Point Probe / Analysis Difference with WindMesh", GH_ParamAccess.list);
+            pManager.AddBooleanParameter("BuildingMask", "BuildingMask", "One bool per WindMesh face, True = mostly inside a building (Mask input of Analysis Heatmap / Difference)", GH_ParamAccess.list);
         }
 
         protected override void Solve(IGH_DataAccess DA, System.Diagnostics.Stopwatch hudSw)
@@ -440,6 +442,7 @@ namespace Enzyme.Components
 
             int[] vMap = new int[totalCells];
             int vCounter = 0;
+            var faceObstacle = new List<bool>();
             for (int i = 1; i <= N; i++)
             {
                 for (int j = 1; j <= M; j++)
@@ -469,10 +472,28 @@ namespace Enzyme.Components
 
                     if (insideMask[idx00] || insideMask[idx10] || insideMask[idx11] || insideMask[idx01]) {
                         outMesh.Faces.AddFace(vMap[idx00], vMap[idx10], vMap[idx11], vMap[idx01]);
+                        int obs = (obstacles[idx00] ? 1 : 0) + (obstacles[idx10] ? 1 : 0) + (obstacles[idx11] ? 1 : 0) + (obstacles[idx01] ? 1 : 0);
+                        faceObstacle.Add(obs >= 2);
                     }
                 }
             }
-            outMesh.Compact(); 
+
+            // speed per WindMesh vertex (NaN inside buildings), aligned with the compacted mesh,
+            // so Analysis Heatmap / Point Probe / Analysis Difference can read WindMesh directly
+            var vertexSpeedsAll = new double[vCounter];
+            for (int i = 1; i <= N; i++)
+                for (int j = 1; j <= M; j++)
+                {
+                    int idx = IX(i, j, N);
+                    vertexSpeedsAll[vMap[idx]] = obstacles[idx] ? double.NaN : speeds[idx];
+                }
+            var usedV = new bool[vCounter];
+            foreach (MeshFace mf in outMesh.Faces) { usedV[mf.A] = true; usedV[mf.B] = true; usedV[mf.C] = true; usedV[mf.D] = true; }
+            var vertexSpeeds = new List<double>();
+            for (int q = 0; q < vCounter; q++) if (usedV[q]) vertexSpeeds.Add(vertexSpeedsAll[q]);
+            outMesh.Compact(); // removes unused vertices, keeping the order of the used ones
+            if (vertexSpeeds.Count != outMesh.Vertices.Count) vertexSpeeds.Clear();
+            if (faceObstacle.Count != outMesh.Faces.Count) faceObstacle.Clear();
 
             DA.SetData(0, outMesh);
             DA.SetDataList(1, outPoints);
@@ -500,6 +521,8 @@ namespace Enzyme.Components
   ]
 }}";
             DA.SetData(5, jsonStr);
+            if (Params.Output.Count > 7) DA.SetDataList(7, vertexSpeeds);
+            if (Params.Output.Count > 8) DA.SetDataList(8, faceObstacle);
 
             string infoStr = 
                 "FAST CFD (2.5D MULTI-THREADED EULERIAN SOLVER)\n" +
