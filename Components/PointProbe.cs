@@ -164,7 +164,7 @@ namespace Enzyme.Components
             double s = 0, w = 0;
             for (int k = 0; k < 4; k++)
             {
-                if (t[k] == 0 || (k == 3 && !f.IsQuad)) continue;
+                if (t[k] == 0) continue;   // triangles: ids[3] == ids[2], so any split of the weight is still right
                 double v = vals[ids[k]];
                 if (double.IsNaN(v)) continue;
                 s += t[k] * v; w += t[k];

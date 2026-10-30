@@ -32,7 +32,7 @@ namespace Enzyme.Components
 
         protected override void RegisterInputParams(GH_InputParamManager p)
         {
-            p.AddMeshParameter("Mesh", "Mesh", "Analysis mesh (e.g. Fast CFD WindMesh, Sun Hours or Noise mesh)", GH_ParamAccess.item);
+            p.AddMeshParameter("Mesh", "Mesh", "Analysis mesh, e.g. Fast CFD WindMesh (with its VertexSpeeds as Values and BuildingMask as Mask), Sun Hours or Noise mesh", GH_ParamAccess.item);
             p.AddNumberParameter("Values", "Values", "One value per mesh vertex or per mesh face (detected automatically)", GH_ParamAccess.list);
             p.AddTextParameter("Mode", "Mode", "Cells, Smooth, Contour or Classes (0-3 also accepted)", GH_ParamAccess.item, "Contour");
             p.AddIntegerParameter("Levels", "Levels", "Contour: number of bands (rounded to nice steps when Min/Max are not set)", GH_ParamAccess.item, 10);
@@ -120,13 +120,18 @@ namespace Enzyme.Components
             int mode = ParseMode(modeIn);
             levels = Math.Max(1, Math.Min(levels, 100));
             smooth = Math.Max(0, Math.Min(smooth, 50));
-            Color[] stops = custom.Count >= 2 ? custom.ToArray() : Palettes.Get(palName);
+            Color[] stops = custom.Count >= 2 ? custom.ToArray() : null;
+            if (stops == null && !Palettes.TryGet(palName, out stops))
+            {
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Unknown palette '" + palName + "' - using Ladybug. See Color Palette > Names.");
+                stops = Palettes.Get("Ladybug");
+            }
             ClassScheme scheme = null;
             if (mode == 3 && !Palettes.TryGetScheme(schemeName, out scheme))
                 throw new ArgumentException("Unknown Scheme '" + schemeName + "'. Use UTCI, Lawson or Noise.");
 
             string key = string.Join("|", mode, levels, smooth, vminIn, vmaxIn, string.Join(",", stops.Select(c => c.ToArgb())),
-                scheme?.Name, mesh.Vertices.Count, mesh.Faces.Count, mesh.GetBoundingBox(false), Hash(values), Hash(maskIn));
+                scheme?.Name, mesh.Vertices.Count, mesh.Faces.Count, VertexHash(mesh), Hash(values), Hash(maskIn));
             bool cached = key == _key && _geo != null;
             if (!cached)
             {
@@ -270,7 +275,7 @@ namespace Enzyme.Components
             if (smooth > 0 && mode != 0) vv = FieldMath.Smooth(F, nv, vv, smooth, faceMask);
 
             // face values for Cells mode and the data range
-            double[] fv = perFace && smooth == 0 ? values.ToArray() : FieldMath.VertexToFace(F, vv);
+            double[] fv = perFace && (smooth == 0 || mode == 0) ? values.ToArray() : FieldMath.VertexToFace(F, vv);
             double dmin = double.MaxValue, dmax = double.MinValue;
             for (int f = 0; f < nf; f++)
             {
@@ -284,6 +289,7 @@ namespace Enzyme.Components
             if (dmin > dmax) throw new ArgumentException("No valid values (all masked or NaN).");
 
             double vmin = vminIn ?? dmin, vmax = vmaxIn ?? dmax;
+            if (vmin > vmax) { double sw = vmin; vmin = vmax; vmax = sw; }   // Min/Max swapped: use them the right way round
             if (vmax - vmin < 1e-12) vmax = vmin + 1e-6;
 
             // band edges
@@ -329,7 +335,16 @@ namespace Enzyme.Components
             // contour geometry (also used for band areas in every mode)
             var bands = FieldMath.Bands(sm, vv, bounds, faceMask);
             var area = new double[bounds.Length - 1];
-            foreach (var bp in bands) area[bp.Band] += PolyArea(bp.Xyz);
+            if (mode == 0)
+            {
+                // stats must match what is drawn: each cell counts whole in its own band
+                for (int f = 0; f < nf; f++)
+                {
+                    if ((faceMask != null && faceMask[f]) || double.IsNaN(fv[f])) continue;
+                    area[FieldMath.BandOf(Math.Max(bounds[0], Math.Min(bounds[bounds.Length - 1], fv[f])), bounds)] += FaceArea(sm, f);
+                }
+            }
+            else foreach (var bp in bands) area[bp.Band] += PolyArea(bp.Xyz);
 
             Color maskCol = Color.FromArgb(255, 200, 200, 200);
             Mesh outMesh = new Mesh();
@@ -359,10 +374,9 @@ namespace Enzyme.Components
                     bool masked = faceMask != null && faceMask[f];
                     bool bad = false;
                     for (int k = 0; k < 4; k++) if (double.IsNaN(vv[F[4 * f + k]])) bad = true;
-                    if (masked || bad) continue;
+                    if (masked || bad) { AddFace(outMesh, sm, f, maskCol); continue; }
                     outMesh.Faces.AddFace(F[4 * f], F[4 * f + 1], F[4 * f + 2], F[4 * f + 3]);
                 }
-                if (faceMask != null) for (int f = 0; f < nf; f++) if (faceMask[f]) AddFace(outMesh, sm, f, maskCol);
                 outMesh.Compact();
             }
             else
@@ -379,7 +393,12 @@ namespace Enzyme.Components
                     if (k == 4) outMesh.Faces.AddFace(a, a + 1, a + 2, a + 3);
                     else for (int i = 1; i < k - 1; i++) outMesh.Faces.AddFace(a, a + i, a + i + 1);
                 }
-                if (faceMask != null) for (int f = 0; f < nf; f++) if (faceMask[f]) AddFace(outMesh, sm, f, maskCol);
+                for (int f = 0; f < nf; f++)
+                {
+                    bool bad = faceMask != null && faceMask[f];
+                    for (int k = 0; k < 4 && !bad; k++) if (double.IsNaN(vv[F[4 * f + k]])) bad = true;
+                    if (bad) AddFace(outMesh, sm, f, maskCol);
+                }
             }
             outMesh.Normals.ComputeNormals();
 
@@ -435,14 +454,25 @@ namespace Enzyme.Components
 
         private static double PolyArea(double[] xyz)
         {
+            // relative to the first vertex: keeps precision at georeferenced (UTM) coordinates
             int n = xyz.Length / 3;
             var s = Vector3d.Zero;
-            for (int i = 0; i < n; i++)
+            for (int i = 1; i < n - 1; i++)
             {
-                int j = (i + 1) % n;
-                s += Vector3d.CrossProduct(new Vector3d(xyz[3 * i], xyz[3 * i + 1], xyz[3 * i + 2]), new Vector3d(xyz[3 * j], xyz[3 * j + 1], xyz[3 * j + 2]));
+                var a = new Vector3d(xyz[3 * i] - xyz[0], xyz[3 * i + 1] - xyz[1], xyz[3 * i + 2] - xyz[2]);
+                var b = new Vector3d(xyz[3 * i + 3] - xyz[0], xyz[3 * i + 4] - xyz[1], xyz[3 * i + 5] - xyz[2]);
+                s += Vector3d.CrossProduct(a, b);
             }
             return 0.5 * s.Length;
+        }
+
+        private static double FaceArea(ScalarMesh sm, int f)
+        {
+            int b = 4 * f;
+            int k = sm.F[b + 3] == sm.F[b + 2] ? 3 : 4;
+            var xyz = new double[3 * k];
+            for (int i = 0; i < k; i++) { int q = sm.F[b + i]; xyz[3 * i] = sm.X[q]; xyz[3 * i + 1] = sm.Y[q]; xyz[3 * i + 2] = sm.Z[q]; }
+            return PolyArea(xyz);
         }
 
         private static void ReadingAxes(Vector3d n, out Vector3d right, out Vector3d up)
@@ -491,6 +521,17 @@ namespace Enzyme.Components
             }
             j["Metrics"] = metrics;
             return j.ToString(Newtonsoft.Json.Formatting.None);
+        }
+
+        private static int VertexHash(Mesh m)
+        {
+            unchecked
+            {
+                int h = m.Vertices.Count;
+                for (int i = 0; i < m.Vertices.Count; i++) h = h * 31 + m.Vertices[i].GetHashCode();
+                for (int f = 0; f < m.Faces.Count; f++) h = h * 31 + m.Faces[f].GetHashCode();
+                return h;
+            }
         }
 
         private static int Hash<T>(List<T> l)

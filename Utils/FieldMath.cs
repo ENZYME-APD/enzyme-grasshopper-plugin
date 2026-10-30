@@ -249,16 +249,15 @@ namespace Enzyme.Utils
             return o;
         }
 
-        // twice the area of a polygon (any orientation, 3D)
+        // twice the area of a polygon (any orientation, 3D), relative to the first vertex for precision
         private static double Area2(double[] xyz)
         {
             int n = xyz.Length / 3;
             double sx = 0, sy = 0, sz = 0;
-            for (int i = 0; i < n; i++)
+            for (int i = 1; i < n - 1; i++)
             {
-                int j = (i + 1) % n;
-                double ax = xyz[3 * i], ay = xyz[3 * i + 1], az = xyz[3 * i + 2];
-                double bx = xyz[3 * j], by = xyz[3 * j + 1], bz = xyz[3 * j + 2];
+                double ax = xyz[3 * i] - xyz[0], ay = xyz[3 * i + 1] - xyz[1], az = xyz[3 * i + 2] - xyz[2];
+                double bx = xyz[3 * i + 3] - xyz[0], by = xyz[3 * i + 4] - xyz[1], bz = xyz[3 * i + 5] - xyz[2];
                 sx += ay * bz - az * by; sy += az * bx - ax * bz; sz += ax * by - ay * bx;
             }
             return Math.Sqrt(sx * sx + sy * sy + sz * sz);

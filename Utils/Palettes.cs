@@ -99,13 +99,14 @@ namespace Enzyme.Utils
         {
             stops = null;
             if (string.IsNullOrWhiteSpace(name)) return false;
-            string key = Norm(name.Replace("(diverging)", ""));
+            string raw = name.Replace("(diverging)", "").Trim();
             bool rev = false;
-            if (key.EndsWith("_r") || key.EndsWith("reversed"))
+            string low = raw.ToLowerInvariant();
+            foreach (var suf in new[] { " reversed", "_reversed", " r", "_r", "-r" })
             {
-                rev = true;
-                key = key.EndsWith("_r") ? key.Substring(0, key.Length - 2) : key.Substring(0, key.Length - 8);
+                if (low.EndsWith(suf) && low.Length > suf.Length) { rev = true; raw = raw.Substring(0, raw.Length - suf.Length); break; }
             }
+            string key = Norm(raw);
             foreach (var p in All)
             {
                 if (Norm(p.Name) != key) continue;

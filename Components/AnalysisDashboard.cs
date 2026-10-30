@@ -222,6 +222,8 @@ namespace Enzyme.Components
 
             int maxChars = _title.Length;
             foreach(var l in _labels) if(l.Length > maxChars) maxChars = l.Length;
+            if (_legendType == "Blocks" && _labels.Count == _colors.Count + 1)
+                for (int i = 0; i + 1 < _labels.Count; i++) maxChars = Math.Max(maxChars, _labels[i].Length + _labels[i + 1].Length + 3);
             foreach(var m in _metrics) {
                 int mLen = m.Name.Length + m.Value.Length + 4;
                 if (mLen > maxChars) maxChars = mLen;

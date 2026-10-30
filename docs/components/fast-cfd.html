@@ -90,31 +90,33 @@
                 <div class="io-col">
                     <h3>Inputs (13)</h3>
                     <ul>
-                        <li><strong>TerrainMesh</strong> (Mesh): Input topography mesh over which the 2.5D simulation sheet drapes.</li>
-                        <li><strong>ContextMeshes</strong> (Mesh list, optional): Closed building and site massing meshes acting as aerodynamic obstacles.</li>
-                        <li><strong>WindVector</strong> (Vector): Cardinal orientation of the prevailing wind (e.g. <code>(1, 1, 0)</code> for NE wind).</li>
-                        <li><strong>WindSpeed</strong> (Number): Baseline meteorological wind speed magnitude in m/s (default: <code>10.0</code>).</li>
-                        <li><strong>CellSize</strong> (Number): Spatial resolution of the Eulerian grid in meters (default: <code>4.0</code>). Smaller cells increase spatial resolution.</li>
-                        <li><strong>Iterations</strong> (Integer): Advection and diffusion time steps (default: <code>50</code>). Automatically adapts to domain scale if lower than minimum domain flush.</li>
-                        <li><strong>AnalysisHeight</strong> (Number): Offset in meters above terrain level for pedestrian comfort evaluation (default: <code>1.5m</code>).</li>
-                        <li><strong>Viscosity</strong> (Number): Fluid kinematic viscosity in m²/s (default: <code>0.1</code>). Scaled independently of grid cell size.</li>
-                        <li><strong>Friction</strong> (Number / List, optional): Surface aerodynamic drag coefficient (0.0 to 1.0) simulating rough terrain, vegetation, or paving.</li>
-                        <li><strong>ComfortThreshold</strong> (Number): User-defined comfort threshold in m/s (default: <code>5.0</code>).</li>
-                        <li><strong>BoundaryMask</strong> (Curve, optional): Closed curve to restrict the simulation domain and lock grid coordinates.</li>
-                        <li><strong>Colors</strong> (Colour list, optional): Custom gradient palette for velocity heatmap visualization.</li>
-                        <li><strong>WindRefHeight</strong> (Number, optional): Meteorological measurement height for input WindSpeed in meters (default: <code>10.0m</code>). Scales to pedestrian level via atmospheric boundary layer (ABL) power law.</li>
+                        <li><strong>TerrainMesh</strong> (Mesh): Input Terrain Mesh</li>
+                        <li><strong>ContextMeshes</strong> (Mesh): Buildings and context as closed meshes</li>
+                        <li><strong>WindVector</strong> (Vector): Prevailing wind direction vector</li>
+                        <li><strong>WindSpeed</strong> (Number): Baseline wind velocity (m/s) at reference height (default 10m meteorological wind)</li>
+                        <li><strong>CellSize</strong> (Number): Resolution of the grid in meters.</li>
+                        <li><strong>Iterations</strong> (Integer): Simulation steps (time steps). Automatically adapts to domain scale if lower than minimum flush.</li>
+                        <li><strong>AnalysisHeight</strong> (Number): Drape offset above terrain for pedestrian evaluation (m)</li>
+                        <li><strong>Viscosity</strong> (Number): Kinematic viscosity (diffusion/turbulence in m²/s, default 0.1)</li>
+                        <li><strong>Friction</strong> (Number): Surface drag coefficient (0.0 to 1.0). Accepts item or list.</li>
+                        <li><strong>ComfortThreshold</strong> (Number): User threshold for pedestrian comfort (m/s)</li>
+                        <li><strong>BoundaryMask</strong> (Curve): Optional closed curve to crop the simulation domain and lock grid coordinates.</li>
+                        <li><strong>Colors</strong> (Colour): Custom color spectrum override (min to max)</li>
+                        <li><strong>WindRefHeight</strong> (Number): Meteorological measurement height for input WindSpeed (m). Default = 10.0m (scales to pedestrian height via ABL power law).</li>
                     </ul>
                 </div>
                 <div class="io-col">
-                    <h3>Outputs (7)</h3>
+                    <h3>Outputs (9)</h3>
                     <ul>
-                        <li><strong>WindMesh</strong> (Mesh): Continuous vertex-colored mesh displaying the terrain-projected wind velocity heatmap.</li>
-                        <li><strong>Points</strong> (Point list): Evaluated grid point positions at pedestrian analysis height.</li>
-                        <li><strong>WindVectors</strong> (Vector list): Local velocity vectors (m/s) indicating local direction and speed.</li>
-                        <li><strong>Colors</strong> (Colour list): Color values assigned to each grid point and vector.</li>
-                        <li><strong>Speeds</strong> (Number list): Scalar wind speed magnitude (m/s) at each grid cell.</li>
-                        <li><strong>Dashboard Data</strong> (Text / JSON): Structured JSON payload compatible with the <code>Analysis Dashboard</code> HUD component.</li>
-                        <li><strong>Info</strong> (Text): Detailed performance log, domain statistics, Lawson comfort breakdown, and scientific notes.</li>
+                        <li><strong>WindMesh</strong> (Mesh): Heatmap of wind speeds mapped to the terrain</li>
+                        <li><strong>Points</strong> (Point): Grid points corresponding to the vectors</li>
+                        <li><strong>WindVectors</strong> (Vector): Wind velocity vectors for visualization (m/s)</li>
+                        <li><strong>Colors</strong> (Colour): The color assigned to each point/vector</li>
+                        <li><strong>Speeds</strong> (Number): Wind speed magnitude (m/s) at each point</li>
+                        <li><strong>Dashboard Data</strong> (Text): JSON string for Dashboard and Legend</li>
+                        <li><strong>Info</strong> (Text): Simulation data, Lawson comfort criteria, and timing</li>
+                        <li><strong>VertexSpeeds</strong> (Number): Wind speed (m/s) at every WindMesh vertex (NaN inside buildings) - feed Analysis Heatmap / Point Probe / Analysis Difference with WindMesh</li>
+                        <li><strong>BuildingMask</strong> (Boolean): One bool per WindMesh face, True = mostly inside a building (Mask input of Analysis Heatmap / Difference)</li>
                     </ul>
                 </div>
             </div>

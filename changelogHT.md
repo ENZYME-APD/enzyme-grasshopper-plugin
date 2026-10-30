@@ -9,6 +9,7 @@ Running log of changes made on `main` going forward. Intended to eventually be f
 - New **Analysis Difference**: option A − B on a diverging scale centred on zero, area-weighted % higher / lower / unchanged, and % area above a level in each option.
 - New **Point Probe**: values at named points, interpolated in the face, several result sets at once, CSV table.
 - New **Color Palette**: 32 palettes incl. colour-blind-safe Viridis / Cividis, Turbo and diverging sets; shared by all new components (`Utils/Palettes.cs`).
+- **Fast CFD**: new VertexSpeeds (aligned with WindMesh, NaN in buildings) and BuildingMask outputs, so WindMesh plugs straight into the new components.
 - **Streamlines** upgraded: regular grids (Fast CFD) are read directly with bilinear interpolation instead of a radius search per step; 4th-order Runge-Kutta steps; trace both ways from each seed; lines stop at calm zones, walls and closed loops; new outputs: speeds per vertex, speed-coloured tube mesh, legend JSON. Placed components keep their old ports and behaviour.
 - **Legend Geometry**: gradients now use every colour stop (was only the first two); contour/class legends label every band.
 - **Analysis Dashboard**: contour legends show the range of each band.

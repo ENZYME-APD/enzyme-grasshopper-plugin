@@ -120,18 +120,39 @@ namespace Enzyme.Components
             if (sumW <= 0) throw new ArgumentException("No valid (unmasked) area to compare.");
             if (double.IsNaN(range) || range <= 0) range = maxAbs > 0 ? maxAbs : 1;
 
-            Color[] stops = Palettes.Get(pal, "Balance");
+            Color[] stops;
+            if (!Palettes.TryGet(pal, out stops))
+            {
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Unknown palette '" + pal + "' - using Balance.");
+                stops = Palettes.Get("Balance");
+            }
             Color maskCol = Color.FromArgb(255, 200, 200, 200);
             Func<double, Color> col = v => double.IsNaN(v) ? maskCol : Palettes.Sample(stops, 0.5 + 0.5 * Math.Max(-1, Math.Min(1, v / range)));
 
             Mesh outMesh;
             if (perVertex)
             {
-                outMesh = mesh.DuplicateMesh();
-                outMesh.VertexColors.Clear();
-                var vc = new Color[nv];
-                for (int i = 0; i < nv; i++) vc[i] = valid[i] ? col(d[i]) : maskCol;
-                outMesh.VertexColors.SetColors(vc);
+                // shared vertices carry the gradient; masked faces are appended separately in grey
+                outMesh = new Mesh();
+                for (int i = 0; i < nv; i++) { outMesh.Vertices.Add(mesh.Vertices[i]); outMesh.VertexColors.Add(valid[i] && !double.IsNaN(d[i]) ? col(d[i]) : maskCol); }
+                for (int f = 0; f < nf; f++)
+                {
+                    var mf = mesh.Faces[f];
+                    if (mask != null && mask[f]) continue;
+                    if (mf.IsQuad) outMesh.Faces.AddFace(mf.A, mf.B, mf.C, mf.D); else outMesh.Faces.AddFace(mf.A, mf.B, mf.C);
+                }
+                if (mask != null)
+                    for (int f = 0; f < nf; f++)
+                    {
+                        if (!mask[f]) continue;
+                        var mf = mesh.Faces[f];
+                        int s0 = outMesh.Vertices.Count, k = mf.IsQuad ? 4 : 3;
+                        int[] ids = { mf.A, mf.B, mf.C, mf.D };
+                        for (int q = 0; q < k; q++) { outMesh.Vertices.Add(mesh.Vertices[ids[q]]); outMesh.VertexColors.Add(maskCol); }
+                        if (k == 4) outMesh.Faces.AddFace(s0, s0 + 1, s0 + 2, s0 + 3); else outMesh.Faces.AddFace(s0, s0 + 1, s0 + 2);
+                    }
+                outMesh.Compact();
+                outMesh.Normals.ComputeNormals();
             }
             else
             {

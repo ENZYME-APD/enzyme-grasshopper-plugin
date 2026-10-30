@@ -50,6 +50,7 @@ Check(Math.Abs(pts[10][2]-5)<1e-9 && Math.Abs(spd[0]-8)<1e-6, "z and speed carri
 var jit=new List<double>(px); jit[3]+=0.4; Check(GridField2D.TryBuild(jit,py,pz,pu,pv)==null,"scattered points rejected (fallback to IDW)");
 // palettes
 Check(Palettes.TryGet("viridis_r", out var vr) && vr[0].R==253, "palette lookup + reverse");
+Check(Palettes.TryGet("Viridis r", out var vr2) && vr2[0].R==253 && Palettes.TryGet("Ocean Thermal", out _) && Palettes.TryGet("Balance (diverging)", out _) && !Palettes.TryGet("Viridiss", out _), "palette names: space-r reverse, spaces, diverging tag, typo rejected");
 Check(Palettes.Utci.ClassOf(20)==5 && Palettes.Utci.ClassOf(-50)==0 && Palettes.Utci.ClassOf(50)==9 && Palettes.Lawson.ClassOf(4)==1, "class schemes");
 Check(FieldMath.NiceStep(37,10)==5, "nice step");
 Console.WriteLine(fails==0?"ALL PASS":$"{fails} FAILED"); return fails;
