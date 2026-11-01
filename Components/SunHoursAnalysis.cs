@@ -23,7 +23,7 @@ namespace Enzyme.Components
 
         public SunHoursAnalysis()
           : base("Sun Hours Analysis", "SunHours",
-              "Multi-threaded raycaster. Analyzes arbitrary 3D massing or custom points for sun exposure.",
+              "Multi-threaded raycaster. Analyzes arbitrary 3D massing or custom points for sun exposure. Optional tree crowns filter sunlight (Beer–Lambert) instead of blocking it.",
               "Enzyme", "Site Analysis")
         {
         }
@@ -43,7 +43,12 @@ namespace Enzyme.Components
             pManager.AddBooleanParameter("Run", "Run", "Trigger the analysis.", GH_ParamAccess.item, true);
             pManager.AddNumberParameter("Offset", "Offset", "Offset distance for output points.", GH_ParamAccess.item, 0.1);
             pManager[6].Optional = true;
-            
+            pManager.AddMeshParameter("Trees", "Trees", "Optional closed tree-crown meshes. Treated as porous (Beer–Lambert) instead of solid: sun through foliage is reduced, not blocked. Do not also put them in Context.", GH_ParamAccess.list);
+            pManager.AddNumberParameter("Leaf Area Density", "LAD", "Leaf area density per crown (m²/m³), matched to Trees by index (last value repeats). ~0.5 sparse / winter, 1.0 typical, 2.0 dense evergreen.", GH_ParamAccess.list, 1.0);
+            pManager.AddNumberParameter("Extinction k", "k", "Light extinction coefficient. 0.5 = spherical leaf-angle distribution.", GH_ParamAccess.item, CanopyMath.DefaultK);
+            pManager[8].Optional = true;
+            pManager[9].Optional = true;
+            pManager[10].Optional = true;
         }
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
@@ -54,6 +59,7 @@ namespace Enzyme.Components
             pManager.AddMeshParameter("Analysis Mesh", "Mesh", "The auto-subdivided Massing mesh (for easy gradient coloring).", GH_ParamAccess.item);
             pManager.AddColourParameter("Colors", "Colors", "Color mapped to each point.", GH_ParamAccess.list);
             pManager.AddTextParameter("Dashboard Data", "Dashboard", "JSON legend data", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Tree Shade %", "TreeShade", "Share of the point's direct sun (0.0 to 1.0) removed by tree foliage. 0 when no Trees are given.", GH_ParamAccess.list);
         }
 
                         protected override void Solve(IGH_DataAccess DA, System.Diagnostics.Stopwatch hudSw)
@@ -78,6 +84,14 @@ namespace Enzyme.Components
 
             double offset = 0.1;
             DA.GetData(7, ref offset);
+
+            List<Mesh> treeMeshes = new List<Mesh>();
+            List<double> lads = new List<double>();
+            double k = CanopyMath.DefaultK;
+            DA.GetDataList(8, treeMeshes);
+            DA.GetDataList(9, lads);
+            DA.GetData(10, ref k);
+            if (lads.Count == 0) lads.Add(1.0);
 
             // Run = false is handled by EnzymeComponent (replays the last results).
 
@@ -161,8 +175,35 @@ namespace Enzyme.Components
             combinedContext.Compact();
             MeshPrep.WarmUp(combinedContext); // build ray-acceleration data once, before the parallel loop
 
+            // Porous tree crowns: each keeps its own mesh, box and LAD so overlapping crowns add up.
+            var trees = new List<Mesh>();
+            var treeBoxes = new List<BoundingBox>();
+            var treeLad = new List<double>();
+            int openCrowns = 0;
+            for (int t = 0; t < treeMeshes.Count; t++)
+            {
+                Mesh tm = treeMeshes[t];
+                if (tm == null || !tm.IsValid || tm.Faces.Count == 0) continue;
+                if (!tm.IsClosed) { openCrowns++; continue; }
+                double lad = lads[Math.Min(t, lads.Count - 1)];
+                if (lad <= 0) continue;
+                MeshPrep.WarmUp(tm);
+                trees.Add(tm);
+                treeBoxes.Add(tm.GetBoundingBox(true));
+                treeLad.Add(lad);
+            }
+            if (openCrowns > 0)
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"{openCrowns} tree mesh(es) are not closed and were ignored. Crowns must be closed volumes.");
+
+            // Rays only need to reach past the furthest crown.
+            BoundingBox sceneBox = BoundingBox.Empty;
+            foreach (var tb in treeBoxes) sceneBox.Union(tb);
+            foreach (var tp in testPoints) sceneBox.Union(tp);
+            double rayLen = sceneBox.IsValid ? sceneBox.Diagonal.Length * 2.0 + 1.0 : 1.0;
+
             int[] sunHits = new int[testPoints.Count];
             double[] exposures = new double[testPoints.Count];
+            double[] treeShade = new double[testPoints.Count];
             Point3d[] offsetPoints = new Point3d[testPoints.Count];
             int totalRays = vectors.Count;
 
@@ -172,7 +213,8 @@ namespace Enzyme.Components
                 Vector3d normal = normals[i];
                 offsetPoints[i] = pt + (normal * offset);
                 
-                int hits = 0;
+                double sun = 0.0;     // direct sun received, trees included (in ray units)
+                double clearSun = 0.0; // same without trees
 
                 foreach (Vector3d vec in vectors)
                 {
@@ -189,14 +231,30 @@ namespace Enzyme.Components
                         isShaded = true;
                     }
 
-                    if (!isShaded)
+                    if (isShaded) continue;
+                    clearSun += 1.0;
+
+                    double tau = 0.0;
+                    if (trees.Count > 0)
                     {
-                        hits++;
+                        Point3d o = ray.Position;
+                        Line line = new Line(o, o + vec * rayLen);
+                        for (int t = 0; t < trees.Count; t++)
+                        {
+                            if (!Rhino.Geometry.Intersect.Intersection.LineBox(line, treeBoxes[t], 0.0, out _)) continue;
+                            Point3d[] xs = Rhino.Geometry.Intersect.Intersection.MeshLine(trees[t], line);
+                            if (xs == null || xs.Length == 0) continue;
+                            var dists = new double[xs.Length];
+                            for (int q = 0; q < xs.Length; q++) dists[q] = (xs[q] - o) * vec;
+                            tau += CanopyMath.OpticalDepth(CanopyMath.PathLengthInside(dists, rayLen), treeLad[t], k);
+                        }
                     }
+                    sun += CanopyMath.Transmittance(tau);
                 }
 
-                sunHits[i] = hits;
-                exposures[i] = (double)hits / totalRays;
+                sunHits[i] = (int)Math.Round(sun);
+                exposures[i] = sun / totalRays;
+                treeShade[i] = clearSun > 0 ? 1.0 - sun / clearSun : 0.0;
             });
 
             System.Drawing.Color[] outColors = new System.Drawing.Color[testPoints.Count];
@@ -247,7 +305,14 @@ namespace Enzyme.Components
             _cachedTime = sw.Elapsed.TotalMilliseconds;
             _cachedRays = totalRays;
 
-            Enzyme.Utils.Hud.Done(this, _cachedTime, Enzyme.Utils.Hud.Metric("Points", _cachedPoints.Count), Enzyme.Utils.Hud.Metric("Rays", _cachedRays));
+            if (trees.Count > 0)
+            {
+                double avgShade = 0; foreach (double v in treeShade) avgShade += v; avgShade /= treeShade.Length;
+                Enzyme.Utils.Hud.Done(this, _cachedTime, Enzyme.Utils.Hud.Metric("Points", _cachedPoints.Count), Enzyme.Utils.Hud.Metric("Rays", _cachedRays),
+                    Enzyme.Utils.Hud.Metric("Trees", trees.Count), Enzyme.Utils.Hud.Metric("Tree shade", avgShade * 100.0, "%", 1));
+            }
+            else
+                Enzyme.Utils.Hud.Done(this, _cachedTime, Enzyme.Utils.Hud.Metric("Points", _cachedPoints.Count), Enzyme.Utils.Hud.Metric("Rays", _cachedRays));
 
             DA.SetDataList(0, _cachedHits);
             DA.SetDataList(1, _cachedExposures);
@@ -255,6 +320,7 @@ namespace Enzyme.Components
             if (isWorkflow1 && displayMesh.IsValid) DA.SetData(3, displayMesh);
             DA.SetDataList(4, _cachedColors);
             DA.SetData(5, _cachedJson);
+            DA.SetDataList(6, treeShade);
         }
         private System.Drawing.Color InterpolateColor(List<System.Drawing.Color> gradient, double t)
         {

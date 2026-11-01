@@ -11,6 +11,7 @@
     <Compile Include="..\..\Utils\VectorField.cs" />
     <Compile Include="..\..\Utils\Palettes.cs" />
     <Compile Include="..\..\Utils\ReportMetrics.cs" />
+    <Compile Include="..\..\Utils\CanopyMath.cs" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 </Project>

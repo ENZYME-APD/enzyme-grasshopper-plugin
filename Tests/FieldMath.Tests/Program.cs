@@ -70,4 +70,10 @@ Check((string)fl[0]["rating"]=="amber" && (string)fl[1]["rating"]=="amber" && (s
 Check(mets.Count==5 && (double)mets.First(m=>(string)m["key"]=="comfort_pct")["value"]==50 && mets.Any(m=>(string)m["key"]=="elev_min_m"), "merge keeps old metrics, replaces same key");
 Check(((Newtonsoft.Json.Linq.JArray)built["maps"]).Count==2 && (string)built["maps"][0]["caption"]=="Slope map" && ((Newtonsoft.Json.Linq.JArray)built["inputs"]).Count==2 && (string)built["confidence"]=="modelled" && (string)built["run_date"]=="2026-10-30", "maps, sources, confidence, date");
 Check(ReportMetrics.Rate(rules[0], double.NaN)=="n/a" && ReportMetrics.Rate(rules[0],25)=="red" && ReportMetrics.Rate(rules[1],70)=="green", "rate edge cases");
+// canopy (Beer-Lambert through tree crowns)
+Check(Math.Abs(CanopyMath.PathLengthInside(new[]{12.0,10.0},100)-2)<1e-12, "crown path: sorted entry/exit");
+Check(Math.Abs(CanopyMath.PathLengthInside(new[]{3.0},100)-3)<1e-12, "crown path: origin inside crown");
+Check(Math.Abs(CanopyMath.PathLengthInside(new[]{10.0,10.0,12.0,12.0},100)-2)<1e-12, "crown path: duplicate edge hits merged");
+Check(Math.Abs(CanopyMath.PathLengthInside(new[]{10.0,12.0,20.0,25.0},22)-4)<1e-12 && CanopyMath.PathLengthInside(new double[0],10)==0, "crown path: two crowns, clipped to ray length; empty = 0");
+Check(Math.Abs(CanopyMath.Transmittance(CanopyMath.OpticalDepth(4,1,0.5))-Math.Exp(-2))<1e-12 && CanopyMath.Transmittance(0)==1 && CanopyMath.OpticalDepth(4,0,0.5)==0, "Beer-Lambert transmittance");
 Console.WriteLine(fails==0?"ALL PASS":$"{fails} FAILED"); return fails;
