@@ -2,6 +2,13 @@
 
 Running log of changes made on `main` going forward. Intended to eventually be folded into `DEVELOPMENT_GUIDE.md` / `docs/` once reviewed.
 
+## 1.12.0
+
+**Site context and porous trees (ideas adapted from VoxCity, Fujiwara et al. 2025, NUS / Takenaka, MIT):**
+- New **Site Fetch**: lat/lon + size → Copernicus GLO-30 terrain, ESA WorldCover land cover (coloured mesh + class per cell), OSM buildings (height / levels / roof:levels / min_height, courtyards) as closed extrusions on the terrain plus one joined mesh for Context, and OSM trees as closed crowns. Local metres (UTM of the site centre at 0,0) with a Georeference output; Dashboard Data in Report Metrics format; disk cache; Run gate.
+- **Sun Hours**: optional Trees / LAD / k inputs and Tree Shade % output. Crowns filter sun with Beer–Lambert (exp(-k·LAD·path)) instead of blocking it; per-crown LAD for species or season. Results unchanged with no Trees.
+- Rhino-free helpers with tests: `GeoTiff` (COG range reads, DEFLATE, predictors), `GeoProj` (UTM), `SiteData` (sources, OSM parsing), `CanopyMath`.
+
 ## 1.11.0
 
 **Analysis visualisation (ideas adapted from Meerkat, T.-T. Tran, MIT):**

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Site Fetch - Enzyme Plugin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="../index.html" class="nav-brand">
+            <img src="../images/enzyme_logo.png" alt="Enzyme Logo" class="logo-img">
+        </a>
+        <div class="nav-links">
+            <a href="../index.html#components">Components</a>
+            <a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank">GitHub</a>
+        </div>
+    </nav>
+
+    <main class="container doc-page">
+        <div class="doc-header" style="display: flex; align-items: center;">
+            <div>
+                <h1>Site Fetch</h1>
+                <p class="doc-subtitle">Downloads open data for a site (terrain, land cover, OSM buildings and trees) and builds it as geometry in local metres. Site centre = 0,0 in UTM; see Georeference.</p>
+                <div class="doc-meta">
+                    <span class="badge site-analysis">Site Analysis</span>
+                    <span>Nickname: <strong>SiteFetch</strong></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="doc-content">
+            <h2>Overview</h2>
+            <p>Downloads open data for a site (terrain, land cover, OSM buildings and trees) and builds it as geometry in local metres. Site centre = 0,0 in UTM; see Georeference.</p>
+
+            <div class="io-grid">
+                <div class="io-col">
+                    <h3>Inputs (14)</h3>
+                    <ul>
+                        <li><strong>Latitude</strong> (Number): Site centre latitude (WGS84 degrees).</li>
+                        <li><strong>Longitude</strong> (Number): Site centre longitude (WGS84 degrees).</li>
+                        <li><strong>Size</strong> (Number): Side of the square site in metres (max 5000).</li>
+                        <li><strong>Cell Size</strong> (Number): Terrain and land cover mesh cell size in metres. Terrain source is 30 m, land cover 10 m.</li>
+                        <li><strong>Buildings</strong> (Boolean): Fetch OSM buildings.</li>
+                        <li><strong>Trees</strong> (Boolean): Fetch OSM individual trees (natural=tree).</li>
+                        <li><strong>Land Cover</strong> (Boolean): Fetch ESA WorldCover land cover.</li>
+                        <li><strong>Default Height</strong> (Number): Height for buildings with no height or levels tag (m).</li>
+                        <li><strong>Level Height</strong> (Number): Storey height used to convert building:levels to metres.</li>
+                        <li><strong>Tree Height</strong> (Number): Height for trees with no height tag (m).</li>
+                        <li><strong>Crown Diameter</strong> (Number): Crown diameter for trees with no diameter_crown tag (m).</li>
+                        <li><strong>Cache Folder</strong> (Text): Optional folder for downloaded data. Default: %LOCALAPPDATA%/Enzyme/SiteFetch. Re-runs read from here.</li>
+                        <li><strong>Overpass URL</strong> (Text): Optional Overpass API endpoint for OSM data.</li>
+                        <li><strong>Run</strong> (Boolean): Download and build. Use a button or toggle: nothing is downloaded until Run is true.</li>
+                    </ul>
+                </div>
+                <div class="io-col">
+                    <h3>Outputs (12)</h3>
+                    <ul>
+                        <li><strong>Terrain</strong> (Mesh): Terrain mesh (Copernicus GLO-30, EGM2008 heights in m).</li>
+                        <li><strong>Land Cover</strong> (Mesh): Terrain mesh coloured by ESA WorldCover class (one colour per cell).</li>
+                        <li><strong>Land Cover Class</strong> (Integer): WorldCover class code per land cover cell (10 tree cover, 50 built-up, 80 water, ...).</li>
+                        <li><strong>Buildings</strong> (Brep): OSM buildings as closed extrusions standing on the terrain.</li>
+                        <li><strong>Building Mesh</strong> (Mesh): All buildings joined in one mesh: plug into Context of Sun Hours, Fast CFD, etc.</li>
+                        <li><strong>Building Heights</strong> (Number): Height of each building (m, eaves to ground, from OSM height / levels or the default).</li>
+                        <li><strong>Tree Crowns</strong> (Mesh): Closed crown meshes: plug into Trees of Sun Hours.</li>
+                        <li><strong>Tree Points</strong> (Point): Trunk base points on the terrain.</li>
+                        <li><strong>Boundary</strong> (Curve): Site boundary square.</li>
+                        <li><strong>Georeference</strong> (Text): JSON: UTM zone, EPSG, easting/northing of the local origin, lat/lon.</li>
+                        <li><strong>Dashboard Data</strong> (Text): JSON legend, site metrics and land cover areas (for Report Metrics).</li>
+                        <li><strong>Sources</strong> (Text): Data sources and required attribution.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p><a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank" style="color: #a1a1aa; text-decoration: none; border-bottom: 1px solid #3f3f46; padding-bottom: 2px;">View on GitHub</a></p>
+    </footer>
+</body>
+</html>

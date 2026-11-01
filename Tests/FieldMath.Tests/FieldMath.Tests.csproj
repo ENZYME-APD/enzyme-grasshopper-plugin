@@ -5,12 +5,18 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>disable</Nullable>
     <LangVersion>latest</LangVersion>
+    <NoWarn>SYSLIB0014</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\..\Utils\FieldMath.cs" />
     <Compile Include="..\..\Utils\VectorField.cs" />
     <Compile Include="..\..\Utils\Palettes.cs" />
     <Compile Include="..\..\Utils\ReportMetrics.cs" />
+    <Compile Include="..\..\Utils\CanopyMath.cs" />
+    <Compile Include="..\..\Utils\GeoTiff.cs" />
+    <Compile Include="..\..\Utils\GeoProj.cs" />
+    <Compile Include="..\..\Utils\SiteData.cs" />
+    <None Include="fixtures\**" CopyToOutputDirectory="PreserveNewest" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 </Project>
