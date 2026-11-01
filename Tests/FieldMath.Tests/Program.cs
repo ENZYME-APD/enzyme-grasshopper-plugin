@@ -76,4 +76,28 @@ Check(Math.Abs(CanopyMath.PathLengthInside(new[]{3.0},100)-3)<1e-12, "crown path
 Check(Math.Abs(CanopyMath.PathLengthInside(new[]{10.0,10.0,12.0,12.0},100)-2)<1e-12, "crown path: duplicate edge hits merged");
 Check(Math.Abs(CanopyMath.PathLengthInside(new[]{10.0,12.0,20.0,25.0},22)-4)<1e-12 && CanopyMath.PathLengthInside(new double[0],10)==0, "crown path: two crowns, clipped to ray length; empty = 0");
 Check(Math.Abs(CanopyMath.Transmittance(CanopyMath.OpticalDepth(4,1,0.5))-Math.Exp(-2))<1e-12 && CanopyMath.Transmittance(0)==1 && CanopyMath.OpticalDepth(4,0,0.5)==0, "Beer-Lambert transmittance");
+// site fetch: UTM vs pyproj, GeoTIFF decoding, OSM parsing
+foreach (var (la, lo, ep, E, Nn) in new[]{ (40.4168,-3.7038,32630,440290.4581,4474257.3820), (1.2903,103.8519,32648,372268.7952,142645.9810), (-23.5505,-46.6333,32723,333287.9151,7394588.3186), (22.2793,114.1628,32650,207633.0274,2466488.0031), (60.0,5.0,32632,276979.9264,6658157.2024) })
+{
+    int z=GeoProj.UtmZone(la,lo); GeoProj.ToUtm(la,lo,z,la>=0,out double ue,out double un); GeoProj.FromUtm(ue,un,z,la>=0,out double bla,out double blo);
+    Check(GeoProj.UtmEpsg(z,la>=0)==ep && Math.Abs(ue-E)<0.005 && Math.Abs(un-Nn)<0.005 && Math.Abs(bla-la)<1e-7 && Math.Abs(blo-lo)<1e-7, $"UTM {ep}: {ue:F3},{un:F3} (round trip dlat {bla-la:E1} dlon {blo-lo:E1})");
+}
+var lf=new LocalFrame(40.4168,-3.7038); lf.ToLocal(40.4168,-3.7038,out double lx0,out double ly0); lf.Bounds(250,250,out double bs,out double bw,out double bn,out double be);
+Check(Math.Abs(lx0)<1e-6 && Math.Abs(ly0)<1e-6 && bs<40.4168 && bn>40.4168 && Math.Abs((bn-bs)*111000-500)<10, "local frame centred, bounds ~500 m");
+string fx(string f)=>System.IO.Path.Combine(AppContext.BaseDirectory,"fixtures",f);
+var dem=new GeoTiff(new FileByteSource(fx("dem_f32_tiled_pred3.tif")));
+var dw=dem.ReadWindow(10,20,30,25); bool demOk=true; for(int r=0;r<25;r++) for(int c=0;c<30;c++){ double ex=100+(c+10)*0.5+(r+20)*0.25; if(Math.Abs(dw[r*30+c]-ex)>1e-4) demOk=false; }
+Check(dem.Width==70 && dem.Height==50 && demOk && double.IsNaN(dem.ReadWindow(4,3,1,1)[0]) && Math.Abs(dem.OriginX+3.71)<1e-12 && Math.Abs(dem.OriginY-40.42)<1e-12, "GeoTIFF float32 tiled + DEFLATE + predictor 3 + NoData");
+var edge=dem.ReadWindow(65,45,10,10); Check(Math.Abs(edge[0]-(100+65*0.5+45*0.25))<1e-4 && double.IsNaN(edge[9*10+9]), "GeoTIFF window past image edge -> NaN");
+var lc=new GeoTiff(new FileByteSource(fx("lc_u8_strip_pred2.tif"))); var lw=lc.ReadWindow(0,0,70,50); bool lcOk=true; for(int r=0;r<50;r++) for(int c=0;c<70;c++) if(lw[r*70+c]!=(c*3+r*7)%256) lcOk=false;
+Check(lcOk, "GeoTIFF uint8 strips + DEFLATE + predictor 2");
+var s16=new GeoTiff(new FileByteSource(fx("s16_be_big.tif"))); var sw16=s16.ReadWindow(0,0,70,50); bool sOk=true; for(int r=0;r<50;r++) for(int c=0;c<70;c++) if(sw16[r*70+c]!=c*10-r*20) sOk=false;
+Check(sOk, "BigTIFF big-endian int16 tiles, uncompressed, negatives");
+var mos=new RasterMosaic(); mos.Add(dem,40.38,-3.70,40.41,-3.67);
+Check(Math.Abs(mos.Bilinear(-3.71+0.0205,40.42-0.0305)-(100+20*0.5+30*0.25))<1e-4 && Math.Abs(mos.Bilinear(-3.71+0.0210,40.42-0.0305)-(100+20.5*0.5+30*0.25))<1e-4, "mosaic bilinear at pixel centre and midway");
+Check(SiteSources.CopernicusDemUrl(40,-4).EndsWith("Copernicus_DSM_COG_10_N40_00_W004_00_DEM/Copernicus_DSM_COG_10_N40_00_W004_00_DEM.tif") && SiteSources.CopernicusDemUrl(-24,-47).Contains("S24_00_W047") && SiteSources.WorldCoverUrl(39,-6).EndsWith("v200_N39W006_Map.tif") && SiteSources.Tiles(40.9,-0.1,41.1,0.1,1).Count==4 && SiteSources.Tiles(40.9,-0.1,41.1,0.1,3)[0]==(39,-3), "tile URLs and tile cover");
+var ob=new List<OsmBuilding>(); var ot=new List<OsmTree>(); OsmParse.Parse(System.IO.File.ReadAllText(fx("overpass.json")),9,3,ob,ot);
+Check(ob.Count==3 && ob[0].Height==12 && ob[1].Height==16.5 && ob[1].MinHeight==3 && ob[2].Height==9 && !ob[2].HeightFromTags && ob[2].Outers.Count==1 && ob[2].Outers[0].Count==5 && ob[2].Inners.Count==1, "OSM buildings: height, levels+roof, min_height, default, stitched relation with hole");
+Check(ot.Count==1 && Math.Abs(ot[0].Height-9.144)<1e-9 && ot[0].CrownDiameter==6.5 && ot[0].Species=="Platanus", "OSM trees: feet, decimal comma, genus");
+Check(double.IsNaN(OsmParse.ParseLength("tall")) && OsmParse.ParseLength("12;15")==12 && Math.Abs(OsmParse.ParseLength("10'6\"")-3.2004)<1e-9, "OSM length parsing");
 Console.WriteLine(fails==0?"ALL PASS":$"{fails} FAILED"); return fails;
