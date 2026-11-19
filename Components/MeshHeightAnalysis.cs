@@ -14,8 +14,10 @@ using Enzyme.Utils;
 
 namespace Enzyme.Terrain
 {
-    public class MeshHeightAnalysis : GH_Component
+    public class MeshHeightAnalysis : EnzymeComponent
     {
+        protected override bool UsesRunGate => true;
+
         public MeshHeightAnalysis()
           : base("Terrain Height", "TerrainHeight",
               "Analyzes mesh extremes, unrolls sections bi-directionally, and generates 3D/2D metadata labels.",
@@ -51,6 +53,8 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
             pManager.AddBooleanParameter("CullGlobals", "CG", "Toggle to remove the absolute highest/lowest points.", GH_ParamAccess.item, false);
             pManager.AddBooleanParameter("AvoidBoundaries", "AB", "Toggle to ignore naked edge vertices.", GH_ParamAccess.item, false);
             pManager.AddBooleanParameter("EnableHeatmap", "EH", "Toggle to compute and output the vertex heatmap mesh.", GH_ParamAccess.item, true);
+            pManager.AddBooleanParameter("Run", "Run", "Optional. False = skip the analysis and keep showing the last results (cached). Share one toggle with the Analysis Dashboard to switch everything on/off together.", GH_ParamAccess.item, true);
+            pManager[pManager.ParamCount - 1].Optional = true;
         }
 
         public override bool Read(GH_IO.Serialization.GH_IReader reader)
@@ -91,7 +95,7 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
                     pManager.AddTextParameter("Info", "Info", "Component information and interpretation", GH_ParamAccess.item);
         }
 
-        protected override void SolveInstance(IGH_DataAccess DA)
+        protected override void Solve(IGH_DataAccess DA, System.Diagnostics.Stopwatch hudSw)
         {
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             var t_start = System.Diagnostics.Stopwatch.StartNew();

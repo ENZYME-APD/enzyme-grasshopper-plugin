@@ -7,8 +7,10 @@ using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
-    public class MicroclimateComfort : GH_Component
+    public class MicroclimateComfort : EnzymeComponent
     {
+        protected override bool UsesRunGate => true;
+
         public MicroclimateComfort()
           : base("Microclimate Comfort", "FeelsLike",
               "Calculates the perceived 'Feels Like' temperature using Fast Apparent Temperature or Precise UTCI.",
@@ -30,6 +32,8 @@ namespace Enzyme.Components
             pManager[2].Optional = true;
             pManager[3].Optional = true;
             pManager[4].Optional = true;
+            pManager.AddBooleanParameter("Run", "Run", "Optional. False = skip the analysis and keep showing the last results (cached). Share one toggle with the Analysis Dashboard to switch everything on/off together.", GH_ParamAccess.item, true);
+            pManager[pManager.ParamCount - 1].Optional = true;
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
@@ -41,7 +45,7 @@ namespace Enzyme.Components
             pManager.AddTextParameter("Dashboard Data", "Dashboard", "JSON Legend Data", GH_ParamAccess.item);
         }
 
-        protected override void SolveInstance(IGH_DataAccess DA)
+        protected override void Solve(IGH_DataAccess DA, System.Diagnostics.Stopwatch hudSw)
         {
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
 

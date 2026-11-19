@@ -36,7 +36,7 @@
 
             <div class="io-grid">
                 <div class="io-col">
-                    <h3>Inputs (15)</h3>
+                    <h3>Inputs (16)</h3>
                     <ul>
                         <li><strong>Mesh</strong> (Mesh): Analysis mesh, e.g. Fast CFD WindMesh (with its VertexSpeeds as Values and BuildingMask as Mask), Sun Hours or Noise mesh</li>
                         <li><strong>Values</strong> (Number): One value per mesh vertex or per mesh face (detected automatically)</li>
@@ -53,6 +53,7 @@
                         <li><strong>LabelSpacing</strong> (Number): Distance between isoline labels (0 = no labels, default: 15% of the map size)</li>
                         <li><strong>LabelSize</strong> (Number): Label text height (default: 1.2% of the map size)</li>
                         <li><strong>Peaks</strong> (Integer): Number of high-point labels (0 = none). Negative = label low points instead</li>
+                        <li><strong>Run</strong> (Boolean): Optional. False = skip the analysis and keep showing the last results (cached). Share one toggle with the Analysis Dashboard to switch everything on/off together.</li>
                     </ul>
                 </div>
                 <div class="io-col">

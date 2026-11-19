@@ -13,6 +13,8 @@ namespace Enzyme.Components
 {
     public class FastCFD : EnzymeComponent
     {
+        protected override bool UsesRunGate => true;
+
         public FastCFD()
           : base("Fast CFD", "FastCFD",
               "A multi-threaded 2.5D Terrain-Following Grid Fluid Solver for fast urban wind and pedestrian comfort analysis.",
@@ -43,6 +45,8 @@ namespace Enzyme.Components
             pManager[10].Optional = true;
             pManager[11].Optional = true;
             pManager[12].Optional = true;
+            pManager.AddBooleanParameter("Run", "Run", "Optional. False = skip the analysis and keep showing the last results (cached). Share one toggle with the Analysis Dashboard to switch everything on/off together.", GH_ParamAccess.item, true);
+            pManager[pManager.ParamCount - 1].Optional = true;
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)

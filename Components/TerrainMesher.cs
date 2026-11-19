@@ -246,7 +246,10 @@ namespace Enzyme.Components
                 Point3d a = pts[f.A], b = pts[f.B], c = pts[f.C];
                 if (PlanSq(a, b) > maxSq || PlanSq(b, c) > maxSq || PlanSq(c, a) > maxSq) continue;
                 if (clip != null && !clip.Contains((a.X + b.X + c.X) / 3, (a.Y + b.Y + c.Y) / 3)) continue;
-                mesh.Faces.AddFace(f.A, f.B, f.C);
+                // Wind every triangle counter-clockwise in plan so normals point up (slope tools rely on it)
+                double cross = (b.X - a.X) * (c.Y - a.Y) - (b.Y - a.Y) * (c.X - a.X);
+                if (cross >= 0) mesh.Faces.AddFace(f.A, f.B, f.C);
+                else mesh.Faces.AddFace(f.A, f.C, f.B);
             }
             mesh.Compact();
             mesh.Normals.ComputeNormals();

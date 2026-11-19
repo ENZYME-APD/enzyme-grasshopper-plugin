@@ -7,8 +7,10 @@ using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
-    public class Heliodon : GH_Component
+    public class Heliodon : EnzymeComponent
     {
+        protected override bool UsesRunGate => true;
+
         public Heliodon()
           : base("Enzyme Heliodon", "Heliodon",
               "Generates a 3D solar dome and calculates annual sun vectors for environmental analysis.",
@@ -28,6 +30,8 @@ namespace Enzyme.Components
             
             pManager[5].Optional = true;
             pManager[6].Optional = true;
+            pManager.AddBooleanParameter("Run", "Run", "Optional. False = skip the analysis and keep showing the last results (cached). Share one toggle with the Analysis Dashboard to switch everything on/off together.", GH_ParamAccess.item, true);
+            pManager[pManager.ParamCount - 1].Optional = true;
         }
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
@@ -38,7 +42,7 @@ namespace Enzyme.Components
             pManager.AddCurveParameter("Base Circle", "Circle", "A flat circle framing the heliodon radius.", GH_ParamAccess.item);
         }
 
-                protected override void SolveInstance(IGH_DataAccess DA)
+                protected override void Solve(IGH_DataAccess DA, System.Diagnostics.Stopwatch hudSw)
         {
             System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
 

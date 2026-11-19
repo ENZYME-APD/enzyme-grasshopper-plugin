@@ -10,6 +10,8 @@ namespace Enzyme.Components
 {
     public class HydroDEM : EnzymeComponent
     {
+        protected override bool UsesRunGate => true;
+
         public HydroDEM()
           : base("Hydro-DEM Engine", "HydroDEM",
               "Calculates Flow Direction and Flow Accumulation on a terrain mesh to extract stream networks.",
@@ -23,6 +25,8 @@ namespace Enzyme.Components
             pManager.AddIntegerParameter("Threshold", "T", "Minimum flow accumulation to form a stream", GH_ParamAccess.item, 50);
             
             pManager[1].Optional = true;
+            pManager.AddBooleanParameter("Run", "Run", "Optional. False = skip the analysis and keep showing the last results (cached). Share one toggle with the Analysis Dashboard to switch everything on/off together.", GH_ParamAccess.item, true);
+            pManager[pManager.ParamCount - 1].Optional = true;
         }
 
         private bool hasSources = false;

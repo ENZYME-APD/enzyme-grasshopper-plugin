@@ -12,6 +12,8 @@ namespace Enzyme.Components
 {
     public class AdaptiveTerrainGrader : EnzymeComponent
     {
+        protected override bool UsesRunGate => true;
+
         public AdaptiveTerrainGrader()
             : base("Terrain Grader", "TERRAIN GRADER",
                 "Generates adaptive grading meshes, volumes, and crisp cut/fill colors.",
@@ -81,6 +83,8 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
             pManager.AddColourParameter("FillColor", "FillColor", "Fill zones color", GH_ParamAccess.item, Color.Blue);
             pManager.AddNumberParameter("MeshResolution", "MeshResolution", "Base grid size", GH_ParamAccess.item, 10.0);
             pManager.AddBooleanParameter("ShowContours", "ShowContours", "Toggle contour generation", GH_ParamAccess.item, false);
+            pManager.AddBooleanParameter("Run", "Run", "Optional. False = skip the analysis and keep showing the last results (cached). Share one toggle with the Analysis Dashboard to switch everything on/off together.", GH_ParamAccess.item, true);
+            pManager[pManager.ParamCount - 1].Optional = true;
         }
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
@@ -191,6 +195,7 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
                         ptsBag.Add(pt);
                         
                         Mesh.ClosestPoint(pt, out Point3d closest, out Vector3d normal, 0.0);
+                        if (normal.Z < 0) normal.Reverse(); // downward-wound faces: same slope
                         if (Vector3d.VectorAngle(normal, Vector3d.ZAxis) > (30.0 * Math.PI / 180.0))
                         {
                             double halfRes = MeshResolution * 0.5;

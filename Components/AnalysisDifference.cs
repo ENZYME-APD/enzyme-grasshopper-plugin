@@ -17,6 +17,8 @@ namespace Enzyme.Components
     /// </summary>
     public class AnalysisDifference : EnzymeComponent
     {
+        protected override bool UsesRunGate => true;
+
         public AnalysisDifference()
           : base("Analysis Difference", "Diff",
               "Compares two design options (or two hours) analysed on the same mesh: A - B map on a diverging scale centred on zero, with area-weighted % increased / decreased and the share of area above a level in each option.",
@@ -39,6 +41,8 @@ namespace Enzyme.Components
             pManager.AddTextParameter("Palette", "Palette", "Diverging palette (Balance, RdBu, Delta, Vlag, PuOr, BrBG...)", GH_ParamAccess.item, "Balance");
             pManager.AddBooleanParameter("Mask", "Mask", "Optional: one bool per face, True = building / no data", GH_ParamAccess.list);
             for (int i = 3; i < 9; i++) pManager[i].Optional = true;
+            pManager.AddBooleanParameter("Run", "Run", "Optional. False = skip the analysis and keep showing the last results (cached). Share one toggle with the Analysis Dashboard to switch everything on/off together.", GH_ParamAccess.item, true);
+            pManager[pManager.ParamCount - 1].Optional = true;
         }
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)

@@ -10,8 +10,10 @@ using Rhino;
 
 namespace Enzyme.Components
 {
-    public class TerrainSections : GH_Component
+    public class TerrainSections : EnzymeComponent
     {
+        protected override bool UsesRunGate => true;
+
         public TerrainSections()
           : base("Terrain Sections", "TerrSec",
               "Slices meshes into sections and unrolls them for layout.",
@@ -48,6 +50,8 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
             pManager.AddTextParameter("BakeName", "BN", "Bake group/layer name", GH_ParamAccess.item, "TerrainSections");
             
             pManager[1].Optional = true;
+            pManager.AddBooleanParameter("Run", "Run", "Optional. False = skip the analysis and keep showing the last results (cached). Share one toggle with the Analysis Dashboard to switch everything on/off together.", GH_ParamAccess.item, true);
+            pManager[pManager.ParamCount - 1].Optional = true;
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
@@ -64,7 +68,7 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
             pManager.AddTextParameter("Info", "Info", "Component information and interpretation", GH_ParamAccess.item);
         }
 
-        protected override void SolveInstance(IGH_DataAccess DA)
+        protected override void Solve(IGH_DataAccess DA, System.Diagnostics.Stopwatch hudSw)
         {
             var t_start = System.Diagnostics.Stopwatch.StartNew();
             

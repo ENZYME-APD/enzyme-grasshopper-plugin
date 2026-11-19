@@ -18,6 +18,8 @@ namespace Enzyme.Components
     /// </summary>
     public class AnalysisHeatmap : EnzymeComponent
     {
+        protected override bool UsesRunGate => true;
+
         public AnalysisHeatmap()
           : base("Analysis Heatmap", "Heatmap",
               "Colours any analysis mesh from its values: flat cells, smooth gradient, contour bands with labelled isolines, or report classes (UTCI, Lawson wind comfort, noise, slope bands, flood depth). Also reports the % of area in each band.",
@@ -48,6 +50,8 @@ namespace Enzyme.Components
             pManager.AddNumberParameter("LabelSize", "LabelSize", "Label text height (default: 1.2% of the map size)", GH_ParamAccess.item);
             pManager.AddIntegerParameter("Peaks", "Peaks", "Number of high-point labels (0 = none). Negative = label low points instead", GH_ParamAccess.item, 0);
             for (int i = 2; i < 15; i++) pManager[i].Optional = true;
+            pManager.AddBooleanParameter("Run", "Run", "Optional. False = skip the analysis and keep showing the last results (cached). Share one toggle with the Analysis Dashboard to switch everything on/off together.", GH_ParamAccess.item, true);
+            pManager[pManager.ParamCount - 1].Optional = true;
         }
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)

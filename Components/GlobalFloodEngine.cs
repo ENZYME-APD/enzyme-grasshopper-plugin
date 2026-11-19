@@ -8,6 +8,8 @@ namespace Enzyme.Components
 {
     public class GlobalFloodEngine : EnzymeComponent
     {
+        protected override bool UsesRunGate => true;
+
         public GlobalFloodEngine()
             : base("Global Flood Engine", "GlobalFlood",
                 "Simulates rainfall accumulation pooling into local valleys and depressions.",
@@ -29,6 +31,8 @@ namespace Enzyme.Components
             
             pManager[4].Optional = true;
             pManager[5].Optional = true;
+            pManager.AddBooleanParameter("Run", "Run", "Optional. False = skip the analysis and keep showing the last results (cached). Share one toggle with the Analysis Dashboard to switch everything on/off together.", GH_ParamAccess.item, true);
+            pManager[pManager.ParamCount - 1].Optional = true;
         }
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)

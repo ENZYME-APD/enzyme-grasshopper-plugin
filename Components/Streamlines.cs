@@ -10,6 +10,8 @@ namespace Enzyme.Components
 {
     public class Streamlines : EnzymeComponent
     {
+        protected override bool UsesRunGate => true;
+
         public Streamlines()
           : base("Streamlines", "Streamlines",
               "Generates smooth streamlines (particle traces) through any vector field. Regular grids (e.g. Fast CFD) are read directly with bilinear interpolation; scattered points use Inverse Distance Weighting. 4th-order Runge-Kutta integration, optional speed-coloured tubes.",
@@ -32,6 +34,8 @@ namespace Enzyme.Components
             pManager.AddTextParameter("Palette", "Palette", "Tube colours by local speed (palette name, e.g. Wind, Turbo, Viridis)", GH_ParamAccess.item, "Wind");
 
             for (int i = 3; i < 11; i++) pManager[i].Optional = true;
+            pManager.AddBooleanParameter("Run", "Run", "Optional. False = skip the analysis and keep showing the last results (cached). Share one toggle with the Analysis Dashboard to switch everything on/off together.", GH_ParamAccess.item, true);
+            pManager[pManager.ParamCount - 1].Optional = true;
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)

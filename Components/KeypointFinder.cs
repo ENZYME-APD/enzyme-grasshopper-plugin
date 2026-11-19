@@ -8,8 +8,10 @@ using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
-    public class KeypointFinder : GH_Component
+    public class KeypointFinder : EnzymeComponent
     {
+        protected override bool UsesRunGate => true;
+
         public KeypointFinder()
           : base("Keypoint Engine", "Keypoint",
               "Analyzes stream slopes to find the inflection point (Keypoint) and extracts the Master Keyline contour.",
@@ -24,6 +26,8 @@ namespace Enzyme.Components
             pManager.AddIntegerParameter("Smoothing", "Sm", "Smoothing window for slope analysis (helps ignore mesh noise)", GH_ParamAccess.item, 2);
             
             pManager[2].Optional = true;
+            pManager.AddBooleanParameter("Run", "Run", "Optional. False = skip the analysis and keep showing the last results (cached). Share one toggle with the Analysis Dashboard to switch everything on/off together.", GH_ParamAccess.item, true);
+            pManager[pManager.ParamCount - 1].Optional = true;
         }
 
         private bool hasSources = false;
@@ -48,7 +52,7 @@ namespace Enzyme.Components
             pManager.AddTextParameter("Dashboard Data", "Dashboard Data", "Unified JSON payload containing legend and key analysis metrics for the Analysis Dashboard", GH_ParamAccess.item);
         }
 
-        protected override void SolveInstance(IGH_DataAccess DA)
+        protected override void Solve(IGH_DataAccess DA, System.Diagnostics.Stopwatch hudSw)
         {
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             Mesh terrain = null;

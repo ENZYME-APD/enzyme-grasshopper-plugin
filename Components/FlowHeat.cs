@@ -14,6 +14,8 @@ namespace Enzyme.Components
 {
     public class FlowHeat : EnzymeComponent
     {
+        protected override bool UsesRunGate => true;
+
         public FlowHeat()
           : base("Flow Accumulation Heatmap", "FlowHeat",
               "Generates a flow accumulation heatmap by evaluating water paths against mesh vertices.",
@@ -44,6 +46,8 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
             pManager.AddMeshParameter("TerrainMesh", "TM", "The unified topological surface.", GH_ParamAccess.item);
             pManager.AddCurveParameter("FlowPaths", "FP", "The flow lines generated from the Raindrop Engine.", GH_ParamAccess.tree);
             pManager.AddNumberParameter("VisualScale", "VS", "Multiplier to intensify the visual color mapping (Try 1.5 to 3.0).", GH_ParamAccess.item, 1.0);
+            pManager.AddBooleanParameter("Run", "Run", "Optional. False = skip the analysis and keep showing the last results (cached). Share one toggle with the Analysis Dashboard to switch everything on/off together.", GH_ParamAccess.item, true);
+            pManager[pManager.ParamCount - 1].Optional = true;
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)

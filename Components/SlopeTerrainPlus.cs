@@ -12,8 +12,10 @@ using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
-    public class SlopeTerrainPlus : GH_Component
+    public class SlopeTerrainPlus : EnzymeComponent
     {
+        protected override bool UsesRunGate => true;
+
         public SlopeTerrainPlus()
             : base("Terrain Slope", "TerrainSlope",
                 "Ultra-fast mesh slope analyzer using raw C# sequential array processing and safe UI automation.",
@@ -58,6 +60,8 @@ namespace Enzyme.Components
             pManager.AddColourParameter("Custom Colors", "Custom Colors", "List of colors for gradient or binary mapping", GH_ParamAccess.list);
             pManager[3].Optional = true;
             pManager.AddBooleanParameter("EnableBinaryMode", "EnableBinaryMode", "If true, snaps to binary colors (Under/Over threshold)", GH_ParamAccess.item, true);
+            pManager.AddBooleanParameter("Run", "Run", "Optional. False = skip the analysis and keep showing the last results (cached). Share one toggle with the Analysis Dashboard to switch everything on/off together.", GH_ParamAccess.item, true);
+            pManager[pManager.ParamCount - 1].Optional = true;
         }
 
                         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
@@ -67,7 +71,7 @@ namespace Enzyme.Components
             pManager.AddTextParameter("Info", "Info", "Component information and interpretation", GH_ParamAccess.item);
         }
 
-                protected override void SolveInstance(IGH_DataAccess DA)
+                protected override void Solve(IGH_DataAccess DA, System.Diagnostics.Stopwatch hudSw)
         {
             List<Mesh> TargetMeshes = new List<Mesh>();
             DA.GetDataList(0, TargetMeshes);
@@ -148,7 +152,9 @@ namespace Enzyme.Components
                 int over_count = 0;
 
                 for (int i = 0; i < faceCount; i++) {
-                    float nz = normals[i].Z;
+                    // |n.Z|: slope is the same whichever way the face is wound. Meshes whose faces
+                    // point down (common from survey/Delaunay tools) otherwise read as ~180° = 100% over.
+                    float nz = Math.Abs(normals[i].Z);
                     if (nz > 1f) nz = 1f;
                     else if (nz < -1f) nz = -1f;
                     

@@ -8,8 +8,10 @@ using Enzyme.Utils;
 
 namespace Enzyme.Components
 {
-    public class TerrainColorizer : GH_Component
+    public class TerrainColorizer : EnzymeComponent
     {
+        protected override bool UsesRunGate => true;
+
         public TerrainColorizer()
           : base("Terrain Colorizer", "Terrain Color",
               "Colors a terrain mesh by elevation and generates contours.",
@@ -30,6 +32,8 @@ namespace Enzyme.Components
             pManager.AddNumberParameter("Main Step", "MS", "Interval for main contour lines", GH_ParamAccess.item, 5.0);
 
             pManager[1].Optional = true;
+            pManager.AddBooleanParameter("Run", "Run", "Optional. False = skip the analysis and keep showing the last results (cached). Share one toggle with the Analysis Dashboard to switch everything on/off together.", GH_ParamAccess.item, true);
+            pManager[pManager.ParamCount - 1].Optional = true;
         }
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
@@ -74,7 +78,7 @@ namespace Enzyme.Components
             });
         }
 
-        protected override void SolveInstance(IGH_DataAccess DA)
+        protected override void Solve(IGH_DataAccess DA, System.Diagnostics.Stopwatch hudSw)
         {
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
 

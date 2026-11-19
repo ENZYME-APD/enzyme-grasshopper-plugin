@@ -36,7 +36,7 @@
             
             <div class="io-grid">
                 <div class="io-col">
-                    <h3>Inputs (6)</h3>
+                    <h3>Inputs (7)</h3>
                     <ul>
                         <li><strong>TerrainMesh</strong> (Mesh): Input Terrain Mesh</li>
                         <li><strong>Rainfall</strong> (Number): Rainfall intensity in Liters/m2/hour (mm/h)</li>
@@ -44,6 +44,7 @@
                         <li><strong>Iterations</strong> (Integer): Simulation steps for water flow</li>
                         <li><strong>Runoff Coefficient</strong> (Number): Multiplier for rainfall (0.0 to 1.0). 1.0 = concrete (no absorption). Can be a single value or a list matching the mesh vertices.</li>
                         <li><strong>Boundary Condition</strong> (Integer): 0 = Closed (water pools at edges), 1 = Open (water drains off edges)</li>
+                        <li><strong>Run</strong> (Boolean): Optional. False = skip the analysis and keep showing the last results (cached). Share one toggle with the Analysis Dashboard to switch everything on/off together.</li>
                     </ul>
                 </div>
                 <div class="io-col">

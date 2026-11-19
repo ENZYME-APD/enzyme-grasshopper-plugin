@@ -13,6 +13,8 @@ namespace Enzyme.Terrain
 {
     public class WaterFlow : EnzymeComponent
     {
+        protected override bool UsesRunGate => true;
+
         public WaterFlow()
           : base("Raindrop Flow Engine", "WaterFlow",
               "Generates a parametric grid, projects it to the terrain, and simulates downhill flow paths.",
@@ -44,6 +46,8 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
             pManager.AddNumberParameter("GridSpacing", "GS", "The XY distance between starting raindrops.", GH_ParamAccess.item);
             pManager.AddNumberParameter("StepSize", "SS", "Distance the water travels per tick.", GH_ParamAccess.item);
             pManager.AddIntegerParameter("MaxSteps", "MS", "Safety limit for the simulation loop.", GH_ParamAccess.item);
+            pManager.AddBooleanParameter("Run", "Run", "Optional. False = skip the analysis and keep showing the last results (cached). Share one toggle with the Analysis Dashboard to switch everything on/off together.", GH_ParamAccess.item, true);
+            pManager[pManager.ParamCount - 1].Optional = true;
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)

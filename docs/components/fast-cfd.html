@@ -88,7 +88,7 @@
 
             <div class="io-grid">
                 <div class="io-col">
-                    <h3>Inputs (13)</h3>
+                    <h3>Inputs (14)</h3>
                     <ul>
                         <li><strong>TerrainMesh</strong> (Mesh): Input Terrain Mesh</li>
                         <li><strong>ContextMeshes</strong> (Mesh): Buildings and context as closed meshes</li>
@@ -103,6 +103,7 @@
                         <li><strong>BoundaryMask</strong> (Curve): Optional closed curve to crop the simulation domain and lock grid coordinates.</li>
                         <li><strong>Colors</strong> (Colour): Custom color spectrum override (min to max)</li>
                         <li><strong>WindRefHeight</strong> (Number): Meteorological measurement height for input WindSpeed (m). Default = 10.0m (scales to pedestrian height via ABL power law).</li>
+                        <li><strong>Run</strong> (Boolean): Optional. False = skip the analysis and keep showing the last results (cached). Share one toggle with the Analysis Dashboard to switch everything on/off together.</li>
                     </ul>
                 </div>
                 <div class="io-col">
