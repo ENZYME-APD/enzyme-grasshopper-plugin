@@ -41,11 +41,16 @@ namespace Enzyme.Components
             pManager.AddNumberParameter("WindRefHeight", "RefHeight", "Meteorological measurement height for input WindSpeed (m). Default = 10.0m (scales to pedestrian height via ABL power law).", GH_ParamAccess.item, 10.0);
             
             pManager[1].Optional = true;
+            pManager[2].Optional = true;
             pManager[8].Optional = true;
             pManager[10].Optional = true;
             pManager[11].Optional = true;
             pManager[12].Optional = true;
             pManager.AddBooleanParameter("Run", "Run", "Optional. False = skip the analysis and keep showing the last results (cached). Share one toggle with the Analysis Dashboard to switch everything on/off together.", GH_ParamAccess.item, true);
+            pManager[pManager.ParamCount - 1].Optional = true;
+            pManager.AddNumberParameter("Direction", "Dir", "Optional. Wind direction in degrees, meteorological: where the wind blows FROM, 0 = North, clockwise (as in EPW files and the Wind Rose). Overrides WindVector when connected.", GH_ParamAccess.item);
+            pManager[pManager.ParamCount - 1].Optional = true;
+            pManager.AddNumberParameter("North", "North", "Optional. Angle of true north from the model +Y axis, degrees counter-clockwise (Ladybug convention). Only used with Direction.", GH_ParamAccess.item, 0.0);
             pManager[pManager.ParamCount - 1].Optional = true;
         }
 
@@ -71,7 +76,14 @@ namespace Enzyme.Components
             DA.GetDataList(1, contextMeshes);
 
             Vector3d windDir = new Vector3d(1, 1, 0);
-            if (!DA.GetData(2, ref windDir)) return;
+            DA.GetData(2, ref windDir);
+            double dirDeg = double.NaN;
+            if (Params.Input.Count > 14 && DA.GetData(14, ref dirDeg) && !double.IsNaN(dirDeg))
+            {
+                double northDeg = 0.0;
+                if (Params.Input.Count > 15) DA.GetData(15, ref northDeg);
+                windDir = WindMath.FlowVector(dirDeg, northDeg);   // Direction wins over WindVector
+            }
 
             double windSpeed = 10.0;
             if (!DA.GetData(3, ref windSpeed)) return;

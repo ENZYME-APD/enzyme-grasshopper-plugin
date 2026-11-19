@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wind Rose - Enzyme Plugin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="../index.html" class="nav-brand">
+            <img src="../images/enzyme_logo.png" alt="Enzyme Logo" class="logo-img">
+        </a>
+        <div class="nav-links">
+            <a href="../index.html#components">Components</a>
+            <a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank">GitHub</a>
+        </div>
+    </nav>
+
+    <main class="container doc-page">
+        <div class="doc-header" style="display: flex; align-items: center;">
+            <div>
+                <h1>Wind Rose</h1>
+                <p class="doc-subtitle">Wind rose from an EPW weather file (or direction/speed lists), drawn in the Rhino viewport on site and/or as a screen HUD. A 0-360 selector picks a direction and outputs its speed and frequency, ready for Fast CFD. Directions are meteorological: where the wind blows FROM, 0 = North, clockwise.</p>
+                <div class="doc-meta">
+                    <span class="badge site-analysis">Site Analysis</span>
+                    <span>Nickname: <strong>WindRose</strong></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="doc-content">
+            <h2>Overview</h2>
+            <p>Wind rose from an EPW weather file (or direction/speed lists), drawn in the Rhino viewport on site and/or as a screen HUD. A 0-360 selector picks a direction and outputs its speed and frequency, ready for Fast CFD. Directions are meteorological: where the wind blows FROM, 0 = North, clockwise.</p>
+
+            <div class="io-grid">
+                <div class="io-col">
+                    <h3>Inputs (19)</h3>
+                    <ul>
+                        <li><strong>EPW</strong> (Text): Path to an EPW weather file (e.g. from climate.onebuilding.org).</li>
+                        <li><strong>Directions</strong> (Number): Alternative to EPW: wind directions in degrees (FROM, 0 = N, clockwise).</li>
+                        <li><strong>Speeds</strong> (Number): Alternative to EPW: wind speeds (m/s), same length as Directions.</li>
+                        <li><strong>Selector</strong> (Number): Direction to inspect, 0-360 degrees (FROM, 0 = N). Drives the Direction/Speed/Frequency outputs and the highlight.</li>
+                        <li><strong>Sectors</strong> (Integer): Number of direction sectors (8, 16, 36...).</li>
+                        <li><strong>Speed Classes</strong> (Number): Lower edges of the speed bands in m/s (last band is open-ended).</li>
+                        <li><strong>Speed Stat</strong> (Integer): Speed output for the selected sector: 0 = Mean, 1 = Median, 2 = P90, 3 = Max.</li>
+                        <li><strong>Months</strong> (Integer): Optional months to include (1-12), e.g. summer only. EPW only.</li>
+                        <li><strong>Hours</strong> (Integer): Optional hours of day to include (0-23), e.g. 8-20 for daytime. EPW only.</li>
+                        <li><strong>Plane</strong> (Plane): Where the rose sits in the model (centre and orientation).</li>
+                        <li><strong>Radius</strong> (Number): Rose radius in model units; the busiest sector reaches it.</li>
+                        <li><strong>North</strong> (Number): Angle of true north from the model +Y axis, degrees counter-clockwise (Ladybug convention).</li>
+                        <li><strong>Colors</strong> (Colour): Optional colours for the speed bands (low to high), e.g. from Color Palette.</li>
+                        <li><strong>Display</strong> (Integer): 0 = on site (world), 1 = screen HUD, 2 = both.</li>
+                        <li><strong>HUD Size</strong> (Integer): Screen HUD rose diameter in pixels.</li>
+                        <li><strong>HUD Anchor</strong> (Integer): Screen HUD corner: 0 = top left, 1 = top right, 2 = bottom left, 3 = bottom right.</li>
+                        <li><strong>Text Size</strong> (Number): Label size in pixels (viewport labels and HUD).</li>
+                        <li><strong>Calm</strong> (Number): Speeds below this (m/s) count as calm and are left out of the sectors.</li>
+                        <li><strong>Run</strong> (Boolean): Optional. False = keep showing the last rose (cached). Share one toggle with the Analysis Dashboard to switch everything on/off together.</li>
+                    </ul>
+                </div>
+                <div class="io-col">
+                    <h3>Outputs (10)</h3>
+                    <ul>
+                        <li><strong>Direction</strong> (Number): Selected direction in degrees (FROM, 0 = N) — plug into Fast CFD Direction.</li>
+                        <li><strong>Speed</strong> (Number): Wind speed of the selected sector (m/s, statistic chosen by Speed Stat) — plug into Fast CFD WindSpeed.</li>
+                        <li><strong>Frequency</strong> (Number): Share of all hours the wind blows from the selected sector (%).</li>
+                        <li><strong>Rose</strong> (Mesh): Coloured rose mesh (bakeable).</li>
+                        <li><strong>Guides</strong> (Curve): Frequency rings, compass axes, selected-sector outline and wind arrow (bakeable).</li>
+                        <li><strong>Label Points</strong> (Point): Positions for the labels (bake with Text Tag / text).</li>
+                        <li><strong>Labels</strong> (Text): Label text matching Label Points.</li>
+                        <li><strong>Sector Table</strong> (Text): Frequency (%) per sector and speed band, tab-separated.</li>
+                        <li><strong>Dashboard Data</strong> (Text): JSON for the Analysis Dashboard.</li>
+                        <li><strong>Info</strong> (Text): Source, period, calm share and how to read the rose.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p><a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank" style="color: #a1a1aa; text-decoration: none; border-bottom: 1px solid #3f3f46; padding-bottom: 2px;">View on GitHub</a></p>
+    </footer>
+</body>
+</html>
