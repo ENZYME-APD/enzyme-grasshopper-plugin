@@ -177,7 +177,7 @@ Component-level findings from the method-notes review are listed in section 9.
 
 In order of priority (update as items finish):
 
-1. **Test PR #2 and the review-fixes PR in Rhino** (I1 to I4 and the canvas list in section 9), fix, merge, release (next version after 1.13.0).
+1. **Test v1.14.0 in Rhino** (I1 to I4 and the canvas list in section 9): PRs #2 and #3 merged and released as 1.14.0 without a canvas test; fix whatever the tests show in 1.14.x.
 2. **Road Junction (3D):** priority / T / crossroads patches tied to the corridor end sections, roundabouts (with splitter islands) and cul-de-sacs in 3D, earthworks of the junction patches added to the totals; levels: priority road profile, side roads tied to it (option for flat plazas at ground level).
 3. **Auto-Grade from the network:** grade priority roads first, then side roads starting from the priority road's level at each junction, so roads meet; optional flat-plaza junctions at the average ground level.
 3b. **Facade Module Distributor:** bring `facade_modules.py` into the repo, document it, ship it inside the plugin, then re-publish the node.
