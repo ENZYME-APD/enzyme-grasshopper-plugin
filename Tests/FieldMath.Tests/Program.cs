@@ -141,4 +141,30 @@ Check(double.IsNaN(OsmParse.ParseLength("tall")) && OsmParse.ParseLength("12;15"
     Check(mh2.BalancePoints.Count==1 && Math.Abs(mh2.BalancePoints[0]-166.6666667)<1e-4 && Math.Abs(mh2.Net+100)<1e-9, "mass haul: balance point and import");
     Check(RoadTemplate.PresetNames.All(n=>RoadTemplate.Parse(n).HalfWidth(true)>0) && RoadTemplate.Parse(RoadTemplate.Preset("urban street").ToJson()).Right.Count==5, "presets parse and JSON round trip");
 }
+// road network topology
+{
+    var res=RoadTemplate.Preset("residential street");
+    NetEdgeInput E(double x0,double y0,double x1,double y1,string h){ var a=new V2(x0,y0); var b=new V2(x1,y1); var d=(b-a).Unit(); return new NetEdgeInput{Start=a,End=b,StartDir=d,EndDir=d,Length=(b-a).Length,Template=res,TemplateName="residential street",Hierarchy=h}; }
+    var radii=new double[]{6,6,9,12};
+    // crossroads, two edges reversed (ending at the node)
+    var xg=RoadNetworkGraph.Build(new List<NetEdgeInput>{E(0,0,50,0,"local"),E(0,50,0,0,"local"),E(-50,0,0,0,"local"),E(0,0,0,-50,"local")},0.5,radii);
+    var xn=xg.Nodes.First(nd=>nd.Arms.Count==4);
+    Check(xg.Nodes.Count==5 && xn.Type=="crossroads" && xn.Corners.Count==4 && xg.Corners.All(c=>Math.Abs(c.Angle-90)<1e-9 && !c.Straight), "network: crossroads found, 4 corners of 90 deg");
+    var xkf=xg.Corners[xn.Corners[0]].Lines[0];
+    Check(Math.Abs(xkf.Ta-9)<1e-9 && Math.Abs(xkf.Tb-9)<1e-9 && Math.Abs(xkf.Radius-6)<1e-9 && xn.Arms.All(a=>Math.Abs(xg.Arms[a].Mouth-10)<1e-9), "network: 6 m kerb return tangent at 9 m, mouths at 10 m");
+    double cdist=(xkf.Centre-xn.P).Length; Check(Math.Abs(cdist-Math.Sqrt(2)*9)<1e-9 && Math.Abs((xkf.Mid-xkf.Centre).Length-6)<1e-9, "network: kerb return centre and mid point");
+    var xl=xg.Corners[xn.Corners[0]].Lines; Check(xl.Count==4 && xl.Last().Role=="boundary" && Math.Abs(xl.Last().Radius-(6-2.65))<1e-9 && Math.Abs(xl.Last().Ta-9)<1e-9, "network: concentric footway / boundary returns share tangent stations");
+    Check(Math.Abs(xg.StartStation(0)-10)<1e-9 && Math.Abs(xg.EndStation(1)-40)<1e-9 && Math.Abs(xg.EndStation(0)-50)<1e-9, "network: corridor stations between mouths, none at dead ends");
+    // T: main E-W through, local side road north
+    var tj=RoadNetworkGraph.Build(new List<NetEdgeInput>{E(0,0,60,0,"main"),E(-60,0,0,0,"main"),E(0,0,0,40,"local")},0.5,radii);
+    var tn=tj.Nodes.First(nd=>nd.Arms.Count==3);
+    Check(tn.Type=="T" && tn.Through.Contains(0) && tn.Through.Contains(3) && tj.Corners.Count(c=>c.Straight)==1 && tj.Arms.Where(a=>a.Node==tn.Id).All(a=>Math.Abs(a.Mouth-10)<1e-9), "network: T junction, main road through, straight side and mouths");
+    var nj=tj.NodeJson(tn); Check((string)nj["type"]=="T" && (int)nj["degree"]==3 && nj["arms"].Count()==3 && !(bool)nj["skewed"] && tn.CarriagewayOutline.Count>20, "network: node JSON and junction outline");
+    // skewed Y, snap tolerance clustering
+    var yj=RoadNetworkGraph.Build(new List<NetEdgeInput>{E(0,0,50,0,"local"),E(0.3,0.2,40,30,"local"),E(-50,0,-0.2,0.1,"local")},0.5,radii);
+    Check(yj.Nodes.Count(nd=>nd.Arms.Count==3)==1 && (bool)yj.NodeJson(yj.Nodes.First(nd=>nd.Arms.Count==3))["skewed"] && yj.Arms.Where(a=>a.Node==yj.Nodes.First(nd=>nd.Arms.Count==3).Id).Max(a=>a.Mouth)>10, "network: ends within tolerance merged, skewed junction gets longer mouths");
+    // too short edge
+    var sh=RoadNetworkGraph.Build(new List<NetEdgeInput>{E(0,0,12,0,"local"),E(0,0,0,30,"local"),E(0,0,0,-30,"local"),E(12,0,12,30,"local"),E(12,0,12,-30,"local")},0.5,radii);
+    Check(sh.Warnings.Count==1 && sh.StartStation(0)<=sh.EndStation(0), "network: short link between junctions warned and shortened");
+}
 Console.WriteLine(fails==0?"ALL PASS":$"{fails} FAILED"); return fails;

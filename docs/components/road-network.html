@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Road Network - Enzyme Plugin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="../index.html" class="nav-brand">
+            <img src="../images/enzyme_logo.png" alt="Enzyme Logo" class="logo-img">
+        </a>
+        <div class="nav-links">
+            <a href="../index.html#components">Components</a>
+            <a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank">GitHub</a>
+        </div>
+    </nav>
+
+    <main class="container doc-page">
+        <div class="doc-header" style="display: flex; align-items: center;">
+            <div>
+                <h1>Road Network</h1>
+                <p class="doc-subtitle">Solves the road network topology (junctions, arms, priority, corner radii, mouths) from centrelines and draws the 2D road plan with kerb returns. Reads road_template / road_hierarchy / road_name User Text from the referenced Rhino curves.</p>
+                <div class="doc-meta">
+                    <span class="badge masterplan">Masterplan</span>
+                    <span>Nickname: <strong>RoadNet</strong></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="doc-content">
+            <h2>Overview</h2>
+            <p>Solves the road network topology (junctions, arms, priority, corner radii, mouths) from centrelines and draws the 2D road plan with kerb returns. Reads road_template / road_hierarchy / road_name User Text from the referenced Rhino curves.</p>
+
+            <div class="io-grid">
+                <div class="io-col">
+                    <h3>Inputs (10)</h3>
+                    <ul>
+                        <li><strong>Centrelines</strong> (Curve): Road centrelines. Reference them from Rhino to use their User Text (road_template, road_hierarchy, road_name).</li>
+                        <li><strong>Snap Tolerance</strong> (Number): Ends closer than this (m) to another centreline or end are joined.</li>
+                        <li><strong>Default Template</strong> (Text): Template for centrelines without one (preset name or JSON).</li>
+                        <li><strong>Default Hierarchy</strong> (Text): Hierarchy for centrelines without one: main, secondary or local.</li>
+                        <li><strong>Corner Radii</strong> (Number): Kerb return radius (m) by the lower hierarchy of the two roads at a corner: local, secondary, main.</li>
+                        <li><strong>Custom Templates</strong> (Text): Your own templates as JSON, each with a "name" that road_template can refer to.</li>
+                        <li><strong>Templates</strong> (Text): Optional override per centreline (same order), for centrelines made in Grasshopper that cannot carry User Text. Empty items fall through.</li>
+                        <li><strong>Hierarchies</strong> (Text): Optional override per centreline (same order).</li>
+                        <li><strong>Names</strong> (Text): Optional override per centreline (same order).</li>
+                        <li><strong>Run</strong> (Boolean): False = keep showing the last results (cached).</li>
+                    </ul>
+                </div>
+                <div class="io-col">
+                    <h3>Outputs (16)</h3>
+                    <ul>
+                        <li><strong>Nodes</strong> (Point): Junctions, dead ends and joins.</li>
+                        <li><strong>Edges</strong> (Curve): Centrelines split at every junction (original 3D curves).</li>
+                        <li><strong>Corridor Edges</strong> (Curve): Edges trimmed between the junction mouths: feed Auto-Grade Road / Road Corridor so corridors stop where the junction starts.</li>
+                        <li><strong>Kerb Lines</strong> (Curve): 2D kerb face and kerb back lines, with kerb returns at the corners.</li>
+                        <li><strong>Edge Lines</strong> (Curve): 2D edges of the other parts (cycle tracks, footways, verges, shoulders) and the road boundary, with returns at the corners where they match.</li>
+                        <li><strong>Mouth Lines</strong> (Curve): 2D lines across each road where its junction ends.</li>
+                        <li><strong>Junction Areas</strong> (Curve): 2D carriageway outline of each junction (closed).</li>
+                        <li><strong>Road Areas</strong> (Curve): 2D closed strips per edge for hatching: carriageway and each part between the mouths.</li>
+                        <li><strong>Area Types</strong> (Text): Part type of each Road Area (carriageway, kerb, cycle, footway, verge ...).</li>
+                        <li><strong>Label Points</strong> (Point): Where to place labels (edge middles, nodes).</li>
+                        <li><strong>Labels</strong> (Text): Label text for each label point.</li>
+                        <li><strong>Node JSON</strong> (Text): Per node: type, arms (heading, widths, priority, mouth), corners (angle, radii, tangent points).</li>
+                        <li><strong>Edge JSON</strong> (Text): Per edge: name, template, hierarchy, where they came from, nodes, length, corridor start / end stations.</li>
+                        <li><strong>Network JSON</strong> (Text): The whole graph in one JSON.</li>
+                        <li><strong>Attributes Used</strong> (Text): Per edge: template | hierarchy | name | source (user text, list or default). Check for untagged roads.</li>
+                        <li><strong>Dashboard Data</strong> (Text): JSON metrics for Analysis Dashboard / Report Metrics.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p><a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank" style="color: #a1a1aa; text-decoration: none; border-bottom: 1px solid #3f3f46; padding-bottom: 2px;">View on GitHub</a></p>
+    </footer>
+</body>
+</html>
