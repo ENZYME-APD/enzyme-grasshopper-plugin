@@ -36,16 +36,17 @@
             
             <div class="io-grid">
                 <div class="io-col">
-                    <h3>Inputs (8)</h3>
+                    <h3>Inputs (9)</h3>
                     <ul>
                         <li><strong>Latitude</strong> (Number): Location latitude (-90 to 90)</li>
                         <li><strong>Longitude</strong> (Number): Location longitude (-180 to 180)</li>
                         <li><strong>Time Zone</strong> (Number): Time zone offset from GMT</li>
                         <li><strong>Radius</strong> (Number): Visual radius of the heliodon dome</li>
                         <li><strong>Center</strong> (Point): Center point of the heliodon</li>
-                        <li><strong>Months</strong> (Interval): Domain of months to evaluate (e.g., 1 to 12).</li>
+                        <li><strong>Months</strong> (Interval): Domain of months to evaluate (e.g., 1 to 12). A start after the end wraps over the new year (e.g., 11 to 2 = November to February).</li>
                         <li><strong>Hours</strong> (Interval): Domain of hours to evaluate (e.g., 8 to 17).</li>
                         <li><strong>Run</strong> (Boolean): Optional. False = skip the analysis and keep showing the last results (cached). Share one toggle with the Analysis Dashboard to switch everything on/off together.</li>
+                        <li><strong>North</strong> (Number): Optional. Angle of true north from the model +Y axis, degrees counter-clockwise (Ladybug convention: 90 = north points to -X). Sun vectors, arcs and points are rotated with it. Default 0 = +Y is north.</li>
                     </ul>
                 </div>
                 <div class="io-col">
@@ -76,7 +77,7 @@
                 <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
                     <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
                     <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
-                        <li>Model +Y is true north and +X east.</li>
+                        <li>Model +Y is true north and +X east unless North is set: North (degrees, counter-clockwise from +Y, Ladybug convention) rotates the vectors, arcs and points about Z.</li>
                         <li>Time Zone is the standard offset from GMT; daylight saving is not applied.</li>
                         <li>Each vector stands for one hour on one representative day per month.</li>
                     </ul>
@@ -85,7 +86,6 @@
                     <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
                     <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
                         <li>Twelve representative days, not every day of the year: summing vectors gives hours on those days, not annual sun hours.</li>
-                        <li>No north-angle input: for a model rotated from true north the vectors must be rotated about Z downstream.</li>
                         <li>No atmospheric refraction; position accuracy is that of the NOAA approximation (around a few tenths of a degree).</li>
                     </ul>
                 </div>

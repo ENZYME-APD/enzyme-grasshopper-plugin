@@ -32,6 +32,8 @@ namespace Enzyme.Components
             pManager[6].Optional = true;
             pManager.AddBooleanParameter("Run", "Run", "Optional. False = skip the analysis and keep showing the last results (cached). Share one toggle with the Analysis Dashboard to switch everything on/off together.", GH_ParamAccess.item, true);
             pManager[pManager.ParamCount - 1].Optional = true;
+            pManager.AddNumberParameter("North", "North", "Optional. Angle of true north from the model +Y axis, degrees counter-clockwise (Ladybug convention: 90 = north points to -X). Sun vectors, arcs and points are rotated with it. Default 0 = +Y is north.", GH_ParamAccess.item, 0.0);
+            pManager[pManager.ParamCount - 1].Optional = true;
         }
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
@@ -63,6 +65,9 @@ namespace Enzyme.Components
             DA.GetData(4, ref center);
             DA.GetData(5, ref mth);
             DA.GetData(6, ref hrs);
+            double north = 0.0;
+            if (Params.Input.Count > 8) DA.GetData(8, ref north);
+            var northRot = Rhino.Geometry.Transform.Rotation(north * System.Math.PI / 180.0, Rhino.Geometry.Vector3d.ZAxis, Rhino.Geometry.Point3d.Origin);
 
             System.Collections.Generic.List<Rhino.Geometry.Vector3d> vectors = new System.Collections.Generic.List<Rhino.Geometry.Vector3d>();
             System.Collections.Generic.List<Rhino.Geometry.Curve> arcs = new System.Collections.Generic.List<Rhino.Geometry.Curve>();
@@ -95,6 +100,7 @@ namespace Enzyme.Components
                 for (double hour = firstHour; hour <= endHour + 1e-9; hour += 0.5)
                 {
                     Rhino.Geometry.Vector3d sunVec = GetSunVector(lat, lon, day, hour, tz);
+                    sunVec.Transform(northRot);
                     
                     if (sunVec.Z > 0.01) 
                     {
@@ -124,7 +130,7 @@ namespace Enzyme.Components
             DA.SetDataList(2, points);
             DA.SetData(3, new Rhino.Geometry.Circle(new Rhino.Geometry.Plane(center, Rhino.Geometry.Vector3d.ZAxis), radius).ToNurbsCurve());
             
-            Hud.Done(this, sw.Elapsed.TotalMilliseconds, $"Lat: {lat:F1}\nLon: {lon:F1}\nVectors: {vectors.Count}");
+            Hud.Done(this, sw.Elapsed.TotalMilliseconds, $"Lat: {lat:F1}\nLon: {lon:F1}\nVectors: {vectors.Count}" + (north != 0 ? $"\nNorth: {north:F0}°" : ""));
         }
 
         private Vector3d GetSunVector(double lat, double lon, int dayOfYear, double hour, double tz)

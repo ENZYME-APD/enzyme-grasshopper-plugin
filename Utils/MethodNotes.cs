@@ -1202,6 +1202,7 @@ namespace Enzyme.Utils
                 Title = "Facade Module Distributor",
                 Method = new[]
                 {
+                    "WITHDRAWN (2026-11-22): the node is hidden from the toolbar and no longer downloads or runs any script; placed copies show an error. The notes below describe the old behaviour.",
                     "Closed curves from Base_Curves are collected into one flat list; open curves are ignored.",
                     "In production mode the Python file facade_modules.py is downloaded from the ENZYME-APD/Grasshopper-GitHub-test repository (main branch) to the user folder .rhinocode/gh_distributed_scripts when missing or when Force_Update is True. In Dev_Mode it is read from Local_Repo_Dir.",
                     "The script text is cached in memory and re-read only when its file modification time changes.",
@@ -1317,7 +1318,7 @@ namespace Enzyme.Utils
                     "For each receiver (every vertex of AnalysisMeshes, moved Offset along its normal, plus the AnalysisPoints) the level from each emitter is Lp = Power - 20 log10(d) - 0.0028 × d, with d the straight distance (min 1 m).",
                     "Emitters more than 45 dB below the loudest free-field contribution at that receiver are added without screening.",
                     "Ground effect (only with Ground): A_gr = G × max(0, 4.8 - (2 h_m / d)(17 + 300 / d)), with h_m the mean height of source and receiver above the Ground mesh.",
-                    "If the straight path hits HardCtx, the barrier term comes from a height raster of the obstacle tops (about 500 × 500 cells, at least 0.5 m): the path over the tops is the upper convex hull of the profile, δ = its extra length, N = 2δ / λ with λ = 0.69 m (500 Hz), Dz = 10 log10(3 + 20 N), capped at 20 dB (one edge) or 25 dB (several). The larger of Dz and A_gr is used. If no top is found, 5 dB.",
+                    "If the straight path hits HardCtx, the barrier term comes from a height raster of the obstacle tops (about 500 × 500 cells, at least 0.5 m): the path over the tops is the upper convex hull of the profile, δ = its extra length, N = 2δ / λ with λ = 0.69 m (500 Hz), Dz = 10 log10(3 + 10 N) as in ISO 9613-2 with C2 = 20, C3 = 1 and Kmet = 1, capped at 20 dB (one edge) or 25 dB (several). The larger of Dz and A_gr is used. If no top is found, 5 dB.",
                     "If the path is not screened and crosses SoftCtx, the length through foliage gives 0 dB below 10 m, 1 dB for 10-20 m and 0.05 dB/m up to 200 m.",
                     "Contributions are added as energy: L = 10 log10(Σ 10^(Li/10)).",
                     "Mesh colours span the min to max of the run; Info and Dashboard report max, min, energetic and arithmetic averages over vertices.",
@@ -1343,6 +1344,7 @@ namespace Enzyme.Utils
                 {
                     "ISO 9613-2:1996, Attenuation of sound during propagation outdoors, Part 2: general method of calculation.",
                     "ISO 9613-1:1993, calculation of the absorption of sound by the atmosphere.",
+                    "ISO 9613-2:1996, Acoustics: attenuation of sound during propagation outdoors, Part 2 (barrier term, C2 = 20).",
                     "Maekawa Z. (1968), Noise reduction by screens, Applied Acoustics 1(3).",
                 },
             },
@@ -1534,14 +1536,13 @@ namespace Enzyme.Utils
                 },
                 Assumptions = new[]
                 {
-                    "Model +Y is true north and +X east.",
+                    "Model +Y is true north and +X east unless North is set: North (degrees, counter-clockwise from +Y, Ladybug convention) rotates the vectors, arcs and points about Z.",
                     "Time Zone is the standard offset from GMT; daylight saving is not applied.",
                     "Each vector stands for one hour on one representative day per month.",
                 },
                 Simplifications = new[]
                 {
                     "Twelve representative days, not every day of the year: summing vectors gives hours on those days, not annual sun hours.",
-                    "No north-angle input: for a model rotated from true north the vectors must be rotated about Z downstream.",
                     "No atmospheric refraction; position accuracy is that of the NOAA approximation (around a few tenths of a degree).",
                 },
                 Workflow = new[]

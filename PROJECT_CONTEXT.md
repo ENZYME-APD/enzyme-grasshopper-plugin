@@ -141,6 +141,11 @@ Flow today: tagged centrelines (and junction points) in Rhino -> Road Network ->
 | 2026-11-22 | Review-fixes pass: 197 findings fixed in 89 components, 37 left open for owner decisions or canvas tests, 17 not bugs. Ports and GUIDs unchanged. | Owner asked to fix the bugs. |
 | 2026-11-22 | Results deliberately changed by fixes: UTCI is the full Bröde et al. 2012 polynomial (from pythermalcomfort, MIT); Fast CFD uses the physical time step for viscosity and friction; Auto-Grade never exceeds Max Slope; Terrain Grader measures earthworks against the grading rule; slope tools treat vertical pieces as non-compliant; Terrain Slope over-threshold shares are areas. | Correctness. |
 | 2026-11-22 | Higrothermal Comfort renamed Hygrothermal Comfort (GUID unchanged). | Typo. |
+| 2026-11-22 | Copyright holder: **Enzyme APD Limited**. | Owner. |
+| 2026-11-22 | **Facade Module Distributor unpublished**: hidden from the toolbar, download / run of remote Python disabled (placed copies show an error). Re-publish only with the script shipped inside the plugin. | Security: it ran unverified code from GitHub. |
+| 2026-11-22 | **Fast Noise barrier term follows ISO 9613-2** (C2 = 20: Dz = 10 log10(3 + 10 N)); about 3 dB less screening than before. | Owner chose the standard. |
+| 2026-11-22 | **Heliodon North input** added (last input; degrees CCW from +Y, Ladybug convention, same as Fast CFD). | Rotated models. |
+| 2026-11-22 | **Junction levels**: the priority road keeps its own profile and side roads meet it at its height (option b); option (a), junction at the average ground level, kept as a choice for flat plazas. | Owner; usual engineering practice. |
 
 ---
 
@@ -158,11 +163,11 @@ Flow today: tagged centrelines (and junction points) in Rhino -> Road Network ->
 - I7. Road Network: mismatched templates only wrap kerb face / kerb back / boundary round corners; footway hatches stop at mouths; no splitter islands or hammerhead turning heads; radii not checked against swept paths.
 
 **Questions for the owner:**
-- Q1. ~~Licence~~: decided (section 6). Please confirm the legal entity to name as copyright holder (the file says Enzyme APD) and consider a lawyer's review: the licence is custom.
+- Q1. ~~Licence~~: decided; copyright holder Enzyme APD Limited (section 6). A lawyer's review of the custom licence is still recommended.
 - Q2. Which street design guide should the road templates follow by default (Spain, UK, NL CROW, US AASHTO, per project)?
-- Q3. **Junction levels.** Where roads meet, both corridors must arrive at the same height. Two ways to set it: (a) take the junction height from the existing ground (average terrain under the junction) and grade every road to it; good for flat junctions on hilly sites, but the main road may get a dip or hump at each junction; or (b) let the main (priority) road keep its own smooth profile and make the side roads meet it at whatever height the main road has there; this is the usual engineering approach. Recommendation: (b), with (a) as an option for flat plazas.
+- Q3. ~~Junction levels~~: decided, priority road profile with side roads tied to it; ground-level option for flat plazas (section 6).
 - Q4. ~~ScriptsToProcess~~: deleted.
-- Q5. Open review items needing a decision (details and recommendations in `REVIEW_FINDINGS.md`): Fast Noise barrier constant (ISO 9613-2 C2 = 20 or keep 40); hand-typed GUIDs (Fast Noise, Keypoint, Pixel Gradient, Noise Emitter, Pixelated Surface: keep unless a clash appears); Facade Module Distributor downloads and runs Python from GitHub without an integrity check (ship it inside the plugin); JSON MP Engine setback facades; MP adapters' absolute vs relative Z; branch-path stability in Masses and Facade parsers; Global Flood Engine volume conservation; Heliodon North input; Report Metrics re-rating merged flags (fix in `Utils/ReportMetrics.cs`); Terrain Generator hash at UTM coordinates.
+- Q5. Open review items needing a decision (details and recommendations in `REVIEW_FINDINGS.md`): hand-typed GUIDs (Fast Noise, Keypoint, Pixel Gradient, Noise Emitter, Pixelated Surface: keep unless a clash appears); JSON MP Engine setback facades; MP adapters' absolute vs relative Z; branch-path stability in Masses and Facade parsers; Global Flood Engine volume conservation; Report Metrics re-rating merged flags (fix in `Utils/ReportMetrics.cs`); Terrain Generator hash at UTM coordinates.
 
 Component-level findings from the method-notes review are listed in section 9.
 
@@ -173,8 +178,9 @@ Component-level findings from the method-notes review are listed in section 9.
 In order of priority (update as items finish):
 
 1. **Test PR #2 and the review-fixes PR in Rhino** (I1 to I4 and the canvas list in section 9), fix, merge, release (next version after 1.13.0).
-2. **Road Junction (3D):** priority / T / crossroads patches tied to the corridor end sections, roundabouts (with splitter islands) and cul-de-sacs in 3D, earthworks of the junction patches added to the totals, junction levels from the network (Q3).
-3. **Auto-Grade from the network:** grade edges with shared node levels so roads meet at junctions.
+2. **Road Junction (3D):** priority / T / crossroads patches tied to the corridor end sections, roundabouts (with splitter islands) and cul-de-sacs in 3D, earthworks of the junction patches added to the totals; levels: priority road profile, side roads tied to it (option for flat plazas at ground level).
+3. **Auto-Grade from the network:** grade priority roads first, then side roads starting from the priority road's level at each junction, so roads meet; optional flat-plaza junctions at the average ground level.
+3b. **Facade Module Distributor:** bring `facade_modules.py` into the repo, document it, ship it inside the plugin, then re-publish the node.
 4. **Stitch corridors into the terrain** (spec phase 5): one finished-ground mesh for CFD, Hydro-DEM, sun and noise.
 5. **More road tags** from the spec: one-way, lane counts, medians, boulevards, crossings, mapped to templates.
 6. **Design criteria check** for roads (radii, grades, vertical curves, sight distance) from primary-source tables (AASHTO, CROW or the chosen guide, Q2).
@@ -188,18 +194,18 @@ In order of priority (update as items finish):
 
 ## 9. Component review findings
 
-`REVIEW_FINDINGS.md` lists every finding with its status: **197 fixed, 37 open, 17 not a bug** (2026-11-22). Nothing in the fixes has been run in Rhino yet.
+`REVIEW_FINDINGS.md` lists every finding with its status: **200 fixed, 34 open, 17 not a bug** (2026-11-22). Nothing in the fixes has been run in Rhino yet.
 
 Status of the priorities:
 - P1 UTCI: **fixed** (full 210-term polynomial, Hardy vapour pressure, validity clamps with a warning, extreme categories; matches pythermalcomfort's reference values).
 - P2 Fast CFD time step: **fixed** (physical seconds; Viscosity / Friction now about 1.6× stronger per step at defaults: review defaults on a canvas). Terrain speed-up only seeding the initial field: **open**, documented.
-- P3 Fast Noise barrier constant: **open** (owner decision, Q5).
+- P3 Fast Noise barrier constant: **fixed** (ISO 9613-2, C2 = 20).
 - P4 slope tools: **fixed** (vertical = 90°, ∞ %, 1:0, never compliant; ratio legend corrected). Representation of flat pieces in ratio mode (∞) and per-curve output order: open.
 - P5 Auto-Grade: **fixed** (clamped back to Max Slope after smoothing).
 - P6 Terrain Grader: **fixed** (earthworks against the grading rule per cell).
 - P7 number parsing: **fixed** (invariant culture).
 - P8 Topology Split Edge Classifier partial walls: **fixed**.
-- P9 Heliodon: **fixed** (wrap-around months, half-hour start); still only the 21st of each month (documented); North input open.
+- P9 Heliodon: **fixed** (wrap-around months, half-hour start); still only the 21st of each month (documented); North input **added**.
 - P10 Raindrop Flow hang: **fixed** (error on spacing ≤ 0, seed cap, sane sliders).
 - P11 Terrain Height outputs lost on load: **fixed** (`Read()` keeps the layout).
 - P12 MP Engine colours: **fixed** (stable hash).

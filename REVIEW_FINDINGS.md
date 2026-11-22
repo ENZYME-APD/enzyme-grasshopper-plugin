@@ -2,7 +2,7 @@
 
 Found while writing the method notes (2026-11-22) and worked through in the review-fixes pass the same day (AI-assisted; geometry changes still need a Rhino canvas check).
 
-Status: 197 fixed, 37 open (need an owner decision or a canvas test), 17 not a bug. Open items are summarised in `PROJECT_CONTEXT.md` section 9.
+Status: 200 fixed, 34 open (need an owner decision or a canvas test), 17 not a bug. Open items are summarised in `PROJECT_CONTEXT.md` section 9.
 
 Legend: `[x]` fixed · `[ ]` open, with the recommendation · `[x] ~~…~~` not a bug.
 
@@ -182,7 +182,7 @@ Legend: `[x]` fixed · `[ ]` open, with the recommendation · `[x] ~~…~~` not 
 - [x] Description says annual sun vectors but only the 21st of each month is sampled. **Fixed:** Component description corrected: hourly sun vectors on the 21st of each selected month (one representative day per month).
 - [x] A Hours start that is not a whole or half hour gives no Sun Vectors. **Fixed:** The loop now starts at the start hour rounded up to the next half hour, so whole hours are always hit (8.25 starts at 8.5). The loop end has a 1e-9 tolerance.
 - [x] Months read as Interval Min..Max, so 11 to 2 becomes February to November. **Fixed:** Months are read as T0 to T1. A start after the end wraps over the new year (11 to 2 = Nov, Dec, Jan, Feb). Normal increasing domains are unchanged. A deliberately reversed full domain such as 12 to 1 now gives Dec and Jan instead of all 12 months. The input description is updated.
-- [ ] No North input; rotated models get wrong sun directions. **Open:** This needs a new input port: a feature, not a defect fix. It also touches the Run-gate port order (Run is currently last) and the method notes. Recommendation: append a North angle input at the end with the same convention as Fast CFD, and rotate the vectors about Z.
+- [x] No North input; rotated models get wrong sun directions. **Fixed (owner, 2026-11-22):** North input appended (degrees CCW from +Y, Ladybug convention).
 
 ## Export Named Views (`Components/ExportViews.cs`)
 
@@ -196,7 +196,7 @@ Legend: `[x]` fixed · `[ ]` open, with the recommendation · `[x] ~~…~~` not 
 
 ## Facade Module Distributor (`Components/FacadeDist.cs`)
 
-- [ ] Downloads and executes Python from a public GitHub test repo without integrity check (security risk). **Open:** Needs an owner decision. Recommendation: ship facade_modules.py inside the plugin (or pin a commit URL and verify a SHA-256 hash before running), and stop using the test repository.
+- [x] Downloads and executes Python from a public GitHub test repo without integrity check (security risk). **Resolved (owner, 2026-11-22):** node unpublished (hidden) and its download / run code disabled until the script ships inside the plugin.
 - [ ] Method cannot be documented because the geometry is in the remote facade_modules.py. **Open:** Needs the script in this repo (owner). Recommendation: add facade_modules.py to the repo/plugin and document its method in MethodNotes.
 - [x] All exceptions reported as Compile error, hiding the real Python error. **Fixed:** Read and execution errors now show 'Script read error: ...' / 'Python error: ...' with the exception message and a runtime error balloon; a failed download with a cached file gives a warning, a failed first download shows 'Sync error: ...'.
 - [x] Description mentions hot-reloading, but the file is only re-checked when the component solves. **Fixed:** Description rewritten: loads and runs facade_modules.py; a changed file is re-read the next time the component solves.
@@ -248,7 +248,7 @@ Legend: `[x]` fixed · `[ ]` open, with the recommendation · `[x] ~~…~~` not 
 
 ## Fast Noise Analyzer (`Components/FastNoiseAnalyzer.cs`)
 
-- [ ] Barrier term 10 log10(3+20N) equals ISO 9613-2 with C2 = 40, not 20. **Open:** Standard constant: owner decision (brief). Recommendation: if ISO 9613-2 is intended use Dz = 10 log10(3 + (C2/lambda) C3 delta Kmet) with C2 = 20 (i.e. 3 + 10N); otherwise relabel as Maekawa-type with C2 = 40.
+- [x] Barrier term 10 log10(3+20N) equals ISO 9613-2 with C2 = 40, not 20. **Fixed (owner chose ISO, 2026-11-22):** Dz = 10 log10(3 + 10 N), ISO 9613-2 C2 = 20.
 - [ ] ComponentGuid 11112222-3333-4444-5555-666677778888 looks hand-typed. **Open:** Changing the GUID breaks saved files; owner decision. Checked: unique within this repo (only also in Archive/FastNoiseAnalyzer_v1_pre_review.cs, the old copy). Recommendation: keep unless a clash is reported.
 - [x] ~~Run = false branch inside Solve is unreachable because of UsesRunGate~~ **Not a bug:** Harmless dead code (base class replays cached outputs); left as is (no style refactors).
 - [ ] Colours scaled per run min/max; no fixed dB range. **Open:** Feature request needing new appended ports; owner decision. Recommendation: append an optional 'Range' interval input (dB) at the end.

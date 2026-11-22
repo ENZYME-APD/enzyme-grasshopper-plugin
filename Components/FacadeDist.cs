@@ -62,6 +62,15 @@ namespace Enzyme.Components
         protected override void SolveInstance(IGH_DataAccess DA)
         {
             if (DA.Iteration == 0 && Params.Output.Count > 3) DA.SetData(3, Enzyme.Utils.MethodNotes.Info("FacadeDist"));
+            // Unpublished (2026-11-22): this node downloaded and ran Python from GitHub without an integrity
+            // check. It stays loadable so saved files open, but it no longer downloads or runs anything until
+            // the script ships inside the plugin.
+            if (Disabled)
+            {
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Facade Module Distributor is withdrawn pending a security review (it downloaded and ran remote Python code). Use the Facade Module components instead.");
+                Message = "Withdrawn";
+                return;
+            }
             var watch = System.Diagnostics.Stopwatch.StartNew();
 
             GH_Structure<GH_Curve> crvsTree = null;
@@ -232,6 +241,7 @@ namespace Enzyme.Components
 
         protected override System.Drawing.Bitmap Icon => IconLoader.Load("FacadeDist.png");
 
-        public override GH_Exposure Exposure => GH_Exposure.primary;
+        public override GH_Exposure Exposure => GH_Exposure.hidden; // unpublished: see SolveInstance
+        private const bool Disabled = true;
     }
 }

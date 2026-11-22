@@ -407,7 +407,8 @@ namespace Enzyme.Components
         }
 
         // ------------------------------------------------------------------
-        // Maekawa / ISO 9613-2 screening: Dz = 10 log10(3 + 20 N), N = 2 delta / lambda.
+        // ISO 9613-2 screening: Dz = 10 log10(3 + (C2 / lambda) C3 delta Kmet) with C2 = 20, C3 = 1, Kmet = 1,
+        // i.e. 3 + 10 N with the Fresnel number N = 2 delta / lambda.
         // delta = extra path length over the obstacle tops, found as the upper convex
         // hull ("rubber band") of the height profile between receiver and source.
         // ------------------------------------------------------------------
@@ -462,7 +463,7 @@ namespace Enzyme.Components
             if (delta <= 0) return fallbackDb;
 
             double N = 2.0 * delta / Lambda;
-            double dz2 = 10.0 * Math.Log10(3.0 + 20.0 * N);
+            double dz2 = 10.0 * Math.Log10(3.0 + 10.0 * N); // ISO 9613-2, C2 = 20
             int edges = hull.Count - 2;
             double cap = edges >= 2 ? 25.0 : 20.0; // ISO 9613-2 limits: single 20 dB, double 25 dB
             return Math.Min(cap, Math.Max(0.0, dz2));
@@ -517,7 +518,7 @@ namespace Enzyme.Components
                 "   Roads should come from 'Noise Emitter From Curves', which calibrates point levels as a line source.\n" +
                 $"2. Air absorption: {AirAbsDbPerM * 1000:F1} dB/km (ISO 9613-1, 500 Hz, 20 C, 70% RH).\n" +
                 "3. Ground effect (only with Ground mesh): ISO 9613-2 eq.10, A_gr = G * max(0, 4.8 - (2 h_m / d)(17 + 300 / d)).\n" +
-                "4. Barriers (HardCtx): Maekawa, Dz = 10*log10(3 + 20 N), N = 2*delta/lambda (lambda = 0.69 m @ 500 Hz).\n" +
+                "4. Barriers (HardCtx): ISO 9613-2, Dz = 10*log10(3 + 10 N) (C2 = 20), N = 2*delta/lambda (lambda = 0.69 m @ 500 Hz).\n" +
                 "   delta is the extra path over the obstacle tops ('rubber band' over the roof profile). Capped at 20 dB (single) / 25 dB (multiple edges).\n" +
                 "   When screened, the barrier replaces the ground term (ISO: A_bar = Dz - A_gr).\n" +
                 "5. Foliage (SoftCtx): ISO 9613-2 Annex A, by path length through vegetation: <10 m: 0 dB, 10-20 m: 1 dB, 20-200 m: 0.05 dB/m.\n" +

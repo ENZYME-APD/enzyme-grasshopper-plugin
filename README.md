@@ -30,4 +30,4 @@ To install:
 
 ## Licence
 
-Free to use, study, modify and share for any purpose, including paid design work, **with attribution** to the Enzyme Grasshopper Plugin by Enzyme APD. Selling it, or including any part of it in a commercial software product or service, needs **prior written permission** from Enzyme APD. Full terms in [`LICENSE`](LICENSE); third-party parts and data in [`NOTICE.md`](NOTICE.md).
+Free to use, study, modify and share for any purpose, including paid design work, **with attribution** to the Enzyme Grasshopper Plugin by Enzyme APD. Selling it, or including any part of it in a commercial software product or service, needs **prior written permission** from Enzyme APD Limited. Full terms in [`LICENSE`](LICENSE); third-party parts and data in [`NOTICE.md`](NOTICE.md).

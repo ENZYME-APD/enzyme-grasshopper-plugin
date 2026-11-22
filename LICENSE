@@ -1,12 +1,12 @@
 Enzyme Grasshopper Plugin Licence, version 1.0
 
-Copyright (c) 2026 Enzyme APD and the contributors to the Enzyme Grasshopper Plugin.
+Copyright (c) 2026 Enzyme APD Limited and the contributors to the Enzyme Grasshopper Plugin.
 All rights not expressly granted below are reserved.
 
 1. Definitions
    "Software" means the Enzyme Grasshopper Plugin: its source code, compiled plug-in (.gha), documentation,
    icons and other files in this repository, and any part or modified version of them.
-   "Licensor" means Enzyme APD.
+   "Licensor" means Enzyme APD Limited.
    "Commercial Product" means any software, plug-in, library, script, template, web or cloud service, or other
    tool that is sold, licensed for a fee, offered by subscription, or otherwise provided in exchange for payment
    or as part of a paid offering.
@@ -20,12 +20,12 @@ All rights not expressly granted below are reserved.
 3. Attribution
    Any copy, modified version or redistribution of the Software, in whole or in part, must keep this licence
    and the copyright notice above, and must state clearly that it is based on the Enzyme Grasshopper Plugin by
-   Enzyme APD, with a link to https://github.com/ENZYME-APD/enzyme-grasshopper-plugin.
+   Enzyme APD Limited, with a link to https://github.com/ENZYME-APD/enzyme-grasshopper-plugin.
 
 4. Commercial Products need permission
    You may not sell the Software, or include the Software or any part of its source code (modified or not) in a
    Commercial Product, without prior written permission from the Licensor. To ask for permission, contact
-   Enzyme APD through https://github.com/ENZYME-APD or the contact details on the documentation site.
+   Enzyme APD Limited through https://github.com/ENZYME-APD or the contact details on the documentation site.
    Using the Software inside your own organisation, including on paid projects for clients, is not selling it
    and needs no permission.
 
