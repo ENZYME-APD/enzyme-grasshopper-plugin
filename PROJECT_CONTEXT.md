@@ -20,7 +20,7 @@ A toolkit of about 115 native C# Grasshopper components for Enzyme's work: urban
 | Site Analysis | 34 | Site Fetch, Sun Hours Analysis, Heliodon, Fast CFD, Fast Noise Analyzer, Global Flood Engine, Hydro-DEM, Terrain Slope, Analysis Heatmap / Difference / Dashboard, Report Metrics |
 | Masterplan | 9 | Road Network, Road Corridor, Auto-Grade Road, Procedural Road Generator, road slope analysers, Masterplan Clearance Engine |
 | JSON Masterplan (Beta) | 26 | JSON MP Engine V2, Master JSON Config Builder, Masses / Slab / Roof / Facade parsers, Archicad (Tapir) and massing adapters |
-| Facade | 9 | Curtain Wall System, Facade Module Distributor, Pixel Image / Gradient, Tile Pattern |
+| Facade | 9 | Curtain Wall System, Pixel Image / Gradient, Tile Pattern (Facade Module Distributor withdrawn, hidden) |
 | Curve, Data | 11 | Topology Split Edge Classifier, Polyline Healer, tree and list helpers |
 | Utilities, Info | 24 | canvas tools, named views and exports, GIF compiler, gradients |
 
@@ -97,7 +97,7 @@ Road templates are JSON (`RoadTemplate` in `Utils/Corridor.cs`): `name`, `cut_sl
 
 - **MIT / permissive code** (VoxCity, Meerkat): ideas and code may be adapted with attribution in comments and method notes.
 - **GPL code** (Open Infra Studio, FreeCAD Road): **methods only**, never copy code; implement from the published method or paper. The plugin is not GPL.
-- **Our licence** (`LICENSE`): anyone may use, modify and share the plugin for any purpose, including paid design work, with attribution; selling it or putting any of its code into a commercial software product or service needs written permission from Enzyme APD. Outputs (models, drawings, reports) are free of conditions. Source-available, not OSI open source. Any code ported from elsewhere must be MIT/BSD/Apache-compatible and listed in `NOTICE.md`.
+- **Our licence** (`LICENSE`): anyone may use, modify and share the plugin for any purpose, including paid design work, with attribution; selling it or putting any of its code into a commercial software product or service needs written permission from Enzyme APD Limited. Outputs (models, drawings, reports) are free of conditions. Source-available, not OSI open source. Any code ported from elsewhere must be MIT/BSD/Apache-compatible and listed in `NOTICE.md`.
 - **Data:** OpenStreetMap is ODbL (attribution required on any output: Site Fetch's Sources output); Copernicus DEM and ESA WorldCover (CC BY 4.0) need credit. FABDEM is non-commercial (CC BY-NC-SA), so it is not used by default.
 
 ---
@@ -188,7 +188,7 @@ In order of priority (update as items finish):
 8. **VoxCity items not yet done:** green view index, sky view on facades, landmark visibility, street-network aggregation of results, ENVI-met / PALM export, Perez sky and reflections in Sun Hours.
 9. **IFC 4.3 alignment export** for BIM handover.
 10. **Decide the open review items** (Q5) and fix them; spot-check the AI-written method notes of the analysis tools used in reports.
-11. **Legal review of `LICENSE`** (custom licence) and confirm the copyright holder (Q1).
+11. **Legal review of `LICENSE`** (custom licence; holder Enzyme APD Limited).
 
 ---
 
