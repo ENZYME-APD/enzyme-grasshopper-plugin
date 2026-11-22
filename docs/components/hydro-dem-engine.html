@@ -22,7 +22,7 @@
         <div class="doc-header" style="display: flex; align-items: center;">
             <div>
                 <h1>Hydro-DEM Engine</h1>
-                <p class="doc-subtitle">Calculates Flow Direction and Flow Accumulation on a terrain mesh to extract stream networks.</p>
+                <p class="doc-subtitle">Calculates Flow Direction and Flow Accumulation on a terrain mesh to extract stream networks. Depressions are filled first (Priority-Flood) so streams run through hollows to the terrain edge; the hollows are reported as ponds.</p>
                 <div class="doc-meta">
                     <span class="badge site-analysis">Site Analysis</span>
                     <span>Nickname: <strong>HydroDEM</strong></span>
@@ -36,21 +36,26 @@
             
             <div class="io-grid">
                 <div class="io-col">
-                    <h3>Inputs (3)</h3>
+                    <h3>Inputs (5)</h3>
                     <ul>
                         <li><strong>Terrain</strong> (Mesh): The base topography mesh</li>
                         <li><strong>Threshold</strong> (Integer): Minimum flow accumulation to form a stream</li>
                         <li><strong>Run</strong> (Boolean): Optional. False = skip the analysis and keep showing the last results (cached). Share one toggle with the Analysis Dashboard to switch everything on/off together.</li>
+                        <li><strong>Fill Pits</strong> (Boolean): Fill depressions before routing (Priority-Flood, Barnes et al. 2014). False = old behaviour: flow stops in every hollow.</li>
+                        <li><strong>Min Pond Depth</strong> (Number): Hollows shallower than this (m) are not reported as ponds (still routed through).</li>
                     </ul>
                 </div>
                 <div class="io-col">
-                    <h3>Outputs (5)</h3>
+                    <h3>Outputs (8)</h3>
                     <ul>
                         <li><strong>Streams</strong> (Curve): Extracted stream networks (Polylines)</li>
                         <li><strong>Accumulation</strong> (Integer): Flow accumulation value per topology vertex</li>
                         <li><strong>Topology Points</strong> (Point): Topology vertices matching the accumulation list</li>
                         <li><strong>Info</strong> (Text): Component information and methodology</li>
                         <li><strong>Dashboard Data</strong> (Text): Unified JSON payload containing legend and key analysis metrics for the Analysis Dashboard</li>
+                        <li><strong>Pond Depth</strong> (Number): Water depth per topology vertex when hollows fill up (0 = dry).</li>
+                        <li><strong>Ponds</strong> (Mesh): Water surface of every pond at its spill level.</li>
+                        <li><strong>Catchment</strong> (Integer): Catchment id per topology vertex: the outlet vertex its water leaves the terrain at.</li>
                     </ul>
                 </div>
             </div>

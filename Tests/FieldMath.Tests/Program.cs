@@ -100,4 +100,21 @@ var ob=new List<OsmBuilding>(); var ot=new List<OsmTree>(); OsmParse.Parse(Syste
 Check(ob.Count==3 && ob[0].Height==12 && ob[1].Height==16.5 && ob[1].MinHeight==3 && ob[2].Height==9 && !ob[2].HeightFromTags && ob[2].Outers.Count==1 && ob[2].Outers[0].Count==5 && ob[2].Inners.Count==1, "OSM buildings: height, levels+roof, min_height, default, stitched relation with hole");
 Check(ot.Count==1 && Math.Abs(ot[0].Height-9.144)<1e-9 && ot[0].CrownDiameter==6.5 && ot[0].Species=="Platanus", "OSM trees: feet, decimal comma, genus");
 Check(double.IsNaN(OsmParse.ParseLength("tall")) && OsmParse.ParseLength("12;15")==12 && Math.Abs(OsmParse.ParseLength("10'6\"")-3.2004)<1e-9, "OSM length parsing");
+// hydrology: Priority-Flood depression filling + routing
+{
+    double[] hz={5,4,1,3,2,0}; var hn=new int[6][]; for(int i=0;i<6;i++){ var l=new List<int>(); if(i>0)l.Add(i-1); if(i<5)l.Add(i+1); hn[i]=l.ToArray(); }
+    var hout=new bool[6]; hout[0]=hout[5]=true;
+    var hr=Hydrology.Route(hz,hn,null,hout,true); var hacc=Hydrology.Accumulate(hr,new double[]{1,1,1,1,1,1});
+    Check(string.Join(",",hr.Filled)=="5,4,3,3,2,0" && hacc[5]==6 && hr.Outlet[2]==5 && hr.Down[2]==3, "Priority-Flood: pit filled to its spill level, all water reaches the outlet");
+    var hp=Hydrology.Ponds(hz,hr.Filled,hn,0.01,out int pc); Check(pc==1 && hp[2]==0 && hp[1]==-1, "ponds: one pond at the pit");
+    var hr0=Hydrology.Route(hz,hn,null,hout,false); var hacc0=Hydrology.Accumulate(hr0,new double[]{1,1,1,1,1,1});
+    Check(hr0.Down[2]==-1 && hacc0[2]==4 && hacc0[5]==2, "no fill: pit keeps its water (legacy behaviour)");
+    // 20x20 bowl with a rim lower on one side; plus a flat plateau: everything must drain, no cycles
+    int G=20; var gz=new double[G*G]; var gn=new int[G*G][]; var go=new bool[G*G];
+    for(int y=0;y<G;y++) for(int x=0;x<G;x++){ int i=y*G+x; double r=Math.Sqrt((x-9.5)*(x-9.5)+(y-9.5)*(y-9.5)); gz[i]= x>14&&y>14 ? 5 : r*0.3 + (x==0?-1:0); var l=new List<int>(); if(x>0)l.Add(i-1); if(x<G-1)l.Add(i+1); if(y>0)l.Add(i-G); if(y<G-1)l.Add(i+G); gn[i]=l.ToArray(); go[i]= x==0||y==0||x==G-1||y==G-1; }
+    var gr=Hydrology.Route(gz,gn,null,go,true); var gacc=Hydrology.Accumulate(gr,Enumerable.Repeat(1.0,G*G).ToArray());
+    double toOut=0; for(int i=0;i<G*G;i++) if(gr.Down[i]<0) toOut+=gacc[i];
+    bool steps=true; for(int i=0;i<G*G;i++){ int c=i,k=0; while(gr.Down[c]>=0&&k++<G*G) c=gr.Down[c]; if(k>=G*G||!go[c]) steps=false; }
+    Check(toOut==G*G && steps && Math.Abs(gr.Filled[9*G+9]-gr.Filled[9*G+10])<1e-12, "grid bowl + flat plateau: every cell reaches an edge outlet, no cycles");
+}
 Console.WriteLine(fails==0?"ALL PASS":$"{fails} FAILED"); return fails;

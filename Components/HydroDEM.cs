@@ -14,7 +14,7 @@ namespace Enzyme.Components
 
         public HydroDEM()
           : base("Hydro-DEM Engine", "HydroDEM",
-              "Calculates Flow Direction and Flow Accumulation on a terrain mesh to extract stream networks.",
+              "Calculates Flow Direction and Flow Accumulation on a terrain mesh to extract stream networks. Depressions are filled first (Priority-Flood) so streams run through hollows to the terrain edge; the hollows are reported as ponds.",
               "Enzyme", "Site Analysis")
         {
         }
@@ -26,6 +26,10 @@ namespace Enzyme.Components
             
             pManager[1].Optional = true;
             pManager.AddBooleanParameter("Run", "Run", "Optional. False = skip the analysis and keep showing the last results (cached). Share one toggle with the Analysis Dashboard to switch everything on/off together.", GH_ParamAccess.item, true);
+            pManager[pManager.ParamCount - 1].Optional = true;
+            pManager.AddBooleanParameter("Fill Pits", "Fill", "Fill depressions before routing (Priority-Flood, Barnes et al. 2014). False = old behaviour: flow stops in every hollow.", GH_ParamAccess.item, true);
+            pManager.AddNumberParameter("Min Pond Depth", "MinD", "Hollows shallower than this (m) are not reported as ponds (still routed through).", GH_ParamAccess.item, 0.05);
+            pManager[pManager.ParamCount - 2].Optional = true;
             pManager[pManager.ParamCount - 1].Optional = true;
         }
 
@@ -50,6 +54,9 @@ namespace Enzyme.Components
             pManager.AddPointParameter("Topology Points", "P", "Topology vertices matching the accumulation list", GH_ParamAccess.list);
             pManager.AddTextParameter("Info", "Info", "Component information and methodology", GH_ParamAccess.item);
             pManager.AddTextParameter("Dashboard Data", "Dashboard Data", "Unified JSON payload containing legend and key analysis metrics for the Analysis Dashboard", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Pond Depth", "Depth", "Water depth per topology vertex when hollows fill up (0 = dry).", GH_ParamAccess.list);
+            pManager.AddMeshParameter("Ponds", "Ponds", "Water surface of every pond at its spill level.", GH_ParamAccess.item);
+            pManager.AddIntegerParameter("Catchment", "Catch", "Catchment id per topology vertex: the outlet vertex its water leaves the terrain at.", GH_ParamAccess.list);
         }
 
         protected override void Solve(IGH_DataAccess DA, System.Diagnostics.Stopwatch hudSw)
@@ -62,57 +69,88 @@ namespace Enzyme.Components
             DA.GetData(1, ref threshold);
             if (threshold < 1) threshold = 1;
 
-            // Ensure mesh topology is generated
+            bool fillPits = true; double minDepth = 0.05;
+            DA.GetData(3, ref fillPits);
+            DA.GetData(4, ref minDepth);
+
+            // Topology graph: one node per topology vertex
             mesh.TopologyVertices.SortEdges();
             int vCount = mesh.TopologyVertices.Count;
-
-            int[] flowDirection = new int[vCount];
-            int[] accumulation = new int[vCount];
-            
-            // Step 1: Calculate Flow Direction (Steepest Descent)
+            var z = new double[vCount];
+            var nbrs = new int[vCount][];
+            var lens = new double[vCount][];
             for (int i = 0; i < vCount; i++)
             {
-                accumulation[i] = 1; // Every vertex receives at least its own rain
                 Point3f p = mesh.TopologyVertices[i];
-                int[] neighbors = mesh.TopologyVertices.ConnectedTopologyVertices(i);
-                
-                float maxSlope = 0;
-                int targetIndex = -1;
-                
-                foreach (int n in neighbors)
+                z[i] = p.Z;
+                nbrs[i] = mesh.TopologyVertices.ConnectedTopologyVertices(i);
+                lens[i] = new double[nbrs[i].Length];
+                for (int k = 0; k < nbrs[i].Length; k++)
                 {
-                    Point3f np = mesh.TopologyVertices[n];
-                    float drop = p.Z - np.Z;
-                    
-                    if (drop > 0)
-                    {
-                        float dist = (float)p.DistanceTo(np);
-                        float slope = drop / dist;
-                        if (slope > maxSlope)
-                        {
-                            maxSlope = slope;
-                            targetIndex = n;
-                        }
-                    }
+                    Point3f q = mesh.TopologyVertices[nbrs[i][k]];
+                    lens[i][k] = Math.Sqrt((p.X - q.X) * (p.X - q.X) + (p.Y - q.Y) * (p.Y - q.Y));
                 }
-                flowDirection[i] = targetIndex;
             }
-            
-            // Step 2: Calculate Flow Accumulation (Top-Down approach)
-            // Sort vertices by Z elevation (highest to lowest)
-            var sortedIndices = Enumerable.Range(0, vCount)
-                                          .OrderByDescending(i => mesh.TopologyVertices[i].Z)
-                                          .ToList();
-                                          
-            foreach (int i in sortedIndices)
+
+            // Outlets: the open edge of the terrain, where water leaves the model
+            var outlet = new bool[vCount];
+            bool[] naked = mesh.GetNakedEdgePointStatus();
+            if (naked != null)
+                for (int i = 0; i < vCount; i++)
+                    foreach (int mv in mesh.TopologyVertices.MeshVertexIndices(i))
+                        if (mv < naked.Length && naked[mv]) { outlet[i] = true; break; }
+
+            // Steps 1-2: Priority-Flood fill, flow direction on the filled surface, accumulation
+            var route = Hydrology.Route(z, nbrs, lens, outlet, fillPits);
+            int[] flowDirection = route.Down;
+            double[] accD = Hydrology.Accumulate(route, Enumerable.Repeat(1.0, vCount).ToArray());
+            int[] accumulation = accD.Select(v => (int)Math.Round(v)).ToArray();
+            var sortedIndices = route.UpToDown.ToList();
+
+            // Ponds: depth, water surface, volume (vertex share of each face's plan area)
+            var depth = new double[vCount];
+            for (int i = 0; i < vCount; i++) depth[i] = Math.Max(0.0, route.Filled[i] - z[i]);
+            int[] pondId = Hydrology.Ponds(z, route.Filled, nbrs, minDepth, out int pondCount);
+            var vArea = new double[vCount];
+            var water = new Mesh();
+            var wIndex = new Dictionary<int, int>();
+            for (int f = 0; f < mesh.Faces.Count; f++)
             {
-                int target = flowDirection[i];
-                if (target != -1)
+                var face = mesh.Faces[f];
+                int nv = face.IsQuad ? 4 : 3;
+                var tv = new int[nv];
+                for (int k = 0; k < nv; k++) tv[k] = mesh.TopologyVertices.TopologyVertexIndex(face[k]);
+                double area = 0;
+                for (int k = 0; k < nv; k++)
                 {
-                    accumulation[target] += accumulation[i];
+                    Point3f a = mesh.TopologyVertices[tv[k]], b = mesh.TopologyVertices[tv[(k + 1) % nv]];
+                    area += a.X * b.Y - b.X * a.Y;
                 }
+                area = Math.Abs(area) / 2.0;
+                for (int k = 0; k < nv; k++) vArea[tv[k]] += area / nv;
+
+                bool wet = true;
+                for (int k = 0; k < nv && wet; k++) wet = pondId[tv[k]] >= 0 && pondId[tv[k]] == pondId[tv[0]];
+                if (!wet) continue;
+                var w = new int[nv];
+                for (int k = 0; k < nv; k++)
+                {
+                    if (!wIndex.TryGetValue(tv[k], out int wi))
+                    {
+                        Point3f p = mesh.TopologyVertices[tv[k]];
+                        wi = water.Vertices.Add(p.X, p.Y, route.Filled[tv[k]]);
+                        wIndex[tv[k]] = wi;
+                    }
+                    w[k] = wi;
+                }
+                if (nv == 4) water.Faces.AddFace(w[0], w[1], w[2], w[3]); else water.Faces.AddFace(w[0], w[1], w[2]);
             }
-            
+            double pondVolume = 0, maxDepth = 0;
+            for (int i = 0; i < vCount; i++)
+                if (pondId[i] >= 0) { pondVolume += depth[i] * vArea[i]; maxDepth = Math.Max(maxDepth, depth[i]); }
+            if (water.Faces.Count > 0) water.Normals.ComputeNormals();
+            int catchments = route.Outlet.Distinct().Count(o => accumulation[o] >= threshold);
+
             // Step 3: Extract Stream Networks
             List<Curve> streams = new List<Curve>();
             bool[] visitedEdges = new bool[vCount];
@@ -157,7 +195,8 @@ namespace Enzyme.Components
             }
 
             stopwatch.Stop();
-            Hud.Done(this, stopwatch.Elapsed.TotalMilliseconds, $"Threshold: {threshold}\nStreams: {streams.Count}");
+            Hud.Done(this, stopwatch.Elapsed.TotalMilliseconds, Hud.Metric("Streams", streams.Count),
+                Hud.Metric("Ponds", pondCount), Hud.Metric("Pond vol.", pondVolume, "m³", 0));
             
             JObject payload = new JObject();
             payload["Title"] = "HYDRO DEM";
@@ -167,12 +206,17 @@ namespace Enzyme.Components
             
             JArray metrics = new JArray();
             metrics.Add(new JObject { ["Name"] = "Stream Networks", ["Value"] = streams.Count.ToString() });
+            metrics.Add(new JObject { ["Name"] = "Catchments", ["Value"] = catchments.ToString() });
+            metrics.Add(new JObject { ["Name"] = "Ponds", ["Value"] = pondCount.ToString() });
+            metrics.Add(new JObject { ["Name"] = "Pond volume", ["Value"] = pondVolume.ToString("F0", System.Globalization.CultureInfo.InvariantCulture) + " m³" });
+            metrics.Add(new JObject { ["Name"] = "Max pond depth", ["Value"] = maxDepth.ToString("F2", System.Globalization.CultureInfo.InvariantCulture) + " m" });
             payload["Metrics"] = metrics;
             
             DA.SetData(3, "HYDROLOGICAL DEM\n"
                 + "\n"
                 + "METHODOLOGY:\n"
-                + "Uses the D8 flow routing algorithm. Each mesh vertex assesses its 8 immediate topological neighbors to find the steepest descent path. "
+                + "Depressions are first filled with Priority-Flood (Barnes, Lehman & Mulla 2014): a flood grows inward from the terrain edge, lowest first, so each hollow fills to its spill level. "
+                + "Each vertex then drains to its steepest-descent neighbour on the filled surface (through filled hollows and flats along the flood order), so every stream reaches the terrain edge. "
                 + "Rainfall (1 unit per vertex) is then accumulated down these natural gradients. Flow networks are generated where accumulation exceeds the specified threshold.\n\n"
                 + "INTERPRETATION & IMPORTANCE:\n"
                 + "Critical for predicting natural drainage, identifying flood-prone catchments, and optimizing agricultural water capture systems before detailed engineering begins.");
@@ -181,6 +225,9 @@ namespace Enzyme.Components
             DA.SetDataList(0, streams);
             DA.SetDataList(1, accumulation.ToList());
             DA.SetDataList(2, topPoints);
+            DA.SetDataList(5, depth);
+            if (water.Faces.Count > 0) DA.SetData(6, water);
+            DA.SetDataList(7, route.Outlet);
         }
 
         protected override System.Drawing.Bitmap Icon => Enzyme.IconLoader.Load("HydroDEM.png");
