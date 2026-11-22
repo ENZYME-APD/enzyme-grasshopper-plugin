@@ -36,7 +36,7 @@
 
             <div class="io-grid">
                 <div class="io-col">
-                    <h3>Inputs (10)</h3>
+                    <h3>Inputs (11)</h3>
                     <ul>
                         <li><strong>Centrelines</strong> (Curve): Road centrelines. Reference them from Rhino to use their User Text (road_template, road_hierarchy, road_name).</li>
                         <li><strong>Snap Tolerance</strong> (Number): Ends closer than this (m) to another centreline or end are joined.</li>
@@ -47,19 +47,21 @@
                         <li><strong>Templates</strong> (Text): Optional override per centreline (same order), for centrelines made in Grasshopper that cannot carry User Text. Empty items fall through.</li>
                         <li><strong>Hierarchies</strong> (Text): Optional override per centreline (same order).</li>
                         <li><strong>Names</strong> (Text): Optional override per centreline (same order).</li>
+                        <li><strong>Junction Points</strong> (Point): Optional points referenced from Rhino, placed on junctions, with User Text: junction_type (auto, priority, signals, roundabout, mini-roundabout, cul-de-sac), junction_radius (kerb radius, or outer radius of a roundabout / cul-de-sac), junction_priority (road_name that runs through), junction_name.</li>
                         <li><strong>Run</strong> (Boolean): False = keep showing the last results (cached).</li>
                     </ul>
                 </div>
                 <div class="io-col">
-                    <h3>Outputs (16)</h3>
+                    <h3>Outputs (17)</h3>
                     <ul>
                         <li><strong>Nodes</strong> (Point): Junctions, dead ends and joins.</li>
                         <li><strong>Edges</strong> (Curve): Centrelines split at every junction (original 3D curves).</li>
                         <li><strong>Corridor Edges</strong> (Curve): Edges trimmed between the junction mouths: feed Auto-Grade Road / Road Corridor so corridors stop where the junction starts.</li>
+                        <li><strong>Corridor Templates</strong> (Text): Template JSON of each Corridor Edge (same order): wire into Road Corridor's Template so the 3D uses the same street type as the plan.</li>
                         <li><strong>Kerb Lines</strong> (Curve): 2D kerb face and kerb back lines, with kerb returns at the corners.</li>
                         <li><strong>Edge Lines</strong> (Curve): 2D edges of the other parts (cycle tracks, footways, verges, shoulders) and the road boundary, with returns at the corners where they match.</li>
                         <li><strong>Mouth Lines</strong> (Curve): 2D lines across each road where its junction ends.</li>
-                        <li><strong>Junction Areas</strong> (Curve): 2D carriageway outline of each junction (closed).</li>
+                        <li><strong>Junction Areas</strong> (Curve): 2D carriageway outline of each junction (closed); roundabout islands too.</li>
                         <li><strong>Road Areas</strong> (Curve): 2D closed strips per edge for hatching: carriageway and each part between the mouths.</li>
                         <li><strong>Area Types</strong> (Text): Part type of each Road Area (carriageway, kerb, cycle, footway, verge ...).</li>
                         <li><strong>Label Points</strong> (Point): Where to place labels (edge middles, nodes).</li>

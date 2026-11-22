@@ -167,4 +167,29 @@ Check(double.IsNaN(OsmParse.ParseLength("tall")) && OsmParse.ParseLength("12;15"
     var sh=RoadNetworkGraph.Build(new List<NetEdgeInput>{E(0,0,12,0,"local"),E(0,0,0,30,"local"),E(0,0,0,-30,"local"),E(12,0,12,30,"local"),E(12,0,12,-30,"local")},0.5,radii);
     Check(sh.Warnings.Count==1 && sh.StartStation(0)<=sh.EndStation(0), "network: short link between junctions warned and shortened");
 }
+// road network: junction tags (roundabout, cul-de-sac, priority, radius)
+{
+    var res=RoadTemplate.Preset("residential street");
+    NetEdgeInput E2(double x0,double y0,double x1,double y1,string h,string nm){ var a=new V2(x0,y0); var b=new V2(x1,y1); var d=(b-a).Unit(); return new NetEdgeInput{Start=a,End=b,StartDir=d,EndDir=d,Length=(b-a).Length,Template=res,TemplateName="residential street",Hierarchy=h,Name=nm}; }
+    var radii=new double[]{6,6,9,12};
+    var arms4=new List<NetEdgeInput>{E2(0,0,80,0,"local","A"),E2(0,80,0,0,"local","B"),E2(-80,0,0,0,"local","C"),E2(0,0,0,-80,"local","D")};
+    var rb=RoadNetworkGraph.Build(arms4,0.5,radii,1.0,170,new List<JunctionTag>{new JunctionTag{P=new V2(1,1),Type="Roundabout",Name="R1"}});
+    var rn=rb.Nodes.First(nd=>nd.Arms.Count==4); double xr=Math.Sqrt(25*25-13*13);
+    Check(rn.Type=="roundabout" && rn.Control=="roundabout" && rn.RingRadius==15 && Math.Abs(rn.IslandRadius-9.5)<1e-9 && rb.Corners.Count==0 && rn.Arms.All(a=>Math.Abs(rb.Arms[a].Mouth-(xr+1))<1e-9), $"tag: roundabout R15, entries {xr:F2} m, mouths, no priority corners");
+    Check(rn.RingArcs.Count(a=>a.Role=="kerb face")==12 && rn.RingArcs.Count(a=>a.Role=="boundary")==12 && rn.IslandOutline.Count==49 && rn.CarriagewayOutline.Count>100, "tag: roundabout arcs (fillets + circle), island and outline");
+    var arcOk=rn.RingArcs.Where(a=>a.Role=="kerb face").All(a=>{ var pts=RoadNetworkGraph.ArcSampled(a,8); return pts.Count==9; });
+    var ringPts=rn.RingArcs.Where(a=>a.Role=="kerb face" && Math.Abs((a.A-rn.P).Length-15)<1e-6 && Math.Abs((a.B-rn.P).Length-15)<1e-6).ToList();
+    Check(arcOk && ringPts.Count==4 && ringPts.All(a=>Math.Abs((a.M-rn.P).Length-15)<1e-6), "tag: circle arcs between entries lie on the 15 m kerb circle");
+    Check(rb.LineTrims.ContainsKey((rn.Arms[0],'L',1)) && Math.Abs(rb.LineTrims[(rn.Arms[0],'L',1)].t-xr)<1e-9 && Math.Abs(rb.LineTrims[(rn.Arms[0],'L',4)].t-xr)<1e-9, "tag: kerb face and boundary trimmed at the entry fillet");
+    var cd=RoadNetworkGraph.Build(new List<NetEdgeInput>{E2(0,0,60,0,"local","Close")},0.5,radii,1.0,170,new List<JunctionTag>{new JunctionTag{P=new V2(0,0),Type="cul-de-sac"}});
+    var cn=cd.Nodes.First(nd=>nd.Arms.Count==1&&nd.IsRing); var bulb=cn.RingArcs.First(a=>a.Role=="kerb face" && Math.Abs((a.A-cn.P).Length-9)<1e-6);
+    Check(cn.RingRadius==9 && Math.Abs(cd.Arms[0].Mouth-13)<1e-9 && Math.Abs(bulb.M.X+9)<1e-6 && Math.Abs(bulb.M.Y)<1e-6 && Math.Abs(cd.StartStation(0)-13)<1e-9, "tag: cul-de-sac bulb R9 round the back of the dead end");
+    var pr=RoadNetworkGraph.Build(new List<NetEdgeInput>{E2(0,0,60,0,"main","High St"),E2(-60,0,0,0,"main","High St"),E2(0,0,0,40,"local","Side")},0.5,radii,1.0,170,
+        new List<JunctionTag>{new JunctionTag{P=new V2(0,0),Type="priority",Priority="Side",Radius=4}});
+    var pn=pr.Nodes.First(nd=>nd.Arms.Count==3);
+    Check(pn.Control=="priority" && pr.Corners.Where(c=>!c.Straight).All(c=>c.Radius==4) && pn.Through.SequenceEqual(new[]{0,3}), "tag: radius override; priority name with one arm keeps automatic priority");
+    Check(pr.Warnings.Any(w=>w.Contains("does not have two arms")) && RoadNetworkGraph.BaseName("High St (2)")=="High St", "tag: priority warning and split-edge base names");
+    var far=RoadNetworkGraph.Build(arms4,0.5,radii,1.0,170,new List<JunctionTag>{new JunctionTag{P=new V2(40,40),Type="roundabout"}});
+    Check(far.Warnings.Count==1 && far.Nodes.All(nd=>!nd.Tagged), "tag: far from any node is ignored with a warning");
+}
 Console.WriteLine(fails==0?"ALL PASS":$"{fails} FAILED"); return fails;

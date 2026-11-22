@@ -31,7 +31,7 @@ namespace Enzyme.Components
         {
             pManager.AddCurveParameter("Centreline", "C", "3D road centreline. Its Z is the finished road level on the axis (use Auto-Grade Road for a draped, slope-limited profile).", GH_ParamAccess.item);
             pManager.AddMeshParameter("Terrain", "T", "Existing ground mesh.", GH_ParamAccess.item);
-            pManager.AddTextParameter("Template", "Tpl", "Preset name (residential street, urban street, rural road, cycle path, access track) or a JSON template. See the Template output for the format.", GH_ParamAccess.item, "residential street");
+            pManager.AddTextParameter("Template", "Tpl", "Preset name (residential street, urban street, rural road, cycle path, access track), a JSON template, or Road Network's Corridor Templates (one per Corridor Edge) so the 3D matches the 2D plan.", GH_ParamAccess.item, "residential street");
             pManager.AddNumberParameter("Interval", "Int", "Distance between cross sections (m).", GH_ParamAccess.item, 5.0);
             pManager.AddNumberParameter("Design Speed", "V", "Design speed (km/h), used for superelevation on curves.", GH_ParamAccess.item, 30.0);
             pManager.AddNumberParameter("Max Superelevation", "eMax", "Maximum superelevation (%). 0 = keep the normal crown (typical for urban streets).", GH_ParamAccess.item, 0.0);

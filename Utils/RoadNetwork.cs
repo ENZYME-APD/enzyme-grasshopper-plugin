@@ -66,6 +66,23 @@ namespace Enzyme.Utils
         public List<CornerLine> Lines = new List<CornerLine>();
     }
 
+    /// <summary>A junction tag: a point with User Text near a node.</summary>
+    public sealed class JunctionTag
+    {
+        public V2 P;
+        public string Type = "auto";    // auto, priority, signals, roundabout, mini-roundabout, cul-de-sac
+        public double Radius = double.NaN; // kerb radius (priority junctions) or outer radius (roundabouts, cul-de-sacs)
+        public string Priority = "";    // road_name of the road that runs through
+        public string Name = "";
+    }
+
+    /// <summary>A circular arc in plan through three points.</summary>
+    public struct ArcSpec
+    {
+        public V2 A, M, B;
+        public string Role;             // "kerb face", "boundary", "island"
+    }
+
     public sealed class NetNode
     {
         public int Id;
@@ -75,6 +92,16 @@ namespace Enzyme.Utils
         public List<int> Corners = new List<int>();
         public int[] Through;           // the two priority arms, or null
         public List<V2> CarriagewayOutline = new List<V2>(); // junction paved area (deg >= 3)
+        public string Control = "auto"; // from a junction tag
+        public string TagName = "";
+        public bool Tagged;
+        public double RingRadius;       // roundabout / cul-de-sac outer kerb radius (0 = none)
+        public double IslandRadius;     // roundabout central island (0 = none)
+        public List<ArcSpec> RingArcs = new List<ArcSpec>();
+        public List<V2> IslandOutline = new List<V2>();
+        public bool IsRing => RingRadius > 0;
+        public string Priority = "";
+        public double TagRadius = double.NaN;
     }
 
     public sealed class RoadNetworkGraph
@@ -85,6 +112,12 @@ namespace Enzyme.Utils
         public List<NetCorner> Corners = new List<NetCorner>();
         public int[] EdgeStartNode, EdgeEndNode;
         public List<string> Warnings = new List<string>();
+        /// <summary>Where each part-edge line of an arm stops: (arm, 'L'/'R' looking away from the node, boundary) -> (distance from node, exact end point).</summary>
+        public Dictionary<(int arm, char side, int k), (double t, V2 p)> LineTrims = new Dictionary<(int, char, int), (double, V2)>();
+
+        public static readonly string[] Controls = { "auto", "priority", "signals", "roundabout", "mini-roundabout", "cul-de-sac" };
+        public static double DefaultRingRadius(string control) => control == "roundabout" ? 15.0 : control == "mini-roundabout" ? 8.0 : control == "cul-de-sac" ? 9.0 : 0;
+        public static double DefaultIslandRadius(string control, double outer) => control == "roundabout" ? Math.Max(1.0, outer - 5.5) : control == "mini-roundabout" ? 2.0 : 0;
 
         public static readonly string[] Hierarchies = { "main", "secondary", "local" };
         public static int RankOf(string h)
@@ -122,7 +155,7 @@ namespace Enzyme.Utils
         }
 
         /// <param name="radiusByRank">Corner radius for rank 1 (local), 2 (secondary), 3 (main); index 0 for unranked.</param>
-        public static RoadNetworkGraph Build(List<NetEdgeInput> edges, double tol, double[] radiusByRank, double mouthExtra = 1.0, double straightAngle = 170.0)
+        public static RoadNetworkGraph Build(List<NetEdgeInput> edges, double tol, double[] radiusByRank, double mouthExtra = 1.0, double straightAngle = 170.0, List<JunctionTag> tags = null, double tagReach = 5.0)
         {
             var g = new RoadNetworkGraph { Edges = edges };
             int n = edges.Count;
@@ -165,11 +198,37 @@ namespace Enzyme.Utils
                 }
             }
 
+            // ---- junction tags: nearest node within reach
+            if (tags != null)
+                foreach (var tag in tags)
+                {
+                    NetNode best = null; double bd = double.MaxValue;
+                    foreach (var nd in g.Nodes) { double d = (nd.P - tag.P).Length; if (d < bd) { bd = d; best = nd; } }
+                    if (best == null || bd > Math.Max(tagReach, tol)) { g.Warnings.Add($"Junction tag '{tag.Name}' {tag.Type} at {tag.P} is not within {Math.Max(tagReach, tol):0.#} m of a node; ignored."); continue; }
+                    string ctl = (tag.Type ?? "auto").Trim().ToLowerInvariant().Replace(" ", "-");
+                    if (ctl == "turning-head" || ctl == "turning-circle") ctl = "cul-de-sac";
+                    if (ctl == "mini") ctl = "mini-roundabout";
+                    if (Array.IndexOf(Controls, ctl) < 0) { g.Warnings.Add($"Junction tag type '{tag.Type}' unknown (use {string.Join(", ", Controls)}); treated as auto."); ctl = "auto"; }
+                    if (best.Tagged) g.Warnings.Add($"Node {best.Id} has more than one junction tag; the last one wins.");
+                    best.Tagged = true; best.Control = ctl; best.TagName = tag.Name ?? "";
+                    best.Priority = tag.Priority ?? ""; best.TagRadius = tag.Radius;
+                }
+
             foreach (var node in g.Nodes)
             {
                 node.Arms.Sort((a, b) => g.Arms[a].Heading.CompareTo(g.Arms[b].Heading));
                 int deg = node.Arms.Count;
                 node.Type = deg == 1 ? "dead end" : deg == 2 ? "continuation" : deg == 3 ? "T" : deg == 4 ? "crossroads" : "multi";
+
+                bool ring = node.Control == "roundabout" || node.Control == "mini-roundabout" || (node.Control == "cul-de-sac" && deg == 1);
+                if (node.Control == "cul-de-sac" && deg != 1) g.Warnings.Add($"Node {node.Id} is tagged cul-de-sac but is not a dead end; ignored.");
+                if (ring)
+                {
+                    if (node.Control != "cul-de-sac") node.Type = "roundabout";
+                    node.RingRadius = !double.IsNaN(node.TagRadius) && node.TagRadius > 0 ? node.TagRadius : DefaultRingRadius(node.Control);
+                    node.IslandRadius = DefaultIslandRadius(node.Control, node.RingRadius);
+                    continue;
+                }
 
                 if (deg >= 3)
                 {
@@ -183,6 +242,12 @@ namespace Enzyme.Utils
                             double score = (a.Rank + b.Rank) * 10 + straight;
                             if (score > best) { best = score; pair = new[] { a.Id, b.Id }; }
                         }
+                    if (!string.IsNullOrWhiteSpace(node.Priority))
+                    {
+                        var named = node.Arms.Where(id => BaseName(g.Edges[g.Arms[id].Edge].Name).Equals(node.Priority.Trim(), StringComparison.OrdinalIgnoreCase)).ToList();
+                        if (named.Count >= 2) pair = new[] { named[0], named[1] };
+                        else g.Warnings.Add($"Node {node.Id}: priority road '{node.Priority}' does not have two arms here; automatic priority kept.");
+                    }
                     node.Through = pair;
                     foreach (int id in pair) g.Arms[id].Priority = true;
                     double straightness = -g.Arms[pair[0]].Dir.Dot(g.Arms[pair[1]].Dir);
@@ -195,6 +260,7 @@ namespace Enzyme.Utils
                         if (deg > 1 && ang == 0) ang = 360;
                         int minRank = Math.Min(A.Rank, B.Rank);
                         double r = radiusByRank[Math.Max(0, Math.Min(radiusByRank.Length - 1, minRank))];
+                        if (!double.IsNaN(node.TagRadius) && node.TagRadius > 0) r = node.TagRadius;
                         var c = new NetCorner { Node = node.Id, ArmA = A.Id, ArmB = B.Id, Angle = ang, Radius = r, Straight = ang >= straightAngle };
                         c.Lines = CornerLines(node.P, A, B, ang, r, c.Straight);
                         node.Corners.Add(g.Corners.Count);
@@ -202,6 +268,9 @@ namespace Enzyme.Utils
                     }
                 }
             }
+
+            // ---- roundabouts and cul-de-sacs
+            foreach (var node in g.Nodes.Where(nd => nd.IsRing)) Ring(g, node, radiusByRank, mouthExtra);
 
             // ---- mouths: past the farthest kerb-face tangent point of the arm's two corners
             foreach (var c in g.Corners)
@@ -217,7 +286,7 @@ namespace Enzyme.Utils
                 }
             }
             // Arms of a junction with only straight corners on one side still need a mouth (e.g. the through road of a T).
-            foreach (var node in g.Nodes.Where(nd => nd.Arms.Count >= 3))
+            foreach (var node in g.Nodes.Where(nd => nd.Arms.Count >= 3 && !nd.IsRing))
             {
                 double m = node.Arms.Max(a => g.Arms[a].Mouth);
                 foreach (int a in node.Arms)
@@ -248,7 +317,15 @@ namespace Enzyme.Utils
             }
 
             // ---- junction carriageway outline
-            foreach (var node in g.Nodes.Where(nd => nd.Arms.Count >= 3))
+            // ---- line trims (after mouth shortening the straight ones are final)
+            foreach (var c in g.Corners)
+                foreach (var l in c.Lines)
+                {
+                    g.LineTrims[(c.ArmA, 'L', l.BoundaryA)] = (l.Ta, l.TangentA);
+                    g.LineTrims[(c.ArmB, 'R', l.BoundaryB)] = (l.Tb, l.TangentB);
+                }
+
+            foreach (var node in g.Nodes.Where(nd => nd.Arms.Count >= 3 && !nd.IsRing))
             {
                 var outline = node.CarriagewayOutline;
                 for (int k = 0; k < node.Corners.Count; k++)
@@ -336,6 +413,124 @@ namespace Enzyme.Utils
             return list;
         }
 
+        public static string BaseName(string edgeName)
+        {
+            string s = edgeName ?? "";
+            int k = s.LastIndexOf(" (", StringComparison.Ordinal);
+            return k > 0 && s.EndsWith(")") ? s.Substring(0, k) : s;
+        }
+
+        /// <summary>
+        /// Roundabout / cul-de-sac: an outer kerb circle around the node, each arm's kerb face and
+        /// boundary joined to it with a fillet (concentric for the two lines), circle arcs between
+        /// the arms, and a central island for roundabouts.
+        /// </summary>
+        private static void Ring(RoadNetworkGraph g, NetNode node, double[] radiusByRank, double mouthExtra)
+        {
+            double R = node.RingRadius;
+            int deg = node.Arms.Count;
+            var circleT = new Dictionary<(int arm, char side, string role), V2>();
+            var filletKF = new Dictionary<(int arm, char side), ArcSpec>();
+            foreach (int a in node.Arms)
+            {
+                var arm = g.Arms[a];
+                double r = radiusByRank[Math.Max(0, Math.Min(radiusByRank.Length - 1, arm.Rank))];
+                if (node.Control == "roundabout") r = Math.Max(r, 10.0);
+                foreach (char side in new[] { 'L', 'R' })
+                {
+                    var parts = side == 'L' ? arm.LeftParts : arm.RightParts;
+                    var n = side == 'L' ? arm.Dir.Left : arm.Dir.Right;
+                    double c = CarriagewayWidth(parts);
+                    var bnd = Boundaries(parts);
+                    int kc = Array.FindIndex(bnd, v => Math.Abs(v - c) < 1e-9); if (kc < 0) kc = 1;
+                    var roles = new List<(string role, int k)> { ("kerb face", kc) };
+                    if (bnd.Length - 1 > kc) roles.Add(("boundary", bnd.Length - 1));
+                    foreach (var (role, k) in roles)
+                    {
+                        double w = bnd[k], delta = w - c;
+                        double Rk = R + delta, rk = Math.Max(0.5, r - delta);
+                        double h = (Rk + rk) * (Rk + rk) - (w + rk) * (w + rk);
+                        if (h <= 0)
+                        {
+                            g.Warnings.Add($"Node {node.Id}: {node.Control} radius {R:0.#} m is too small for '{g.Edges[arm.Edge].Name}'; increase junction_radius.");
+                            continue;
+                        }
+                        double x = Math.Sqrt(h);
+                        var tLine = node.P + arm.Dir * x + n * w;
+                        var C = node.P + arm.Dir * x + n * (w + rk);
+                        var tCircle = node.P + (C - node.P) * (Rk / (Rk + rk));
+                        var mid = C + (((tLine + tCircle) * 0.5) - C).Unit() * rk;
+                        var fillet = new ArcSpec { A = tLine, M = mid, B = tCircle, Role = role };
+                        node.RingArcs.Add(fillet);
+                        if (role == "kerb face") filletKF[(a, side)] = fillet;
+                        circleT[(a, side, role)] = tCircle;
+                        g.LineTrims[(a, side, k)] = (x, tLine);
+                        if (role == "kerb face") arm.Mouth = Math.Max(arm.Mouth, x + mouthExtra);
+                    }
+                }
+            }
+            // circle arcs between consecutive arms, counter-clockwise from A's left to B's right
+            var circleKF = new Dictionary<int, ArcSpec>();
+            for (int i = 0; i < deg; i++)
+            {
+                int a = node.Arms[i], b = node.Arms[(i + 1) % deg];
+                foreach (string role in new[] { "kerb face", "boundary" })
+                {
+                    if (!circleT.TryGetValue((a, 'L', role), out V2 p0) || !circleT.TryGetValue((b, 'R', role), out V2 p1)) continue;
+                    double a0 = (p0 - node.P).Angle, a1 = (p1 - node.P).Angle;
+                    double sweep = a1 - a0;
+                    while (sweep <= 1e-9) sweep += 2 * Math.PI;
+                    if (sweep > 2 * Math.PI - 1e-6) continue;
+                    double rad = (p0 - node.P).Length, am = a0 + sweep / 2;
+                    var arc = new ArcSpec { A = p0, M = node.P + new V2(Math.Cos(am), Math.Sin(am)) * rad, B = p1, Role = role };
+                    node.RingArcs.Add(arc);
+                    if (role == "kerb face") circleKF[i] = arc;
+                }
+            }
+            if (node.IslandRadius > 0)
+                for (int i = 0; i <= 48; i++)
+                {
+                    double t = 2 * Math.PI * i / 48;
+                    node.IslandOutline.Add(node.P + new V2(Math.Cos(t), Math.Sin(t)) * node.IslandRadius);
+                }
+
+            // carriageway outline, counter-clockwise: across each mouth, out along the left fillet,
+            // round the circle, back along the next arm's right fillet.
+            var o = node.CarriagewayOutline;
+            for (int i = 0; i < deg; i++)
+            {
+                var A = g.Arms[node.Arms[i]];
+                var B = g.Arms[node.Arms[(i + 1) % deg]];
+                o.Add(node.P + A.Dir * A.Mouth + A.Dir.Right * CarriagewayWidth(A.RightParts));
+                o.Add(node.P + A.Dir * A.Mouth + A.Dir.Left * CarriagewayWidth(A.LeftParts));
+                if (filletKF.TryGetValue((A.Id, 'L'), out var fl)) o.AddRange(ArcSampled(fl, 8));
+                if (circleKF.TryGetValue(i, out var ca)) o.AddRange(ArcSampled(ca, 24));
+                if (filletKF.TryGetValue((B.Id, 'R'), out var fr)) o.AddRange(ArcSampled(new ArcSpec { A = fr.B, M = fr.M, B = fr.A }, 8));
+            }
+            if (o.Count > 2) o.Add(o[0]);
+        }
+
+        /// <summary>Points along an arc through A, M, B (inclusive).</summary>
+        public static List<V2> ArcSampled(ArcSpec s, int segments)
+        {
+            // circumcentre
+            double ax = s.A.X, ay = s.A.Y, bx = s.M.X, by = s.M.Y, cx = s.B.X, cy = s.B.Y;
+            double d = 2 * (ax * (by - cy) + bx * (cy - ay) + cx * (ay - by));
+            if (Math.Abs(d) < 1e-12) return new List<V2> { s.A, s.B };
+            double ux = ((ax * ax + ay * ay) * (by - cy) + (bx * bx + by * by) * (cy - ay) + (cx * cx + cy * cy) * (ay - by)) / d;
+            double uy = ((ax * ax + ay * ay) * (cx - bx) + (bx * bx + by * by) * (ax - cx) + (cx * cx + cy * cy) * (bx - ax)) / d;
+            var c = new V2(ux, uy);
+            double r = (s.A - c).Length;
+            double a0 = (s.A - c).Angle, am = (s.M - c).Angle, a1 = (s.B - c).Angle;
+            double ccw = Wrap(a1 - a0), toMid = Wrap(am - a0);
+            double sweep = toMid <= ccw ? ccw : ccw - 2 * Math.PI;
+            var list = new List<V2>();
+            for (int i = 0; i <= segments; i++) { double t = a0 + sweep * i / segments; list.Add(c + new V2(Math.Cos(t), Math.Sin(t)) * r); }
+            return list;
+        }
+
+        private static double Wrap(double a) { while (a < 0) a += 2 * Math.PI; while (a >= 2 * Math.PI) a -= 2 * Math.PI; return a; }
+
         private static double Norm360(double d) { d %= 360; return d < 0 ? d + 360 : d; }
 
         /// <summary>Distance along edge e where its corridor should start / end (between the junction mouths).</summary>
@@ -386,6 +581,8 @@ namespace Enzyme.Utils
             return new JObject
             {
                 ["id"] = nd.Id, ["type"] = nd.Type, ["x"] = Math.Round(nd.P.X, 3), ["y"] = Math.Round(nd.P.Y, 3),
+                ["control"] = nd.Control, ["tagged"] = nd.Tagged, ["name"] = nd.TagName,
+                ["ring_radius_m"] = Math.Round(nd.RingRadius, 3), ["island_radius_m"] = Math.Round(nd.IslandRadius, 3),
                 ["degree"] = nd.Arms.Count,
                 ["through_arms"] = nd.Through == null ? null : new JArray(nd.Through),
                 ["min_corner_angle_deg"] = Math.Round(minAngle, 2),

@@ -44,8 +44,9 @@ namespace Enzyme.Components
             pManager.AddTextParameter("Templates", "Tpl", "Optional override per centreline (same order), for centrelines made in Grasshopper that cannot carry User Text. Empty items fall through.", GH_ParamAccess.list);
             pManager.AddTextParameter("Hierarchies", "H", "Optional override per centreline (same order).", GH_ParamAccess.list);
             pManager.AddTextParameter("Names", "N", "Optional override per centreline (same order).", GH_ParamAccess.list);
+            pManager.AddPointParameter("Junction Points", "JPts", "Optional points referenced from Rhino, placed on junctions, with User Text: junction_type (auto, priority, signals, roundabout, mini-roundabout, cul-de-sac), junction_radius (kerb radius, or outer radius of a roundabout / cul-de-sac), junction_priority (road_name that runs through), junction_name.", GH_ParamAccess.list);
             pManager.AddBooleanParameter("Run", "Run", "False = keep showing the last results (cached).", GH_ParamAccess.item, true);
-            for (int i = 1; i <= 9; i++) pManager[i].Optional = true;
+            for (int i = 1; i <= 10; i++) pManager[i].Optional = true;
         }
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
@@ -53,10 +54,11 @@ namespace Enzyme.Components
             pManager.AddPointParameter("Nodes", "Nodes", "Junctions, dead ends and joins.", GH_ParamAccess.list);
             pManager.AddCurveParameter("Edges", "Edges", "Centrelines split at every junction (original 3D curves).", GH_ParamAccess.list);
             pManager.AddCurveParameter("Corridor Edges", "CorrEdges", "Edges trimmed between the junction mouths: feed Auto-Grade Road / Road Corridor so corridors stop where the junction starts.", GH_ParamAccess.list);
+            pManager.AddTextParameter("Corridor Templates", "CorrTpl", "Template JSON of each Corridor Edge (same order): wire into Road Corridor's Template so the 3D uses the same street type as the plan.", GH_ParamAccess.list);
             pManager.AddCurveParameter("Kerb Lines", "Kerbs", "2D kerb face and kerb back lines, with kerb returns at the corners.", GH_ParamAccess.list);
             pManager.AddCurveParameter("Edge Lines", "Lines", "2D edges of the other parts (cycle tracks, footways, verges, shoulders) and the road boundary, with returns at the corners where they match.", GH_ParamAccess.list);
             pManager.AddCurveParameter("Mouth Lines", "Mouths", "2D lines across each road where its junction ends.", GH_ParamAccess.list);
-            pManager.AddCurveParameter("Junction Areas", "JArea", "2D carriageway outline of each junction (closed).", GH_ParamAccess.list);
+            pManager.AddCurveParameter("Junction Areas", "JArea", "2D carriageway outline of each junction (closed); roundabout islands too.", GH_ParamAccess.list);
             pManager.AddCurveParameter("Road Areas", "RArea", "2D closed strips per edge for hatching: carriageway and each part between the mouths.", GH_ParamAccess.list);
             pManager.AddTextParameter("Area Types", "AType", "Part type of each Road Area (carriageway, kerb, cycle, footway, verge ...).", GH_ParamAccess.list);
             pManager.AddPointParameter("Label Points", "LblPt", "Where to place labels (edge middles, nodes).", GH_ParamAccess.list);
@@ -79,6 +81,8 @@ namespace Enzyme.Components
             DA.GetDataList(4, radii); DA.GetDataList(5, custom);
             DA.GetDataList(6, oTpl); DA.GetDataList(7, oH); DA.GetDataList(8, oN);
             tol = Math.Max(0.001, tol);
+            var jGoos = new List<GH_Point>();
+            DA.GetDataList(9, jGoos);
             if (radii.Count == 0) radii = new List<double> { 6, 9, 12 };
             while (radii.Count < 3) radii.Add(radii[radii.Count - 1]);
             double[] radiusByRank = { radii[0], radii[0], radii[1], radii[2] };
@@ -200,26 +204,42 @@ namespace Enzyme.Components
             if (dropped > 0) AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"{dropped} piece(s) shorter than the snap tolerance dropped.");
             if (edges.Count == 0) throw new InvalidOperationException("No road edges.");
 
-            var g = RoadNetworkGraph.Build(edges, tol, radiusByRank);
+            var tags = new List<JunctionTag>();
+            int unreferenced = 0;
+            foreach (var jp in jGoos)
+            {
+                if (jp == null) continue;
+                var obj = (jp.IsReferencedGeometry && doc != null) ? doc.Objects.FindId(jp.ReferenceID) : null;
+                if (obj == null) { unreferenced++; continue; }
+                var at = obj.Attributes;
+                string ty = Get(at, "junction_type", "junction");
+                if (string.IsNullOrEmpty(ty)) { unreferenced++; continue; }
+                double rad = double.NaN;
+                string rs = Get(at, "junction_radius");
+                if (rs != null && double.TryParse(rs.Replace(",", "."), NumberStyles.Float, CultureInfo.InvariantCulture, out double rv)) rad = rv;
+                tags.Add(new JunctionTag
+                {
+                    P = new V2(jp.Value.X, jp.Value.Y), Type = ty, Radius = rad,
+                    Priority = Get(at, "junction_priority") ?? "", Name = Get(at, "junction_name") ?? "",
+                });
+            }
+            if (unreferenced > 0)
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"{unreferenced} junction point(s) have no junction_type User Text (or are not referenced from Rhino); ignored.");
+
+            var g = RoadNetworkGraph.Build(edges, tol, radiusByRank, 1.0, 170.0, tags, Math.Max(5.0, 3 * tol));
             foreach (string w in g.Warnings) AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, w);
 
             // ---- trim stations per (arm, side, boundary)
-            var trim = new Dictionary<(int arm, char side, int k), (double t, V2? p)>();
-            foreach (var c in g.Corners)
-                foreach (var l in c.Lines)
-                {
-                    trim[(c.ArmA, 'L', l.BoundaryA)] = (l.Ta, (V2?)l.TangentA);
-                    trim[(c.ArmB, 'R', l.BoundaryB)] = (l.Tb, (V2?)l.TangentB);
-                }
             Func<NetArm, char, int, (double t, V2? p)> trimOf = (arm, side, k) =>
             {
-                if (trim.TryGetValue((arm.Id, side, k), out var v)) return v;
-                return (g.Nodes[arm.Node].Arms.Count >= 3 ? arm.Mouth : 0.0, null);
+                if (g.LineTrims.TryGetValue((arm.Id, side, k), out var v)) return (v.t, (V2?)v.p);
+                var nd = g.Nodes[arm.Node];
+                return (nd.Arms.Count >= 3 || nd.IsRing ? arm.Mouth : 0.0, null);
             };
 
             var kerbLines = new List<Curve>(); var edgeLines = new List<Curve>(); var mouths = new List<Curve>();
             var areas = new List<Curve>(); var areaTypes = new List<string>();
-            var corridorEdges = new List<Curve>();
+            var corridorEdges = new List<Curve>(); var corridorTpl = new List<string>();
             for (int e = 0; e < edges.Count; e++)
             {
                 var fc = edgeFlat[e]; double L = edges[e].Length;
@@ -232,7 +252,7 @@ namespace Enzyme.Components
                 {
                     fc.LengthParameter(s0, out double t0); fc.LengthParameter(s1, out double t1);
                     var tr = edgeOrig[e].Trim(t0, t1);
-                    if (tr != null) corridorEdges.Add(tr);
+                    if (tr != null) { corridorEdges.Add(tr); corridorTpl.Add(edges[e].Template.ToJson()); }
                 }
 
                 foreach (int sign in new[] { -1, 1 })
@@ -257,8 +277,8 @@ namespace Enzyme.Components
 
                 // hatch areas between the mouths
                 double m0 = sArm.Mouth, m1 = L - eArm.Mouth;
-                if (g.Nodes[sArm.Node].Arms.Count < 3) m0 = 0;
-                if (g.Nodes[eArm.Node].Arms.Count < 3) m1 = L;
+                if (g.Nodes[sArm.Node].Arms.Count < 3 && !g.Nodes[sArm.Node].IsRing) m0 = 0;
+                if (g.Nodes[eArm.Node].Arms.Count < 3 && !g.Nodes[eArm.Node].IsRing) m1 = L;
                 if (m1 - m0 > 1e-3)
                 {
                     double cl = RoadNetworkGraph.CarriagewayWidth(tplE.Left), cr = RoadNetworkGraph.CarriagewayWidth(tplE.Right);
@@ -288,7 +308,21 @@ namespace Enzyme.Components
                     (l.Role.Contains("kerb") ? kerbLines : edgeLines).Add(crv);
                 }
             var junctionAreas = new List<Curve>();
-            foreach (var nd in g.Nodes.Where(x => x.Arms.Count >= 3))
+            foreach (var nd in g.Nodes.Where(x => x.IsRing))
+            {
+                foreach (var arc in nd.RingArcs)
+                {
+                    var ac = new ArcCurve(new Arc(P3(arc.A), P3(arc.M), P3(arc.B)));
+                    if (ac.IsValid && ac.GetLength() > 1e-3) (arc.Role == "kerb face" ? kerbLines : edgeLines).Add(ac);
+                }
+                if (nd.IslandRadius > 0)
+                {
+                    var island = new ArcCurve(new Circle(P3(nd.P), nd.IslandRadius));
+                    kerbLines.Add(island);
+                    junctionAreas.Add(island);
+                }
+            }
+            foreach (var nd in g.Nodes.Where(x => x.Arms.Count >= 3 || x.IsRing))
             {
                 if (nd.CarriagewayOutline.Count > 3) junctionAreas.Add(new PolylineCurve(nd.CarriagewayOutline.Select(P3)));
                 foreach (int a in nd.Arms)
@@ -309,10 +343,11 @@ namespace Enzyme.Components
                 lblPts.Add(At(edgeFlat[e], edges[e].Length / 2, 0));
                 lbls.Add($"{edges[e].Name}\n{edges[e].TemplateName} · {edges[e].Hierarchy}");
             }
-            foreach (var nd in g.Nodes.Where(x => x.Arms.Count != 2))
+            foreach (var nd in g.Nodes.Where(x => x.Arms.Count != 2 || x.Tagged))
             {
                 lblPts.Add(P3(nd.P));
-                lbls.Add($"N{nd.Id} {nd.Type}");
+                string ctl = nd.Tagged && nd.Control != nd.Type ? " · " + nd.Control : "";
+                lbls.Add($"N{nd.Id} {(string.IsNullOrEmpty(nd.TagName) ? "" : nd.TagName + " ")}{nd.Type}{ctl}");
             }
             var nodeJson = g.Nodes.Select(nd => g.NodeJson(nd).ToString(Newtonsoft.Json.Formatting.None)).ToList();
             var edgeJson = Enumerable.Range(0, edges.Count).Select(e => g.EdgeJson(e).ToString(Newtonsoft.Json.Formatting.None)).ToList();
@@ -324,7 +359,7 @@ namespace Enzyme.Components
             BoundingBox all = BoundingBox.Empty;
             foreach (var c in edgeFlat) all.Union(c.GetBoundingBox(false));
             double km2 = Math.Max(1e-9, (all.Max.X - all.Min.X) * (all.Max.Y - all.Min.Y) / 1e6);
-            int junctions = g.Nodes.Count(x => x.Arms.Count >= 3);
+            int junctions = g.Nodes.Count(x => x.Arms.Count >= 3 || x.Type == "roundabout");
             double netLen = edges.Sum(ed => ed.Length);
             var metrics = new JArray
             {
@@ -333,8 +368,10 @@ namespace Enzyme.Components
                 M("T / Y junctions", g.Nodes.Count(x => x.Type == "T" || x.Type == "Y").ToString(inv)),
                 M("Crossroads", g.Nodes.Count(x => x.Type == "crossroads").ToString(inv)),
                 M("Multi-arm junctions", g.Nodes.Count(x => x.Type == "multi").ToString(inv)),
+                M("Roundabouts", g.Nodes.Count(x => x.Type == "roundabout").ToString(inv)),
+                M("Cul-de-sacs", g.Nodes.Count(x => x.Control == "cul-de-sac").ToString(inv)),
                 M("Dead ends", g.Nodes.Count(x => x.Type == "dead end").ToString(inv)),
-                M("Skewed junctions (< 70°)", g.Nodes.Count(x => x.Arms.Count >= 3 && x.Corners.Min(ci => g.Corners[ci].Angle) < 70).ToString(inv)),
+                M("Skewed junctions (< 70°)", g.Nodes.Count(x => x.Arms.Count >= 3 && x.Corners.Count > 0 && x.Corners.Min(ci => g.Corners[ci].Angle) < 70).ToString(inv)),
                 M("Junction density (bounding box)", (junctions / km2).ToString("F0", inv) + " /km²"),
                 M("Untagged centrelines", untagged.ToString(inv)),
             };
@@ -349,19 +386,20 @@ namespace Enzyme.Components
             DA.SetDataList(0, g.Nodes.Select(nd => P3(nd.P)));
             DA.SetDataList(1, edgeOrig);
             DA.SetDataList(2, corridorEdges);
-            DA.SetDataList(3, kerbLines);
-            DA.SetDataList(4, edgeLines);
-            DA.SetDataList(5, mouths);
-            DA.SetDataList(6, junctionAreas);
-            DA.SetDataList(7, areas);
-            DA.SetDataList(8, areaTypes);
-            DA.SetDataList(9, lblPts);
-            DA.SetDataList(10, lbls);
-            DA.SetDataList(11, nodeJson);
-            DA.SetDataList(12, edgeJson);
-            DA.SetData(13, g.NetworkJson().ToString());
-            DA.SetDataList(14, attrs);
-            DA.SetData(15, dash.ToString());
+            DA.SetDataList(3, corridorTpl);
+            DA.SetDataList(4, kerbLines);
+            DA.SetDataList(5, edgeLines);
+            DA.SetDataList(6, mouths);
+            DA.SetDataList(7, junctionAreas);
+            DA.SetDataList(8, areas);
+            DA.SetDataList(9, areaTypes);
+            DA.SetDataList(10, lblPts);
+            DA.SetDataList(11, lbls);
+            DA.SetDataList(12, nodeJson);
+            DA.SetDataList(13, edgeJson);
+            DA.SetData(14, g.NetworkJson().ToString());
+            DA.SetDataList(15, attrs);
+            DA.SetData(16, dash.ToString());
         }
 
         // ---------------- helpers
