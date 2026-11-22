@@ -18,7 +18,7 @@ namespace Enzyme.Components
     {
         public ModFramesComponent()
           : base("Facade Module: Frames", "Mod_Frames",
-              "Deep structural exoskeleton grid utilizing the robust Area-Offset Method.",
+              "Facade frame on storey outlines: beams between each outline and its offset (BeamDepth), columns at equal bays, and optional sill, glass and header panels and vertical fins.",
               "Enzyme", "JSON Masterplan (Beta)")
         {
         }
@@ -44,8 +44,8 @@ namespace Enzyme.Components
             pManager.AddNumberParameter("Heights", "Heights", "Input heights", GH_ParamAccess.tree);
             pManager[1].Optional = true;
             pManager.AddNumberParameter("BayWidth", "BayWidth", "Width of each bay", GH_ParamAccess.item, 3.0);
-            pManager.AddNumberParameter("BeamWidth", "BeamWidth", "Width of the beam", GH_ParamAccess.item, 0.5);
-            pManager.AddNumberParameter("BeamDepth", "BeamDepth", "Depth of the beam", GH_ParamAccess.item, 0.4);
+            pManager.AddNumberParameter("BeamWidth", "BeamWidth", "Vertical height of the beams (m)", GH_ParamAccess.item, 0.5);
+            pManager.AddNumberParameter("BeamDepth", "BeamDepth", "Horizontal depth of the beams: offset distance from the boundary (m)", GH_ParamAccess.item, 0.4);
             pManager.AddNumberParameter("ColWidth", "ColWidth", "Width of the column", GH_ParamAccess.item, 0.5);
             pManager.AddNumberParameter("ColDepth", "ColDepth", "Depth of the column", GH_ParamAccess.item, 0.4);
             pManager.AddBooleanParameter("HasPanel", "HasPanel", "Enable inner facade panels", GH_ParamAccess.item, false);
@@ -148,21 +148,21 @@ namespace Enzyme.Components
                     Brep[] tLoft = Brep.CreateFromLoft(new Curve[] { tIn, tOut }, Point3d.Unset, Point3d.Unset, LoftType.Straight, false);
                     if (tLoft != null && tLoft.Length > 0) faces.AddRange(tLoft);
                     
-                    Extrusion iExt = Extrusion.Create(bIn, bW, false);
-                    if (iExt != null) faces.Add(iExt.ToBrep());
+                    Brep iExt = ExtrudeUp(bIn, bW);
+                    if (iExt != null) faces.Add(iExt);
                     
-                    Extrusion oExt = Extrusion.Create(bOut, bW, false);
-                    if (oExt != null) faces.Add(oExt.ToBrep());
+                    Brep oExt = ExtrudeUp(bOut, bW);
+                    if (oExt != null) faces.Add(oExt);
                     
                     if (!cIn.IsClosed)
                     {
                         Line e1 = new Line(bIn.PointAtStart, bOut.PointAtStart);
-                        Extrusion cap1 = Extrusion.Create(e1.ToNurbsCurve(), bW, false);
-                        if (cap1 != null) faces.Add(cap1.ToBrep());
+                        Brep cap1 = ExtrudeUp(e1.ToNurbsCurve(), bW);
+                        if (cap1 != null) faces.Add(cap1);
                         
                         Line e2 = new Line(bIn.PointAtEnd, bOut.PointAtEnd);
-                        Extrusion cap2 = Extrusion.Create(e2.ToNurbsCurve(), bW, false);
-                        if (cap2 != null) faces.Add(cap2.ToBrep());
+                        Brep cap2 = ExtrudeUp(e2.ToNurbsCurve(), bW);
+                        if (cap2 != null) faces.Add(cap2);
                     }
                     
                     Brep[] joined = Brep.JoinBreps(faces, 0.01);
@@ -170,6 +170,16 @@ namespace Enzyme.Components
                         foreach (Brep b in joined) outBeams.Append(new GH_Brep(b), path);
                     else
                         foreach (Brep b in faces) outBeams.Append(new GH_Brep(b), path); 
+                }
+
+                // The base beam goes on the lowest storey of the branch, not simply on index 0.
+                int baseIdx = -1;
+                double baseZ = double.MaxValue;
+                for (int k = 0; k < crvs.Count; k++)
+                {
+                    if (crvs[k] == null) continue;
+                    double z = crvs[k].GetBoundingBox(true).Min.Z;
+                    if (z < baseZ - 1e-6) { baseZ = z; baseIdx = k; }
                 }
 
                 for (int i = 0; i < crvs.Count; i++)
@@ -221,7 +231,7 @@ namespace Enzyme.Components
                         if (actualBeamW > 0 && depthToUse > 0)
                         {
                             GenerateSolidBeam(crv, outCrv, hIn, actualBeamW);
-                            if (i == 0 && !RemoveBaseBeam) GenerateSolidBeam(crv, outCrv, 0.0, actualBeamW);
+                            if (i == baseIdx && !RemoveBaseBeam) GenerateSolidBeam(crv, outCrv, 0.0, actualBeamW);
                         }
                     }
 
@@ -291,22 +301,22 @@ namespace Enzyme.Components
                                 {
                                     if (actualSill > 0)
                                     {
-                                        Extrusion eSill = Extrusion.Create(bayCrv, actualSill, false);
-                                        if (eSill != null) { outSills.Append(new GH_Brep(eSill.ToBrep()), path); solidArea += bayLen * actualSill; }
+                                        Brep eSill = ExtrudeUp(bayCrv, actualSill);
+                                        if (eSill != null) { outSills.Append(new GH_Brep(eSill), path); solidArea += bayLen * actualSill; }
                                     }
                                     
                                     if (visionH > 0)
                                     {
                                         Curve vCrv = bayCrv.DuplicateCurve(); vCrv.Translate(new Vector3d(0, 0, actualSill));
-                                        Extrusion eVis = Extrusion.Create(vCrv, visionH, false);
-                                        if (eVis != null) { outGlass.Append(new GH_Brep(eVis.ToBrep()), path); glassArea += bayLen * visionH; }
+                                        Brep eVis = ExtrudeUp(vCrv, visionH);
+                                        if (eVis != null) { outGlass.Append(new GH_Brep(eVis), path); glassArea += bayLen * visionH; }
                                     }
                                     
                                     if (actualDrop > 0)
                                     {
                                         Curve hCrv = bayCrv.DuplicateCurve(); hCrv.Translate(new Vector3d(0, 0, hIn - actualDrop));
-                                        Extrusion eHead = Extrusion.Create(hCrv, actualDrop, false);
-                                        if (eHead != null) { outHeaders.Append(new GH_Brep(eHead.ToBrep()), path); solidArea += bayLen * actualDrop; }
+                                        Brep eHead = ExtrudeUp(hCrv, actualDrop);
+                                        if (eHead != null) { outHeaders.Append(new GH_Brep(eHead), path); solidArea += bayLen * actualDrop; }
                                     }
 
                                     if (SubdivWidth > 0 && visionH > 0 && FinDepth > 0)
@@ -335,8 +345,8 @@ namespace Enzyme.Components
                                                     Curve finProfile = finLine.ToNurbsCurve();
                                                     finProfile.Translate(new Vector3d(0, 0, actualSill)); 
                                                     
-                                                    Extrusion finExt = Extrusion.Create(finProfile, visionH, false); 
-                                                    if (finExt != null) { outFins.Append(new GH_Brep(finExt.ToBrep()), path); finCount++; }
+                                                    Brep finExt = ExtrudeUp(finProfile, visionH); 
+                                                    if (finExt != null) { outFins.Append(new GH_Brep(finExt), path); finCount++; }
                                                 }
                                             }
                                         }
@@ -368,6 +378,33 @@ namespace Enzyme.Components
             {
                 Hud.Waiting(this);
             }
+        }
+
+        /// <summary>
+        /// Extrudes a curve by h along world +Z. Extrusion.Create uses the normal of the curve's own
+        /// plane, which points down for clockwise curves and is arbitrary for straight lines; this
+        /// retries with the opposite height and finally falls back to an explicit +Z extrusion.
+        /// </summary>
+        private static Brep ExtrudeUp(Curve c, double h)
+        {
+            if (c == null || h <= 0) return null;
+            double z0 = c.GetBoundingBox(true).Min.Z;
+            double tol = Math.Max(1e-6, h * 1e-3);
+            bool GoesUp(Extrusion e)
+            {
+                if (e == null) return false;
+                var bb = e.GetBoundingBox(true);
+                return bb.Min.Z > z0 - tol && bb.Max.Z > z0 + h - tol && bb.Max.Z < z0 + h + tol + (c.GetBoundingBox(true).Max.Z - z0);
+            }
+            Extrusion ext = Extrusion.Create(c, h, false);
+            if (GoesUp(ext)) return ext.ToBrep();
+            ext = Extrusion.Create(c, -h, false);
+            if (GoesUp(ext)) return ext.ToBrep();
+            Surface srf = Surface.CreateExtrusion(c, new Vector3d(0, 0, h));
+            if (srf == null) return null;
+            Brep b = srf.ToBrep();
+            if (b != null) b.Faces.SplitKinkyFaces();
+            return b;
         }
 
         public override GH_Exposure Exposure => GH_Exposure.secondary;

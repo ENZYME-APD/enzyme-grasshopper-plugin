@@ -62,7 +62,7 @@
                 <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
                     <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
                     <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
-                        <li>Seeds a regular XY grid of drops at GridSpacing over the mesh bounding box and projects them straight down onto TerrainMesh; each hit is a drop point.</li>
+                        <li>Seeds a regular XY grid of drops at GridSpacing over the mesh bounding box and projects them straight down onto TerrainMesh; each hit is a drop point. GridSpacing and StepSize must be greater than 0; more than 1,000,000 seeds is refused with an error.</li>
                         <li>From each drop, the downhill direction on the current face is the steepest-descent vector (n × g) × n, with n the face normal and g pointing down.</li>
                         <li>The drop moves StepSize along that direction, is pulled back to the closest mesh point, and the step is kept only if it is at least 1 mm lower; otherwise the path ends.</li>
                         <li>Paths also end on near-flat faces (normal Z ≥ 0.9999) or after MaxSteps. Each path is output as a polyline in its own branch.</li>
@@ -81,6 +81,7 @@
                         <li>Drops do not interact: no flow accumulation, ponding, infiltration or merging of paths.</li>
                         <li>Paths stop in pits and on flats instead of filling or crossing them; a large StepSize can overshoot a valley and stop early on the opposite slope.</li>
                         <li>Path length is limited to MaxSteps × StepSize.</li>
+                        <li>Branch numbers follow the projected hits, not the seeds: on overhangs one seed can give several drops.</li>
                     </ul>
                 </div>
                 <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">

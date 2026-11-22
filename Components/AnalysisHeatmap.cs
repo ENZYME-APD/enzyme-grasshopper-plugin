@@ -557,7 +557,7 @@ namespace Enzyme.Components
         private const string InfoText =
             "ANALYSIS HEATMAP\n================\n\n" +
             "HOW IT WORKS:\nTakes any analysis mesh and its values (one per vertex or per face) and colours it in one of four modes:\n" +
-            "- Cells: one flat colour per cell (exact values, no interpolation).\n" +
+            "- Cells: one flat colour per face (per-face values exactly; per-vertex values as the mean of the face's vertices).\n" +
             "- Smooth: colours blended between cells.\n" +
             "- Contour: filled bands between round-number levels, plus isolines. Bands are clipped exactly, so they line up with the isolines.\n" +
             "- Classes: named categories with standard colours: UTCI thermal stress, Lawson (LDDC) wind comfort, noise bands, slope bands (0-5 / 5-15 / 15-30 / >30 %) or flood depth (0.1 / 0.3 / 0.5 m).\n\n" +

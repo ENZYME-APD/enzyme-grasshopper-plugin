@@ -78,6 +78,7 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
             int[] vertexHits = new int[coloredMesh.Vertices.Count];
 
             int pathCount = 0;
+            int skippedCount = 0;
 
             foreach (var branch in flowPaths.Branches)
             {
@@ -95,8 +96,14 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
                             vertexHits[closestIdx]++;
                         }
                     }
+                    else
+                    {
+                        skippedCount++;
+                    }
                 }
             }
+            if (skippedCount > 0)
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, skippedCount + " flow path(s) are not polylines and were skipped (convert them to polylines first).");
 
             int maxAccum = vertexHits.Length > 0 ? vertexHits.Max() : 1;
             if (maxAccum == 0) maxAccum = 1;
@@ -159,7 +166,7 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
         
         private void AutoWireDefaultInputs(GH_Document document)
         {
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 1.5, 3.0, 1.0, 330, 0);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 1.0, 3.0, 1.0, 330, 0);
                 Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 0, "mesh", 220, -38);
                 Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 2, 220, 26, 180, 22);
             }

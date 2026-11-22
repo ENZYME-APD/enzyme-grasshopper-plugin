@@ -71,6 +71,7 @@
                         <li>Neighbours whose residual exceeds max(3 × MAD, Min Deviation) are dropped and the plane is refitted; MAD is the median absolute deviation × 1.4826 (a robust standard deviation).</li>
                         <li>Deviation = point Z minus the plane at the point; Score = |Deviation| / max(MAD, Min Deviation / Threshold). A point is flagged when Score &gt; Threshold (default 3) and |Deviation| &gt; Min Deviation (default 0.3).</li>
                         <li>Passes (default 2, maximum 5) repeat the test with flagged points removed from the neighbour pool, so clusters of bad shots cannot support each other; flags come from the last pass.</li>
+                        <li>Deviation, Score, Flags and Colors follow the input list item by item; invalid points get empty values and Flag False, and a warning gives their count.</li>
                     </ol>
                 </div>
                 <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">

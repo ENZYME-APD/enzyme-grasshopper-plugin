@@ -62,12 +62,12 @@ namespace Enzyme.Components
             pManager.AddBooleanParameter("Group By Bldg", "GroupByBldg", "Group By Building", GH_ParamAccess.item, false);
             pManager.AddTextParameter("Title", "title", "HUD Title", GH_ParamAccess.item, "MASTERPLAN SUMMARY");
             pManager.AddTextParameter("Suffix", "suffix", "Unit suffix", GH_ParamAccess.item, "");
-            pManager.AddNumberParameter("Target Global", "TargetGlobal", "Target Global Area", GH_ParamAccess.item, 0.0);
+            pManager.AddNumberParameter("Target Global", "TargetGlobal", "Target total area (same units as the payload, e.g. m²); 0 = no target.", GH_ParamAccess.item, 0.0);
             pManager.AddTextParameter("Target JSON", "TargetJSON", "JSON containing Targets", GH_ParamAccess.item, "");
             pManager.AddNumberParameter("Size", "size", "Font size", GH_ParamAccess.item, 12.0);
             pManager.AddIntegerParameter("Anchor", "anchor", "Anchor (0=TL, 1=TR, 2=BL, 3=BR)", GH_ParamAccess.item, 0);
             pManager.AddTextParameter("Font", "font", "Font Face", GH_ParamAccess.item, "Arial");
-            pManager.AddNumberParameter("Transparency", "transparency", "Background Opacity (0.0 - 1.0)", GH_ParamAccess.item, 0.8);
+            pManager.AddNumberParameter("Transparency", "transparency", "Background opacity despite the name: 0 = fully transparent, 1 = opaque (default 0.8).", GH_ParamAccess.item, 0.8);
             pManager.AddNumberParameter("Offset X", "ox", "Offset X", GH_ParamAccess.item, 20.0);
             pManager.AddNumberParameter("Offset Y", "oy", "Offset Y", GH_ParamAccess.item, 20.0);
             pManager.AddNumberParameter("Padding", "fit_padding", "Padding", GH_ParamAccess.item, 10.0);
@@ -116,7 +116,7 @@ namespace Enzyme.Components
                     
                     double totalArea = 0.0;
                     if (data.ContainsKey("total_area") && data["total_area"] != null)
-                        totalArea = Convert.ToDouble(data["total_area"]);
+                        totalArea = Convert.ToDouble(data["total_area"], System.Globalization.CultureInfo.InvariantCulture);
                     
                     var bldgData = new Dictionary<string, Dictionary<string, object>>();
                     if (data.ContainsKey("buildings") && data["buildings"] != null)
@@ -133,7 +133,7 @@ namespace Enzyme.Components
                                 foreach (var kvp in rawTargets)
                                 {
                                     if (kvp.Value != null)
-                                        cleanTargetData[kvp.Key.Trim().ToUpper()] = Convert.ToDouble(kvp.Value);
+                                        cleanTargetData[kvp.Key.Trim().ToUpper()] = Convert.ToDouble(kvp.Value, System.Globalization.CultureInfo.InvariantCulture);
                                 }
                             }
                         }
@@ -168,7 +168,7 @@ namespace Enzyme.Components
                             
                             double bTotArea = 0.0;
                             if (bStats.ContainsKey("total_area") && bStats["total_area"] != null)
-                                bTotArea = Convert.ToDouble(bStats["total_area"]);
+                                bTotArea = Convert.ToDouble(bStats["total_area"], System.Globalization.CultureInfo.InvariantCulture);
                                 
                             string bTotVal = $"{FormatNum(bTotArea)}{_suffix}";
                             _displayData.Add(new DashDisplayItem("  SUBTOTAL: ", bTotVal, false));
@@ -188,7 +188,7 @@ namespace Enzyme.Components
                                 {
                                     double pct = (valArea / target) * 100.0;
                                     string lineLabel = $"  {progName}: ";
-                                    string lineVal = $"{FormatNum(valArea)}{_suffix} / {FormatNum(target)}{_suffix} ({pct:F1}%)";
+                                    string lineVal = $"{FormatNum(valArea)}{_suffix} / {FormatNum(target)}{_suffix} ({pct.ToString("F1", System.Globalization.CultureInfo.InvariantCulture)}%)";
                                     _displayData.Add(new DashDisplayItem(lineLabel, lineVal, valArea > target));
                                 }
                             }
@@ -213,7 +213,7 @@ namespace Enzyme.Components
                             if (target > 0)
                             {
                                 double pct = (valArea / target) * 100.0;
-                                lineVal += $" / {FormatNum(target)}{_suffix} ({pct:F1}%)";
+                                lineVal += $" / {FormatNum(target)}{_suffix} ({pct.ToString("F1", System.Globalization.CultureInfo.InvariantCulture)}%)";
                                 if (valArea > target) overTarget = true;
                             }
                             
@@ -228,7 +228,7 @@ namespace Enzyme.Components
                     if (_targetGlobal > 0)
                     {
                         double totPct = (totalArea / _targetGlobal) * 100.0;
-                        totStr += $" [Target: {FormatNum(_targetGlobal)}{_suffix} ({totPct:F1}%)]";
+                        totStr += $" [Target: {FormatNum(_targetGlobal)}{_suffix} ({totPct.ToString("F1", System.Globalization.CultureInfo.InvariantCulture)}%)]";
                         if (totalArea > _targetGlobal) totIsRed = true;
                     }
                     
@@ -331,7 +331,7 @@ namespace Enzyme.Components
 
         private string FormatNum(double n)
         {
-            return n.ToString("N2");
+            return n.ToString("N2", System.Globalization.CultureInfo.InvariantCulture);
         }
 
         private void Unsubscribe()
@@ -365,7 +365,7 @@ namespace Enzyme.Components
         {
                 Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 0, false, 210, -160);
                 Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 2, false, 210, -120);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 5, 0.0, 2.0, 0.0, 330, -80);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 5, 0.0, 1000000.0, 0.0, 330, -80);
                 Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 7, 0.0, 24, 12.0, 330, -40);
                 Enzyme.Utils.AutoWireHelper.WireValueList(this, document, 8, new string[]{"TL", "TR", "BL", "BR"}, new string[]{"0", "1", "2", "3"}, 300, 0);
                 Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 10, 0.0, 1.0, 0.8, 330, 40);

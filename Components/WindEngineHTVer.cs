@@ -81,7 +81,7 @@ namespace Enzyme.Components
 
         public WindEngineHTVer()
             : base("Urban Wind Vector Engine HT (Beta)", "WindEngineHTVer",
-                "Simulates urban wind fields using terrain-parallel raycasting. Outputs a perfectly flat, crisp XY pixel-screen heatmap at a custom elevation.",
+                "Heuristic urban wind screening: terrain-parallel wind deflected by building wakes, corner channelling and gaps, coloured as a heatmap draped on the terrain (DrapeHeatmap, default) or flat at a custom elevation, with vectors and streamlines.",
                 "Enzyme", "Site Analysis")
         {
         }
@@ -577,6 +577,7 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
                             double nearestDist = double.MaxValue;
                             Vector3d nearestNormal = Vector3d.Zero;
                             bool hasNearest = false;
+                            double cornerDist = double.MaxValue; // bend direction comes from the nearest qualifying wall
 
                             for (int b = 0; b < buildingCount; b++)
                             {
@@ -609,8 +610,12 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
                                             if ((bypass * currentDir) < 0) bypass = -bypass;
                                             bypass.Unitize();
 
-                                            bentDir = (currentDir * (1.0 - blend)) + (bypass * blend);
-                                            bentDir.Unitize();
+                                            if (dist < cornerDist)
+                                            {
+                                                cornerDist = dist;
+                                                bentDir = (currentDir * (1.0 - blend)) + (bypass * blend);
+                                                bentDir.Unitize();
+                                            }
                                             cornerFactor *= (1.0 + (cornerBoost * blend));
                                         }
                                     }

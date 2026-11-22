@@ -87,7 +87,7 @@
                         <li>Hours with speed below Calm (default 0.5 m/s) are counted as calm. The others are binned into Sectors (default 16, 4-72) centred on N and into speed bands (lower edges, default 0, 2, 4, 6, 8, 10 m/s).</li>
                         <li>Frequency = hours in a sector and band / all hours (calm included) × 100.</li>
                         <li>Petals start at a calm circle of 0.12 × Radius and grow linearly with frequency up to Radius at the top ring (rounded up to a nice step), stacked by speed band, with a 10 % gap between sectors. Bearings are turned into the model with North (degrees anticlockwise from +Y).</li>
-                        <li>The Selector picks a sector; Speed is the mean, median, P90 (linear interpolation) or max of its non-calm hours, Frequency its share. Direction is the selector angle itself.</li>
+                        <li>The Selector picks a sector; Speed is the mean, median, P90 (linear interpolation) or max of its non-calm hours, Frequency its share. Direction is the Selector angle; Speed and Frequency are statistics of the whole sector containing it (a remark names the sector centre when they differ).</li>
                     </ol>
                 </div>
                 <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">

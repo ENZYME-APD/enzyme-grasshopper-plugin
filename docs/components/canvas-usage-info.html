@@ -57,7 +57,7 @@
                     <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
                     <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
                         <li>When Run is True, lists every non-core plug-in library used by objects on the canvas (name and version).</li>
-                        <li>Counts every canvas object except groups, by category, subcategory and name, and writes the lists to two panels named PlugIns Used and All Components Used (created at fixed canvas positions if missing, otherwise updated).</li>
+                        <li>Counts every canvas object except groups, by category, subcategory and name, and writes the lists to two panels named PlugIns Used and All Components Used (created at fixed canvas positions if missing, otherwise updated). The report header shows the date, time and Windows user of the report run (not of the last save).</li>
                     </ol>
                 </div>
                 <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
@@ -69,7 +69,7 @@
                 <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
                     <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
                     <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
-                        <li>Counts include parameters, panels, sliders and the tool's own panels, not only components.</li>
+                        <li>Counts include parameters, panels and sliders, not only components; the two report panels the component creates are not counted.</li>
                     </ul>
                 </div>
             </div>

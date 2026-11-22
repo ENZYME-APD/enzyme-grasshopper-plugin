@@ -283,7 +283,7 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
                     {
                         labels.Add(lArray[0].ToString());
                         labelPositions.Add(new Rhino.Geometry.Point3d(basePoint.X, basePoint.Y - textOffset, basePoint.Z));
-                        labels.Add(lArray[1].ToString());
+                        labels.Add(lArray[lArray.Count - 1].ToString());
                         labelPositions.Add(new Rhino.Geometry.Point3d(basePoint.X + rectWidth, basePoint.Y - textOffset, basePoint.Z));
                     }
 
@@ -294,8 +294,10 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
                         labelPositions.Add(new Rhino.Geometry.Point3d(basePoint.X + rectWidth / 2, basePoint.Y - textOffset * 2, basePoint.Z));
                     }
                 }
-                else if (legendType == "Blocks" && cArray != null)
+                else if ((legendType == "Blocks" || legendType == "Binary" || legendType == "Discrete") && cArray != null)
                 {
+                    // Binary and Discrete legends (pass / fail, categories) are drawn as blocks with one name per block
+                    bool categorical = legendType != "Blocks";
                     int colorCount = cArray.Count;
                     for (int i = 0; i < colorCount; i++)
                     {
@@ -319,7 +321,7 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
                             labelPositions.Add(new Rhino.Geometry.Point3d(basePoint.X + i * segW, basePoint.Y - textOffset, basePoint.Z));
                         }
                     }
-                    else if (lArray != null && nBlocks > 2 && lArray.Count == nBlocks)
+                    else if (lArray != null && (nBlocks > 2 || categorical) && lArray.Count == nBlocks)
                     {
                         // one name per block (class legends, e.g. UTCI / Lawson), staggered to avoid overlaps
                         for (int i = 0; i < lArray.Count; i++)
@@ -334,6 +336,13 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
                         labelPositions.Add(new Rhino.Geometry.Point3d(basePoint.X, basePoint.Y - textOffset, basePoint.Z));
                         labels.Add(lArray[lArray.Count - 1].ToString());
                         labelPositions.Add(new Rhino.Geometry.Point3d(basePoint.X + rectWidth, basePoint.Y - textOffset, basePoint.Z));
+                    }
+
+                    var catSubArray = categorical ? parsed["SubLabels"] as JArray : null;
+                    if (catSubArray != null && catSubArray.Count > 0)
+                    {
+                        labels.Add(catSubArray[0].ToString());
+                        labelPositions.Add(new Rhino.Geometry.Point3d(basePoint.X + rectWidth / 2, basePoint.Y - textOffset * 3, basePoint.Z));
                     }
                 }
             }
@@ -352,14 +361,6 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
             };
         }
 
-
-        private Color InterpolateColor(Color color1, Color color2, double t)
-        {
-            int r = (int)(color1.R * (1 - t) + color2.R * t);
-            int g = (int)(color1.G * (1 - t) + color2.G * t);
-            int b = (int)(color1.B * (1 - t) + color2.B * t);
-            return Color.FromArgb(r, g, b);
-        }
 
         private class LegendResult
         {

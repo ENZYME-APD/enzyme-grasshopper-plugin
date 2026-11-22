@@ -62,7 +62,7 @@
                     <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
                     <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
                         <li>For each line, a rectangular shaft of BodyWidth and a triangular head of HeadWidth × HeadLength are drawn in the plan perpendicular of the line (XY), at the end (Mode 0), the start (1) or both (2). The shaft is shortened by 0.9 × HeadLength under each head so they overlap slightly.</li>
-                        <li>Shaft and heads are unioned into one outline (Arrow2D) and meshed as a planar boundary (ArrowMesh). Lines shorter than 1.1 × HeadLength are skipped.</li>
+                        <li>Shaft and heads are unioned into one outline (Arrow2D) and meshed as a planar boundary (ArrowMesh). Lines shorter than 1.1 × HeadLength (2.2 × HeadLength in Double mode) are skipped and counted in a remark.</li>
                     </ol>
                 </div>
                 <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">

@@ -26,7 +26,7 @@ namespace Enzyme.Components
             pManager.AddColourParameter("Colors", "C", "Gradient color palette", GH_ParamAccess.list);
             pManager.AddIntervalParameter("Domain", "D", "Target domain for geometry size (Radius/Height)", GH_ParamAccess.item, new Interval(0.5, 5.0));
             pManager.AddIntegerParameter("Type", "T", "Visual Type (0: Bar, 1: Flat Dot, 2: Sphere)", GH_ParamAccess.item, 2);
-            pManager.AddNumberParameter("Bar Thickness", "W", "Thickness for Bar Chart (Type 0 only)", GH_ParamAccess.list);
+            pManager.AddNumberParameter("Bar Thickness", "W", "Bar radius for Type 0 only: circumradius of the hexagonal bar, so the bar is about twice this wide (cycled per point)", GH_ParamAccess.list);
 
             pManager[2].Optional = true;
             pManager[3].Optional = true;
@@ -88,8 +88,11 @@ namespace Enzyme.Components
 
             double minVal = double.MaxValue;
             double maxVal = double.MinValue;
-            foreach (double v in vals)
+            // Only the values that are drawn (one per point) set the range.
+            int drawn = Math.Min(pts.Count, vals.Count);
+            for (int k = 0; k < drawn; k++)
             {
+                double v = vals[k];
                 if (v < minVal) minVal = v;
                 if (v > maxVal) maxVal = v;
             }
@@ -129,6 +132,8 @@ namespace Enzyme.Components
 
                 masterMesh.Append(m);
             }
+
+            masterMesh.Normals.ComputeNormals();
 
             sw.Stop();
             string typeName = type == 0 ? "Bar Chart" : (type == 1 ? "Flat Dot" : "Sphere");

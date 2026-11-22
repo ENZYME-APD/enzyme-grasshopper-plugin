@@ -22,7 +22,7 @@
         <div class="doc-header" style="display: flex; align-items: center;">
             <div>
                 <h1>Adapter: The Lego Builder</h1>
-                <p class="doc-subtitle">STAGE 1 ADAPTER: THE LEGO BUILDER (METHOD 3) - VERBOSE DIAGNOSTICS &amp; FIXED STACKING</p>
+                <p class="doc-subtitle">Converts multi-storey massing Breps into floor blocks for the Masterplan Engine: slices each Brep's footprint, counts the whole floors that fit its height and outputs the JSON payload grouped per building.</p>
                 <div class="doc-meta">
                     <span class="badge json-masterplan-beta">JSON Masterplan (Beta)</span>
                     <span>Nickname: <strong>AD_LEGO</strong></span>
@@ -63,7 +63,7 @@
                     <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
                     <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
                         <li>For each MassingBlocks Brep, the bounding box gives the bottom and top and the total height; the Brep is cut 0.01 m above its bottom and the largest closed section is taken as the footprint.</li>
-                        <li>Floor count = whole number of FloorHeights that fit in the block height (FloorHeights per block, default 4.0 m; zero or negative also falls back to 4.0 m).</li>
+                        <li>Floor count = whole number of FloorHeights that fit in the block height, with a 1 mm tolerance (a block of 11.9999 m with 4 m floors counts 3 floors); FloorHeights per block, default 4.0 m, zero or negative also falls back to 4.0 m.</li>
                         <li>HeightResolution 0 (Strict Cutoff): one block with that many floors; the leftover height is discarded.</li>
                         <li>HeightResolution 1 (Stretch Top Floor): if the leftover is more than 0.1 m, the block is split into the standard floors plus one top floor whose height is FloorHeight plus the leftover (program tagged (Top)).</li>
                         <li>base_z of each block = block bottom minus the lowest bottom of its building (true_base_elevation), rounded to 1 mm. Footprints are written as line, arc or polyline segments, as in AD_CAKE.</li>
@@ -84,6 +84,7 @@
                         <li>Blocks lower than one FloorHeight produce no floors and are left out without a warning.</li>
                         <li>In Stretch mode a leftover of 0.1 m or less is dropped; in Strict mode all leftover height is dropped.</li>
                         <li>Only the largest closed section is kept: holes and extra pieces are lost; setbacks inside a block are ignored.</li>
+                        <li>boundary_segments keep their absolute world Z while base_z is relative to the building base.</li>
                     </ul>
                 </div>
                 <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">

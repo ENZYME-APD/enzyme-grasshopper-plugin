@@ -16,7 +16,7 @@ namespace Enzyme.Components
     {
         public Clearance()
           : base("Masterplan Clearance Engine", "Clearance",
-              "Calculates topological (Delaunay) or proximity-based clearances between tower outlines with dynamic categorization.",
+              "Calculates the shortest clearances between neighbouring tower outlines and categorises them by L1 and L2. Neighbour pairs come from a Delaunay triangulation (Method 0) or a proximity search (Method 1) of the outline bounding-box centres.",
               "Enzyme", "Masterplan")
         {
         }
@@ -135,6 +135,13 @@ namespace Enzyme.Components
                     pln.Rotate(angle, Vector3d.ZAxis, mid);
                     planeTree.Append(new GH_Plane(pln), path);
                 }
+                else
+                {
+                    // Zero-length clearance (touching outlines): keep LabelPlanes in step with the other outputs.
+                    Rhino.Geometry.Plane pln = Rhino.Geometry.Plane.WorldXY;
+                    pln.Origin = mid;
+                    planeTree.Append(new GH_Plane(pln), path);
+                }
             };
 
             string methodName = "";
@@ -156,8 +163,10 @@ namespace Enzyme.Components
                         for (int i = 0; i < topEdges.Count; i++)
                         {
                             var pair = topEdges.GetTopologyVertices(i);
-                            int idxAValid = pair.I;
-                            int idxBValid = pair.J;
+                            // Topology vertex order is not the mesh vertex (node) order: map through MeshVertexIndices.
+                            int idxAValid = delaunayMesh.TopologyVertices.MeshVertexIndices(pair.I)[0];
+                            int idxBValid = delaunayMesh.TopologyVertices.MeshVertexIndices(pair.J)[0];
+                            if (idxAValid < 0 || idxAValid >= validIndices.Count || idxBValid < 0 || idxBValid >= validIndices.Count) continue;
                             
                             int idxA = validIndices[idxAValid];
                             int idxB = validIndices[idxBValid];

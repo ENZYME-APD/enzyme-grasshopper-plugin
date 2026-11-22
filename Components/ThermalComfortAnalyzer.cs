@@ -29,7 +29,7 @@ namespace Enzyme.Components
         private const double DEFAULT_COMFORT_TOLERANCE = 0.1;
 
         public ThermalComfortAnalyzer()
-            : base("Higrothermal Comfort", "HigroComfort",
+            : base("Hygrothermal Comfort", "HygroComfort",
                 "Maps wind-engine velocity samples onto apparent (\"feels like\") temperature and locates the best/worst comfort points, without requiring a regular grid.",
                 "Enzyme", "Site Analysis")
         {
@@ -103,7 +103,7 @@ namespace Enzyme.Components
         {
             pManager.AddBooleanParameter("Run", "Run", "Global execution toggle switch", GH_ParamAccess.item, false);
             pManager.AddMeshParameter("TerrainMesh", "TerrainMesh", "The underlying site topography - its own vertices/connectivity are reused directly for ComfortMesh, no separate grid is built", GH_ParamAccess.item);
-            pManager.AddNumberParameter("VelocityValues", "VelocityValues", "Raw wind speeds (m/s), aligned index-for-index with TagPoints - e.g. from the wind engine's VelocityValues output", GH_ParamAccess.list);
+            pManager.AddNumberParameter("VelocityValues", "VelocityValues", "Raw wind speeds (m/s), aligned index-for-index with TagPoints - e.g. from the wind engine's VelocityValues output. Steadman AT expects wind at 10 m height; pedestrian-level speeds are lower, so AT reads warmer than the published scale.", GH_ParamAccess.list);
             pManager.AddPointParameter("TagPoints", "TagPoints", "Sample points matching VelocityValues index-for-index - e.g. from the wind engine's TagPoints output", GH_ParamAccess.list);
             pManager.AddNumberParameter("Humidity", "Humidity", "Relative humidity (%), currently a single constant across the whole site", GH_ParamAccess.item, 50.0);
             pManager.AddNumberParameter("Temperature", "Temperature", "Ambient dry-bulb air temperature (deg C), currently a single constant across the whole site", GH_ParamAccess.item, 20.0);
@@ -252,8 +252,12 @@ namespace Enzyme.Components
                     double bestDist = double.MaxValue;
                     // Widen the ring until a candidate is found - handles terrain vertices that
                     // fall outside the TagPoints' own footprint (e.g. beyond the analysis grid).
-                    for (int ring = 0; ring <= 5 && bestIdx == -1; ring++)
+                    // Once found, keep widening while a closer point could still sit in the next ring:
+                    // any point in ring R is at least (R - 1) * cellSize away in plan.
+                    for (int ring = 0; ; ring++)
                     {
+                        if (bestIdx == -1 && ring > 5) break;
+                        if (bestIdx != -1 && (ring - 1) * cellSize >= Math.Sqrt(bestDist)) break;
                         for (int dx = -ring; dx <= ring; dx++)
                         {
                             for (int dy = -ring; dy <= ring; dy++)
@@ -366,7 +370,7 @@ namespace Enzyme.Components
                 payload["Labels"] = jlabels;
                 
                 JArray jmetrics = new JArray();
-                jmetrics.Add(new JObject { ["Name"] = "Avg Apparent Temp", ["Value"] = avgAT.ToString("F1") + " °C" });
+                jmetrics.Add(new JObject { ["Name"] = "Avg Apparent Temp", ["Value"] = avgAT.ToString("F1", System.Globalization.CultureInfo.InvariantCulture) + " °C" });
                 jmetrics.Add(new JObject { ["Name"] = "Best Comfort Pts", ["Value"] = bestPoints.Count.ToString() });
                 jmetrics.Add(new JObject { ["Name"] = "Worst Comfort Pts", ["Value"] = worstPoints.Count.ToString() });
                 payload["Metrics"] = jmetrics;
@@ -388,7 +392,18 @@ namespace Enzyme.Components
             sw.Stop();
             if (execute)
             {
-                if (tagPoints.Count > 0)
+                if (tagPoints.Count > 0 && velocityValues.Count != tagPoints.Count)
+                {
+                    stopwatch.Stop();
+                    AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"VelocityValues ({velocityValues.Count}) and TagPoints ({tagPoints.Count}) must have the same count: nothing was computed.");
+                    Hud.Waiting(this, "matching VelocityValues");
+                }
+                else if (tagPoints.Count > 0 && terrain == null)
+                {
+                    stopwatch.Stop();
+                    Hud.Waiting(this, "TerrainMesh");
+                }
+                else if (tagPoints.Count > 0)
                 {
                     double bestPct = (double)bestPoints.Count / tagPoints.Count * 100.0;
                     double worstPct = (double)worstPoints.Count / tagPoints.Count * 100.0;

@@ -209,7 +209,7 @@ namespace Enzyme.Components
 
         private void OnDrawForeground(object sender, DrawEventArgs e)
         {
-            if (!_run || _colors.Count == 0) return;
+            if (!_run || (_colors.Count == 0 && _metrics.Count == 0)) return;
 
             int vpW = e.Viewport.Bounds.Width;
             int vpH = e.Viewport.Bounds.Height;

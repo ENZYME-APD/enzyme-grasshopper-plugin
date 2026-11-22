@@ -15,7 +15,7 @@ namespace Enzyme.Components
     {
         public FacadeDist()
           : base("Facade Module Distributor", "FACADE_DIST",
-              "Dynamically streams procedural facade modules with high-performance hot-reloading.",
+              "Loads the facade_modules.py Python script (downloaded from GitHub, or a local file in Dev_Mode) and runs it to build facade bands, storefront mullions and glass. A changed script file is re-read the next time the component solves.",
               "Enzyme", "Facade")
         {
         }
@@ -62,6 +62,15 @@ namespace Enzyme.Components
         protected override void SolveInstance(IGH_DataAccess DA)
         {
             if (DA.Iteration == 0 && Params.Output.Count > 3) DA.SetData(3, Enzyme.Utils.MethodNotes.Info("FacadeDist"));
+            // Unpublished (2026-11-22): this node downloaded and ran Python from GitHub without an integrity
+            // check. It stays loadable so saved files open, but it no longer downloads or runs anything until
+            // the script ships inside the plugin.
+            if (Disabled)
+            {
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Facade Module Distributor is withdrawn pending a security review (it downloaded and ran remote Python code). Use the Facade Module components instead.");
+                Message = "Withdrawn";
+                return;
+            }
             var watch = System.Diagnostics.Stopwatch.StartNew();
 
             GH_Structure<GH_Curve> crvsTree = null;
@@ -133,13 +142,14 @@ namespace Enzyme.Components
                             client.DownloadFile(GITHUB_RAW_URL, source_file_path);
                         }
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
                         if (!File.Exists(source_file_path))
                         {
-                            Hud.Error(this, "Sync error", false);
+                            Hud.Error(this, "Sync error: " + ex.Message);
                             return;
                         }
+                        AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Download failed, using the previously downloaded script: " + ex.Message);
                     }
                 }
             }
@@ -169,9 +179,9 @@ namespace Enzyme.Components
                     cache_status = "RAM Cached";
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                Hud.Error(this, "Compile error", false);
+                Hud.Error(this, "Script read error: " + ex.Message);
                 return;
             }
 
@@ -199,9 +209,9 @@ namespace Enzyme.Components
                 DA.SetDataList(1, mullions as System.Collections.IEnumerable);
                 DA.SetDataList(2, glass as System.Collections.IEnumerable);
             }
-            catch
+            catch (Exception ex)
             {
-                Hud.Error(this, "Compile error", false);
+                Hud.Error(this, "Python error: " + ex.Message);
                 return;
             }
 
@@ -231,6 +241,7 @@ namespace Enzyme.Components
 
         protected override System.Drawing.Bitmap Icon => IconLoader.Load("FacadeDist.png");
 
-        public override GH_Exposure Exposure => GH_Exposure.primary;
+        public override GH_Exposure Exposure => GH_Exposure.hidden; // unpublished: see SolveInstance
+        private const bool Disabled = true;
     }
 }

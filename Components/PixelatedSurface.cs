@@ -16,6 +16,8 @@ namespace Enzyme.Components
     {
         private Bitmap _cachedBitmap = null;
         private string _cachedImagePath = "";
+        private DateTime _cachedImageTime = DateTime.MinValue;
+        private bool _lastBake = false;
 
         public PixelatedSurface()
           : base("Pixel Image", "PixImg",
@@ -86,12 +88,22 @@ namespace Enzyme.Components
 
             if (!string.IsNullOrEmpty(imgPath))
             {
-                if (imgPath != _cachedImagePath || _cachedBitmap == null)
+                DateTime fileTime = DateTime.MinValue;
+                try { fileTime = System.IO.File.GetLastWriteTimeUtc(imgPath); } catch { }
+                if (imgPath != _cachedImagePath || _cachedBitmap == null || fileTime != _cachedImageTime)
                 {
                     try
                     {
-                        _cachedBitmap = new System.Drawing.Bitmap(imgPath);
+                        // Copy the image so the file is not kept locked; reload when it changes on disk.
+                        System.Drawing.Bitmap loaded;
+                        using (var fileBitmap = new System.Drawing.Bitmap(imgPath))
+                        {
+                            loaded = new System.Drawing.Bitmap(fileBitmap);
+                        }
+                        _cachedBitmap?.Dispose();
+                        _cachedBitmap = loaded;
                         _cachedImagePath = imgPath;
+                        _cachedImageTime = fileTime;
                     }
                     catch (Exception ex)
                     {
@@ -170,6 +182,8 @@ namespace Enzyme.Components
             }
 
             List<GH_Curve> branch_geometries = new List<GH_Curve>();
+            // Cells per colour (a cell is one fan of triangles, so face counts would over-count).
+            Dictionary<System.Drawing.Color, int> cell_counts = new Dictionary<System.Drawing.Color, int>();
             
             BoundingBox bbox = BoundingBox.Empty;
             foreach(var c in inputCells)
@@ -288,6 +302,7 @@ namespace Enzyme.Components
                 }
 
                 total_panels++;
+                cell_counts[c_mapped] = cell_counts.TryGetValue(c_mapped, out int cc) ? cc + 1 : 1;
                 branch_geometries.Add(new GH_Curve(polyline.ToNurbsCurve()));
             }
 
@@ -295,6 +310,8 @@ namespace Enzyme.Components
             List<GH_Mesh> local_meshes = new List<GH_Mesh>();
             List<GH_Colour> local_colors = new List<GH_Colour>();
             List<GH_String> local_tags = new List<GH_String>();
+            // Tag base names ("Tile 1", "Accent Tile") parallel to local_meshes, for baking.
+            List<string> mesh_tag_names = new List<string>();
 
             Dictionary<System.Drawing.Color, int> global_color_counts = new Dictionary<System.Drawing.Color, int>();
             foreach (var c in palette) global_color_counts[c] = 0;
@@ -308,8 +325,11 @@ namespace Enzyme.Components
                     local_meshes.Add(new GH_Mesh(kvp.Value));
                     local_colors.Add(new GH_Colour(kvp.Key));
                     
-                    int count = kvp.Value.Faces.Count; // not correct for triangles per cell, but legacy behavior preserved
+                    int count = cell_counts.TryGetValue(kvp.Key, out int cnt) ? cnt : 0;
                     global_color_counts[kvp.Key] += count;
+
+                    int pIdx = palette.IndexOf(kvp.Key);
+                    mesh_tag_names.Add(pIdx >= 0 ? $"Tile {pIdx + 1}" : "Accent Tile");
                 }
             }
 
@@ -328,7 +348,11 @@ namespace Enzyme.Components
             out_tags_tree.AppendRange(local_tags, pth);
 
             string bake_status = "";
-            if (run_bake)
+            // Without a Bake Name nothing is replaced, so bake only when Bake turns on (not on every
+            // solve while a Toggle stays True), to avoid stacking copies.
+            bool bake_now = run_bake && (!string.IsNullOrEmpty(bake_name) || !_lastBake);
+            _lastBake = run_bake;
+            if (bake_now)
             {
                 var doc = Rhino.RhinoDoc.ActiveDoc;
                 if (doc != null)
@@ -352,7 +376,9 @@ namespace Enzyme.Components
                         GH_Path path = out_mesh_tree.Paths[i];
                         var branch_meshes = out_mesh_tree.Branches[i];
                         var branch_colors = out_cols_tree.Branches[i];
-                        var branch_tags = out_tags_tree.Branches[i];
+                        // Tags are listed per palette colour (also empty ones); use the names
+                        // that match the non-empty meshes instead.
+                        var branch_tags = mesh_tag_names;
 
                         string branch_id = path.ToString().Replace("{", "").Replace("}", "").Replace(";", "_");
                         string group_name = !string.IsNullOrEmpty(bake_name) ? $"SurfaceGroup_{bake_name}_{branch_id}" : $"SurfaceGroup_{branch_id}";
@@ -376,7 +402,9 @@ namespace Enzyme.Components
                         {
                             Rhino.Geometry.Mesh f_mesh = branch_meshes[j].Value;
                             System.Drawing.Color f_color = branch_colors[j].Value;
-                            string f_tag = branch_tags[j].Value;
+                            string tag_name = j < branch_tags.Count ? branch_tags[j] : $"Tile {j + 1}";
+                            int f_count = cell_counts.TryGetValue(f_color, out int fc) ? fc : 0;
+                            string f_tag = $"{tag_name}: {f_count}";
 
                             string parent_name = "Tiles";
                             int parent_idx = doc.Layers.FindByFullPath(parent_name, -1);
@@ -387,7 +415,8 @@ namespace Enzyme.Components
                                 parent_idx = doc.Layers.Add(parent_layer);
                             }
 
-                            string layer_name = $"HexFacade_{f_tag.Replace(" ", "")}";
+                            // Stable layer name (no tile count, no colon): tag plus colour hex.
+                            string layer_name = $"HexFacade_{tag_name.Replace(" ", "")}_{f_color.R:X2}{f_color.G:X2}{f_color.B:X2}";
                             int layer_idx = -1;
                             
                             foreach(var l in doc.Layers)

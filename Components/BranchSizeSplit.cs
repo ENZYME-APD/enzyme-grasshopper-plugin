@@ -35,8 +35,8 @@ namespace Enzyme.Components
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddGenericParameter("Tree", "T", "Tree to process", GH_ParamAccess.tree);
-            pManager.AddNumberParameter("MinItems", "minItems", "Minimum items threshold", GH_ParamAccess.item);
-            pManager.AddNumberParameter("MaxItems", "maxItems", "Maximum items threshold", GH_ParamAccess.item);
+            pManager.AddNumberParameter("MinItems", "minItems", "Minimum item count for Tree B (whole number; decimals are truncated)", GH_ParamAccess.item);
+            pManager.AddNumberParameter("MaxItems", "maxItems", "Maximum item count for Tree B, inclusive (whole number; decimals are truncated)", GH_ParamAccess.item);
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
@@ -120,8 +120,8 @@ namespace Enzyme.Components
         
         private void AutoWireDefaultInputs(GH_Document document)
         {
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 1, 0.0, 3.0, 1.5, 330, -20);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 0.0, 3.0, 1.5, 330, 20);
+                Enzyme.Utils.AutoWireHelper.WireIntegerSlider(this, document, 1, 0, 10, 1, 330, -20);
+                Enzyme.Utils.AutoWireHelper.WireIntegerSlider(this, document, 2, 0, 10, 3, 330, 20);
             }
 
         protected override void AppendAdditionalComponentMenuItems(System.Windows.Forms.ToolStripDropDown menu)

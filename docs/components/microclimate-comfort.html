@@ -22,7 +22,7 @@
         <div class="doc-header" style="display: flex; align-items: center;">
             <div>
                 <h1>Microclimate Comfort</h1>
-                <p class="doc-subtitle">Calculates the perceived 'Feels Like' temperature using Fast Apparent Temperature or Precise UTCI.</p>
+                <p class="doc-subtitle">Calculates the perceived 'Feels Like' temperature using Fast Apparent Temperature or UTCI (full Broede et al. 2012 polynomial). In UTCI mode the mean radiant temperature is not computed: it is approximated as air temperature + 15 C x Solar Factor, which dominates the uncertainty.</p>
                 <div class="doc-meta">
                     <span class="badge site-analysis">Site Analysis</span>
                     <span>Nickname: <strong>FeelsLike</strong></span>
@@ -69,8 +69,10 @@
                     <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
                         <li>Each point takes Air Temp, Humidity, Wind Speed and Solar Factor from the lists by index (the last value is reused if a list is shorter; defaults 25 °C, 50 %, 1 m/s, 1.0).</li>
                         <li>Method 0: Apparent Temperature AT = T + 0.33 e - 0.70 v - 4.0, e = RH/100 × 6.105 × exp(17.27 T / (237.7 + T)) hPa, plus 4 °C × Solar Factor.</li>
-                        <li>Method 1: mean radiant temperature is set to T + 15 °C × Solar Factor; UTCI is evaluated with a polynomial in T, v, Tmrt - T and vapour pressure (Magnus formula, kPa, capped at 5). T is clamped to -50..50 °C and v to 0.5..30 m/s.</li>
-                        <li>Categories: AT uses fixed bands (40, 32, 27, 20, 10, 0 °C); UTCI uses the standard stress bands from very strong heat (38+) to very strong cold (below -27).</li>
+                        <li>Method 1: mean radiant temperature is not computed: it is approximated as T + 15 °C × Solar Factor, which dominates the uncertainty of the UTCI result.</li>
+                        <li>UTCI uses the full 210-term operational polynomial of Bröde et al. (2012) in T, v, Tmrt - T and vapour pressure, ported from pythermalcomfort (MIT), with saturation vapour pressure from Hardy (1998) as in the official UTCI program; results match the pythermalcomfort reference values within 0.1 °C.</li>
+                        <li>Inputs outside the UTCI validity range (T -50 to 50 °C, Tmrt - T -30 to 70 °C, wind 0.5 to 17 m/s, vapour pressure 0 to 5 kPa) are clamped to it and a warning gives the number of points affected; those results are indicative only.</li>
+                        <li>Categories: AT uses fixed bands (40, 32, 27, 20, 10, 0 °C); UTCI follows the official 10-class scale, from Extreme Heat Stress above 46 °C to Extreme Cold Stress below -40 °C.</li>
                         <li>Colours run from dark blue at -10 °C to dark red at 40 °C through 5 fixed stops.</li>
                     </ol>
                 </div>
@@ -99,6 +101,8 @@
                     <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
                         <li>Steadman R.G. (1994), Norms of apparent temperature in Australia, Australian Meteorological Magazine 43; the Australian Bureau of Meteorology apparent temperature formula.</li>
                         <li>Bröde P. et al. (2012), Deriving the operational procedure for the Universal Thermal Climate Index (UTCI), International Journal of Biometeorology 56.</li>
+                        <li>Tartarini F. and Schiavon S. (2020), pythermalcomfort: a Python package for thermal comfort research, SoftwareX 12 (MIT licence): source of the ported UTCI polynomial.</li>
+                        <li>Hardy B. (1998), ITS-90 formulations for vapor pressure, frostpoint temperature, dewpoint temperature and enhancement factors.</li>
                     </ul>
                 </div>
             </div>

@@ -48,9 +48,11 @@ namespace Enzyme.Components
             if (DA.Iteration == 0 && Params.Output.Count > 6) DA.SetData(6, Enzyme.Utils.MethodNotes.Info("SurveyOutlierCleaner"));
             DA.SetData(6, Enzyme.Utils.MethodNotes.Info("SurveyOutlierCleaner"));
 
-            var pts = new List<Point3d>();
-            DA.GetDataList(0, pts);
-            pts = pts.Where(p => p.IsValid).ToList();
+            var input = new List<Point3d>();
+            DA.GetDataList(0, input);
+            // Keep the input index of every valid point so the per-point outputs stay aligned with Points.
+            var validIdx = Enumerable.Range(0, input.Count).Where(i => input[i].IsValid).ToList();
+            var pts = validIdx.Select(i => input[i]).ToList();
             if (pts.Count < 4) { Hud.Waiting(this, "points"); return; }
 
             int k = 12; double threshold = 3.0, minDev = 0.3; int passes = 2;
@@ -77,17 +79,55 @@ namespace Enzyme.Components
 
             DA.SetDataList(0, clean);
             DA.SetDataList(1, outliers);
-            DA.SetDataList(2, result.Deviation);
-            DA.SetDataList(3, result.Score);
-            DA.SetDataList(4, result.Flags);
-            DA.SetDataList(5, colors);
+            if (validIdx.Count == input.Count)
+            {
+                DA.SetDataList(2, result.Deviation);
+                DA.SetDataList(3, result.Score);
+                DA.SetDataList(4, result.Flags);
+                DA.SetDataList(5, colors);
+            }
+            else
+            {
+                // Invalid input points get null Deviation / Score / Colour and Flag False, so lists match Points item by item.
+                var devAll = new Grasshopper.Kernel.Types.GH_Number[input.Count]; var scoreAll = new Grasshopper.Kernel.Types.GH_Number[input.Count];
+                var flagAll = new bool[input.Count]; var colAll = new Grasshopper.Kernel.Types.GH_Colour[input.Count];
+                for (int v = 0; v < validIdx.Count; v++)
+                {
+                    int i = validIdx[v];
+                    devAll[i] = new Grasshopper.Kernel.Types.GH_Number(result.Deviation[v]);
+                    scoreAll[i] = new Grasshopper.Kernel.Types.GH_Number(result.Score[v]);
+                    flagAll[i] = result.Flags[v];
+                    colAll[i] = new Grasshopper.Kernel.Types.GH_Colour(colors[v]);
+                }
+                DA.SetDataList(2, devAll);
+                DA.SetDataList(3, scoreAll);
+                DA.SetDataList(4, flagAll);
+                DA.SetDataList(5, colAll);
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, (input.Count - validIdx.Count) + " invalid point(s) ignored: their Deviation, Score and Colors are empty and Flags False.");
+            }
 
             double maxDev = outliers.Count > 0 ? result.Deviation.Where((d, i) => result.Flags[i]).Max(d => Math.Abs(d)) : 0;
             Hud.Done(this, sw,
                 Hud.Metric("Points", pts.Count),
                 Hud.Metric("Outliers", outliers.Count),
                 $"Up: {up} | Down: {outliers.Count - up}",
-                outliers.Count > 0 ? Hud.Metric("Max off", maxDev, "m", 2) : null);
+                outliers.Count > 0 ? Hud.Metric("Max off", maxDev, UnitAbbrev(), 2) : null);
+        }
+
+        static string UnitAbbrev()
+        {
+            var doc = Rhino.RhinoDoc.ActiveDoc;
+            if (doc == null) return "m";
+            switch (doc.ModelUnitSystem)
+            {
+                case Rhino.UnitSystem.Meters: return "m";
+                case Rhino.UnitSystem.Millimeters: return "mm";
+                case Rhino.UnitSystem.Centimeters: return "cm";
+                case Rhino.UnitSystem.Kilometers: return "km";
+                case Rhino.UnitSystem.Feet: return "ft";
+                case Rhino.UnitSystem.Inches: return "in";
+                default: return "units";
+            }
         }
 
         // ---------------- Detection ----------------

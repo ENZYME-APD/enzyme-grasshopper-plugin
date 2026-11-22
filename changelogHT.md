@@ -15,6 +15,15 @@ Running log of changes made on `main` going forward. Intended to eventually be f
 - Method notes written for **all 115 components** (docs pages + Info outputs): fixed-text Info outputs now show the notes; Info outputs with run values (Fast CFD, Fast Noise Analyzer, Noise Emitter From Curves, Wind Rose) keep them and append the notes; 30 analysis / generator / data components without an Info output get one as their last output. Outdated Info claims corrected (Keypoint Engine, Keyline Engine, Legend Geometry, Data Visualizer, Elevation Label, Analysis Heatmap).
 - New `PROJECT_CONTEXT.md` (hand-over context: standards, build / release, decision log, open issues, next steps), `CLAUDE.md` / `AGENTS.md` pointers for AI assistants, and `REVIEW_FINDINGS.md` (250 candidate findings from the code review, prioritised in the context file).
 
+**Review fixes, licence and clean-up (2026-11-22):**
+- 197 of the review findings fixed across 89 components (ports and GUIDs unchanged; see `REVIEW_FINDINGS.md`). Results that change on purpose: Microclimate Comfort UTCI now the full 210-term Bröde et al. 2012 polynomial (ported from pythermalcomfort, MIT) with Hardy vapour pressure, validity clamps and extreme categories; Fast CFD viscosity and friction use the physical time step; Auto-Grade Road never exceeds Max Slope; Terrain Grader measures earthworks against the grading rule; Road Slope Analyzer / 3D Road Slope / Road Profile Unroller treat vertical pieces as 90° and non-compliant (ratio legend fixed); Terrain Slope over-threshold shares are true areas; Terrain Height keeps its outputs when files are reopened; Raindrop Flow no longer hangs on zero spacing; facade modules and Masses parser extrude upwards for any outline orientation; JSON builders escape names; numbers parsed with invariant culture. 37 items stay open for owner decisions or canvas tests.
+- **Facade Module Distributor unpublished**: hidden from the toolbar and no longer downloads or runs remote Python (placed copies show an error) until the script ships inside the plugin.
+- **Fast Noise Analyzer** barrier term now follows ISO 9613-2 (C2 = 20, Dz = 10 log10(3 + 10 N)): about 3 dB less screening behind barriers than before.
+- **Heliodon**: new North input (last input; degrees counter-clockwise from +Y, Ladybug convention) rotates sun vectors, arcs and points.
+- Higrothermal Comfort renamed Hygrothermal Comfort (GUID unchanged). Layer Material's Instructions output now carries its method notes.
+- Licence: `LICENSE` (Enzyme APD Limited; free use with attribution; selling or commercial products need permission) and `NOTICE.md` (third-party libraries, methods and data).
+- Clean-up: removed `Archive/`, `ScriptsToProcess/`, `dev_scripts/_archive/` and 14 unused icons; icon tool moved to `dev_scripts/`.
+
 ## 1.12.0
 
 **Site context and porous trees (ideas adapted from VoxCity, Fujiwara et al. 2025, NUS / Takenaka, MIT):**

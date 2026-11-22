@@ -107,7 +107,10 @@ namespace Enzyme.Components
                 "- Open curve end points carry half a segment (-3 dB).\n\n" +
                 "LIMITATIONS:\n" +
                 "- Calibration assumes a long straight road; near the ends of short roads levels drift slightly low.\n" +
-                "- Points closer than ~spacing to a receiver can produce local hot spots; use a divide length smaller than the closest receiver distance.\n\n" +
+                "- Points closer than ~spacing to a receiver can produce local hot spots; use a divide length smaller than the closest receiver distance.\n" +
+                "- Pairs with the Fast Noise Analyzer: the calibration assumes pure spherical spreading (Lp1 - 20*log10 r) with energetic summation.\n" +
+                "  The analyzer's air absorption (2.8 dB/km) lowers the level at d_ref only slightly; its ground effect (when Ground is supplied, G > 0)\n" +
+                "  and any barriers are not compensated, so L_ref at d_ref is then reproduced only for hard ground (G = 0) and free view.\n\n" +
                 "TYPICAL LAeq AT 10 m (presets): Highway 78, Arterial 70, Local 60, Pedestrian 50, Railway 80 dB(A).";
             DA.SetData(2, (info) + "\n\n" + Enzyme.Utils.MethodNotes.Info("NoiseEmitterFromCurves"));
 

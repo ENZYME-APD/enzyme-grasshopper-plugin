@@ -74,7 +74,7 @@
                 <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
                     <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
                     <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
-                        <li>On a rising edge of Run it stores all settings and starts a state machine. For each name in GH States (or once, if empty) it sets Current GH State, waits 500 ms, then captures every view in Views (all Named Views if empty) from the active viewport with Rhino ViewCapture at Width × Height.</li>
+                        <li>On a rising edge of Run it stores all settings and starts a state machine. For each name in GH States (or once, if empty) it sets Current GH State (which holds the state being captured while a capture is pending and keeps the last exported state after the export ends), waits 500 ms, then captures every view in Views (all Named Views if empty; when Views is connected but empty a warning says so) from the active viewport with Rhino ViewCapture at Width × Height.</li>
                         <li>Before capturing it optionally switches the active viewport to Display Style and restores the Layer State; afterwards it restores the original camera, display mode and layers.</li>
                         <li>Files are named Prefix_State_View_Suffix.ext in Directory (Desktop if empty; created if missing); the DPI value is written as image metadata only.</li>
                     </ol>

@@ -11,9 +11,18 @@ namespace Enzyme.Components
 {
     public class ModBalconyComponent : GH_Component
     {
+        // Extrudes straight up along world Z (Extrusion.Create follows the curve plane normal, which can point down for
+        // clockwise outlines and is undefined for single line segments).
+        private static Brep ExtrudeUp(Curve crv, double height)
+        {
+            if (crv == null || Math.Abs(height) < 1e-9) return null;
+            Surface srf = Surface.CreateExtrusion(crv, new Vector3d(0, 0, height));
+            return srf?.ToBrep();
+        }
+
         public ModBalconyComponent()
           : base("Facade Module: Balcony", "Mod_Balcony",
-              "Continuous balconies with 2D wall patterns and intelligent corners.",
+              "Continuous balconies with 2D wall patterns; corner pieces are the segment ends trimmed by CornerOffset (or short segments when SegLength is on).",
               "Enzyme", "JSON Masterplan (Beta)")
         {
         }
@@ -159,6 +168,12 @@ namespace Enzyme.Components
                         if (offsets != null && offsets.Length > 0)
                         {
                             Curve offCrv = offsets[0];
+                            if (offsets.Length > 1)
+                            {
+                                Curve[] joinedOffsets = Curve.JoinCurves(offsets, 0.01);
+                                if (joinedOffsets != null && joinedOffsets.Length == 1) offCrv = joinedOffsets[0];
+                                else AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Branch {path}, floor {i}: the balcony offset split into {offsets.Length} pieces; only the first piece is used, so the balcony is partial.");
+                            }
                             Brep[] lofts = Brep.CreateFromLoft(new Curve[] { crv, offCrv }, Point3d.Unset, Point3d.Unset, LoftType.Straight, false);
                             
                             if (lofts != null && lofts.Length > 0)
@@ -167,8 +182,8 @@ namespace Enzyme.Components
                                 slabArea += crv.GetLength() * Math.Abs(depth);
                             }
 
-                            Extrusion extRail = Extrusion.Create(offCrv, railHeight, false);
-                            if (extRail != null) outRails.Append(new GH_Brep(extRail.ToBrep()), path);
+                            Brep extRail = ExtrudeUp(offCrv, railHeight);
+                            if (extRail != null) outRails.Append(new GH_Brep(extRail), path);
                         }
                     }
 
@@ -241,10 +256,10 @@ namespace Enzyme.Components
                         {
                             if (sillHeight > 0)
                             {
-                                Extrusion extSill = Extrusion.Create(cCrv, sillHeight, false);
+                                Brep extSill = ExtrudeUp(cCrv, sillHeight);
                                 if (extSill != null)
                                 {
-                                    outSolid.Append(new GH_Brep(extSill.ToBrep()), path);
+                                    outSolid.Append(new GH_Brep(extSill), path);
                                     solidArea += cLen * sillHeight;
                                 }
                             }
@@ -254,10 +269,10 @@ namespace Enzyme.Components
                             {
                                 Curve cGlass = cCrv.DuplicateCurve();
                                 cGlass.Transform(Transform.Translation(new Vector3d(0, 0, sillHeight)));
-                                Extrusion extGlass = Extrusion.Create(cGlass, visionH, false);
+                                Brep extGlass = ExtrudeUp(cGlass, visionH);
                                 if (extGlass != null)
                                 {
-                                    outCorners.Append(new GH_Brep(extGlass.ToBrep()), path);
+                                    outCorners.Append(new GH_Brep(extGlass), path);
                                     cornerArea += cLen * visionH;
                                 }
                             }
@@ -266,20 +281,20 @@ namespace Enzyme.Components
                             {
                                 Curve cTop = cCrv.DuplicateCurve();
                                 cTop.Transform(Transform.Translation(new Vector3d(0, 0, h - headerDrop)));
-                                Extrusion extTop = Extrusion.Create(cTop, headerDrop, false);
+                                Brep extTop = ExtrudeUp(cTop, headerDrop);
                                 if (extTop != null)
                                 {
-                                    outHeaders.Append(new GH_Brep(extTop.ToBrep()), path);
+                                    outHeaders.Append(new GH_Brep(extTop), path);
                                     headerArea += cLen * headerDrop;
                                 }
                             }
                         }
                         else
                         {
-                            Extrusion extCorner = Extrusion.Create(cCrv, h, false);
+                            Brep extCorner = ExtrudeUp(cCrv, h);
                             if (extCorner != null)
                             {
-                                outCorners.Append(new GH_Brep(extCorner.ToBrep()), path);
+                                outCorners.Append(new GH_Brep(extCorner), path);
                                 cornerArea += cLen * h;
                             }
                         }
@@ -296,10 +311,10 @@ namespace Enzyme.Components
                         {
                             if (sillHeight > 0)
                             {
-                                Extrusion extSill = Extrusion.Create(bayCrv, sillHeight, false);
+                                Brep extSill = ExtrudeUp(bayCrv, sillHeight);
                                 if (extSill != null)
                                 {
-                                    outSolid.Append(new GH_Brep(extSill.ToBrep()), path);
+                                    outSolid.Append(new GH_Brep(extSill), path);
                                     solidArea += bayLen * sillHeight;
                                 }
                             }
@@ -309,10 +324,10 @@ namespace Enzyme.Components
                             {
                                 Curve cGlass = bayCrv.DuplicateCurve();
                                 cGlass.Transform(Transform.Translation(new Vector3d(0, 0, sillHeight)));
-                                Extrusion extGlass = Extrusion.Create(cGlass, visionH, false);
+                                Brep extGlass = ExtrudeUp(cGlass, visionH);
                                 if (extGlass != null)
                                 {
-                                    outGlass.Append(new GH_Brep(extGlass.ToBrep()), path);
+                                    outGlass.Append(new GH_Brep(extGlass), path);
                                     glassArea += bayLen * visionH;
                                 }
                             }
@@ -321,20 +336,20 @@ namespace Enzyme.Components
                             {
                                 Curve cTop = bayCrv.DuplicateCurve();
                                 cTop.Transform(Transform.Translation(new Vector3d(0, 0, h - headerDrop)));
-                                Extrusion extTop = Extrusion.Create(cTop, headerDrop, false);
+                                Brep extTop = ExtrudeUp(cTop, headerDrop);
                                 if (extTop != null)
                                 {
-                                    outHeaders.Append(new GH_Brep(extTop.ToBrep()), path);
+                                    outHeaders.Append(new GH_Brep(extTop), path);
                                     headerArea += bayLen * headerDrop;
                                 }
                             }
                         }
                         else
                         {
-                            Extrusion extSolid = Extrusion.Create(bayCrv, h, false);
+                            Brep extSolid = ExtrudeUp(bayCrv, h);
                             if (extSolid != null)
                             {
-                                outSolid.Append(new GH_Brep(extSolid.ToBrep()), path);
+                                outSolid.Append(new GH_Brep(extSolid), path);
                                 solidArea += bayLen * h;
                             }
                         }

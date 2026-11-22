@@ -58,8 +58,9 @@
                 <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
                     <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
                     <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
-                        <li>Takes the first item of x. A Surface is used directly; a single-face Brep uses its face's underlying surface; polysurfaces are rejected.</li>
-                        <li>If the surface is planar within the document absolute tolerance, the normal is evaluated at the middle of its UV domain, and the origin is the bounding-box centre (plane surfaces) or the area centroid of the untrimmed surface. Outputs the normal, its reverse and a plane at that origin.</li>
+                        <li>Takes the first item of x. A Surface is used directly; a single-face Brep uses its face; polysurfaces are rejected.</li>
+                        <li>If the surface is planar within the document absolute tolerance, the normal is evaluated at the middle of its UV domain and follows the Brep face orientation (reversed faces are taken into account). A non-planar input raises a warning and gives no outputs.</li>
+                        <li>For a single-face Brep the origin is the area centroid of the trimmed face; for a Surface it is the bounding-box centre (plane surfaces) or the area centroid of the surface. Outputs the normal, its reverse and a plane at that origin.</li>
                     </ol>
                 </div>
                 <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">

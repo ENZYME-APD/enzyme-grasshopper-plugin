@@ -68,6 +68,12 @@ namespace Enzyme.Components
 
             int numDec = 2;
             DA.GetData(3, ref numDec);
+            if (numDec < 0 || numDec > 15)
+            {
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, "num_dec is clamped to 0..15.");
+                numDec = Math.Max(0, Math.Min(15, numDec));
+            }
+            int skippedFreeForm = 0;
 
             var treeLines = new GH_Structure<GH_Curve>();
             var treeArcs = new GH_Structure<GH_Curve>();
@@ -123,13 +129,20 @@ namespace Enzyme.Components
                                     TextDot textDot = new TextDot(label, offsetPt);
 
                                     treeDims.Append(new GH_Curve(leaderLine), path);
-                                    treeDims.Append(new GH_ObjectWrapper(textDot), path);
+                                    treeDims.Append(new GH_TextDot(textDot), path);
                                 }
+                            }
+                            else
+                            {
+                                skippedFreeForm++;
                             }
                         }
                     }
                 }
             }
+
+            if (skippedFreeForm > 0)
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"{skippedFreeForm} free-form segment(s) are neither lines nor arcs and are not output.");
 
             watch.Stop();
             double elapsedMs = watch.Elapsed.TotalMilliseconds;

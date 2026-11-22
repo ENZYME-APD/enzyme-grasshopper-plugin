@@ -125,9 +125,11 @@ namespace Enzyme.Components
         private IGH_Goo SmartCast(string val)
         {
             val = val.Trim();
-            if (double.TryParse(val, out double f))
+            // Invariant culture: '.' is the decimal point on every system (no thousands separators).
+            if (double.TryParse(val, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out double f))
             {
-                if (f % 1 == 0)
+                // Whole numbers become integers only if they fit in an int; larger ones stay numbers.
+                if (f % 1 == 0 && f >= int.MinValue && f <= int.MaxValue)
                 {
                     return new GH_Integer((int)f);
                 }

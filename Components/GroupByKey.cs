@@ -53,6 +53,12 @@ namespace Enzyme.Components
             Dictionary<object, int> keyToIndex = new Dictionary<object, int>();
             int branchIndex = 0;
 
+            // With a data tree on the inputs the component runs once per branch: prefix the group index with
+            // the input branch path so groups of different branches do not merge. A single-branch input keeps
+            // the flat {0}, {1}, {2}... paths.
+            bool multiBranch = Params.Input[0].VolatileData.PathCount > 1 || Params.Input[1].VolatileData.PathCount > 1;
+            GH_Path basePath = multiBranch ? DA.ParameterTargetPath(1) : null;
+
             for (int i = 0; i < keys.Count; i++)
             {
                 object rawKey = keys[i];
@@ -65,6 +71,7 @@ namespace Enzyme.Components
                 //   - GH_Boolean(true)  → true  (bool)
                 // This ensures that different GH_ types with the same value group correctly in the dictionary.
                 object unwrappedKey = rawKey is IGH_Goo gooKey ? gooKey.ScriptVariable() : rawKey;
+                if (unwrappedKey == null) unwrappedKey = NullKey; // Dictionary keys cannot be null
 
                 object value = values[i];
 
@@ -75,7 +82,7 @@ namespace Enzyme.Components
                 }
 
                 int pathIndex = keyToIndex[unwrappedKey];
-                GH_Path path = new GH_Path(pathIndex);
+                GH_Path path = basePath != null ? basePath.AppendElement(pathIndex) : new GH_Path(pathIndex);
 
                 IGH_Goo gooValue = value as IGH_Goo ?? new GH_ObjectWrapper(value);
                 groupedTree.Append(gooValue, path);
@@ -83,6 +90,8 @@ namespace Enzyme.Components
 
             // Extract unique keys
             List<object> uniqueKeys = new List<object>(keyToIndex.Keys);
+            for (int k = 0; k < uniqueKeys.Count; k++)
+                if (ReferenceEquals(uniqueKeys[k], NullKey)) uniqueKeys[k] = null;
 
             // Sets outputs
             DA.SetDataList(0, uniqueKeys);
@@ -95,6 +104,8 @@ namespace Enzyme.Components
             stopwatch.Stop();
             Hud.Done(this, stopwatch.Elapsed.TotalMilliseconds, $"{itemCount} values\n{branchCount} groups");
         }
+
+        private static readonly object NullKey = new object();
 
         protected override Bitmap Icon
         {

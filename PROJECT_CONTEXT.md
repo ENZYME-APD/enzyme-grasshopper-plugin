@@ -20,7 +20,7 @@ A toolkit of about 115 native C# Grasshopper components for Enzyme's work: urban
 | Site Analysis | 34 | Site Fetch, Sun Hours Analysis, Heliodon, Fast CFD, Fast Noise Analyzer, Global Flood Engine, Hydro-DEM, Terrain Slope, Analysis Heatmap / Difference / Dashboard, Report Metrics |
 | Masterplan | 9 | Road Network, Road Corridor, Auto-Grade Road, Procedural Road Generator, road slope analysers, Masterplan Clearance Engine |
 | JSON Masterplan (Beta) | 26 | JSON MP Engine V2, Master JSON Config Builder, Masses / Slab / Roof / Facade parsers, Archicad (Tapir) and massing adapters |
-| Facade | 9 | Curtain Wall System, Facade Module Distributor, Pixel Image / Gradient, Tile Pattern |
+| Facade | 9 | Curtain Wall System, Pixel Image / Gradient, Tile Pattern (Facade Module Distributor withdrawn, hidden) |
 | Curve, Data | 11 | Topology Split Edge Classifier, Polyline Healer, tree and list helpers |
 | Utilities, Info | 24 | canvas tools, named views and exports, GIF compiler, gradients |
 
@@ -35,12 +35,14 @@ The Deep Site Analysis report (a separate project, "DVF collaboration") is fed b
 | `Components/*.cs` | One Grasshopper component per file. |
 | `Utils/*.cs` | Shared code. Rhino-free helpers (maths, file formats, algorithms) live here so they can be unit tested: `FieldMath`, `WindMath`, `VectorField`, `Palettes`, `ReportMetrics`, `CanopyMath`, `GeoTiff`, `GeoProj`, `SiteData`, `Hydrology`, `Corridor`, `RoadNetwork`, `MethodNotes`. Rhino-dependent helpers: `EnzymeComponent`, `Hud`, `AutoWireHelper`, `MeshPrep`. |
 | `Tests/FieldMath.Tests` | Rhino-free test console (net8). Compiles selected `Utils/*.cs`; fixtures in `fixtures/`. Run in CI. |
-| `Resources/` | 24 px PNG icons (`IconLoader.Load("Name.png")`, case-sensitive). New icons from Lucide (`get_icon.js`, `fetch_lucide.sh`). |
+| `Resources/` | 24 px PNG icons embedded in the .gha (`IconLoader.Load("Name.png")`, case-sensitive); only icons a component loads are kept. |
 | `docs/` | GitHub Pages site: `index.html` cards, `components/<slug>.html` pages, guides (`Terrain_and_LEAP_Guide.md`, `Water_Analysis_Guide.md`). |
 | `dev_scripts/gen_docs.py` | Syncs docs with the code (headers, port lists, cards, method notes). `--check` in CI. |
 | `dev_scripts/yank_versions.py` | Yak clean-up (manual workflow). |
-| `ScriptsToProcess/` | Older copies of scripts (see open question Q4). |
-| `Archive/` | Superseded component versions kept for reference; not compiled. |
+| `dev_scripts/get_icon.js`, `fetch_lucide.sh`, `script-env/` | Icon tool: Lucide SVG to 24 px PNG in `Resources/` (one-time `npm install` in `script-env`). |
+| `dev_scripts/sync_galleries.py` | Adds image galleries from `docs/images/components/<page>/` to docs pages. |
+| `LICENSE`, `NOTICE.md` | Enzyme licence (free use with attribution; selling needs permission) and third-party notices. |
+| `REVIEW_FINDINGS.md` | Review checklist per component: fixed, open (owner decision / canvas test), not a bug. |
 | `enzGhPlugin.csproj` | net48, `<Version>` = release switch; RhinoCommon / Grasshopper pinned to 8.0.23304.9001. |
 | `manifest.yml` | Yak manifest. |
 | `.github/workflows/` | `ci-check.yml`, `build.yml`, `deploy-docs.yml`, `cleanup-yak.yml`. |
@@ -95,6 +97,7 @@ Road templates are JSON (`RoadTemplate` in `Utils/Corridor.cs`): `name`, `cut_sl
 
 - **MIT / permissive code** (VoxCity, Meerkat): ideas and code may be adapted with attribution in comments and method notes.
 - **GPL code** (Open Infra Studio, FreeCAD Road): **methods only**, never copy code; implement from the published method or paper. The plugin is not GPL.
+- **Our licence** (`LICENSE`): anyone may use, modify and share the plugin for any purpose, including paid design work, with attribution; selling it or putting any of its code into a commercial software product or service needs written permission from Enzyme APD Limited. Outputs (models, drawings, reports) are free of conditions. Source-available, not OSI open source. Any code ported from elsewhere must be MIT/BSD/Apache-compatible and listed in `NOTICE.md`.
 - **Data:** OpenStreetMap is ODbL (attribution required on any output: Site Fetch's Sources output); Copernicus DEM and ESA WorldCover (CC BY 4.0) need credit. FABDEM is non-commercial (CC BY-NC-SA), so it is not used by default.
 
 ---
@@ -133,6 +136,16 @@ Flow today: tagged centrelines (and junction points) in Rhino -> Road Network ->
 | 2026-11-22 | This file (`PROJECT_CONTEXT.md`) is the hand-over context, with `CLAUDE.md` / `AGENTS.md` pointing to it. | Development from other accounts and colleagues' AI tools. |
 | 2026-11-22 | Method notes written for all 115 components. Info ports: existing fixed-text Info replaced by the notes; Info with run values kept and the notes appended; analysis / generator / data components without Info got one appended as their last output; trivial utilities got docs only. | Standard applied everywhere without breaking placed canvases. |
 | 2026-11-22 | Findings from the review go to `REVIEW_FINDINGS.md`; no behaviour was changed in that pass. | Fixes need Rhino testing and owner decisions. |
+| 2026-11-22 | Licence: free use with attribution; commercial products need permission (`LICENSE`, `NOTICE.md`). | Owner's choice. |
+| 2026-11-22 | Repo clean-up: removed `Archive/`, `ScriptsToProcess/`, `dev_scripts/_archive/` and 14 unused icons (all still in git history); icon tool moved to `dev_scripts/`. | Owner asked to delete garbage. |
+| 2026-11-22 | Review-fixes pass: 197 findings fixed in 89 components, 37 left open for owner decisions or canvas tests, 17 not bugs. Ports and GUIDs unchanged. | Owner asked to fix the bugs. |
+| 2026-11-22 | Results deliberately changed by fixes: UTCI is the full Bröde et al. 2012 polynomial (from pythermalcomfort, MIT); Fast CFD uses the physical time step for viscosity and friction; Auto-Grade never exceeds Max Slope; Terrain Grader measures earthworks against the grading rule; slope tools treat vertical pieces as non-compliant; Terrain Slope over-threshold shares are areas. | Correctness. |
+| 2026-11-22 | Higrothermal Comfort renamed Hygrothermal Comfort (GUID unchanged). | Typo. |
+| 2026-11-22 | Copyright holder: **Enzyme APD Limited**. | Owner. |
+| 2026-11-22 | **Facade Module Distributor unpublished**: hidden from the toolbar, download / run of remote Python disabled (placed copies show an error). Re-publish only with the script shipped inside the plugin. | Security: it ran unverified code from GitHub. |
+| 2026-11-22 | **Fast Noise barrier term follows ISO 9613-2** (C2 = 20: Dz = 10 log10(3 + 10 N)); about 3 dB less screening than before. | Owner chose the standard. |
+| 2026-11-22 | **Heliodon North input** added (last input; degrees CCW from +Y, Ladybug convention, same as Fast CFD). | Rotated models. |
+| 2026-11-22 | **Junction levels**: the priority road keeps its own profile and side roads meet it at its height (option b); option (a), junction at the average ground level, kept as a choice for flat plazas. | Owner; usual engineering practice. |
 
 ---
 
@@ -150,10 +163,11 @@ Flow today: tagged centrelines (and junction points) in Rhino -> Road Network ->
 - I7. Road Network: mismatched templates only wrap kerb face / kerb back / boundary round corners; footway hatches stop at mouths; no splitter islands or hammerhead turning heads; radii not checked against swept paths.
 
 **Questions for the owner:**
-- Q1. Licence: the repo has no LICENSE file. Which licence applies to the plugin (it is public on GitHub and sold through Enzyme Digital Solutions)?
+- Q1. ~~Licence~~: decided; copyright holder Enzyme APD Limited (section 6). A lawyer's review of the custom licence is still recommended.
 - Q2. Which street design guide should the road templates follow by default (Spain, UK, NL CROW, US AASHTO, per project)?
-- Q3. Should junction levels be pinned to the terrain average (spec phase 4) or to the priority road's profile?
-- Q4. `ScriptsToProcess/` holds older copies of `dev_scripts`; can it be removed?
+- Q3. ~~Junction levels~~: decided, priority road profile with side roads tied to it; ground-level option for flat plazas (section 6).
+- Q4. ~~ScriptsToProcess~~: deleted.
+- Q5. Open review items needing a decision (details and recommendations in `REVIEW_FINDINGS.md`): hand-typed GUIDs (Fast Noise, Keypoint, Pixel Gradient, Noise Emitter, Pixelated Surface: keep unless a clash appears); JSON MP Engine setback facades; MP adapters' absolute vs relative Z; branch-path stability in Masses and Facade parsers; Global Flood Engine volume conservation; Report Metrics re-rating merged flags (fix in `Utils/ReportMetrics.cs`); Terrain Generator hash at UTM coordinates.
 
 Component-level findings from the method-notes review are listed in section 9.
 
@@ -163,43 +177,43 @@ Component-level findings from the method-notes review are listed in section 9.
 
 In order of priority (update as items finish):
 
-1. **Test PR #2 in Rhino** (I1 to I3), fix, merge, release (next version after 1.13.0).
-2. **Road Junction (3D):** priority / T / crossroads patches tied to the corridor end sections, roundabouts (with splitter islands) and cul-de-sacs in 3D, earthworks of the junction patches added to the totals, junction levels from the network (Q3).
-3. **Auto-Grade from the network:** grade edges with shared node levels so roads meet at junctions.
+1. **Test PR #2 and the review-fixes PR in Rhino** (I1 to I4 and the canvas list in section 9), fix, merge, release (next version after 1.13.0).
+2. **Road Junction (3D):** priority / T / crossroads patches tied to the corridor end sections, roundabouts (with splitter islands) and cul-de-sacs in 3D, earthworks of the junction patches added to the totals; levels: priority road profile, side roads tied to it (option for flat plazas at ground level).
+3. **Auto-Grade from the network:** grade priority roads first, then side roads starting from the priority road's level at each junction, so roads meet; optional flat-plaza junctions at the average ground level.
+3b. **Facade Module Distributor:** bring `facade_modules.py` into the repo, document it, ship it inside the plugin, then re-publish the node.
 4. **Stitch corridors into the terrain** (spec phase 5): one finished-ground mesh for CFD, Hydro-DEM, sun and noise.
 5. **More road tags** from the spec: one-way, lane counts, medians, boulevards, crossings, mapped to templates.
 6. **Design criteria check** for roads (radii, grades, vertical curves, sight distance) from primary-source tables (AASHTO, CROW or the chosen guide, Q2).
 7. **Site Fetch extras:** Meta 1 m canopy height, Overture buildings, optional FABDEM (non-commercial projects), OSM building:part.
 8. **VoxCity items not yet done:** green view index, sky view on facades, landmark visibility, street-network aggregation of results, ENVI-met / PALM export, Perez sky and reflections in Sun Hours.
 9. **IFC 4.3 alignment export** for BIM handover.
-10. **Work through `REVIEW_FINDINGS.md`**, Priority 1 first (section 9); spot-check the AI-written method notes of the analysis tools used in reports.
+10. **Decide the open review items** (Q5) and fix them; spot-check the AI-written method notes of the analysis tools used in reports.
+11. **Legal review of `LICENSE`** (custom licence; holder Enzyme APD Limited).
 
 ---
 
 ## 9. Component review findings
 
-Writing the method notes meant reading every component; 250 candidate findings in 91 components are listed in **`REVIEW_FINDINGS.md`** (checklist per component). They come from code reading, not Rhino runs: confirm each one before fixing. Where an old Info text claimed something the code does not do (Keypoint Engine, Keyline Engine, Legend Geometry, Data Visualizer, Elevation Label, Analysis Heatmap), the new method notes now describe what the code actually does.
+`REVIEW_FINDINGS.md` lists every finding with its status: **200 fixed, 34 open, 17 not a bug** (2026-11-22). Nothing in the fixes has been run in Rhino yet.
 
-**Priority 1: results can be wrong**
-- P1. Microclimate Comfort "precise UTCI" uses 98 of the 210 terms of the UTCI polynomial (Bröde et al. 2012) and no validity limits: results wrong, worst in hot humid conditions.
-- P2. Fast CFD: diffusion and friction use a time step scaled by CellSize / wind speed, so Viscosity and Friction depend on cell size (contradicts "grid-independent"); terrain speed-up only seeds the initial field.
-- P3. Fast Noise Analyzer: barrier term 10·log10(3 + 20N) equals ISO 9613-2 with C2 = 40, not 20: up to about 3 dB more screening than the standard. Confirm intent.
-- P4. Road Slope Analyzer / 3D Road Slope / Road Profile Unroller: vertical segments read as 0 % and compliant; flat segments give infinity in ratio mode; ratio legend reversed.
-- P5. Auto-Grade Road: smoothing can push the ends above Max Slope.
-- P6. Terrain Grader: cut / fill measured against a re-triangulated copy of the whole terrain, so resampling error counts as earthworks.
-- P7. Regional number parsing (Table to DataTree, BIM Attribute Serializer): on Spanish Windows 3.5 reads as 35. Use invariant culture.
-- P8. Topology Split Edge Classifier: walls shared over part of their length are not split, so external edges can be marked internal.
-- P9. Heliodon samples only the 21st of each month; non-half-hour start times give no vectors; no North input.
+Status of the priorities:
+- P1 UTCI: **fixed** (full 210-term polynomial, Hardy vapour pressure, validity clamps with a warning, extreme categories; matches pythermalcomfort's reference values).
+- P2 Fast CFD time step: **fixed** (physical seconds; Viscosity / Friction now about 1.6× stronger per step at defaults: review defaults on a canvas). Terrain speed-up only seeding the initial field: **open**, documented.
+- P3 Fast Noise barrier constant: **fixed** (ISO 9613-2, C2 = 20).
+- P4 slope tools: **fixed** (vertical = 90°, ∞ %, 1:0, never compliant; ratio legend corrected). Representation of flat pieces in ratio mode (∞) and per-curve output order: open.
+- P5 Auto-Grade: **fixed** (clamped back to Max Slope after smoothing).
+- P6 Terrain Grader: **fixed** (earthworks against the grading rule per cell).
+- P7 number parsing: **fixed** (invariant culture).
+- P8 Topology Split Edge Classifier partial walls: **fixed**.
+- P9 Heliodon: **fixed** (wrap-around months, half-hour start); still only the 21st of each month (documented); North input **added**.
+- P10 Raindrop Flow hang: **fixed** (error on spacing ≤ 0, seed cap, sane sliders).
+- P11 Terrain Height outputs lost on load: **fixed** (`Read()` keeps the layout).
+- P12 MP Engine colours: **fixed** (stable hash).
+- P13 JSON escaping: **fixed**.
+- P14 placeholder GUIDs: **open** (keep unless a clash appears).
+- P15 facade extrusions downwards: **fixed** (forced to world +Z) in Frames, Fins, Rhythmic Balconies, Balcony, Retail, Masses parser; Spandrels still to check.
 
-**Priority 2: crashes, lost data, unstable output**
-- P10. Raindrop Flow Engine: GridSpacing ≤ 0 loops forever (its auto-wired slider starts at 0).
-- P11. Terrain Height (MeshHeightAnalysis): `Read()` deletes outputs after index 9 on file load, so saved definitions lose Info and Dashboard Data.
-- P12. JSON MP Engine V2: fallback programme colours seeded with `string.GetHashCode()` change every Rhino session.
-- P13. JSON builders (Adapter: The Lego Builder, Recipe JSON Builder): names are not escaped, so a quote breaks the JSON.
-- P14. Fast Noise Analyzer and Keypoint Engine have hand-typed placeholder component GUIDs (risk of clashes with other plug-ins; changing them breaks saved files: decide).
-- P15. Several facade modules (Frames, Fins, Rhythmic Balconies, Balcony) extrude along each curve's own plane normal: clockwise outlines may extrude downwards. Test.
-
-**Priority 3: misleading names and descriptions** (typos such as Higrothermal, placeholder names on CWT, leftover debug descriptions, outputs that do not match their descriptions): see `REVIEW_FINDINGS.md`.
+**Canvas tests needed before releasing the fixes:** facade modules (+Z extrusions, clockwise outlines), Pixel Gradient concave cells and bakes, Terrain Height opening old files, Fast CFD defaults, Terrain Grader volumes, Road Generator contours, Topology Split overlaps, Auto-Phase undo, CWT outward side on L / U plans.
 
 ## 10. Working on this repo with an AI assistant
 

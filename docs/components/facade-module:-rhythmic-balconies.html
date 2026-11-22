@@ -22,7 +22,7 @@
         <div class="doc-header" style="display: flex; align-items: center;">
             <div>
                 <h1>Facade Module: Rhythmic Balconies</h1>
-                <p class="doc-subtitle">2D patterned balconies with merge logic, corner isolation, and fast math.</p>
+                <p class="doc-subtitle">2D patterned balconies with merge logic and corner isolation. The slab area in the HUD is a quick estimate (bay length x Depth), approximate for curved bays.</p>
                 <div class="doc-meta">
                     <span class="badge json-masterplan-beta">JSON Masterplan (Beta)</span>
                     <span>Nickname: <strong>Mod_Rhythm_Balc</strong></span>
@@ -76,13 +76,13 @@
                 <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
                     <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
                     <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
-                        <li>Each boundary curve is one floor (height from Heights by path and index, default 4.0 m). Its segments are sorted into corner pieces and middle pieces.</li>
+                        <li>Each boundary curve is one floor (height from Heights by path and index, default 4.0 m); all walls, rails and partitions are extruded straight up along world Z. Its segments are sorted into corner pieces and middle pieces.</li>
                         <li>With SegLength, segments shorter than 2 × BayWidth become corner pieces. With CornerOffset &gt; 0, each longer segment loses CornerOffset at both ends to corner pieces.</li>
                         <li>Corner pieces become a full-height solid panel, or with CornerWindow glass to height - HeaderDrop plus a header panel.</li>
                         <li>Middle pieces are divided into bays of about BayWidth (round(length / BayWidth) equal parts). Bays are numbered along the floor and the active horizontal pattern (chosen by the VertPattern digit for that floor) says which bays get a balcony (1).</li>
                         <li>A balcony bay gets glass to height - HeaderDrop, a header above, a slab (straight loft between the bay line and its copy offset by Depth, FlipDir for the other side), a railing (the offset line extruded RailHeight) and side partitions of RailHeight. With MergeAdjacent, the partition between two neighbouring balconies is left out.</li>
                         <li>Other bays get a full-height solid panel. With FirstBalcony False, the first curve of each branch (ground floor) has no balconies.</li>
-                        <li>The HUD reports glass, solid, header and corner areas (length × height), slab area (bay length × Depth) and the balcony count.</li>
+                        <li>The HUD reports glass, solid, header and corner areas (length × height), slab area (bay length × Depth, approximate for curved bays) and the balcony count.</li>
                     </ol>
                 </div>
                 <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">

@@ -22,7 +22,7 @@
         <div class="doc-header" style="display: flex; align-items: center;">
             <div>
                 <h1>Facade Module: Frames</h1>
-                <p class="doc-subtitle">Deep structural exoskeleton grid utilizing the robust Area-Offset Method.</p>
+                <p class="doc-subtitle">Facade frame on storey outlines: beams between each outline and its offset (BeamDepth), columns at equal bays, and optional sill, glass and header panels and vertical fins.</p>
                 <div class="doc-meta">
                     <span class="badge json-masterplan-beta">JSON Masterplan (Beta)</span>
                     <span>Nickname: <strong>Mod_Frames</strong></span>
@@ -75,9 +75,9 @@
                 <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
                     <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
                     <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
-                        <li>Each Bounds curve is one storey; its height comes from Heights at the same index in the same branch (default 4.0 if missing or 0.1 or less). Non-positive sizes fall back to the defaults.</li>
+                        <li>Each Bounds curve is one storey; all solids and surfaces are extruded upwards (world +Z), whatever the curve orientation. Its height comes from Heights at the same index in the same branch (default 4.0 if missing or 0.1 or less). Non-positive sizes fall back to the defaults.</li>
                         <li>Offset side (area-offset method): a closed curve is offset by BeamDepth both ways and the larger result is taken as outside (inside if FlipDir). An open curve uses the positive offset side unless FlipDir.</li>
-                        <li>Beams: a closed solid between the curve and its offset, BeamWidth high, at the top of the storey (from h - BeamWidth to h). The first curve of each branch also gets a base beam at the storey base unless RemoveBaseBeam.</li>
+                        <li>Beams: a closed solid between the curve and its offset, BeamWidth high, at the top of the storey (from h - BeamWidth to h). The lowest curve of each branch (by Z) also gets a base beam at the storey base unless RemoveBaseBeam.</li>
                         <li>Columns: each segment is divided into round(length / BayWidth) equal bays; at every division point a ColWidth × ColDepth box, pointing towards the offset curve, rises the full storey height. Points repeated at the same position and tangent are placed once.</li>
                         <li>With HasPanel, each bay gets surfaces on the boundary line: a sill of SillHeight, glass for the vision height, and a header of HeaderDrop below the top beam. Vision height = h - BeamWidth - sill - header (each clipped to fit).</li>
                         <li>Fins: each bay with vision height is divided into round(bay length / SubdivWidth) parts; at the inner division points a vertical fin surface FinDepth deep, outward, covers the vision height.</li>
@@ -88,7 +88,7 @@
                     <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
                     <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
                         <li>Bounds are flat storey outlines at their floor level, in metres; Heights are floor-to-floor heights.</li>
-                        <li>Bounds within a branch belong to one building and the first curve is the lowest storey.</li>
+                        <li>Bounds within a branch belong to one building.</li>
                     </ul>
                 </div>
                 <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">

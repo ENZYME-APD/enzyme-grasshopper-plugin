@@ -14,7 +14,7 @@ namespace Enzyme.Components
     {
         public PolylineHealerComponent()
           : base("Polyline Healer", "P-Heal",
-              "Heals polylines by extending segments and creating boolean regions.",
+              "Heals nearly closed polylines: extends every segment at both ends by Tolerance, builds boolean regions from the extended lines and returns the largest unioned outline (holes and separate islands are dropped). Non-polylines are returned unchanged.",
               "Enzyme", "Curve")
         {
         }
@@ -37,7 +37,7 @@ namespace Enzyme.Components
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddCurveParameter("Polyline", "p", "Polyline to heal", GH_ParamAccess.tree);
-            pManager.AddNumberParameter("Tolerance", "tol", "Extension factor", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Tolerance", "tol", "Extension length in model units added at both ends of each segment; use slightly more than the largest gap to close (too large adds spurious regions).", GH_ParamAccess.item, 1.5);
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
@@ -53,6 +53,11 @@ namespace Enzyme.Components
             
             double tol = 0;
             if (!DA.GetData(1, ref tol)) return;
+            if (tol < 0)
+            {
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Tolerance (extension length) must be 0 or more.");
+                return;
+            }
 
             GH_Structure<GH_Curve> resultTree = new GH_Structure<GH_Curve>();
 

@@ -59,7 +59,7 @@
                 <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
                     <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
                     <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
-                        <li>Each curve is split into its segments with DuplicateSegments (polycurve segments, polyline edges); otherwise the whole curve is one segment.</li>
+                        <li>Each curve is split into its segments with DuplicateSegments (polycurve segments, polyline edges), and every segment is further split at its interior kinks (G1 discontinuities); otherwise the whole curve is one segment.</li>
                         <li>Each segment is divided into n = round(length / Target Length) equal-length parts, at least 1, so parts are between about 0.67 and 1.5 × Target Length for short segments and closer to it for long ones.</li>
                         <li>Outputs per curve (one branch per input curve): division points without repeats at segment joints, the sub-curves and their lengths.</li>
                     </ol>

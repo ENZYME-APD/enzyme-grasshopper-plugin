@@ -48,7 +48,7 @@ namespace Enzyme.Components
             pManager[2].Optional = true;
             pManager.AddIntegerParameter("Filter_Level", "Filter_Level", "Filter by level", GH_ParamAccess.list);
             pManager[3].Optional = true;
-            pManager.AddBooleanParameter("ExactMatch", "ExactMatch", "Exact match mode", GH_ParamAccess.item, false);
+            pManager.AddBooleanParameter("ExactMatch", "ExactMatch", "True: names must equal a filter (case-insensitive). False: * and ? wildcards if present, otherwise substring match (A also matches TOWER_A).", GH_ParamAccess.item, false);
         }
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
@@ -128,8 +128,7 @@ namespace Enzyme.Components
                         {
                             foreach (JArray crvData in curvesData.OfType<JArray>())
                             {
-                                Curve c = DeserializeCurve(crvData);
-                                if (c != null)
+                                foreach (Curve c in DeserializeCurve(crvData))
                                 {
                                     c.Transform(zTranslation);
                                     outCurves.Append(new GH_Curve(c), path);
@@ -156,9 +155,10 @@ namespace Enzyme.Components
             }
         }
 
-        private Curve DeserializeCurve(JArray segmentsData)
+        private List<Curve> DeserializeCurve(JArray segmentsData)
         {
-            if (segmentsData == null || segmentsData.Count == 0) return null;
+            var result = new List<Curve>();
+            if (segmentsData == null || segmentsData.Count == 0) return result;
 
             List<Curve> crvs = new List<Curve>();
             foreach (JObject seg in segmentsData.OfType<JObject>())
@@ -207,17 +207,21 @@ namespace Enzyme.Components
                 }
             }
 
-            if (crvs.Count == 0) return null;
-            if (crvs.Count == 1) return crvs[0];
+            if (crvs.Count == 0) return result;
+            if (crvs.Count == 1) { result.Add(crvs[0]); return result; }
 
+            // Keep every joined piece: railings with disjoint pieces must not lose geometry.
             Curve[] joined = Curve.JoinCurves(crvs, 0.01);
-            if (joined != null && joined.Length > 0)
+            if (joined != null)
             {
-                Curve crv = joined[0];
-                if (!crv.IsClosed) crv.MakeClosed(0.01);
-                return crv;
+                foreach (Curve crv in joined)
+                {
+                    if (crv == null) continue;
+                    if (!crv.IsClosed) crv.MakeClosed(0.01);
+                    result.Add(crv);
+                }
             }
-            return null;
+            return result;
         }
 
         private bool IsMatch(string targetName, List<string> filterList, bool exactMode)

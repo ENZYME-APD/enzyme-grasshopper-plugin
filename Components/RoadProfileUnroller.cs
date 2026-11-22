@@ -36,7 +36,7 @@ namespace Enzyme.Components
         {
             pManager.AddCurveParameter("Profile Curves", "Profile", "Continuous unrolled 2D profile curve", GH_ParamAccess.tree);
             pManager.AddCurveParameter("Analyzed Segments", "Segments", "2D lines representing the slope segments", GH_ParamAccess.tree);
-            pManager.AddNumberParameter("Slope Values", "Slopes", "Slope values for each segment", GH_ParamAccess.tree);
+            pManager.AddNumberParameter("Slope Values", "Slopes", "Chord slope of each segment in the Mode unit (degrees, percent, or X of 1:X). A vertical segment gives 90 degrees, infinite percent or 1:0 and is non-compliant; a flat segment gives infinity in ratio mode (left out of the HUD average).", GH_ParamAccess.tree);
             pManager.AddPointParameter("Center Points 2D", "Centers", "2D center points for tagging", GH_ParamAccess.tree);
             pManager.AddTextParameter("Segment Status", "Status", "Status (Compliant / Non-Compliant)", GH_ParamAccess.tree);
             pManager.AddNumberParameter("Compliance Percentage", "Compliance %", "Overall compliance percentage", GH_ParamAccess.item);
@@ -65,6 +65,11 @@ namespace Enzyme.Components
             DA.GetData(3, ref mode);
             DA.GetData(4, ref zScale);
             DA.GetData(5, ref refY);
+            if (segmentSize <= 0)
+            {
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Segment Size must be greater than 0.");
+                return;
+            }
             Rhino.Geometry.Plane basePlane = Rhino.Geometry.Plane.WorldXY;
             DA.GetData(6, ref basePlane);
 
@@ -131,7 +136,12 @@ namespace Enzyme.Components
                     double verticalDistance = System.Math.Abs(p1.Z - p0.Z);
                     double slopeValue = 0.0;
 
-                    if (horizontalDistance > 0)
+                    if (horizontalDistance <= 0 && verticalDistance > 0)
+                    {
+                        // Vertical segment: 90 degrees, infinite percentage, ratio 1:0 (never compliant)
+                        slopeValue = mode == 0 ? 90.0 : (mode == 1 ? double.PositiveInfinity : 0.0);
+                    }
+                    else if (horizontalDistance > 0)
                     {
                         if (mode == 0) // Degrees
                         {
@@ -143,7 +153,8 @@ namespace Enzyme.Components
                         }
                         else if (mode == 2) // Ratio 1:X
                         {
-                            slopeValue = horizontalDistance / verticalDistance;
+                            // A flat segment is 1:infinity in Slope Values (excluded from the HUD average)
+                            slopeValue = verticalDistance > 0 ? horizontalDistance / verticalDistance : double.PositiveInfinity;
                         }
                     }
 
@@ -154,7 +165,7 @@ namespace Enzyme.Components
                     }
                     else
                     {
-                        isCompliant = slopeValue <= threshold;
+                        isCompliant = slopeValue <= threshold && !(horizontalDistance <= 0 && verticalDistance > 0);
                     }
 
                     // Map to 2D Graph space
@@ -235,7 +246,9 @@ namespace Enzyme.Components
                 ["Type"] = "Binary",
                 ["Title"] = "Unrolled Slope Profile",
                 ["Colors"] = jColors,
-                ["Labels"] = new Newtonsoft.Json.Linq.JArray($"<= {threshold}{unit}", $"> {threshold}{unit}"),
+                ["Labels"] = new Newtonsoft.Json.Linq.JArray(mode == 2
+                    ? new object[] { "1:X, X >= " + threshold.ToString(System.Globalization.CultureInfo.InvariantCulture), "1:X, X < " + threshold.ToString(System.Globalization.CultureInfo.InvariantCulture) }
+                    : new object[] { "<= " + threshold.ToString(System.Globalization.CultureInfo.InvariantCulture) + unit, "> " + threshold.ToString(System.Globalization.CultureInfo.InvariantCulture) + unit }),
                 ["SubLabels"] = new Newtonsoft.Json.Linq.JArray($"Compliance: {compliancePct}%")
             };
 
@@ -246,7 +259,7 @@ namespace Enzyme.Components
             int countVal = 0;
             foreach (Grasshopper.Kernel.Types.GH_Number val in outSlopes.AllData(true))
             {
-                if(val != null) {
+                if(val != null && !double.IsInfinity(val.Value) && !double.IsNaN(val.Value)) {
                     double v = val.Value;
                     if(v > maxVal) maxVal = v;
                     if(v < minVal) minVal = v;
@@ -281,7 +294,8 @@ namespace Enzyme.Components
 public override void AddedToDocument(GH_Document document)
         {
             base.AddedToDocument(document);
-            if (this.Params.Input[3].SourceCount == 0)
+            // Only on a fresh drop: a component read from a file or pasted keeps its Mode wiring as saved
+            if (!_readFromFile && this.Params.Input[3].SourceCount == 0)
             {
                 var vl = new Grasshopper.Kernel.Special.GH_ValueList();
                 vl.CreateAttributes();
@@ -294,6 +308,14 @@ public override void AddedToDocument(GH_Document document)
                 document.AddObject(vl, false);
                 this.Params.Input[3].AddSource(vl);
             }
+        }
+
+        private bool _readFromFile = false;
+
+        public override bool Read(GH_IO.Serialization.GH_IReader reader)
+        {
+            _readFromFile = true;
+            return base.Read(reader);
         }
 
         public override GH_Exposure Exposure => GH_Exposure.primary;

@@ -111,6 +111,7 @@ namespace Enzyme.Components
 
             Dictionary<string, BuildingData> bldgDataMap = new Dictionary<string, BuildingData>();
             int totalBlocks = 0;
+            int badValues = 0;
 
             foreach (var gid in guids)
             {
@@ -133,15 +134,27 @@ namespace Enzyme.Components
 
                 double fh = 3.5;
                 string fhStr = obj.Attributes.GetUserString("FloorHeight");
-                if (!string.IsNullOrEmpty(fhStr)) double.TryParse(fhStr, out fh);
+                if (!string.IsNullOrEmpty(fhStr) && !double.TryParse(fhStr.Trim(), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out fh))
+                {
+                    fh = 3.5;
+                    badValues++;
+                }
 
                 int flrs = 1;
                 string flrsStr = obj.Attributes.GetUserString("Floors");
-                if (!string.IsNullOrEmpty(flrsStr)) int.TryParse(flrsStr, out flrs);
+                if (!string.IsNullOrEmpty(flrsStr) && !int.TryParse(flrsStr.Trim(), System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out flrs))
+                {
+                    flrs = 1;
+                    badValues++;
+                }
 
                 int phase = 0;
                 string phaseStr = obj.Attributes.GetUserString("Phase");
-                if (!string.IsNullOrEmpty(phaseStr)) int.TryParse(phaseStr, out phase);
+                if (!string.IsNullOrEmpty(phaseStr) && !int.TryParse(phaseStr.Trim(), System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out phase))
+                {
+                    phase = 0;
+                    badValues++;
+                }
 
                 if (!bldgDataMap.ContainsKey(bldgId))
                 {
@@ -181,6 +194,9 @@ namespace Enzyme.Components
                 });
                 totalBlocks++;
             }
+
+            if (badValues > 0)
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, badValues + " FloorHeight / Floors / Phase value(s) could not be read as numbers (use a dot as decimal separator, e.g. 3.5); the defaults 3.5 / 1 / 0 were used.");
 
             var masterplanDict = new Dictionary<string, object>
             {
@@ -344,18 +360,15 @@ namespace Enzyme.Components
                         { "end", new[] { Math.Round(seg.PointAtEnd.X, 4), Math.Round(seg.PointAtEnd.Y, 4), Math.Round(seg.PointAtEnd.Z, 4) } }
                     });
                 }
-                else if (seg.IsArc(0.001))
+                else if (seg.IsArc(0.001) && seg.TryGetArc(out Arc arc))
                 {
-                    if (seg.TryGetArc(out Arc arc))
+                    segmentsData.Add(new Dictionary<string, object>
                     {
-                        segmentsData.Add(new Dictionary<string, object>
-                        {
-                            { "type", "Arc" },
-                            { "start", new[] { Math.Round(arc.StartPoint.X, 4), Math.Round(arc.StartPoint.Y, 4), Math.Round(arc.StartPoint.Z, 4) } },
-                            { "mid", new[] { Math.Round(arc.MidPoint.X, 4), Math.Round(arc.MidPoint.Y, 4), Math.Round(arc.MidPoint.Z, 4) } },
-                            { "end", new[] { Math.Round(arc.EndPoint.X, 4), Math.Round(arc.EndPoint.Y, 4), Math.Round(arc.EndPoint.Z, 4) } }
-                        });
-                    }
+                        { "type", "Arc" },
+                        { "start", new[] { Math.Round(arc.StartPoint.X, 4), Math.Round(arc.StartPoint.Y, 4), Math.Round(arc.StartPoint.Z, 4) } },
+                        { "mid", new[] { Math.Round(arc.MidPoint.X, 4), Math.Round(arc.MidPoint.Y, 4), Math.Round(arc.MidPoint.Z, 4) } },
+                        { "end", new[] { Math.Round(arc.EndPoint.X, 4), Math.Round(arc.EndPoint.Y, 4), Math.Round(arc.EndPoint.Z, 4) } }
+                    });
                 }
                 else
                 {
@@ -407,7 +420,7 @@ namespace Enzyme.Components
         private void AutoWireDefaultInputs(GH_Document document)
         {
                 Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 1, false, 210, -20);
-                Enzyme.Utils.AutoWireHelper.WireToggle(this, document, 3, false, 210, 20);
+                Enzyme.Utils.AutoWireHelper.WireButton(this, document, 3, 210, 20);
                 Enzyme.Utils.AutoWireHelper.WireOutputPanel(this, document, 0, 220, -11, 180, 22);
             }
 

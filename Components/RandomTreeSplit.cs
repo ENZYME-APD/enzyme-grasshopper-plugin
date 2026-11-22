@@ -12,7 +12,7 @@ namespace Enzyme.Components
     {
         public RandomTreeSplit()
           : base("RandomTreeSplit", "RandomTreeSplit",
-              "RandomTreeSplit",
+              "Randomly splits the branches of a tree into three trees: a share pA of the branches goes to A, a share pB to B and the rest to C. Paths are kept; the same seed gives the same split.",
               "Enzyme", "Data")
         {
         }
@@ -34,17 +34,17 @@ namespace Enzyme.Components
 
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddGenericParameter("Tree", "T", "Tree", GH_ParamAccess.tree);
-            pManager.AddNumberParameter("pA", "pA", "pA", GH_ParamAccess.item);
-            pManager.AddNumberParameter("pB", "pB", "pB", GH_ParamAccess.item);
-            pManager.AddNumberParameter("seed", "seed", "seed", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Tree", "T", "Tree whose branches are split.", GH_ParamAccess.tree);
+            pManager.AddNumberParameter("pA", "pA", "Share of branches for A, 0 to 1 (count = floor(pA × branch count)). pA + pB must be at most 1.", GH_ParamAccess.item);
+            pManager.AddNumberParameter("pB", "pB", "Share of branches for B, 0 to 1 (count = floor(pB × branch count)). pA + pB must be at most 1.", GH_ParamAccess.item);
+            pManager.AddNumberParameter("seed", "seed", "Random seed (truncated to a whole number).", GH_ParamAccess.item);
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddGenericParameter("A", "A", "A", GH_ParamAccess.tree);
-            pManager.AddGenericParameter("B", "B", "B", GH_ParamAccess.tree);
-            pManager.AddGenericParameter("C", "C", "C", GH_ParamAccess.tree);
+            pManager.AddGenericParameter("A", "A", "Randomly chosen branches, share pA.", GH_ParamAccess.tree);
+            pManager.AddGenericParameter("B", "B", "Randomly chosen branches, share pB.", GH_ParamAccess.tree);
+            pManager.AddGenericParameter("C", "C", "All remaining branches.", GH_ParamAccess.tree);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
@@ -134,9 +134,9 @@ namespace Enzyme.Components
         
         private void AutoWireDefaultInputs(GH_Document document)
         {
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 1, 0.0, 3.0, 1.5, 330, -40);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 0.0, 3.0, 1.5, 330, 0);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 3, 0.0, 3.0, 1.5, 330, 40);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 1, 0.0, 1.0, 0.3, 330, -40);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 0.0, 1.0, 0.3, 330, 0);
+                Enzyme.Utils.AutoWireHelper.WireIntegerSlider(this, document, 3, 0, 100, 1, 330, 40);
             }
 
         protected override void AppendAdditionalComponentMenuItems(System.Windows.Forms.ToolStripDropDown menu)

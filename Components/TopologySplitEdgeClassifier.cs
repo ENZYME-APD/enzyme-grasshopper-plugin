@@ -47,7 +47,7 @@ namespace Enzyme.Components
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddTextParameter("Instructions_Out", "IO", "Canvas setup instructions to enforce correct data binding", GH_ParamAccess.item);
+            pManager.AddTextParameter("Instructions_Out", "IO", "Legacy output kept for saved definitions (no data); see the Info output for the method.", GH_ParamAccess.item);
             pManager.AddCurveParameter("ExternalEdges", "EE", "The flattened (Z=0) external boundary curves", GH_ParamAccess.tree);
             pManager.AddCurveParameter("InternalPartitions", "IP", "The flattened (Z=0) internal shared partition curves", GH_ParamAccess.tree);
             pManager.AddTextParameter("MetadataOut", "MO", "JSON serialized spatial parameters for orientation reconstruction", GH_ParamAccess.tree);
@@ -60,14 +60,7 @@ namespace Enzyme.Components
             if (DA.Iteration == 0 && Params.Output.Count > 5) DA.SetData(5, Enzyme.Utils.MethodNotes.Info("TopologySplitEdgeClassifier"));
             var sw = System.Diagnostics.Stopwatch.StartNew();
 
-            string instructionsOut = @"CANVAS INSTRUCTIONS:
-1. Set Input 1 Name: 'RoomCurves' | Access: Tree | Type: Curve
-2. Set Input 2 Name: 'ToleranceValue' | Access: Item | Type: double
-3. Set Output 1 Name: 'Instructions_Out'
-4. Set Output 2 Name: 'ExternalEdges'
-5. Set Output 3 Name: 'InternalPartitions'
-6. Set Output 4 Name: 'MetadataOut'
-7. Set Output 5 Name: 'FloorSlabs'";
+            string instructionsOut = "Legacy output kept for saved definitions; see the Info output for the method.";
 
             DA.SetData(0, instructionsOut);
 
@@ -274,15 +267,17 @@ namespace Enzyme.Components
                                         if (events[e].IsPoint)
                                         {
                                             if (initialSegments[i].ClosestPoint(events[e].PointA, out double ti))
-                                            {
-                                                if (ti > initialSegments[i].Domain.Min + tol && ti < initialSegments[i].Domain.Max - tol)
-                                                    splitParams[i].Add(ti);
-                                            }
+                                                AddSplit(initialSegments[i], splitParams[i], ti, tol);
                                             if (initialSegments[j].ClosestPoint(events[e].PointB, out double tj))
-                                            {
-                                                if (tj > initialSegments[j].Domain.Min + tol && tj < initialSegments[j].Domain.Max - tol)
-                                                    splitParams[j].Add(tj);
-                                            }
+                                                AddSplit(initialSegments[j], splitParams[j], tj, tol);
+                                        }
+                                        else if (events[e].IsOverlap)
+                                        {
+                                            // Collinear walls shared over part of their length: split both at the overlap ends
+                                            AddSplit(initialSegments[i], splitParams[i], events[e].OverlapA.T0, tol);
+                                            AddSplit(initialSegments[i], splitParams[i], events[e].OverlapA.T1, tol);
+                                            AddSplit(initialSegments[j], splitParams[j], events[e].OverlapB.T0, tol);
+                                            AddSplit(initialSegments[j], splitParams[j], events[e].OverlapB.T1, tol);
                                         }
                                     }
                                 }
@@ -365,6 +360,16 @@ namespace Enzyme.Components
             sw.Stop();
             
             Hud.Done(this, sw.Elapsed.TotalMilliseconds, $"Zones: {countZones}\nClusters: {countClusters}\nSlabs: {countSlabs}\nInternal walls: {countInternal}\nExternal walls: {countExternal}");
+        }
+
+        // Keeps a split parameter only if it lies strictly inside the segment and its point is more than
+        // tol (model distance) from both segment ends.
+        private static void AddSplit(Curve seg, List<double> list, double t, double tol)
+        {
+            if (!(t > seg.Domain.Min && t < seg.Domain.Max)) return;
+            Point3d pt = seg.PointAt(t);
+            if (pt.DistanceTo(seg.PointAtStart) > tol && pt.DistanceTo(seg.PointAtEnd) > tol)
+                list.Add(t);
         }
 
         protected override System.Drawing.Bitmap Icon

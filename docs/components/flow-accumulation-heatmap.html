@@ -76,7 +76,7 @@
                     <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
                     <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
                         <li>Counts polyline vertices, not path length or upstream area: densely sampled paths weigh more, and the result is a visual proxy, not a hydrological flow accumulation.</li>
-                        <li>Curves that are not polylines are skipped silently; each point counts at its nearest vertex however far away it is.</li>
+                        <li>Curves that are not polylines are skipped with a warning; each point counts at its nearest vertex however far away it is.</li>
                     </ul>
                 </div>
                 <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">

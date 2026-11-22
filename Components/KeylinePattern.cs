@@ -48,7 +48,7 @@ namespace Enzyme.Components
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
         {
-            pManager.AddCurveParameter("Keylines", "K", "Generated 3D swale/plow curves projected on terrain", GH_ParamAccess.list);
+            pManager.AddCurveParameter("Keylines", "K", "Guide curves and their Count plan offsets on each side (2 x Count + 1 per guide, more if an offset splits), draped vertically on the terrain", GH_ParamAccess.list);
             pManager.AddTextParameter("Info", "Info", "Component information and methodology", GH_ParamAccess.item);
             pManager.AddTextParameter("Dashboard Data", "Dashboard Data", "Unified JSON payload containing legend and key analysis metrics for the Analysis Dashboard", GH_ParamAccess.item);
         }
@@ -68,6 +68,12 @@ namespace Enzyme.Components
 
             int count = 5;
             DA.GetData(3, ref count);
+
+            if (spacing <= 0)
+            {
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Spacing must be greater than 0.");
+                return;
+            }
 
             List<Curve> keylines = new List<Curve>();
             Mesh[] meshes = new Mesh[] { terrain };

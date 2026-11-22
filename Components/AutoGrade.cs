@@ -48,6 +48,17 @@ namespace Enzyme.Components
             DA.GetData(3, ref res);
             DA.GetData(4, ref smoothPasses);
 
+            if (!(res > 0.0) || double.IsInfinity(res))
+            {
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Resolution must be a positive distance (m).");
+                return;
+            }
+            if (!(maxSlope >= 0.0))
+            {
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Max Slope must be zero or positive (ratio, 0.08 = 8 %).");
+                return;
+            }
+
             Curve nCrv = crv.ToNurbsCurve();
             double length = nCrv.GetLength();
             int divs = Math.Max(2, (int)(length / res));
@@ -100,8 +111,9 @@ namespace Enzyme.Components
             }
 
             // 3. SMOOTH: Vertical Curvature (Moving Average)
-            // Moving average is mathematically guaranteed to preserve (or lessen) the max slope constraint
-            // while smoothing sharp kinks into vertical parabolas.
+            // Moving average smooths sharp kinks. It keeps the max slope in the interior, but near the pinned
+            // ends the window is truncated, so the steps next to the ends can get steeper than Max Slope;
+            // an interior-only forward/backward clamp after smoothing (step 3b) restores the limit.
             double[] zSmooth = (double[])zGrade.Clone();
             int window = Math.Max(1, divs / 20); // 5% window size
             
@@ -126,6 +138,19 @@ namespace Enzyme.Components
                 temp[temp.Length - 1] = zSmooth[zSmooth.Length - 1];
                 
                 zSmooth = temp;
+            }
+
+            // 3b. RE-CLAMP: forward/backward slope clamp on the interior points (ends stay pinned), so the
+            // smoothed profile never exceeds Max Slope at the division points.
+            for (int i = 1; i < zSmooth.Length - 1; i++)
+            {
+                double dist = new Point3d(pts2D[i].X, pts2D[i].Y, 0).DistanceTo(new Point3d(pts2D[i - 1].X, pts2D[i - 1].Y, 0));
+                zSmooth[i] = Math.Min(Math.Max(zSmooth[i], zSmooth[i - 1] - maxSlope * dist), zSmooth[i - 1] + maxSlope * dist);
+            }
+            for (int i = zSmooth.Length - 2; i >= 1; i--)
+            {
+                double dist = new Point3d(pts2D[i].X, pts2D[i].Y, 0).DistanceTo(new Point3d(pts2D[i + 1].X, pts2D[i + 1].Y, 0));
+                zSmooth[i] = Math.Min(Math.Max(zSmooth[i], zSmooth[i + 1] - maxSlope * dist), zSmooth[i + 1] + maxSlope * dist);
             }
 
             // 4. BAKE: Generate Output Curves

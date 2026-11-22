@@ -88,7 +88,7 @@
                     <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
                     <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
                         <li>Average Noises is LAeq in dB(A) at RefDist from the road (default 10 m, minimum 1 m).</li>
-                        <li>Free-field spherical spreading from each point source, as used by the downstream noise analyser; sources are incoherent.</li>
+                        <li>Free-field spherical spreading (Lp1 − 20 log10 r) with energetic summation of incoherent sources, as in the Fast Noise Analyzer; its air absorption (2.8 dB/km) lowers the level at RefDist only slightly, and its ground effect (Ground supplied, G above 0) and barriers are not compensated, so L_ref at RefDist is reproduced only for hard ground and free view.</li>
                         <li>Model units are metres.</li>
                     </ul>
                 </div>

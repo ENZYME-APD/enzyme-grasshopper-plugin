@@ -14,7 +14,7 @@ namespace Enzyme.Components
 
         public KeypointFinder()
           : base("Keypoint Engine", "Keypoint",
-              "Analyzes stream slopes to find the inflection point (Keypoint) and extracts the Master Keyline contour.",
+              "Analyzes stream slopes to find the Keypoint (the vertex with the largest steep-to-flat drop in smoothed slope) and extracts the Master Keyline contour.",
               "Enzyme", "Site Analysis")
         {
         }
@@ -68,6 +68,7 @@ namespace Enzyme.Components
 
             List<Point3d> keypoints = new List<Point3d>();
             List<Curve> keylines = new List<Curve>();
+            int noBreak = 0;
 
             foreach (Curve stream in streams)
             {
@@ -82,6 +83,9 @@ namespace Enzyme.Components
                 }
 
                 if (poly.Count < 4) continue; // Too short to analyze inflection
+
+                // Streams flow downhill: if the curve was drawn uphill, reverse it so slopes are positive downstream
+                if (poly[0].Z < poly[poly.Count - 1].Z) poly.Reverse();
 
                 List<double> slopes = new List<double>();
                 
@@ -126,6 +130,13 @@ namespace Enzyme.Components
                     }
                 }
 
+                // No steep-to-flat transition (slope never decreases downstream): no keypoint on this stream
+                if (bestIndex != -1 && !(maxChange > 0.0))
+                {
+                    noBreak++;
+                    bestIndex = -1;
+                }
+
                 if (bestIndex != -1)
                 {
                     Point3d keypoint = poly[bestIndex];
@@ -160,6 +171,9 @@ namespace Enzyme.Components
                     }
                 }
             }
+
+            if (noBreak > 0)
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, noBreak + " stream(s) have no steep-to-flat slope change, so no keypoint was returned for them.");
 
             stopwatch.Stop();
             Hud.Done(this, stopwatch.Elapsed.TotalMilliseconds, $"Smoothing: {window}\nFound: {keypoints.Count}");

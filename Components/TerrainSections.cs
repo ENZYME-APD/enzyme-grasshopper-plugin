@@ -60,8 +60,8 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
             pManager.AddCurveParameter("SectionOutlinesY", "SOY", "3D Polylines running parallel to the Y-axis.", GH_ParamAccess.tree);
             pManager.AddTextParameter("LabelText3D", "LT3D", "Text strings for 3D section labels.", GH_ParamAccess.tree);
             pManager.AddPlaneParameter("LabelPlanes3D", "LPl3D", "Planes for 3D section labels.", GH_ParamAccess.tree);
-            pManager.AddCurveParameter("FlatSectionsX", "FSX", "2D X-Sections stacked downwards (-Y direction).", GH_ParamAccess.tree);
-            pManager.AddCurveParameter("FlatSectionsY", "FSY", "2D Y-Sections stacked leftwards (-X direction).", GH_ParamAccess.tree);
+            pManager.AddCurveParameter("FlatSectionsX", "FSX", "2D X-Sections laid out beside the site, stacked upwards (+Y of the rotation plane) from the top of the site bounding box.", GH_ParamAccess.tree);
+            pManager.AddCurveParameter("FlatSectionsY", "FSY", "2D Y-Sections laid out beside the site, stacked rightwards (+X of the rotation plane) from the right of the site bounding box.", GH_ParamAccess.tree);
             pManager.AddTextParameter("LabelTextFlat", "LTF", "Text strings for the flattened section layout.", GH_ParamAccess.tree);
             pManager.AddPlaneParameter("LabelPlanesFlat", "LPlF", "Planes for the flattened section layout.", GH_ParamAccess.tree);
             pManager.AddTextParameter("SectionMetadata", "SM", "Dictionary keys containing spatial transform & ID data.", GH_ParamAccess.tree);
@@ -134,6 +134,10 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
             Rhino.Geometry.Plane layoutPlane = new Rhino.Geometry.Plane(layoutOrigin, layoutX, layoutY);
             Rhino.Geometry.Transform finalLayoutXform = Rhino.Geometry.Transform.PlaneToPlane(Rhino.Geometry.Plane.WorldXY, layoutPlane);
             
+            // Layout cursors run over all meshes, so the flat sections of several meshes do not overlap
+            double padding = globalRotBB.IsValid ? globalRotBB.Diagonal.Length * 0.05 : 10.0;
+            double cursorYXSecs = globalRotBB.IsValid ? globalRotBB.Max.Y + padding : padding;
+            double cursorXYSecs = globalRotBB.IsValid ? globalRotBB.Max.X + padding : padding;
 
             for (int pathIdx = 0; pathIdx < targetMeshes.Paths.Count; pathIdx++)
             {
@@ -153,9 +157,6 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
                         double lenX = localBox.X.Length;
                         double lenY = localBox.Y.Length;
                         
-                        double padding = globalRotBB.IsValid ? globalRotBB.Diagonal.Length * 0.05 : 10.0;
-                        double cursorYXSecs = globalRotBB.IsValid ? globalRotBB.Max.Y + padding : padding;
-                        double cursorXYSecs = globalRotBB.IsValid ? globalRotBB.Max.X + padding : padding;
 
                         if (sectionsX > 0)
                         {
@@ -207,6 +208,15 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
                                         labelText3D.Append(new GH_String(secId), currentPath);
                                         labelPlanes3D.Append(new GH_Plane(planeStart3D), currentPath);
                                         labelPlanes3D.Append(new GH_Plane(planeEnd3D), currentPath);
+
+                                        // Metadata describes the 3D cut, so it is output with or without LayoutFlat
+                                        var metaObj = new Newtonsoft.Json.Linq.JObject
+                                        {
+                                            ["id"] = secId,
+                                            ["plane_origin"] = string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0},{1},{2}", origin.X, origin.Y, origin.Z),
+                                            ["direction"] = "X_Section"
+                                        };
+                                        sectionMetadata.Append(new GH_String(metaObj.ToString(Newtonsoft.Json.Formatting.None)), currentPath);
                                         
                                         if (layoutFlat)
                                         {
@@ -228,8 +238,6 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
                                             labelPlanesFlat.Append(new GH_Plane(planeStartFlat), currentPath);
                                             labelPlanesFlat.Append(new GH_Plane(planeEndFlat), currentPath);
                                             
-                                            string meta = $"{{\"id\": \"{secId}\", \"plane_origin\": \"{origin}\", \"direction\": \"X_Section\"}}";
-                                            sectionMetadata.Append(new GH_String(meta), currentPath);
                                             
                                             
                                             cursorYXSecs += ((bbFlat.Max.Y - bbFlat.Min.Y) + padding);
@@ -292,6 +300,15 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
                                         labelPlanes3D.Append(new GH_Plane(planeStart3D), currentPath);
                                         labelPlanes3D.Append(new GH_Plane(planeEnd3D), currentPath);
 
+                                        // Metadata describes the 3D cut, so it is output with or without LayoutFlat
+                                        var metaObj = new Newtonsoft.Json.Linq.JObject
+                                        {
+                                            ["id"] = secId,
+                                            ["plane_origin"] = string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0},{1},{2}", origin.X, origin.Y, origin.Z),
+                                            ["direction"] = "Y_Section"
+                                        };
+                                        sectionMetadata.Append(new GH_String(metaObj.ToString(Newtonsoft.Json.Formatting.None)), currentPath);
+
                                         if (layoutFlat)
                                         {
                                             var xformMove = Transform.Translation(new Vector3d(cursorXYSecs - bbFlat.Min.X, globalRotBB.Min.Y - bbFlat.Min.Y, 0));
@@ -312,8 +329,6 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
                                             labelPlanesFlat.Append(new GH_Plane(planeStartFlat), currentPath);
                                             labelPlanesFlat.Append(new GH_Plane(planeEndFlat), currentPath);
 
-                                            string meta = $"{{\"id\": \"{secId}\", \"plane_origin\": \"{origin}\", \"direction\": \"Y_Section\"}}";
-                                            sectionMetadata.Append(new GH_String(meta), currentPath);
 
                                             cursorXYSecs += ((bbFlat.Max.X - bbFlat.Min.X) + padding);
                                         }
@@ -325,7 +340,13 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
                 }
             }
 
-            if (runBake)
+            // Re-baking every solution only replaces earlier objects when BakeName is set; without it bake once per press
+            bool bakeEdge = runBake && !_lastBake;
+            _lastBake = runBake;
+            if (runBake && string.IsNullOrEmpty(bakeName) && !bakeEdge)
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, "Bake is still on but BakeName is empty: not re-baked (would duplicate). Set BakeName or use a button.");
+
+            if (runBake && (bakeEdge || !string.IsNullOrEmpty(bakeName)))
             {
                 var doc = RhinoDoc.ActiveDoc;
                 if (doc != null)
@@ -377,7 +398,9 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
                         layer2d_idx = doc.Layers.Add(layer2d);
                     }
                     
-                    var groupIndex = doc.Groups.Add(bakeName);
+                    // Reuse the group of an earlier bake with the same name instead of adding a new one each time
+                    int groupIndex = string.IsNullOrEmpty(bakeName) ? -1 : doc.Groups.Find(bakeName);
+                    if (groupIndex < 0) groupIndex = doc.Groups.Add(bakeName);
 
                     // Bake 3D sections
                     for (int i = 0; i < sectionOutlinesX.Branches.Count; i++)
@@ -443,6 +466,8 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
             string layoutStatus = layoutFlat ? "ON" : "OFF";
             Hud.Done(this, t_start.Elapsed.TotalMilliseconds, $"Sections X: {totalSectionsX}\nSections Y: {totalSectionsY}\nXY Layout: {layoutStatus}");
         }
+
+        private bool _lastBake = false; // Bake state of the previous solution (rising-edge detection)
 
         protected override System.Drawing.Bitmap Icon
         {

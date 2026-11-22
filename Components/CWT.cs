@@ -18,7 +18,7 @@ namespace Enzyme.Components
     {
         public CWTComponent()
           : base("CWT", "CWT",
-              "CWT",
+              "Curtain wall transoms: divides each closed planar outline into modules of about modSize and places, at every division point, a rectangular transom profile (tDepth outwards, perpendicular to the outline, by tHeight upwards). Outputs the profiles as surfaces and the outward division lines.",
               "Enzyme", "Facade")
         {
         }
@@ -40,10 +40,10 @@ namespace Enzyme.Components
 
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddCurveParameter("curves", "curves", "curves", GH_ParamAccess.tree);
-            pManager.AddNumberParameter("modSize", "modSize", "modSize", GH_ParamAccess.tree);
-            pManager.AddNumberParameter("tDepth", "tDepth", "tDepth", GH_ParamAccess.tree);
-            pManager.AddNumberParameter("tHeight", "tHeight", "tHeight", GH_ParamAccess.tree);
+            pManager.AddCurveParameter("curves", "curves", "Closed planar outlines (for example floor-plate edges at each transom level). Open or non-planar curves are skipped.", GH_ParamAccess.tree);
+            pManager.AddNumberParameter("modSize", "modSize", "Target module width in m (default 1.0, must be > 0); each outline is divided into ceiling(length / modSize) equal parts, at least 4. One value for all, or values matched by branch and index.", GH_ParamAccess.tree);
+            pManager.AddNumberParameter("tDepth", "tDepth", "Transom depth in m, measured outwards from the outline (default 0.2). One value for all, or values matched by branch and index.", GH_ParamAccess.tree);
+            pManager.AddNumberParameter("tHeight", "tHeight", "Transom height in m, measured upwards from the outline (default 0.1). One value for all, or values matched by branch and index.", GH_ParamAccess.tree);
 
             pManager[0].Optional = true;
             pManager[1].Optional = true;
@@ -53,8 +53,8 @@ namespace Enzyme.Components
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddBrepParameter("transoms", "transoms", "transoms", GH_ParamAccess.tree);
-            pManager.AddLineParameter("divLines", "divLines", "divLines", GH_ParamAccess.tree);
+            pManager.AddBrepParameter("transoms", "transoms", "Rectangular transom profile surfaces, one per division point; one branch per input curve ({input path; curve index}).", GH_ParamAccess.tree);
+            pManager.AddLineParameter("divLines", "divLines", "Division lines from each division point outwards (length tDepth), same branches as transoms.", GH_ParamAccess.tree);
             pManager.AddTextParameter("Info", "Info", "Method, assumptions, simplifications and references.", GH_ParamAccess.item);
         }
 
@@ -91,7 +91,6 @@ namespace Enzyme.Components
             var modSizeValues = new List<double>();
 
             // STEP 1: Collect valid curves and preserve original structure
-            int curveIndex = 0;
             foreach (GH_Path path in curves.Paths)
             {
                 int branchIndex = 0;
@@ -114,7 +113,6 @@ namespace Enzyme.Components
 
                     branchIndex++;
                 }
-                curveIndex++;
             }
 
             // STEP 2: Check for uniform inputs
@@ -189,6 +187,7 @@ namespace Enzyme.Components
             }
 
             // STEP 4: Generate transoms and division lines
+            int badModSize = 0;
             for (int i = 0; i < validCurves.Count; i++)
             {
                 Curve curve = validCurves[i];
@@ -224,6 +223,16 @@ namespace Enzyme.Components
                     curveCenter = sum / samplePoints;
                 }
 
+                if (!(moduleSize > 0.0) || double.IsInfinity(moduleSize))
+                {
+                    badModSize++;
+                    continue;
+                }
+
+                // Outward side from the curve orientation (robust on concave L / U / courtyard outlines):
+                // walking counter-clockwise about the plane normal, Normal x Tangent points inwards.
+                CurveOrientation orient = curve.ClosedCurveOrientation(plane);
+
                 double length = curve.GetLength();
                 int divCount = Math.Max(4, (int)Math.Ceiling(length / moduleSize));
 
@@ -247,13 +256,16 @@ namespace Enzyme.Components
                     Vector3d perp = Vector3d.CrossProduct(plane.Normal, tangent);
                     perp.Unitize();
 
-                    // Determine direction based on vector from center to point
-                    Vector3d toPoint = new Vector3d(pt - curveCenter);
-                    toPoint.Unitize();
-
-                    // Check if perp is pointing outward using dot product
-                    if (Vector3d.Multiply(perp, toPoint) < 0)
+                    if (orient == CurveOrientation.CounterClockwise)
                         perp.Reverse();
+                    else if (orient != CurveOrientation.Clockwise)
+                    {
+                        // Orientation undefined: fall back to the vector from the centroid to the point
+                        Vector3d toPoint = new Vector3d(pt - curveCenter);
+                        toPoint.Unitize();
+                        if (Vector3d.Multiply(perp, toPoint) < 0)
+                            perp.Reverse();
+                    }
 
                     Point3d endPt = pt + perp * depth;
                     divisionLinesTree.Append(new GH_Line(new Line(pt, endPt)), branchPath);
@@ -273,6 +285,9 @@ namespace Enzyme.Components
                 }
             }
 
+            if (badModSize > 0)
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, badModSize + " curve(s) skipped: modSize must be a positive length (m).");
+
             // Output assignment
             DA.SetDataTree(0, transomsTree);
             DA.SetDataTree(1, divisionLinesTree);
@@ -287,7 +302,7 @@ namespace Enzyme.Components
             if (obj is double d) return d;
             if (obj is int i) return i;
             if (obj is GH_Number n) return n.Value;
-            if (obj is string s && double.TryParse(s, out double val)) return val;
+            if (obj is string s && double.TryParse(s, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out double val)) return val;
             return fallback;
         }
 

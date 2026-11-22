@@ -22,7 +22,7 @@
         <div class="doc-header" style="display: flex; align-items: center;">
             <div>
                 <h1>Urban Wind Vector Engine HT (Beta)</h1>
-                <p class="doc-subtitle">Simulates urban wind fields using terrain-parallel raycasting. Outputs a perfectly flat, crisp XY pixel-screen heatmap at a custom elevation.</p>
+                <p class="doc-subtitle">Heuristic urban wind screening: terrain-parallel wind deflected by building wakes, corner channelling and gaps, coloured as a heatmap draped on the terrain (DrapeHeatmap, default) or flat at a custom elevation, with vectors and streamlines.</p>
                 <div class="doc-meta">
                     <span class="badge site-analysis">Site Analysis</span>
                     <span>Nickname: <strong>WindEngineHTVer</strong></span>
@@ -85,7 +85,7 @@
                         <li>A grid of GridSpacing is laid over the terrain bounding box; each cell is ray-cast down to the terrain and lifted by AnalysisHeight. The wind direction is projected onto the local face plane and speed is scaled by (1 + dirZ × SlopeSpeedup), so uphill flow speeds up and downhill flow slows down.</li>
                         <li>Points inside a closed building mesh get speed 0. Otherwise three factors multiply the baseline speed: wake, corner and gap.</li>
                         <li>Wake: a ray is cast upwind; if it hits a building at distance d below L = min(building height × WakeLengthRatio, 0.35 × site diagonal), the factor is max(0.12, (d / L)²).</li>
-                        <li>Corner: for every building wall within 2.5 × GridSpacing whose normal is nearly parallel to the flow (|n · dir| &lt; CornerTangency), the direction is bent towards the wall tangent with weight b = 1 − dist / (2.5 × GridSpacing) and speed is multiplied by (1 + CornerBoost × b).</li>
+                        <li>Corner: for every building wall within 2.5 × GridSpacing whose normal is nearly parallel to the flow (|n · dir| &lt; CornerTangency), the direction is bent towards the wall tangent with weight b = 1 − dist / (2.5 × GridSpacing) and speed is multiplied by (1 + CornerBoost × b). When several buildings qualify, the bend direction is taken from the nearest qualifying wall; their speed boosts still multiply.</li>
                         <li>Gap: if another building within the same radius has a wall facing the nearest one (normals dot product below −0.2), speed is multiplied by 1 + GapBoost × (1 − corridor width / (5 × GridSpacing)). GapBoost 0.45 caps the gap speed-up near the 1.45 to 1.5 times seen in wind-tunnel and CFD studies.</li>
                         <li>With Iterations above 1 each point re-evaluates the factors from its own previous direction and blends the result with Damping; no information is exchanged between points.</li>
                         <li>Outputs: tiles coloured by speed normalised between the run minimum and maximum (CustomColors or a default blue to pink ramp), vectors of length 0.5 × speed, and streamlines traced from seed cells by stepping 0.2 units along the nearest cell direction until they leave the grid, hit a solid cell or reach MaxSteps. Comfort % is the share of open points at or below 5 m/s.</li>
@@ -105,7 +105,8 @@
                         <li>This is a rule-based screening model, not CFD: no pressure or continuity solve, no turbulence, no vertical wind profile, and no interaction between neighbouring points.</li>
                         <li>Wake, corner and gap factors are empirical rules of thumb with tunable coefficients; results show patterns, not reliable absolute speeds or comfort classes.</li>
                         <li>Colours are relative to the run speed range, and the comfort share uses a single 5 m/s threshold, not a Lawson or similar criterion with frequency of exceedance.</li>
-                        <li>Streamlines use the nearest-cell direction (no interpolation) with a fixed 0.2 step.</li>
+                        <li>Streamlines use the nearest-cell direction (no interpolation) with a fixed 0.2 step; without SeedBox the default seeds follow an irregular stride over the grid, not a regular upwind row.</li>
+                        <li>The gap rule uses one closest point per building, so corridors inside one U-shaped or courtyard building are not detected.</li>
                     </ul>
                 </div>
                 <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">

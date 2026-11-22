@@ -22,7 +22,7 @@
         <div class="doc-header" style="display: flex; align-items: center;">
             <div>
                 <h1>Terrain Height</h1>
-                <p class="doc-subtitle">Analyzes mesh extremes, unrolls sections bi-directionally, and generates 3D/2D metadata labels.</p>
+                <p class="doc-subtitle">Finds local and global peaks and valleys of terrain meshes, colours a vertex heatmap by elevation and outputs Dashboard Data (elevation legend).</p>
                 <div class="doc-meta">
                     <span class="badge site-analysis">Site Analysis</span>
                     <span>Nickname: <strong>TerrainHeight</strong></span>
@@ -78,7 +78,7 @@
                         <li>A vertex is a candidate peak if no direct neighbour is higher by more than 0.0001, and a candidate valley if none is lower.</li>
                         <li>Candidates are then checked against all vertices within SearchRings topological rings (default 5): a peak must still be the highest and stand at least ProminenceLimit (default 0.5) above the lowest vertex in that neighbourhood; a valley the reverse.</li>
                         <li>The mesh's absolute highest and lowest vertices are always added to peaks and valleys unless CullGlobals is on; AvoidBoundaries skips naked-edge vertices.</li>
-                        <li>The heatmap colours each mesh vertex by (z - zMin) / (zMax - zMin) of that mesh, either along CustomColors or with a built-in cyan-yellow-red ramp.</li>
+                        <li>The heatmap colours each mesh vertex by (z - zMin) / (zMax - zMin), with zMin and zMax taken over all input meshes (the same range as the legend), either along CustomColors or with a built-in cyan-yellow-red ramp; a single custom colour paints the whole mesh.</li>
                         <li>The status shows total 3D mesh area, relief, mean vertex elevation (unweighted), extremes and counts; elevations are rounded to 0.01.</li>
                     </ol>
                 </div>

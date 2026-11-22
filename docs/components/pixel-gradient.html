@@ -22,7 +22,7 @@
         <div class="doc-header" style="display: flex; align-items: center;">
             <div>
                 <h1>Pixel Gradient</h1>
-                <p class="doc-subtitle">BIM-ready Idempotent Engine. Consolidates Mega-Meshes per surface and binds them into Rhino Groups.</p>
+                <p class="doc-subtitle">Colours facade grid cells by a stepped gradient along one axis (with optional jitter and accent), merges cells of one colour into one mesh per branch, and can bake them to Rhino layers and groups (re-bakes replace earlier ones only when bake_name is set).</p>
                 <div class="doc-meta">
                     <span class="badge facade">Facade</span>
                     <span>Nickname: <strong>PixGrad</strong></span>
@@ -71,15 +71,15 @@
                         <li>For every cell curve in Grid Cells, the bounding-box centre is read on the chosen axis (0 = X, 1 = Y, 2 = Z). These values are normalised between the minimum and maximum over all cells in all branches to a parameter t from 0 to 1.</li>
                         <li>If jitter_pct is above 0, a random offset uniformly in ± jitter_pct / 200 is added to t; t is clamped and the colour is picked by stepping: index = floor(t × number of gradient_colors). There is no blending between colours.</li>
                         <li>If accent_color is set and accent_pct is above 0, each cell is replaced by the accent colour with probability accent_pct / 100.</li>
-                        <li>Each cell polyline is scaled about its bounding-box centre by inset_factor (clamped 0 to 1) and meshed as a triangle fan from that centre. Cells of the same colour in a branch are merged into one mesh, tagged Tile n (n = position of the colour in gradient_colors) or Accent Tile.</li>
-                        <li>When bake_trigger is true, meshes are baked to Rhino on layers Tiles::HexFacade_TileN with a matching layer material, grouped per branch, with user strings ElefrontBakeName, Surface_Path, Surface_ID and Material_Tag. Objects previously baked with the same bake_name are deleted first.</li>
+                        <li>Each cell polyline is scaled about its bounding-box centre by inset_factor (clamped 0 to 1) and meshed as a triangle fan from that centre; if that centre would give flipped triangles (concave cells) the closed outline is triangulated instead. Cells of the same colour in a branch are merged into one mesh, tagged Tile n (n = position of the colour in gradient_colors) or Accent Tile.</li>
+                        <li>When bake_trigger is true, meshes are baked to Rhino on layers Tiles::HexFacade_TileN with a matching layer material, grouped per branch, with user strings ElefrontBakeName, Surface_Path, Surface_ID and Material_Tag. With bake_name set, objects previously baked with the same bake_name are deleted first and every solution re-bakes; with bake_name empty it bakes once each time bake_trigger turns on.</li>
                     </ol>
                 </div>
                 <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
                     <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
                     <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
                         <li>Grid cells are closed polylines (at least 3 distinct vertices); other curves are skipped.</li>
-                        <li>Cells are star-shaped from their bounding-box centre (convex cells such as rectangles or hexagons), so the triangle fan does not fold.</li>
+                        <li>Cells are simple (non self-intersecting) closed outlines; convex cells use the fan, concave ones the outline triangulation.</li>
                         <li>The random generator uses a fixed seed (42), so the same inputs always give the same pattern.</li>
                     </ul>
                 </div>

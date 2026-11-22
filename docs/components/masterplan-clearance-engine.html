@@ -22,7 +22,7 @@
         <div class="doc-header" style="display: flex; align-items: center;">
             <div>
                 <h1>Masterplan Clearance Engine</h1>
-                <p class="doc-subtitle">Calculates topological (Delaunay) or proximity-based clearances between tower outlines with dynamic categorization.</p>
+                <p class="doc-subtitle">Calculates the shortest clearances between neighbouring tower outlines and categorises them by L1 and L2. Neighbour pairs come from a Delaunay triangulation (Method 0) or a proximity search (Method 1) of the outline bounding-box centres.</p>
                 <div class="doc-meta">
                     <span class="badge masterplan">Masterplan</span>
                     <span>Nickname: <strong>Clearance</strong></span>
@@ -68,7 +68,7 @@
                         <li>Method 0 (Delaunay): the centres are triangulated in plan (Grasshopper Delaunay, needs at least 3 outlines) and each triangle edge is a candidate neighbour pair.</li>
                         <li>Method 1 (Proximity): pairs whose bounding boxes, grown by SearchRadius, overlap are candidates; a pair is skipped when any other centre lies closer to its mid-point than 0.85 × half the centre distance (a view-blocking test).</li>
                         <li>For each pair the clearance is the shortest distance between the two curves (curve closest points); pairs farther than SearchRadius are dropped.</li>
-                        <li>Category = 0 if distance &lt; L1, 1 if L1 &lt;= distance &lt;= L2, 2 if greater; LabelPlanes sit at the mid-point of each clearance line, rotated to read left to right.</li>
+                        <li>Category = 0 if distance &lt; L1, 1 if L1 &lt;= distance &lt;= L2, 2 if greater; LabelPlanes sit at the mid-point of each clearance line, rotated to read left to right; touching outlines (0 m clearance) get an unrotated World XY label plane.</li>
                         <li>Each pair is listed once, in the branch of the first outline of the pair.</li>
                     </ol>
                 </div>

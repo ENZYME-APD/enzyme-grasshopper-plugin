@@ -40,7 +40,7 @@ namespace Enzyme.Components
             pManager.AddTextParameter("Programs", "P", "Program assigned to each Brep.", GH_ParamAccess.list);
             pManager.AddTextParameter("TowerIDs", "TID", "Tower tags for stacking logic.", GH_ParamAccess.list);
             pManager.AddTextParameter("BuildingNames", "BN", "Building grouping tags.", GH_ParamAccess.list);
-            pManager.AddNumberParameter("SnapTolerance", "ST", "Distance to heal gaps (e.g., 0.15m).", GH_ParamAccess.item, 0.15);
+            pManager.AddNumberParameter("SnapTolerance", "ST", "Distance to heal gaps or overlaps between stacked floors of a tower (m, e.g. 0.15): a floor base within this distance of the top of the floor below is snapped to it.", GH_ParamAccess.item, 0.15);
 
             pManager[1].Optional = true;
             pManager[2].Optional = true;
@@ -76,6 +76,7 @@ namespace Enzyme.Components
             DA.GetData(4, ref snapTolerance);
 
             var rawFloors = new List<RawFloor>();
+            var skippedFloors = new List<int>();
 
             for (int i = 0; i < floorBreps.Count; i++)
             {
@@ -127,6 +128,16 @@ namespace Enzyme.Components
                         Crv = base_crv
                     });
                 }
+                else
+                {
+                    skippedFloors.Add(i);
+                }
+            }
+
+            if (skippedFloors.Count > 0)
+            {
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning,
+                    $"{skippedFloors.Count} floor Brep(s) gave no section 0.01 above their base and were skipped (item index: {string.Join(", ", skippedFloors.Take(20))}{(skippedFloors.Count > 20 ? ", ..." : "")}).");
             }
 
             var buildings = new Dictionary<string, BuildingData>();
@@ -200,6 +211,7 @@ namespace Enzyme.Components
                 double true_base = bdata.TrueBaseElevation;
 
                 var bldg_blocks = new List<object>();
+                var usedNames = new HashSet<string>();
 
                 foreach (var tkvp in bdata.Towers)
                 {
@@ -210,9 +222,17 @@ namespace Enzyme.Components
                     {
                         double relative_z = f.HealedMinZ - true_base;
 
+                        string blockName = $"Floor_{Math.Round(relative_z)}_{tid}";
+                        if (!usedNames.Add(blockName))
+                        {
+                            int dup = 2;
+                            while (!usedNames.Add($"{blockName}_{dup}")) dup++;
+                            blockName = $"{blockName}_{dup}";
+                        }
+
                         var block_dict = new Dictionary<string, object>
                         {
-                            { "name", $"Floor_{Math.Round(relative_z)}_{tid}" },
+                            { "name", blockName },
                             { "tower_id", tid },
                             { "program", f.Prog },
                             { "floor_height", f.HealedHeight },

@@ -18,7 +18,7 @@ namespace Enzyme.Components
     {
         public ModRetailComponent()
           : base("Facade Module: Storefront", "Mod_Retail",
-              "Generates patterned storefronts with intelligent canopies and structure.",
+              "Generates patterned storefronts from planar outline curves: bays with a solid kickplate, a glass or solid middle band and a header band, mullion fins, optional flat canopies and column lines at the mullions.",
               "Enzyme", "JSON Masterplan (Beta)")
         {
         }
@@ -40,20 +40,20 @@ namespace Enzyme.Components
 
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddCurveParameter("Bounds", "Bounds", "Input Curve", GH_ParamAccess.tree);
-            pManager.AddNumberParameter("Heights", "Heights", "Input double", GH_ParamAccess.tree);
-            pManager.AddNumberParameter("BayWidth", "BayWidth", "Input double", GH_ParamAccess.item);
-            pManager.AddNumberParameter("BaseHeight", "BaseHeight", "Input double", GH_ParamAccess.item);
-            pManager.AddNumberParameter("TransomHeight", "TransomHeight", "Input double", GH_ParamAccess.item);
-            pManager.AddNumberParameter("MullionDepth", "MullionDepth", "Input double", GH_ParamAccess.item);
-            pManager.AddBooleanParameter("FlipMullions", "FlipMullions", "Input bool", GH_ParamAccess.item);
-            pManager.AddTextParameter("HorizPattern", "HorizPattern", "Input string", GH_ParamAccess.list);
-            pManager.AddTextParameter("VertPattern", "VertPattern", "Input string", GH_ParamAccess.item);
-            pManager.AddNumberParameter("CanopyDepth", "CanopyDepth", "Input double", GH_ParamAccess.item);
-            pManager.AddTextParameter("CanopyPattern", "CanopyPattern", "Input string", GH_ParamAccess.item);
-            pManager.AddBooleanParameter("FlipCanopy", "FlipCanopy", "Input bool", GH_ParamAccess.item);
-            pManager.AddBooleanParameter("ShowColumns", "ShowColumns", "Input bool", GH_ParamAccess.item);
-            pManager.AddNumberParameter("ColumnOffset", "ColumnOffset", "Input double", GH_ParamAccess.item);
+            pManager.AddCurveParameter("Bounds", "Bounds", "Planar storefront outline curves in world XY (one per facade or floor), as a tree.", GH_ParamAccess.tree);
+            pManager.AddNumberParameter("Heights", "Heights", "Storefront height per curve in m, matched by branch path and index (default 4.5).", GH_ParamAccess.tree);
+            pManager.AddNumberParameter("BayWidth", "BayWidth", "Target bay width in m; each segment gets round(length / BayWidth) equal bays (0 or less = 2.5).", GH_ParamAccess.item);
+            pManager.AddNumberParameter("BaseHeight", "BaseHeight", "Height of the solid kickplate band in m (may be 0).", GH_ParamAccess.item);
+            pManager.AddNumberParameter("TransomHeight", "TransomHeight", "Height in m of the top of the middle (glass) band; above it is the header band. If 0 or unset the whole height is header, with no glass or mullions.", GH_ParamAccess.item);
+            pManager.AddNumberParameter("MullionDepth", "MullionDepth", "Depth of the mullion fins in m (0 or less = 0.2).", GH_ParamAccess.item);
+            pManager.AddBooleanParameter("FlipMullions", "FlipMullions", "True puts the mullion fins on the other side of the curve.", GH_ParamAccess.item);
+            pManager.AddTextParameter("HorizPattern", "HorizPattern", "List of 0/1 strings, one per pattern line: 1 = glass bay, 0 = solid bay, repeated along the curve.", GH_ParamAccess.list);
+            pManager.AddTextParameter("VertPattern", "VertPattern", "String of digits: digit i (repeated) picks which HorizPattern line curve i uses.", GH_ParamAccess.item);
+            pManager.AddNumberParameter("CanopyDepth", "CanopyDepth", "Depth of the flat canopy at transom height in m (0 = no canopy).", GH_ParamAccess.item);
+            pManager.AddTextParameter("CanopyPattern", "CanopyPattern", "0/1 string repeated over the curves: 1 = curve gets a canopy.", GH_ParamAccess.item);
+            pManager.AddBooleanParameter("FlipCanopy", "FlipCanopy", "True offsets the canopy to the other side of the curve.", GH_ParamAccess.item);
+            pManager.AddBooleanParameter("ShowColumns", "ShowColumns", "True draws a column line at each mullion under a canopy.", GH_ParamAccess.item);
+            pManager.AddNumberParameter("ColumnOffset", "ColumnOffset", "Distance in m of the column lines in from the canopy edge (0 or less = 0.2).", GH_ParamAccess.item);
             
             pManager[1].Optional = true;
             pManager[2].Optional = true;
@@ -72,12 +72,12 @@ namespace Enzyme.Components
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddBrepParameter("Glass", "Glass", "Output Brep", GH_ParamAccess.tree);
-            pManager.AddBrepParameter("SolidPanels", "SolidPanels", "Output Brep", GH_ParamAccess.tree);
-            pManager.AddBrepParameter("HeaderPanels", "HeaderPanels", "Output Brep", GH_ParamAccess.tree);
-            pManager.AddBrepParameter("Mullions", "Mullions", "Output Brep", GH_ParamAccess.tree);
-            pManager.AddBrepParameter("Canopy", "Canopy", "Output Brep", GH_ParamAccess.tree);
-            pManager.AddCurveParameter("Columns", "Columns", "Output Curve", GH_ParamAccess.tree);
+            pManager.AddBrepParameter("Glass", "Glass", "Glass panels of the middle band (surfaces).", GH_ParamAccess.tree);
+            pManager.AddBrepParameter("SolidPanels", "SolidPanels", "Solid kickplate panels and solid middle-band panels (surfaces).", GH_ParamAccess.tree);
+            pManager.AddBrepParameter("HeaderPanels", "HeaderPanels", "Header band panels above the transom (surfaces).", GH_ParamAccess.tree);
+            pManager.AddBrepParameter("Mullions", "Mullions", "Mullion fins at the bay ends, spanning the middle band (surfaces).", GH_ParamAccess.tree);
+            pManager.AddBrepParameter("Canopy", "Canopy", "Flat canopy surfaces at transom height.", GH_ParamAccess.tree);
+            pManager.AddCurveParameter("Columns", "Columns", "Column centre lines from the ground to transom height.", GH_ParamAccess.tree);
             pManager.AddTextParameter("Info", "Info", "Method, assumptions, simplifications and references.", GH_ParamAccess.item);
         }
 
@@ -120,7 +120,8 @@ namespace Enzyme.Components
             double BaseHeight = 0;
             DA.GetData(3, ref BaseHeight);
             double TransomHeight = 0;
-            DA.GetData(4, ref TransomHeight);
+            if (!DA.GetData(4, ref TransomHeight) || TransomHeight <= 0)
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, "TransomHeight is 0 or unset: the whole height is header band, with no glass or mullions.");
             double MullionDepth = 0;
             DA.GetData(5, ref MullionDepth);
             bool FlipMullions = false;
@@ -255,10 +256,10 @@ namespace Enzyme.Components
                         // 1. Solid Base (Kickplate)
                         if (actualBaseH > 0)
                         {
-                            Extrusion bWall = Extrusion.Create(bayCrv, actualBaseH, false);
+                            Brep bWall = ExtrudeUp(bayCrv, actualBaseH);
                             if (bWall != null)
                             {
-                                outSolid.Add(bWall.ToBrep(), path);
+                                outSolid.Add(bWall, path);
                                 solidArea += bayLen * actualBaseH;
                             }
                         }
@@ -268,17 +269,17 @@ namespace Enzyme.Components
                         {
                             Curve midCrv = bayCrv.DuplicateCurve();
                             midCrv.Transform(Transform.Translation(new Vector3d(0, 0, actualBaseH)));
-                            Extrusion midWall = Extrusion.Create(midCrv, midH, false);
+                            Brep midWall = ExtrudeUp(midCrv, midH);
                             if (midWall != null)
                             {
                                 if (isGlass)
                                 {
-                                    outGlass.Add(midWall.ToBrep(), path);
+                                    outGlass.Add(midWall, path);
                                     glassArea += bayLen * midH;
                                 }
                                 else
                                 {
-                                    outSolid.Add(midWall.ToBrep(), path);
+                                    outSolid.Add(midWall, path);
                                     solidArea += bayLen * midH;
                                 }
                             }
@@ -289,10 +290,10 @@ namespace Enzyme.Components
                         {
                             Curve headCrv = bayCrv.DuplicateCurve();
                             headCrv.Transform(Transform.Translation(new Vector3d(0, 0, actualTransomH)));
-                            Extrusion headWall = Extrusion.Create(headCrv, headH, false);
+                            Brep headWall = ExtrudeUp(headCrv, headH);
                             if (headWall != null)
                             {
-                                outHeaders.Add(headWall.ToBrep(), path);
+                                outHeaders.Add(headWall, path);
                                 headerArea += bayLen * headH;
                             }
                         }
@@ -321,8 +322,8 @@ namespace Enzyme.Components
                                         // A. Place the Mullion (At the inner facade line with parametric depth)
                                         Line finLine = new Line(pt, pt + (normal * MullionDepth));
                                         finLine.Transform(Transform.Translation(new Vector3d(0, 0, actualBaseH)));
-                                        Extrusion finExt = Extrusion.Create(finLine.ToNurbsCurve(), midH, false);
-                                        if (finExt != null) outMullions.Add(finExt.ToBrep(), path);
+                                        Brep finExt = ExtrudeUp(finLine.ToNurbsCurve(), midH);
+                                        if (finExt != null) outMullions.Add(finExt, path);
 
                                         // B. Place the Canopy Column (Targeting the actual outer offset curve)
                                         if (ShowColumns && baseOffCrv != null)
@@ -378,6 +379,15 @@ namespace Enzyme.Components
             {
                 Hud.Waiting(this);
             }
+        }
+
+        // Extrudes a curve straight up world +Z. (Extrusion.Create used the curve's own plane normal, which for lines is
+        // not unique and for arcs follows the arc orientation, so bands and fins could go sideways or downwards.)
+        private static Brep ExtrudeUp(Curve crv, double height)
+        {
+            if (crv == null || height <= 0) return null;
+            Surface srf = Surface.CreateExtrusion(crv, new Vector3d(0, 0, height));
+            return srf != null ? srf.ToBrep() : null;
         }
 
         public override GH_Exposure Exposure => GH_Exposure.secondary;

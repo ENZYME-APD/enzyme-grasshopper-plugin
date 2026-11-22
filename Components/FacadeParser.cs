@@ -97,6 +97,7 @@ namespace Enzyme.Components
             GH_Structure<GH_String> outPrograms = new GH_Structure<GH_String>();
 
             int matchCount = 0;
+            int missingClosed = 0;
 
             try
             {
@@ -152,6 +153,8 @@ namespace Enzyme.Components
                             }
 
                             List<Curve> extCrvs = DeserializeOpenCurves(floor["BoundsExt"] as JArray);
+                            // A null BoundsClosed item is kept on purpose so the four outputs stay aligned by index
+                            if (closedCrv == null && extCrvs.Count > 0) missingClosed++;
                             
                             string floorLabel = floor["floor_index"]?.ToString() ?? "?";
                             string label = $"{bldgName} | {towerId} | {progName} - Lvl {floorLabel}";
@@ -172,6 +175,9 @@ namespace Enzyme.Components
                     }
                     bldgIndex++;
                 }
+
+                if (missingClosed > 0)
+                    AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, missingClosed + " floor(s) have no BoundsClosed polygon; their BoundsClosed items are null (kept so the outputs stay aligned by index).");
 
                 sw.Stop();
                 string searchMode = exactToggle ? "Exact" : "Flexible";

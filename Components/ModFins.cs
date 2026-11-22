@@ -137,10 +137,10 @@ namespace Enzyme.Masterplan
                     double visionH = h - headerDrop;
                     if (visionH > 0)
                     {
-                        Extrusion glassExt = Extrusion.Create(crv, visionH, false);
+                        Brep glassExt = ExtrudeZ(crv, visionH);
                         if (glassExt != null)
                         {
-                            outGlass.Append(new GH_Brep(glassExt.ToBrep()), path);
+                            outGlass.Append(new GH_Brep(glassExt), path);
                             glassArea += crvLen * visionH;
                         }
                     }
@@ -149,10 +149,10 @@ namespace Enzyme.Masterplan
                     {
                         Curve crvTop = crv.DuplicateCurve();
                         crvTop.Transform(Transform.Translation(new Vector3d(0, 0, visionH)));
-                        Extrusion spanExt = Extrusion.Create(crvTop, headerDrop, false);
+                        Brep spanExt = ExtrudeZ(crvTop, headerDrop);
                         if (spanExt != null)
                         {
-                            outSpandrel.Append(new GH_Brep(spanExt.ToBrep()), path);
+                            outSpandrel.Append(new GH_Brep(spanExt), path);
                             spandrelArea += crvLen * headerDrop;
                         }
                     }
@@ -192,11 +192,11 @@ namespace Enzyme.Masterplan
                                     if (flipDir) normal.Reverse();
 
                                     Line finLine = new Line(pt, pt + (normal * depth));
-                                    Extrusion finExt = Extrusion.Create(finLine.ToNurbsCurve(), h, false);
+                                    Brep finExt = ExtrudeZ(finLine.ToNurbsCurve(), h);
                                     
                                     if (finExt != null)
                                     {
-                                        outFins.Append(new GH_Brep(finExt.ToBrep()), path);
+                                        outFins.Append(new GH_Brep(finExt), path);
                                         finCount++;
                                     }
                                 }
@@ -223,6 +223,15 @@ namespace Enzyme.Masterplan
             {
                 Hud.Waiting(this);
             }
+        }
+
+        // Extrudes straight up along world +Z (Extrusion.Create follows the curve's own plane normal, which can
+        // point downwards for clockwise closed outlines or be arbitrary for straight lines).
+        private static Brep ExtrudeZ(Curve crv, double height)
+        {
+            if (crv == null) return null;
+            Surface srf = Surface.CreateExtrusion(crv, new Vector3d(0, 0, height));
+            return srf?.ToBrep();
         }
 
         public override GH_Exposure Exposure => GH_Exposure.secondary;

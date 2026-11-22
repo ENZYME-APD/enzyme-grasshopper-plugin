@@ -22,6 +22,7 @@ namespace Enzyme.Components
         private bool _prevSave = false;
         private bool _prevLoad = false;
         private string _prevLoadName = "";
+        private string _prevImportJson = "";
 
         public CanvasStateManager()
           : base("Canvas State Manager", "StateMgr",
@@ -66,8 +67,37 @@ namespace Enzyme.Components
             DA.GetData(3, ref loadName);
             DA.GetData(4, ref offNew);
 
+            string importJson = "";
+            DA.GetData(5, ref importJson);
+            if (importJson == null) importJson = "";
+
             string msg = "Idle";
             GH_Document doc = OnPingDocument();
+
+            // Merge states from the Import JSON input, only when its text changes (so local saves are not overwritten every solve).
+            if (importJson != _prevImportJson)
+            {
+                _prevImportJson = importJson;
+                if (!string.IsNullOrWhiteSpace(importJson))
+                {
+                    try
+                    {
+                        var importedStates = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, NodeState>>>(importJson);
+                        if (importedStates != null)
+                        {
+                            foreach (var kvp in importedStates)
+                            {
+                                if (kvp.Value != null) _states[kvp.Key] = kvp.Value;
+                            }
+                            _lastAction = "IMPORTED: " + importedStates.Count;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Import JSON could not be read: " + ex.Message);
+                    }
+                }
+            }
 
             if (save && !_prevSave && !string.IsNullOrWhiteSpace(saveName))
             {

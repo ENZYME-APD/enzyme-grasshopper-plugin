@@ -64,6 +64,28 @@ namespace Enzyme.Components
                     segments = new Curve[] { c };
                 }
 
+                // DuplicateSegments only splits polycurves and polylines: also split every
+                // segment at its interior kinks (G1 discontinuities, e.g. a degree-1 NURBS).
+                var kinkSplit = new List<Curve>();
+                foreach (Curve seg in segments)
+                {
+                    if (seg == null) continue;
+                    var ts = new List<double>();
+                    double t0 = seg.Domain.T0, t1 = seg.Domain.T1;
+                    double tol = 1e-9 * Math.Max(1.0, Math.Abs(t1 - t0));
+                    double tStart = t0;
+                    while (seg.GetNextDiscontinuity(Continuity.G1_continuous, tStart, t1, out double tk))
+                    {
+                        if (tk <= tStart + tol) break;
+                        if (tk < t1 - tol) ts.Add(tk);
+                        tStart = tk;
+                    }
+                    Curve[] pieces = ts.Count > 0 ? seg.Split(ts) : null;
+                    if (pieces != null && pieces.Length > 0) kinkSplit.AddRange(pieces);
+                    else kinkSplit.Add(seg);
+                }
+                if (kinkSplit.Count > 0) segments = kinkSplit.ToArray();
+
                 List<Point3d> pts = new List<Point3d>();
                 List<Curve> subs = new List<Curve>();
                 List<double> lens = new List<double>();

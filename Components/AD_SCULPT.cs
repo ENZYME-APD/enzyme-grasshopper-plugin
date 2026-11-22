@@ -67,7 +67,11 @@ namespace Enzyme.Components
             string recipeJSON = null;
             bool repeatLast = false;
 
-            if (!DA.GetDataList(0, massing)) return;
+            if (!DA.GetDataList(0, massing) || massing.Count == 0)
+            {
+                Hud.Waiting(this, "Massing");
+                return;
+            }
             DA.GetDataList(1, towerIDs);
             DA.GetDataList(2, buildingNames);
             DA.GetData(3, ref recipeJSON);
@@ -95,7 +99,11 @@ namespace Enzyme.Components
                     }
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                raw_recipe.Clear();
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "RecipeJSON could not be read (" + ex.Message + "); using one 4 m Mixed_Use floor instead.");
+            }
 
             if (raw_recipe.Count == 0)
             {
@@ -143,6 +151,7 @@ namespace Enzyme.Components
             // 4. GENERATE GLOBAL Z-RULER & SLICE
             // ==============================================================================
             int total_sliced_floors = 0;
+            int dropped_segments = 0;
 
             foreach (var kvp in buildings)
             {
@@ -182,6 +191,7 @@ namespace Enzyme.Components
                     f_idx += 1;
                 }
 
+                var used_names = new HashSet<string>();
                 foreach (var tuple in bdata.Breps)
                 {
                     Brep brep = tuple.Item1;
@@ -215,15 +225,20 @@ namespace Enzyme.Components
 
                                     double relative_z = z_plane - true_base;
 
+                                    // Unique block name: level with up to 2 decimals (invariant), suffix _2, _3 ... for repeats.
+                                    string base_name = "Floor_" + Math.Round(relative_z, 2).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture) + "_" + tid;
+                                    string block_name = base_name;
+                                    for (int dup = 2; !used_names.Add(block_name); dup++) block_name = base_name + "_" + dup;
+
                                     var block_dict = new Dictionary<string, object>
                                     {
-                                        { "name", $"Floor_{Math.Round(relative_z)}_{tid}" },
+                                        { "name", block_name },
                                         { "tower_id", tid },
                                         { "program", floor_data.Prog },
                                         { "floor_height", floor_data.Height },
                                         { "floors", 1 },
                                         { "base_z", Math.Round(relative_z, 3) },
-                                        { "boundary_segments", SerializeExactCurve(crvCopy) }
+                                        { "boundary_segments", SerializeExactCurve(crvCopy, ref dropped_segments) }
                                     };
                                     bdata.Blocks.Add(block_dict);
                                     total_sliced_floors += 1;
@@ -256,6 +271,9 @@ namespace Enzyme.Components
             string jsonPayload = JsonConvert.SerializeObject(payload_dict, Formatting.Indented);
             DA.SetData(0, jsonPayload);
 
+            if (dropped_segments > 0)
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, dropped_segments + " section segment(s) could not be serialised; those boundaries are open.");
+
             stopwatch.Stop();
             Hud.Done(this, stopwatch.Elapsed.TotalMilliseconds, $"Buildings: {output_buildings.Count}\nFloors Sliced: {total_sliced_floors}");
         }
@@ -263,7 +281,7 @@ namespace Enzyme.Components
         // ==============================================================================
         // 1. HELPER: CURVE SERIALIZATION
         // ==============================================================================
-        private List<Dictionary<string, object>> SerializeExactCurve(Curve crv)
+        private List<Dictionary<string, object>> SerializeExactCurve(Curve crv, ref int dropped)
         {
             var segments_data = new List<Dictionary<string, object>>();
             Curve[] segments = crv.DuplicateSegments();
@@ -283,11 +301,8 @@ namespace Enzyme.Components
                         { "end", new double[] { Math.Round(seg.PointAtEnd.X, 4), Math.Round(seg.PointAtEnd.Y, 4), Math.Round(seg.PointAtEnd.Z, 4) } }
                     });
                 }
-                else if (seg.IsArc(0.001))
+                else if (seg.IsArc(0.001) && seg.TryGetArc(out Arc arc))
                 {
-                    Arc arc;
-                    bool rc = seg.TryGetArc(out arc);
-                    if (rc)
                     {
                         segments_data.Add(new Dictionary<string, object>
                         {
@@ -300,6 +315,7 @@ namespace Enzyme.Components
                 }
                 else
                 {
+                    bool added = false;
                     PolylineCurve poly_crv = seg.ToPolyline(0.01, 0.1, 0.0, 0.0);
                     if (poly_crv != null)
                     {
@@ -316,8 +332,10 @@ namespace Enzyme.Components
                                 { "type", "Polyline" },
                                 { "points", points }
                             });
+                            added = true;
                         }
                     }
+                    if (!added) dropped++;
                 }
             }
             return segments_data;

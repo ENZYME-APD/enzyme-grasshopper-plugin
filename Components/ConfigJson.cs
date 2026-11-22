@@ -47,7 +47,7 @@ namespace Enzyme.Components
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
             pManager.AddTextParameter("JSON_Targets", "JSON_Targets", "Connect to the Dashboard's TargetJSON input.", GH_ParamAccess.item);
-            pManager.AddTextParameter("JSON_Palette", "JSON_Palette", "Connect to the OOP Engine's ColorPalette input.", GH_ParamAccess.item);
+            pManager.AddTextParameter("JSON_Palette", "JSON_Palette", "Connect to the ColorPalette input of JSON MP Engine V2.", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)

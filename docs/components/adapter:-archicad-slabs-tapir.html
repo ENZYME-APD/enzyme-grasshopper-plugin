@@ -62,7 +62,7 @@
                 <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
                     <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
                     <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
-                        <li>All input trees are flattened and matched by index: floor contour i takes FloorHeights i, Programs i, TowerIDs i and BuildingNames i. Missing names default to Mixed_Use, Main_Mass and Building_01.</li>
+                        <li>All input trees are flattened and matched by index: floor contour i takes FloorHeights i, Programs i, TowerIDs i and BuildingNames i. Missing names default to Mixed_Use, Main_Mass and Building_01. Null items in FloorContours or FloorHeights keep their index: that floor is skipped and later floors keep their own heights.</li>
                         <li>Each floor's base level is the lowest Z of its contour's bounding box; its top is base + FloorHeights.</li>
                         <li>Floors are grouped by BuildingNames, then by TowerIDs, and sorted by base level within each tower.</li>
                         <li>Healing: if the gap between a floor's base and the top of the floor below in the same tower is between 0.001 and SnapTolerance (default 0.15, either above or below), the base is snapped to that top. The top stays where it was, so the floor height grows or shrinks by the gap.</li>

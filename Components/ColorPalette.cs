@@ -24,7 +24,7 @@ namespace Enzyme.Components
         protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
             pManager.AddTextParameter("Name", "Name", "Palette name (see Names output)", GH_ParamAccess.item, "Viridis");
-            pManager.AddIntegerParameter("Count", "Count", "Number of colours to return (0 = the palette's own stops)", GH_ParamAccess.item, 0);
+            pManager.AddIntegerParameter("Count", "Count", "Number of evenly spaced colours to return, 2 to 1024 (0 or 1 = the palette's own stops)", GH_ParamAccess.item, 0);
             pManager.AddBooleanParameter("Reverse", "Reverse", "Flip the gradient", GH_ParamAccess.item, false);
             pManager[1].Optional = true; pManager[2].Optional = true;
         }

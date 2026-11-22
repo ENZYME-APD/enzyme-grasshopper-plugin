@@ -15,7 +15,7 @@ namespace Enzyme.Components
     {
         public MasterplanEngineComponent()
           : base("JSON MP Engine V2", "MP ENGINE",
-              "A high-performance topological coordinator. Evaluates spatial intersections, identifies setbacks/roofs, and broadcasts lightweight JSON architectures.",
+              "Reads a buildings JSON payload (from an adapter) and computes slabs per level, roof tops and setback roofs, railings on exposed roof edges, exterior facade edges per floor and gross areas per program and building, output as JSON for the Masses, Slab, Roof, Facade and Railing parsers and the Masterplan Dashboard.",
               "Enzyme", "JSON Masterplan (Beta)")
         {
         }
@@ -386,7 +386,10 @@ namespace Enzyme.Components
         {
             string cleanProg = prog.Trim();
             if (customPalette.ContainsKey(cleanProg)) return customPalette[cleanProg];
-            Random rnd = new Random(cleanProg.GetHashCode());
+            // Stable seed (FNV-1a of the name): string.GetHashCode() changes per process on .NET Core.
+            uint hash = 2166136261;
+            foreach (char ch in cleanProg) { hash ^= ch; hash *= 16777619; }
+            Random rnd = new Random((int)(hash & 0x7FFFFFFF));
             return new List<int> { rnd.Next(70, 200), rnd.Next(70, 200), rnd.Next(70, 200) };
         }
 
@@ -528,14 +531,15 @@ namespace Enzyme.Components
                 }
 
                 color = comp.GetProgramColor(program, customPalette);
+                double a = 0.0;
+                if (base_curve != null)
+                {
+                    var amp = (base_curve.IsClosed && base_curve.IsPlanar()) ? AreaMassProperties.Compute(base_curve) : null;
+                    if (amp != null) a = amp.Area;
+                    else comp.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Block '{name}': boundary is not a closed planar curve, so its floor area is counted as 0.");
+                }
                 for (int i = 0; i < floors; i++)
                 {
-                    double a = 0.0;
-                    if (base_curve != null)
-                    {
-                        var amp = AreaMassProperties.Compute(base_curve);
-                        if (amp != null) a = amp.Area;
-                    }
                     areas.Add(a);
                     floor_indices.Add(0);
                 }

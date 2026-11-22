@@ -81,6 +81,12 @@ namespace Enzyme.Components
             double hl = 2.0;
             DA.GetData(4, ref hl);
 
+            if (bw <= 0 || hw <= 0 || hl <= 0)
+            {
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "BodyWidth, HeadWidth and HeadLength must be greater than 0.");
+                return;
+            }
+
             string current_mode_str = "Custom";
             if (m_val == 0) current_mode_str = "End Head";
             else if (m_val == 1) current_mode_str = "Start Head";
@@ -89,6 +95,7 @@ namespace Enzyme.Components
             List<Curve> arrow2D = new List<Curve>();
             List<Mesh> arrowMesh = new List<Mesh>();
 
+            int skipped = 0;
             foreach (var ln in lines)
             {
                 if (!ln.IsValid) continue;
@@ -98,7 +105,9 @@ namespace Enzyme.Components
                 Vector3d v_dir = p_end - p_start;
                 double v_length = v_dir.Length;
 
-                if (v_length < (hl * 1.1)) continue;
+                // Each head takes HeadLength; with two heads the shaft needs room for both (else they overlap and the shaft inverts)
+                double min_length = (m_val == 2 ? 2.2 : 1.1) * hl;
+                if (v_length < min_length) { skipped++; continue; }
 
                 v_dir.Unitize();
                 Vector3d v_perp = new Vector3d(-v_dir.Y, v_dir.X, 0);
@@ -154,6 +163,9 @@ namespace Enzyme.Components
                     }
                 }
             }
+
+            if (skipped > 0)
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"{skipped} line(s) too short for the arrow heads were skipped (minimum length 1.1 x HeadLength, 2.2 x HeadLength in Double mode).");
 
             DA.SetDataList(0, arrow2D);
             DA.SetDataList(1, arrowMesh);

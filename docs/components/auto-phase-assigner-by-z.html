@@ -62,7 +62,7 @@
                         <li>Blocks are grouped by BuildingID. A block whose TowerID contains podium (any case) is a podium block; the others are grouped by TowerID.</li>
                         <li>Podium blocks of a building are sorted by the lowest Z of their bounding box and numbered 0, 1, 2...</li>
                         <li>Each tower's blocks are sorted by lowest Z and numbered from the last podium phase + 1 upwards. All towers of a building start from the same number, so towers rise in parallel.</li>
-                        <li>The number is written to the object's Phase User Text and committed to the Rhino document; the Log lists every assignment.</li>
+                        <li>The number is written to the object's Phase User Text; the run is recorded as one Rhino undo step (Auto-Phase Assigner), so Undo restores the previous Phase values. The Log lists every assignment.</li>
                     </ol>
                 </div>
                 <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
@@ -76,6 +76,7 @@
                     <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
                     <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
                         <li>Blocks at the same Z in one group get consecutive phases in input order, not the same phase.</li>
+                        <li>All podium blocks of a building form one sequence, whatever their TowerID, so separate podiums are not phased independently.</li>
                         <li>Phase is a simple vertical sequence; no construction logic, areas or dates.</li>
                     </ul>
                 </div>

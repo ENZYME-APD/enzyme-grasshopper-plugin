@@ -64,7 +64,7 @@
                     <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
                         <li>Room curves in each branch are grouped into clusters: two rooms join if their curves intersect or if one of 5 test points per segment of one lies within Tolerance of the other (R-Tree search with boxes grown by max(0.1 m, 2 × Tolerance), union-find).</li>
                         <li>Per cluster, the rooms are boolean-unioned into FloorSlabs and flattened to Z = 0.</li>
-                        <li>All room curves are exploded into segments, and each segment is split at the point intersections it has with the others.</li>
+                        <li>All room curves are exploded into segments, and each segment is split at the point intersections it has with the others and at the ends of collinear overlaps, so a wall shared over part of its length is split into an internal shared part and an external remainder. Split points closer than Tolerance (distance) to a segment end are ignored.</li>
                         <li>Pieces are compared in pairs: if the midpoint of a piece lies within Tolerance of another unmatched piece, both are internal partitions; pieces without a match are external edges. All output curves are flattened to Z = 0.</li>
                         <li>MetadataOut gives one JSON text per output curve: midpoint (origin), its Z as true_z, and type internal or external. Output branch paths are the input path plus the cluster index.</li>
                     </ol>
@@ -80,7 +80,7 @@
                     <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
                     <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
                         <li>Shared walls appear twice in InternalPartitions, once from each room.</li>
-                        <li>Only point intersections split segments; overlaps are not split.</li>
+                        <li>MetadataOut mixes internal and external entries, so it is not index-aligned with either curve output.</li>
                     </ul>
                 </div>
                 <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">

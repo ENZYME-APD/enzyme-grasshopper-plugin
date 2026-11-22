@@ -220,20 +220,6 @@ namespace Enzyme.Components
             }
         }
 
-        private const string InfoText =
-            "UNIVERSAL STREAMLINES\n" +
-            "=====================\n\n" +
-            "HOW IT WORKS:\n" +
-            "Drops a particle at each SeedPoint and follows the vector field with 4th-order Runge-Kutta steps of StepSize (much more accurate in curved flow and vortices than straight steps). " +
-            "If the field points sit on a regular grid (Fast CFD output), values are read directly from the grid with bilinear interpolation - no search per step, so it is much faster. Scattered points fall back to Inverse Distance Weighting within SearchRadius.\n\n" +
-            "2.5D SMART DRAPING:\n" +
-            "Lines follow the ground height of the field points, so they drape over the terrain like the Fast CFD vectors, without needing the terrain mesh.\n\n" +
-            "INPUTS:\n" +
-            "- Direction: 1 traces both upstream and downstream from each seed, so seeds can sit anywhere in the site.\n" +
-            "- MinSpeed: lines stop in calm zones (wakes, courtyards).\n" +
-            "- TubeRadius: > 0 builds one mesh of tubes coloured by local speed (fast to display, renders well).\n\n" +
-            "Lines also stop at buildings, at the edge of the field, and when they close a loop.";
-
         protected override System.Drawing.Bitmap Icon => Enzyme.IconLoader.Load("streamlines.png");
 
         public override GH_Exposure Exposure => GH_Exposure.primary;

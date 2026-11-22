@@ -13,7 +13,7 @@ namespace Enzyme.Components
 
         public Heliodon()
           : base("Enzyme Heliodon", "Heliodon",
-              "Generates a 3D solar dome and calculates annual sun vectors for environmental analysis.",
+              "Generates a 3D solar dome and hourly sun vectors on the 21st of each selected month (one representative day per month) for environmental analysis.",
               "Enzyme", "Site Analysis")
         {
         }
@@ -25,12 +25,14 @@ namespace Enzyme.Components
             pManager.AddNumberParameter("Time Zone", "TZ", "Time zone offset from GMT", GH_ParamAccess.item, 0.0);
                         pManager.AddNumberParameter("Radius", "Radius", "Visual radius of the heliodon dome", GH_ParamAccess.item, 100.0);
             pManager.AddPointParameter("Center", "Center", "Center point of the heliodon", GH_ParamAccess.item, Point3d.Origin);
-            pManager.AddIntervalParameter("Months", "Months", "Domain of months to evaluate (e.g., 1 to 12).", GH_ParamAccess.item, new Interval(1, 12));
+            pManager.AddIntervalParameter("Months", "Months", "Domain of months to evaluate (e.g., 1 to 12). A start after the end wraps over the new year (e.g., 11 to 2 = November to February).", GH_ParamAccess.item, new Interval(1, 12));
             pManager.AddIntervalParameter("Hours", "Hours", "Domain of hours to evaluate (e.g., 8 to 17).", GH_ParamAccess.item, new Interval(0, 24));
             
             pManager[5].Optional = true;
             pManager[6].Optional = true;
             pManager.AddBooleanParameter("Run", "Run", "Optional. False = skip the analysis and keep showing the last results (cached). Share one toggle with the Analysis Dashboard to switch everything on/off together.", GH_ParamAccess.item, true);
+            pManager[pManager.ParamCount - 1].Optional = true;
+            pManager.AddNumberParameter("North", "North", "Optional. Angle of true north from the model +Y axis, degrees counter-clockwise (Ladybug convention: 90 = north points to -X). Sun vectors, arcs and points are rotated with it. Default 0 = +Y is north.", GH_ParamAccess.item, 0.0);
             pManager[pManager.ParamCount - 1].Optional = true;
         }
 
@@ -63,13 +65,17 @@ namespace Enzyme.Components
             DA.GetData(4, ref center);
             DA.GetData(5, ref mth);
             DA.GetData(6, ref hrs);
+            double north = 0.0;
+            if (Params.Input.Count > 8) DA.GetData(8, ref north);
+            var northRot = Rhino.Geometry.Transform.Rotation(north * System.Math.PI / 180.0, Rhino.Geometry.Vector3d.ZAxis, Rhino.Geometry.Point3d.Origin);
 
             System.Collections.Generic.List<Rhino.Geometry.Vector3d> vectors = new System.Collections.Generic.List<Rhino.Geometry.Vector3d>();
             System.Collections.Generic.List<Rhino.Geometry.Curve> arcs = new System.Collections.Generic.List<Rhino.Geometry.Curve>();
             System.Collections.Generic.List<Rhino.Geometry.Point3d> points = new System.Collections.Generic.List<Rhino.Geometry.Point3d>();
 
-            int startMonth = (int)System.Math.Max(1, System.Math.Min(12, mth.Min));
-            int endMonth = (int)System.Math.Max(1, System.Math.Min(12, mth.Max));
+            // Read the domain as start (T0) to end (T1); a start after the end wraps over the new year (11 to 2 = Nov..Feb).
+            int startMonth = (int)System.Math.Max(1, System.Math.Min(12, mth.T0));
+            int endMonth = (int)System.Math.Max(1, System.Math.Min(12, mth.T1));
             
             double startHour = System.Math.Max(0, System.Math.Min(24, hrs.Min));
             double endHour = System.Math.Max(0, System.Math.Min(24, hrs.Max));
@@ -77,18 +83,24 @@ namespace Enzyme.Components
             int[] allDays = new int[] { 21, 52, 80, 111, 141, 172, 202, 233, 264, 294, 325, 355 };
             
             System.Collections.Generic.List<int> validDays = new System.Collections.Generic.List<int>();
-            for (int i = startMonth - 1; i <= endMonth - 1; i++)
+            int monthCount = endMonth >= startMonth ? endMonth - startMonth + 1 : 12 - startMonth + 1 + endMonth;
+            for (int k = 0; k < monthCount; k++)
             {
-                if (i >= 0 && i < 12) validDays.Add(allDays[i]);
+                int i = (startMonth - 1 + k) % 12;
+                validDays.Add(allDays[i]);
             }
+
+            // Step on the half-hour grid so whole hours (Sun Vectors) are always hit, whatever the start time.
+            double firstHour = System.Math.Ceiling(startHour * 2.0 - 1e-9) / 2.0;
 
             foreach (int day in validDays)
             {
                 System.Collections.Generic.List<Rhino.Geometry.Point3d> dailyPts = new System.Collections.Generic.List<Rhino.Geometry.Point3d>();
 
-                for (double hour = startHour; hour <= endHour; hour += 0.5)
+                for (double hour = firstHour; hour <= endHour + 1e-9; hour += 0.5)
                 {
                     Rhino.Geometry.Vector3d sunVec = GetSunVector(lat, lon, day, hour, tz);
+                    sunVec.Transform(northRot);
                     
                     if (sunVec.Z > 0.01) 
                     {
@@ -118,7 +130,7 @@ namespace Enzyme.Components
             DA.SetDataList(2, points);
             DA.SetData(3, new Rhino.Geometry.Circle(new Rhino.Geometry.Plane(center, Rhino.Geometry.Vector3d.ZAxis), radius).ToNurbsCurve());
             
-            Hud.Done(this, sw.Elapsed.TotalMilliseconds, $"Lat: {lat:F1}\nLon: {lon:F1}\nVectors: {vectors.Count}");
+            Hud.Done(this, sw.Elapsed.TotalMilliseconds, $"Lat: {lat:F1}\nLon: {lon:F1}\nVectors: {vectors.Count}" + (north != 0 ? $"\nNorth: {north:F0}°" : ""));
         }
 
         private Vector3d GetSunVector(double lat, double lon, int dayOfYear, double hour, double tz)

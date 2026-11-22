@@ -73,9 +73,9 @@
                         <li>The terrain is sampled by vertical rays on a square grid of MeshResolution over the mesh bounding box. Where the local face is steeper than 30°, two extra samples are added at half a cell in X and in Y. Points every MeshResolution × 0.25 along each pad boundary are added too.</li>
                         <li>A sample inside a pad (plan containment test in World XY) is moved onto that pad plane. A sample outside all pads is clamped into a slope envelope: for each pad, Z must lie within padZ ± d × tan(BlendAngle), where d is the plan distance to the nearest point on the pad boundary; the tightest limits over all pads apply.</li>
                         <li>ModMesh is a 2D Delaunay triangulation (in World XY) of all the moved samples.</li>
-                        <li>CutVolume and FillVolume are summed on the base grid: at each cell centre the original and graded surfaces are ray-cast, and the height difference × MeshResolution² is counted as fill if above +0.01 m or as cut if below −0.01 m. Both are reported as positive volumes.</li>
+                        <li>CutVolume and FillVolume are summed on the base grid: at each cell centre the original terrain is ray-cast and the grading rule (pad plane or slope envelope) is applied at that point; the height difference × MeshResolution² is counted as fill if above +0.01 m or as cut if below −0.01 m. Both are reported as positive volumes.</li>
                         <li>ColoredMesh is an unwelded copy of ModMesh. Each face takes FillColor if the mean vertex height difference to the original terrain is above +0.05 m, CutColor if below −0.05 m, and white otherwise.</li>
-                        <li>With ShowContours on, ModMesh is contoured at every whole model unit between the original terrain bounding box limits; levels divisible by 5 go to MainContours, the rest to Contours.</li>
+                        <li>With ShowContours on, ModMesh is contoured at every whole model unit between the lowest and highest Z of the original and graded terrains; levels divisible by 5 go to MainContours, the rest to Contours.</li>
                     </ol>
                 </div>
                 <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
@@ -91,7 +91,7 @@
                     <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
                     <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
                         <li>Embankments are a geometric slope envelope (a cone of slope BlendAngle around the pads), not a designed batter, retaining wall or drainage profile; no soil type, bulking or shrinkage factor is applied.</li>
-                        <li>The graded surface is a re-triangulation of grid samples, so away from the pads it is a linear resampling of the original terrain. On rough terrain this resampling error can show up as small cut or fill where nothing was graded (partly hidden by the 0.01 m threshold).</li>
+                        <li>The graded surface (ModMesh) is a re-triangulation of grid samples, so away from the pads it is a linear resampling of the original terrain. Volumes are not affected (they apply the grading rule directly), but on rough terrain ColoredMesh can show small cut or fill where nothing was graded.</li>
                         <li>Volumes use one sample per grid cell (midpoint rule), so accuracy depends on MeshResolution.</li>
                         <li>Overlapping pads are resolved by input order (the first containing pad wins); conflicting envelopes from several pads are not reconciled.</li>
                     </ul>

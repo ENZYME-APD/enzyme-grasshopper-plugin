@@ -18,7 +18,7 @@ namespace Enzyme.Components
         {
             pManager.AddTextParameter("Format", "F", "Paper format (e.g., A4, A3, 16:9 FHD).", GH_ParamAccess.item, "A4");
             pManager.AddBooleanParameter("Landscape", "L", "True for Landscape, False for Portrait. (Applies to A-series paper).", GH_ParamAccess.item, true);
-            pManager.AddIntegerParameter("DPI", "DPI", "Print DPI to use for the calculation (default 300).", GH_ParamAccess.item, 300);
+            pManager.AddIntegerParameter("DPI", "DPI", "Print DPI used to convert A-series paper sizes to pixels (default 300). Screen formats (FHD, QHD, 4K, Instagram) keep their native pixel size and ignore DPI.", GH_ParamAccess.item, 300);
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
@@ -40,6 +40,11 @@ namespace Enzyme.Components
 
             int dpi = 300;
             if (!DA.GetData(2, ref dpi)) return;
+            if (dpi <= 0)
+            {
+                Hud.Error(this, "DPI must be a positive number.");
+                return;
+            }
 
             double widthMM = 297.0;
             double heightMM = 210.0;
@@ -87,10 +92,7 @@ namespace Enzyme.Components
             }
             else
             {
-                // Scale digital formats by DPI (baseline 72)
-                double scale = dpi / 72.0;
-                exactWidth = (int)Math.Round(exactWidth * scale);
-                exactHeight = (int)Math.Round(exactHeight * scale);
+                // Screen formats are exact pixel sizes: DPI does not apply (scaling by DPI / 72 turned FHD into 8000 x 4500 at 300 DPI).
 
                 // For exact pixels, if user forces portrait, flip them.
                 if (!landscape && exactWidth > exactHeight)

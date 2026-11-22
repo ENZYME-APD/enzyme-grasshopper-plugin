@@ -74,8 +74,9 @@ namespace Enzyme.Components
                     message = "Point is on the plane\nNo projection needed";
                     isContained = true;
                 }
-                else if (dist > 0)
+                else if (pt.Z > projectedPt.Z)
                 {
+                    // Above / below is judged along world Z (the projection direction), not along the plane normal.
                     message = "Point was above the plane\nProjected downward";
                 }
                 else

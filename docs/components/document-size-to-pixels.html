@@ -61,14 +61,14 @@
                     <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
                     <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
                         <li>A-series formats (A0 to A5, ISO 216 sizes in mm) are oriented by Landscape and converted with pixels = round(mm / 25.4 × DPI).</li>
-                        <li>Screen formats (FHD 1920 × 1080, QHD 2560 × 1440, 4K 3840 × 2160, Instagram 1080 × 1080) are scaled by DPI / 72 and swapped to portrait when Landscape is False.</li>
+                        <li>Screen formats (FHD 1920 × 1080, QHD 2560 × 1440, 4K 3840 × 2160, Instagram 1080 × 1080) keep their native pixel size (DPI does not apply) and are swapped to portrait when Landscape is False.</li>
                         <li>Unknown formats fall back to A4 with a warning; DPI is passed through.</li>
                     </ol>
                 </div>
                 <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
                     <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
                     <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
-                        <li>Screen formats are treated as 72 DPI at their native pixel size.</li>
+                        <li>Screen formats are exact pixel sizes; DPI only applies to paper formats and is passed through.</li>
                     </ul>
                 </div>
                 <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
