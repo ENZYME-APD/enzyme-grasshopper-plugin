@@ -7,6 +7,9 @@ For every component in Components/*.cs this script:
   * creates docs/components/<slug>.html if the component has no page yet
   * rewrites only the generated parts of an existing page (header + Inputs/Outputs grid),
     leaving any hand-written sections (workflow, physics notes, images) untouched
+  * writes the "Method, assumptions and simplifications" section of pages whose component has an
+    entry in Utils/MethodNotes.cs (the same text the component shows in its Info output),
+    between <!-- method-notes:start --> and <!-- method-notes:end -->
   * adds a card to docs/index.html for components that have none, and refreshes
     the input/output counts and description on existing cards
 
@@ -142,6 +145,61 @@ def update_page(text, c):
     return text
 
 
+NOTES_FILE = os.path.join(ROOT, "Utils", "MethodNotes.cs")
+NOTE_SECTIONS = [("Method", "Method", True), ("Assumptions", "Assumptions", False),
+                 ("Simplifications", "Simplifications and limits", False),
+                 ("Workflow", "Workflow", False), ("References", "References", False)]
+MN_START, MN_END = "<!-- method-notes:start -->", "<!-- method-notes:end -->"
+MN_RE = re.compile(r"(?:\n\n)?[ \t]*" + re.escape(MN_START) + r".*?" + re.escape(MN_END), re.S)
+
+
+def parse_notes():
+    """Utils/MethodNotes.cs -> {component file stem: {field: [lines]}}."""
+    if not os.path.exists(NOTES_FILE):
+        return {}
+    src = open(NOTES_FILE, encoding="utf-8").read()
+    notes = {}
+    for m in re.finditer(r'\["(\w+)"\]\s*=\s*new Note\s*\{(.*?)\n            \},', src, re.S):
+        key, body = m.groups()
+        note = {}
+        t = re.search(r"Title\s*=\s*" + STR, body)
+        note["Title"] = unescape(t.group(1)) if t else key
+        for f in re.finditer(r"(\w+)\s*=\s*new\[\]\s*\{(.*?)\n\s*\},", body, re.S):
+            note[f.group(1)] = [unescape(x) for x in re.findall(STR, f.group(2))]
+        notes[key] = note
+    return notes
+
+
+def notes_block(note, indent="            "):
+    cards = []
+    for field, title, ordered in NOTE_SECTIONS:
+        lines = note.get(field) or []
+        if not lines:
+            continue
+        tag = "ol" if ordered else "ul"
+        items = "\n".join(f"{indent}            <li>{html.escape(l, quote=False)}</li>" for l in lines)
+        cards.append(
+            f'{indent}    <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">\n'
+            f'{indent}        <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">{title}</h3>\n'
+            f'{indent}        <{tag} style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">\n{items}\n{indent}        </{tag}>\n'
+            f'{indent}    </div>')
+    return (f"{indent}{MN_START}\n"
+            f'{indent}<h2 style="margin-top: 2rem;">Method, assumptions and simplifications</h2>\n'
+            f'{indent}<p style="color: var(--text-secondary);">The same notes appear in the component\'s <strong>Info</strong> output.</p>\n'
+            f'{indent}<div>\n' + "\n".join(cards) + f"\n{indent}</div>\n"
+            f"{indent}{MN_END}\n")
+
+
+def apply_notes(text, note):
+    text = MN_RE.sub("", text)
+    if not note:
+        return text
+    m = IO_RE.search(text)
+    if not m:
+        return text
+    return text[:m.end()] + "\n\n" + notes_block(note).rstrip("\n") + text[m.end():]
+
+
 def card(c, page):
     cs = category_slug(c["sub"])
     return (f'            <a href="components/{page}" class="card" data-category="{cs}">\n'
@@ -172,6 +230,8 @@ def main(check=False):
             cards[html.unescape(t.group(1))] = m.group(1)
 
     template = open(os.path.join(PAGES, "sun-hours-analysis.html"), encoding="utf-8").read()
+    template = MN_RE.sub("", template)
+    notes = parse_notes()
     changed, warnings = [], []
     linked = set()
 
@@ -188,6 +248,7 @@ def main(check=False):
                 warnings.append(f"{page}: no io-grid block found; header refreshed only")
         else:
             old, new = None, render_new_page(c, template)
+        new = apply_notes(new, notes.get(os.path.splitext(c["file"])[0]))
         if new != old:
             changed.append(f"docs/components/{page}")
             if not check:

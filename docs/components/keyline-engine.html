@@ -54,6 +54,48 @@
                     </ul>
                 </div>
             </div>
+
+            <!-- method-notes:start -->
+            <h2 style="margin-top: 2rem;">Method, assumptions and simplifications</h2>
+            <p style="color: var(--text-secondary);">The same notes appear in the component's <strong>Info</strong> output.</p>
+            <div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
+                    <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Each Guide Curve is projected vertically onto Terrain and output.</li>
+                        <li>For i = 1 to Count, the guide is offset in the World XY plane by ± Spacing × i (sharp corners, tolerance 0.01) and each offset is projected vertically (along Z) onto Terrain.</li>
+                        <li>All projected curves form Keylines; the HUD and Dashboard Data report the number of curves and their total 3D length.</li>
+                    </ol>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Guide Curves are planar in plan (for example contours or a drawn keyline); offsets are computed in World XY.</li>
+                        <li>Spacing is a horizontal distance in model units (metres assumed in the dashboard text).</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Lines are equal plan offsets of the guide, not true keyline geometry: no fall or grade is computed or controlled along each line, and they do not follow the contours.</li>
+                        <li>Offsets that self-intersect on tight curves are kept as returned by Rhino; offsets that fall off the terrain are dropped.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Workflow</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Terrain mesh -&gt; Terrain; a contour or keyline through the keypoint (for example from a contour component) -&gt; Guide Curves.</li>
+                        <li>Keylines -&gt; drawings or swale layout; Dashboard Data -&gt; Analysis Dashboard.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">References</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Yeomans P.A. (1958), The Challenge of Landscape: the keyline system.</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- method-notes:end -->
         </div>
     </main>
 

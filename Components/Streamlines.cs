@@ -49,6 +49,7 @@ namespace Enzyme.Components
 
         protected override void Solve(IGH_DataAccess DA, System.Diagnostics.Stopwatch sw)
         {
+            if (DA.Iteration == 0 && Params.Output.Count > 1) DA.SetData(1, Enzyme.Utils.MethodNotes.Info("Streamlines"));
             List<Point3d> fPts = new List<Point3d>();
             List<Vector3d> fVecs = new List<Vector3d>();
             List<Point3d> seeds = new List<Point3d>();
@@ -129,7 +130,7 @@ namespace Enzyme.Components
             }
 
             DA.SetDataList(0, outCurves);
-            DA.SetData(1, InfoText);
+            DA.SetData(1, Enzyme.Utils.MethodNotes.Info("Streamlines"));
             if (Params.Output.Count > 2) DA.SetDataTree(2, speedTree);
             if (Params.Output.Count > 3) DA.SetData(3, tubes);
             if (Params.Output.Count > 4)

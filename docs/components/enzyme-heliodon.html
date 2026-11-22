@@ -49,15 +49,59 @@
                     </ul>
                 </div>
                 <div class="io-col">
-                    <h3>Outputs (4)</h3>
+                    <h3>Outputs (5)</h3>
                     <ul>
                         <li><strong>Sun Vectors</strong> (Vector): All solar vectors above the horizon (pointing TO the sun).</li>
                         <li><strong>Daily Arcs</strong> (Curve): Visual sun path curves for the 21st of each month.</li>
                         <li><strong>Sun Points</strong> (Point): Visual hourly sun positions.</li>
                         <li><strong>Base Circle</strong> (Curve): A flat circle framing the heliodon radius.</li>
+                        <li><strong>Info</strong> (Text): Method, assumptions, simplifications and references.</li>
                     </ul>
                 </div>
             </div>
+
+            <!-- method-notes:start -->
+            <h2 style="margin-top: 2rem;">Method, assumptions and simplifications</h2>
+            <p style="color: var(--text-secondary);">The same notes appear in the component's <strong>Info</strong> output.</p>
+            <div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
+                    <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>For the 21st of each month in Months (day of year 21, 52, 80 ... 355) it computes sun positions every 0.5 h from the start to the end of Hours, in local standard time.</li>
+                        <li>Sun position uses the NOAA fractional-year formulas: equation of time and declination, true solar time = clock time + equation of time + 4 × Longitude − 60 × Time Zone (minutes), hour angle, then altitude and azimuth.</li>
+                        <li>Positions with Z &gt; 0.01 (altitude above about 0.6°) are kept; whole-hour positions become Sun Vectors (unit vectors pointing to the sun) and Sun Points at Radius around Center.</li>
+                        <li>Daily Arcs are degree-3 curves through the half-hourly positions of each day; Base Circle is the horizontal circle of Radius.</li>
+                    </ol>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Model +Y is true north and +X east; there is no north-angle input.</li>
+                        <li>Time Zone is the standard offset from GMT; daylight saving is not applied.</li>
+                        <li>Each vector stands for one hour on one representative day per month.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Twelve representative days, not every day of the year: summing vectors gives hours on those days, not annual sun hours.</li>
+                        <li>No atmospheric refraction; position accuracy is that of the NOAA approximation (around a few tenths of a degree).</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Workflow</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Heliodon Sun Vectors -&gt; Sun Hours Analysis or other shading tools.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">References</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>NOAA Global Monitoring Division, General Solar Position Calculations (fractional-year equations).</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- method-notes:end -->
         </div>
     </main>
 

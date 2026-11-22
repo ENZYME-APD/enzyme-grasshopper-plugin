@@ -45,13 +45,51 @@
                     </ul>
                 </div>
                 <div class="io-col">
-                    <h3>Outputs (2)</h3>
+                    <h3>Outputs (3)</h3>
                     <ul>
                         <li><strong>transoms</strong> (Brep): transoms</li>
                         <li><strong>divLines</strong> (Line): divLines</li>
+                        <li><strong>Info</strong> (Text): Method, assumptions, simplifications and references.</li>
                     </ul>
                 </div>
             </div>
+
+            <!-- method-notes:start -->
+            <h2 style="margin-top: 2rem;">Method, assumptions and simplifications</h2>
+            <p style="color: var(--text-secondary);">The same notes appear in the component's <strong>Info</strong> output.</p>
+            <div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
+                    <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Only closed, planar curves are used. Each one is divided into n equal-length parts, n = max(4, ceil(length / modSize)), so the real spacing is length / n (at most modSize).</li>
+                        <li>At each division point the horizontal direction perpendicular to the curve is found (curve-plane normal × tangent) and turned to point away from the curve's area centroid.</li>
+                        <li>A divLine runs from the point outwards by tDepth.</li>
+                        <li>A transom is a flat rectangular surface on that line, rising tHeight along the curve-plane normal (turned to point up).</li>
+                        <li>modSize, tDepth and tHeight are matched by branch path and item index; a single value applies to all; missing values use defaults 1.0 m, 0.2 m and 0.1 m. Outputs keep the input path plus the curve index.</li>
+                    </ol>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Curves are closed floor or facade outlines drawn in a horizontal plane; units are metres.</li>
+                        <li>Outward means away from the centroid, which is right for convex shapes.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Transoms are zero-thickness surfaces, not solid profiles.</li>
+                        <li>No corner handling: fins sit only at equal divisions, not at the curve's corners.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Workflow</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Floor outlines (for example Facade JSON Parser BoundsClosed) -&gt; curves; transoms -&gt; Custom Preview or bake.</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- method-notes:end -->
         </div>
     </main>
 

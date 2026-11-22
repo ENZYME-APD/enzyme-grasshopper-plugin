@@ -46,14 +46,46 @@
                     </ul>
                 </div>
                 <div class="io-col">
-                    <h3>Outputs (3)</h3>
+                    <h3>Outputs (4)</h3>
                     <ul>
                         <li><strong>Horizontal_Bands</strong> (Generic): Horizontal_Bands</li>
                         <li><strong>Storefront_Mullions</strong> (Generic): Storefront_Mullions</li>
                         <li><strong>Storefront_Glass</strong> (Generic): Storefront_Glass</li>
+                        <li><strong>Info</strong> (Text): Method, assumptions, simplifications and references.</li>
                     </ul>
                 </div>
             </div>
+
+            <!-- method-notes:start -->
+            <h2 style="margin-top: 2rem;">Method, assumptions and simplifications</h2>
+            <p style="color: var(--text-secondary);">The same notes appear in the component's <strong>Info</strong> output.</p>
+            <div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
+                    <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Closed curves from Base_Curves are collected into one flat list; open curves are ignored.</li>
+                        <li>In production mode the Python file facade_modules.py is downloaded from the ENZYME-APD/Grasshopper-GitHub-test repository (main branch) to the user folder .rhinocode/gh_distributed_scripts when missing or when Force_Update is True. In Dev_Mode it is read from Local_Repo_Dir.</li>
+                        <li>The script text is cached in memory and re-read only when its file modification time changes.</li>
+                        <li>The script is run in Rhino's Python engine, calling generate_horizontal_bands with band_thickness 0.30 and division_count 3, and generate_storefront with mullion_spacing 1.5 and glass_inset 0.05; Floor_Heights defaults to a single 4.0.</li>
+                        <li>Its results are output as Horizontal_Bands, Storefront_Mullions and Storefront_Glass.</li>
+                    </ol>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>The geometry logic lives entirely in the external Python script; this component only loads and runs it.</li>
+                        <li>Model units are metres (fixed 0.30, 1.5, 0.05 and 4.0 values).</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Band thickness, division count, mullion spacing and glass inset are hard-coded and cannot be changed from Grasshopper.</li>
+                        <li>Data trees are flattened; outputs are flat lists.</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- method-notes:end -->
         </div>
     </main>
 

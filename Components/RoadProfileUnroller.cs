@@ -44,10 +44,12 @@ namespace Enzyme.Components
             pManager.AddCurveParameter("Alignment Lines", "Align Lines", "Vertical lines dropping from breakpoints to Ref Y", GH_ParamAccess.tree);
             pManager.AddTextParameter("Alignment Labels", "Align Labels", "Structural geometry labels (Line, Arc, Spline)", GH_ParamAccess.tree);
             pManager.AddPointParameter("Alignment Points", "Align Pts", "Placement points for alignment labels", GH_ParamAccess.tree);
+            pManager.AddTextParameter("Info", "Info", "Method, assumptions, simplifications and references.", GH_ParamAccess.item);
         }
 
                 protected override void SolveInstance(IGH_DataAccess DA)
         {
+            if (DA.Iteration == 0 && Params.Output.Count > 10) DA.SetData(10, Enzyme.Utils.MethodNotes.Info("RoadProfileUnroller"));
             System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
 
             System.Collections.Generic.List<Rhino.Geometry.Curve> curves = new System.Collections.Generic.List<Rhino.Geometry.Curve>();

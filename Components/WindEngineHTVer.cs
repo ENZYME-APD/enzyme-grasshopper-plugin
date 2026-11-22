@@ -277,6 +277,7 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
 
         protected override void Solve(IGH_DataAccess DA, System.Diagnostics.Stopwatch hudSw)
         {
+            if (DA.Iteration == 0 && Params.Output.Count > 7) DA.SetData(7, Enzyme.Utils.MethodNotes.Info("WindEngineHTVer"));
             bool execute = false;
             DA.GetData(0, ref execute);
 
@@ -907,12 +908,7 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
                 DA.SetData(5, cleanMesh);
             }
 
-            DA.SetData(7, "URBAN WIND VECTOR ENGINE HT (BETA)\n"
-                + "\n"
-                + "HOW IT WORKS:\n"
-                + "A physically-refined wind analysis engine: occlusion, wake, corner-channeling and gap/tunneling are combined as independent multiplicative factors (rather than an either/or switch), and an optional multi-pass relaxation lets each point settle through sequential building interactions.\n\n"
-                + "INTERPRETATION & IMPORTANCE:\n"
-                + "Use once massing is known, to check pedestrian comfort, wake shadowing, and speed-up in narrow gaps between buildings before committing to facade or landscape design.");
+            DA.SetData(7, Enzyme.Utils.MethodNotes.Info("WindEngineHTVer"));
 
             {
                 // Legend payload for Legend Geometry's "Color Legend" input: reflects the

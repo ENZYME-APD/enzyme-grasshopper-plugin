@@ -101,3 +101,14 @@ public class MyTool : EnzymeComponent
 ## 7. Rhino SDK version (who can see a release)
 
 `RhinoCommon` / `Grasshopper` NuGet references are **pinned to 8.0.23304.9001** (the first Rhino 8 release). Yak tags each package with the SDK it was built against (`rh8_0`, `rh8_35`…) and Package Manager only offers it to Rhinos at least that new. With `8.*` every build silently raised the minimum to the newest service release, so testers on older Rhino 8 only saw v1.2.0 (the last Rhino 7 build). Only raise the pin if a newer RhinoCommon API is genuinely needed, and note it in the release.
+
+## 8. Method Notes Standard (Info output + docs)
+
+Every analysis, design or data component states **how it works, what it assumes and what it simplifies**, in the same words in Grasshopper and on the docs site.
+
+*   Write the notes once in `Utils/MethodNotes.cs`, keyed by the component's file name (without `.cs`): `Title`, `Method`, `Assumptions`, `Simplifications`, and where useful `Workflow` and `References`. Plain strings: no braces or double quotes (the docs script parses the file).
+*   The component exposes an **Info** text output set with `MethodNotes.Info("<Key>")`. On new components put it just before `Dashboard Data`; on released components append it as the last output so placed canvases keep their wiring.
+*   `python3 dev_scripts/gen_docs.py` writes the notes into the page's **Method, assumptions and simplifications** section (between `<!-- method-notes:start -->` and `<!-- method-notes:end -->`); never edit that block by hand. CI's `--check` fails if code and docs drift.
+*   `Tests/FieldMath.Tests` fails if a note lacks Method, Assumptions or Simplifications, or its component file is missing.
+*   State numbers and defaults (radii, coefficients, tolerances), name the data sources and papers, and say plainly where results are approximate or should be checked against local standards.
+

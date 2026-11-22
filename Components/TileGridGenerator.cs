@@ -90,10 +90,12 @@ namespace Enzyme.Components
             pManager.AddCurveParameter("All Tiles", "All Tiles", "All grid tiles (trimmed and full)", GH_ParamAccess.list);
             pManager.AddCurveParameter("Full Tiles", "Full Tiles", "Tiles fully inside the boundary", GH_ParamAccess.list);
             pManager.AddCurveParameter("Trimmed Tiles", "Trimmed Tiles", "Tiles partially inside the boundary", GH_ParamAccess.list);
+            pManager.AddTextParameter("Info", "Info", "Method, assumptions, simplifications and references.", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            if (DA.Iteration == 0 && Params.Output.Count > 6) DA.SetData(6, Enzyme.Utils.MethodNotes.Info("TileGridGenerator"));
             System.Diagnostics.Stopwatch stopwatch = System.Diagnostics.Stopwatch.StartNew();
             
             GeometryBase baseGeom = null;

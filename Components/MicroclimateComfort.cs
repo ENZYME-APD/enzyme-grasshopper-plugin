@@ -43,10 +43,12 @@ namespace Enzyme.Components
             pManager.AddTextParameter("Category", "C", "Comfort category label.", GH_ParamAccess.list);
             pManager.AddColourParameter("Colors", "Col", "Gradient color mapping.", GH_ParamAccess.list);
             pManager.AddTextParameter("Dashboard Data", "Dashboard", "JSON Legend Data", GH_ParamAccess.item);
+            pManager.AddTextParameter("Info", "Info", "Method, assumptions, simplifications and references.", GH_ParamAccess.item);
         }
 
         protected override void Solve(IGH_DataAccess DA, System.Diagnostics.Stopwatch hudSw)
         {
+            if (DA.Iteration == 0 && Params.Output.Count > 5) DA.SetData(5, Enzyme.Utils.MethodNotes.Info("MicroclimateComfort"));
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
 
             List<Point3d> points = new List<Point3d>();

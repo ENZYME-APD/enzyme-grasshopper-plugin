@@ -60,6 +60,52 @@
                     </ul>
                 </div>
             </div>
+
+            <!-- method-notes:start -->
+            <h2 style="margin-top: 2rem;">Method, assumptions and simplifications</h2>
+            <p style="color: var(--text-secondary);">The same notes appear in the component's <strong>Info</strong> output.</p>
+            <div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
+                    <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Breaklines are sampled at about Spacing along each segment, keeping corners. Survey points inside closed breaklines (platforms) are dropped, and so are points within Clear Radius in plan of an open breakline.</li>
+                        <li>Breakline samples come first, then the kept survey points; points closer than max(tolerance, 0.02 × Spacing) in plan are merged, the first one winning.</li>
+                        <li>If Boundary or Plot Boundary is given, a first Delaunay mesh is built to give their sampled outline points a height (vertical drop; points outside snap to the nearest mesh point). Points outside Boundary are removed, points within 0.25 × Spacing of the plot edge are removed, and the outline points are added.</li>
+                        <li>The final points are triangulated with 2D Delaunay in plan around a local origin and lifted to their Z in double precision. Triangles with a plan edge longer than Max Edge, or with their centroid outside Boundary, are removed. Faces are wound counter-clockwise so normals point up.</li>
+                        <li>Plot Mesh is the set of triangles whose centroid is inside the plot outline; the plot outline and Trees are dropped onto the final mesh. Colors, when given, shade vertices by Z between the mesh minimum and maximum.</li>
+                    </ol>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Survey points and breaklines describe a single-valued ground surface (no overhangs).</li>
+                        <li>Closed breaklines carry the platform level along their edge; inside them the surface is triangulated from the edge points only.</li>
+                        <li>Boundaries are tested in plan; Z of Boundary and Plot Boundary is ignored.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Linear interpolation on triangles (TIN); no smoothing or contour-based interpolation.</li>
+                        <li>Breaklines are enforced by dense sampling, not as hard constrained edges, so a triangle can still cut across a breakline between samples.</li>
+                        <li>Points outside the preliminary mesh snap to the nearest mesh point, which also moves them in plan.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Workflow</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Survey Outlier Cleaner -&gt; Points; road edges and platform outlines -&gt; Breaklines.</li>
+                        <li>Mesh -&gt; slope, flood, sun or visibility analyses; Plot Mesh -&gt; plot-level quantities.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">References</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Grasshopper Delaunay solver (Grasshopper.Kernel.Geometry.Delaunay).</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- method-notes:end -->
         </div>
     </main>
 

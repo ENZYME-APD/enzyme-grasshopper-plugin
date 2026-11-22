@@ -97,10 +97,12 @@ namespace Enzyme.Components
             pManager.AddMeshParameter("Fill Volume", "F", "Added earth volume", GH_ParamAccess.list);
             pManager.AddCurveParameter("Contours", "Ct", "Normal contours (1m)", GH_ParamAccess.list);
             pManager.AddCurveParameter("Main Contours", "MC", "Main contours (5m)", GH_ParamAccess.list);
+            pManager.AddTextParameter("Info", "Info", "Method, assumptions, simplifications and references.", GH_ParamAccess.item);
         }
 
                 protected override void SolveInstance(IGH_DataAccess DA)
         {
+            if (DA.Iteration == 0 && Params.Output.Count > 9) DA.SetData(9, Enzyme.Utils.MethodNotes.Info("RoadGenerator"));
             Stopwatch stopwatch = Stopwatch.StartNew();
 
             List<Curve> centerlines = new List<Curve>();

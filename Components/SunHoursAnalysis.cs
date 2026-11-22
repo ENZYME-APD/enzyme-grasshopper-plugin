@@ -60,6 +60,7 @@ namespace Enzyme.Components
             pManager.AddColourParameter("Colors", "Colors", "Color mapped to each point.", GH_ParamAccess.list);
             pManager.AddTextParameter("Dashboard Data", "Dashboard", "JSON legend data", GH_ParamAccess.item);
             pManager.AddNumberParameter("Tree Shade %", "TreeShade", "Share of the point's direct sun (0.0 to 1.0) removed by tree foliage. 0 when no Trees are given.", GH_ParamAccess.list);
+            pManager.AddTextParameter("Info", "Info", "Method, assumptions, simplifications and references.", GH_ParamAccess.item);
         }
 
                         protected override void Solve(IGH_DataAccess DA, System.Diagnostics.Stopwatch hudSw)
@@ -321,6 +322,7 @@ namespace Enzyme.Components
             DA.SetDataList(4, _cachedColors);
             DA.SetData(5, _cachedJson);
             DA.SetDataList(6, treeShade);
+            DA.SetData(7, MethodNotes.Info("SunHoursAnalysis"));
         }
         private System.Drawing.Color InterpolateColor(List<System.Drawing.Color> gradient, double t)
         {

@@ -47,12 +47,54 @@
                     </ul>
                 </div>
                 <div class="io-col">
-                    <h3>Outputs (1)</h3>
+                    <h3>Outputs (2)</h3>
                     <ul>
                         <li><strong>JSON_Payload</strong> (Text): Output JSON payload</li>
+                        <li><strong>Info</strong> (Text): Method, assumptions, simplifications and references.</li>
                     </ul>
                 </div>
             </div>
+
+            <!-- method-notes:start -->
+            <h2 style="margin-top: 2rem;">Method, assumptions and simplifications</h2>
+            <p style="color: var(--text-secondary);">The same notes appear in the component's <strong>Info</strong> output.</p>
+            <div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
+                    <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>All input trees are flattened and matched by index: floor contour i takes FloorHeights i, Programs i, TowerIDs i and BuildingNames i. Missing names default to Mixed_Use, Main_Mass and Building_01.</li>
+                        <li>Each floor's base level is the lowest Z of its contour's bounding box; its top is base + FloorHeights.</li>
+                        <li>Floors are grouped by BuildingNames, then by TowerIDs, and sorted by base level within each tower.</li>
+                        <li>Healing: if the gap between a floor's base and the top of the floor below in the same tower is between 0.001 and SnapTolerance (default 0.15, either above or below), the base is snapped to that top. The top stays where it was, so the floor height grows or shrinks by the gap.</li>
+                        <li>Each building's true_base_elevation is its lowest healed base; every floor is written as a one-floor block with base_z relative to it (rounded to 0.001) and floor_height = healed height.</li>
+                        <li>Outlines are written as Polyline points if the curve is a polyline; otherwise the curve is converted to arcs and lines (tolerance 0.05, angle 0.1 rad) and each segment is written as Line, Arc (start, mid, end) or a Polyline approximation (tolerance 0.01). Coordinates are rounded to 4 decimals.</li>
+                    </ol>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Contours are flat, closed slab outlines in model units (metres), one per floor.</li>
+                        <li>The flattened lists of contours, heights and names are in the same order.</li>
+                        <li>Floors of one tower stack vertically; small gaps or overlaps up to SnapTolerance are modelling errors, not design intent.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Data tree structure is ignored: everything is matched by flat index.</li>
+                        <li>Every floor becomes its own block (floors = 1); repeated floors are not merged.</li>
+                        <li>Free-form curves are approximated by arcs, lines and polylines.</li>
+                        <li>Block names use the relative level rounded to whole units, so they can repeat; they are labels only.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Workflow</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Archicad slab outlines and heights (through Tapir) -&gt; FloorContours and FloorHeights. JSON_Payload -&gt; JSON_Payload of JSON MP Engine V2.</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- method-notes:end -->
         </div>
     </main>
 

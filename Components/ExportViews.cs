@@ -54,6 +54,7 @@ namespace Enzyme.Components
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            if (DA.Iteration == 0 && Params.Output.Count > 1) DA.SetData(1, Enzyme.Utils.MethodNotes.Info("ExportViews"));
             var sw = System.Diagnostics.Stopwatch.StartNew();
             bool run = false;
             DA.GetData("Run", ref run);
@@ -277,7 +278,7 @@ namespace Enzyme.Components
                 "Hooks into Rhino's native ViewCapture capabilities. By taking a list of view names (or leaving it blank to capture all Named Views), it cycles the active viewport through each camera angle and captures high-res images directly to your specified folder.\n\n" +
                 "INTERPRETATION & IMPORTANCE:\n" +
                 "Automates the tedious task of exporting presentation images. Ensures that every iteration of your Grasshopper definition can be instantly batch-exported into standard, perfectly aligned viewpoints for reports and presentations.";
-            DA.SetData(1, info);
+            DA.SetData(1, Enzyme.Utils.MethodNotes.Info("ExportViews"));
 
             sw.Stop();
             string viewText = viewNames != null && viewNames.Count > 0 ? (viewNames.Count == 1 ? viewNames[0].ToUpper() : $"{viewNames.Count} VIEWS") : "ALL VIEWS";

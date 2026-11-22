@@ -54,10 +54,12 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
         {
             pManager.AddCurveParameter("FlowPaths", "FP", "The generated water movement paths.", GH_ParamAccess.tree);
             pManager.AddPointParameter("DropPoints", "DP", "The valid starting grid points on the mesh.", GH_ParamAccess.tree);
+            pManager.AddTextParameter("Info", "Info", "Method, assumptions, simplifications and references.", GH_ParamAccess.item);
         }
 
         protected override void Solve(IGH_DataAccess DA, System.Diagnostics.Stopwatch hudSw)
         {
+            if (DA.Iteration == 0 && Params.Output.Count > 2) DA.SetData(2, Enzyme.Utils.MethodNotes.Info("WaterFlow"));
             Stopwatch stopwatch = Stopwatch.StartNew();
 
             Mesh terrainMesh = null;

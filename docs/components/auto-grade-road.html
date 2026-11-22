@@ -46,13 +46,55 @@
                     </ul>
                 </div>
                 <div class="io-col">
-                    <h3>Outputs (2)</h3>
+                    <h3>Outputs (3)</h3>
                     <ul>
                         <li><strong>3D Road</strong> (Curve): The optimized, slope-constrained 3D centerline</li>
                         <li><strong>Existing Ground</strong> (Curve): The raw draped profile on the terrain</li>
+                        <li><strong>Info</strong> (Text): Method, assumptions, simplifications and references.</li>
                     </ul>
                 </div>
             </div>
+
+            <!-- method-notes:start -->
+            <h2 style="margin-top: 2rem;">Method, assumptions and simplifications</h2>
+            <p style="color: var(--text-secondary);">The same notes appear in the component's <strong>Info</strong> output.</p>
+            <div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
+                    <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>The Centerline is divided into equal-length steps of about Resolution (number of steps = floor(length / Resolution), minimum 2).</li>
+                        <li>Each division point is draped onto the Terrain by a vertical ray cast down from 10 000 m above it; the first hit gives the existing ground level (EG). Points off the mesh keep the Z of the centerline.</li>
+                        <li>A forward pass then a backward pass clamp each level so the rise or fall to the previous (then next) point is at most Max Slope × horizontal distance. This gives the profile closest to EG that respects the grade limit.</li>
+                        <li>The profile is smoothed by Smoothing passes of a moving average over ±(steps / 20) neighbours (minimum ±1), with the first and last levels pinned after every pass.</li>
+                        <li>3D Road is a degree-3 curve interpolated through the smoothed levels (polyline if that fails); Existing Ground is a polyline through the draped levels.</li>
+                        <li>The HUD reports the maximum grade of the smoothed point profile and the maximum cut and fill against EG at the division points.</li>
+                    </ol>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Model units are metres; Max Slope is a ratio (0.08 = 8 %), default 0.08; Resolution default 2 m; Smoothing default 5.</li>
+                        <li>The Terrain is a single surface seen from above (the topmost hit is used) and lies below Centerline Z + 10 000.</li>
+                        <li>The road ends are meant to meet fixed levels, so the end levels are kept from the slope-clamped profile.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Longitudinal profile only: no cross-fall, road width, earthwork volumes or batters.</li>
+                        <li>No proper vertical curves (K values, sight distance): smoothing is a plain moving average.</li>
+                        <li>Cut and fill are checked only at the division points, not along the interpolated curve, which can overshoot slightly between them.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Workflow</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Road centerlines (for example from Road Network tools) and a terrain mesh (for example Site Fetch) -&gt; Centerline and Terrain.</li>
+                        <li>3D Road -&gt; sweep or loft a road section, or compare with Existing Ground to see cut and fill.</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- method-notes:end -->
         </div>
     </main>
 

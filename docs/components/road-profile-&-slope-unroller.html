@@ -48,7 +48,7 @@
                     </ul>
                 </div>
                 <div class="io-col">
-                    <h3>Outputs (10)</h3>
+                    <h3>Outputs (11)</h3>
                     <ul>
                         <li><strong>Profile Curves</strong> (Curve): Continuous unrolled 2D profile curve</li>
                         <li><strong>Analyzed Segments</strong> (Curve): 2D lines representing the slope segments</li>
@@ -60,9 +60,50 @@
                         <li><strong>Alignment Lines</strong> (Curve): Vertical lines dropping from breakpoints to Ref Y</li>
                         <li><strong>Alignment Labels</strong> (Text): Structural geometry labels (Line, Arc, Spline)</li>
                         <li><strong>Alignment Points</strong> (Point): Placement points for alignment labels</li>
+                        <li><strong>Info</strong> (Text): Method, assumptions, simplifications and references.</li>
                     </ul>
                 </div>
             </div>
+
+            <!-- method-notes:start -->
+            <h2 style="margin-top: 2rem;">Method, assumptions and simplifications</h2>
+            <p style="color: var(--text-secondary);">The same notes appear in the component's <strong>Info</strong> output.</p>
+            <div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
+                    <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Profile: each curve is sampled at 201 points; each point is plotted on Base Plane at x = 3D length along the curve from its start and y = Z × Z Exaggeration, and a degree-3 interpolated curve is fitted through them.</li>
+                        <li>Analysis: the curve is cut into N = ceil(length / Segment Size) equal-length pieces. Slope per segment uses the straight chord between the segment end points: horizontal distance H in plan and absolute height change V; degrees = atan(V / H), percent = V / H × 100, ratio = H / V (1:X).</li>
+                        <li>A segment is Compliant if slope ≤ Threshold (degrees or percent) or ratio ≥ Threshold (ratio mode, flat segments always compliant). Compliance % is the share of compliant segments over all curves.</li>
+                        <li>Segments, centre points and status are drawn on the same profile graph.</li>
+                        <li>Alignment: the curve is split into its own segments (polyline spans, arcs, splines); a vertical line drops from each break point to Ref Y, and each span is labelled Line L, Arc R or Spline L (rounded to 0.1) at Ref Y − 2 × Z Exaggeration.</li>
+                    </ol>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Curves are 3D road centrelines drawn in the direction of chainage, in metres.</li>
+                        <li>Ref Y is in graph units, i.e. already scaled (an elevation × Z Exaggeration).</li>
+                        <li>Threshold is in the units chosen by Mode (default 8 %).</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>The horizontal axis is 3D length along the curve, not plan chainage, so steep roads plot slightly longer than their plan length.</li>
+                        <li>Slope is an average over each segment; peaks shorter than Segment Size are smoothed out. Uphill and downhill are not distinguished.</li>
+                        <li>Elevations are plotted as absolute Z (no datum subtraction), so Base Plane origin must be set accordingly.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Workflow</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>3D road centrelines (for example from Road Corridor or a graded alignment) -&gt; Curves.</li>
+                        <li>Segments and Status -&gt; colour by status for long sections; Dashboard Data -&gt; legend.</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- method-notes:end -->
         </div>
     </main>
 

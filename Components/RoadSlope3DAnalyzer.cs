@@ -42,6 +42,7 @@ namespace Enzyme.Components
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            if (DA.Iteration == 0 && Params.Output.Count > 6) DA.SetData(6, Enzyme.Utils.MethodNotes.Info("RoadSlope3DAnalyzer"));
             System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
 
             List<Curve> curves = new List<Curve>();
@@ -191,7 +192,7 @@ namespace Enzyme.Components
             DA.SetDataTree(3, outStatus);
             DA.SetData(4, compliancePct);
             DA.SetData(5, legendObj.ToString());
-            DA.SetData(6, infoText);
+            DA.SetData(6, Enzyme.Utils.MethodNotes.Info("RoadSlope3DAnalyzer"));
         }
 
         public override void AddedToDocument(GH_Document document)

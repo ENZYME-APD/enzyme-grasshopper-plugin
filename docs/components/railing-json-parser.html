@@ -53,6 +53,40 @@
                     </ul>
                 </div>
             </div>
+
+            <!-- method-notes:start -->
+            <h2 style="margin-top: 2rem;">Method, assumptions and simplifications</h2>
+            <p style="color: var(--text-secondary);">The same notes appear in the component's <strong>Info</strong> output.</p>
+            <div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
+                    <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Parses Railings_JSON as an object of building name to a list of railings; each railing has floor_index, tower_id, true_z and curves (each a list of Line, Arc or Polyline segments).</li>
+                        <li>Railings are kept when they pass Filter_Building, Filter_Tower and Filter_Level. Text filters are case-insensitive: ExactMatch requires equality; otherwise * and ? wildcards are used if present, else a substring match.</li>
+                        <li>Each curve's segments are rebuilt, joined (0.01 tolerance), closed if the gap is within 0.01, and moved up by true_z. Output branches are building index; railing index, with a label Building | Tower - Lvl n Railing.</li>
+                    </ol>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Segment coordinates in the JSON are relative to true_z (the component adds true_z to Z).</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>When the segments of one curve do not join into one piece, only the first joined piece is kept.</li>
+                        <li>Branch numbers are not stable when filters change: building indices count matched buildings only.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Workflow</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Masterplan Engine railings JSON -&gt; Railings_JSON; RailingCurves -&gt; sweep or Archicad railing export.</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- method-notes:end -->
         </div>
     </main>
 

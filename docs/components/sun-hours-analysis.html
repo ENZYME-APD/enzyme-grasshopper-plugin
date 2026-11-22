@@ -52,7 +52,7 @@
                     </ul>
                 </div>
                 <div class="io-col">
-                    <h3>Outputs (7)</h3>
+                    <h3>Outputs (8)</h3>
                     <ul>
                         <li><strong>Sun Hours</strong> (Integer): Total number of sun rays that reached the point.</li>
                         <li><strong>Exposure %</strong> (Number): Percentage of time in the sun (0.0 to 1.0).</li>
@@ -61,9 +61,58 @@
                         <li><strong>Colors</strong> (Colour): Color mapped to each point.</li>
                         <li><strong>Dashboard Data</strong> (Text): JSON legend data</li>
                         <li><strong>Tree Shade %</strong> (Number): Share of the point's direct sun (0.0 to 1.0) removed by tree foliage. 0 when no Trees are given.</li>
+                        <li><strong>Info</strong> (Text): Method, assumptions, simplifications and references.</li>
                     </ul>
                 </div>
             </div>
+
+            <!-- method-notes:start -->
+            <h2 style="margin-top: 2rem;">Method, assumptions and simplifications</h2>
+            <p style="color: var(--text-secondary);">The same notes appear in the component's <strong>Info</strong> output.</p>
+            <div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
+                    <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Each test point casts one ray towards every sun vector from the Heliodon, starting 0.01 m off the point.</li>
+                        <li>A ray that hits the Context mesh is blocked. On massing (Workflow 1), rays from faces turned away from the sun are not counted.</li>
+                        <li>Tree crowns are porous: a ray through foliage keeps a fraction T = exp(−k × LAD × L) of the sun, where L is the length of the ray inside each crown (from its crossings of the closed crown mesh) and LAD the leaf area density of that crown (Beer-Lambert law).</li>
+                        <li>Sun Hours = sum of the transmitted fractions over all sun vectors, rounded; Exposure = that sum / number of sun vectors.</li>
+                        <li>Tree Shade = 1 - (sun with trees / sun without trees) for the rays not blocked by Context.</li>
+                    </ol>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Each sun vector stands for an equal time step (the Heliodon samples the period evenly), so counts read as hours.</li>
+                        <li>Leaf area density is uniform inside a crown; k = 0.5 matches a spherical (random) leaf-angle distribution.</li>
+                        <li>Tree crowns are closed meshes and are not also in Context.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Direct sun only: no diffuse sky, no reflections, no light scattered by leaves.</li>
+                        <li>Trunks and branches are ignored; overlapping crowns add their optical depths.</li>
+                        <li>Crowns that are not closed meshes are ignored (warning).</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Workflow</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Heliodon -&gt; Sun Vectors. Massing or Test Points -&gt; Geometry or Test Points. Buildings and terrain -&gt; Context.</li>
+                        <li>Tree crowns (for example Site Fetch Tree Crowns) -&gt; Trees; LAD per crown or one value; lower LAD for winter or sparse species.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">References</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Monsi M. and Saeki T. (1953), light extinction in plant canopies (Beer-Lambert law).</li>
+                        <li>Campbell G.S. and Norman J.M. (1998), An Introduction to Environmental Biophysics: k = 0.5 for spherical leaf angles.</li>
+                        <li>Fujiwara K. et al. (2025), VoxCity, Computers, Environment and Urban Systems 102366: porous canopy approach.</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- method-notes:end -->
         </div>
     </main>
 

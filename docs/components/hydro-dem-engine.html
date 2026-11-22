@@ -22,7 +22,7 @@
         <div class="doc-header" style="display: flex; align-items: center;">
             <div>
                 <h1>Hydro-DEM Engine</h1>
-                <p class="doc-subtitle">Calculates Flow Direction and Flow Accumulation on a terrain mesh to extract stream networks.</p>
+                <p class="doc-subtitle">Calculates Flow Direction and Flow Accumulation on a terrain mesh to extract stream networks. Depressions are filled first (Priority-Flood) so streams run through hollows to the terrain edge; the hollows are reported as ponds.</p>
                 <div class="doc-meta">
                     <span class="badge site-analysis">Site Analysis</span>
                     <span>Nickname: <strong>HydroDEM</strong></span>
@@ -36,24 +36,78 @@
             
             <div class="io-grid">
                 <div class="io-col">
-                    <h3>Inputs (3)</h3>
+                    <h3>Inputs (5)</h3>
                     <ul>
                         <li><strong>Terrain</strong> (Mesh): The base topography mesh</li>
                         <li><strong>Threshold</strong> (Integer): Minimum flow accumulation to form a stream</li>
                         <li><strong>Run</strong> (Boolean): Optional. False = skip the analysis and keep showing the last results (cached). Share one toggle with the Analysis Dashboard to switch everything on/off together.</li>
+                        <li><strong>Fill Pits</strong> (Boolean): Fill depressions before routing (Priority-Flood, Barnes et al. 2014). False = old behaviour: flow stops in every hollow.</li>
+                        <li><strong>Min Pond Depth</strong> (Number): Hollows shallower than this (m) are not reported as ponds (still routed through).</li>
                     </ul>
                 </div>
                 <div class="io-col">
-                    <h3>Outputs (5)</h3>
+                    <h3>Outputs (8)</h3>
                     <ul>
                         <li><strong>Streams</strong> (Curve): Extracted stream networks (Polylines)</li>
                         <li><strong>Accumulation</strong> (Integer): Flow accumulation value per topology vertex</li>
                         <li><strong>Topology Points</strong> (Point): Topology vertices matching the accumulation list</li>
                         <li><strong>Info</strong> (Text): Component information and methodology</li>
                         <li><strong>Dashboard Data</strong> (Text): Unified JSON payload containing legend and key analysis metrics for the Analysis Dashboard</li>
+                        <li><strong>Pond Depth</strong> (Number): Water depth per topology vertex when hollows fill up (0 = dry).</li>
+                        <li><strong>Ponds</strong> (Mesh): Water surface of every pond at its spill level.</li>
+                        <li><strong>Catchment</strong> (Integer): Catchment id per topology vertex: the outlet vertex its water leaves the terrain at.</li>
                     </ul>
                 </div>
             </div>
+
+            <!-- method-notes:start -->
+            <h2 style="margin-top: 2rem;">Method, assumptions and simplifications</h2>
+            <p style="color: var(--text-secondary);">The same notes appear in the component's <strong>Info</strong> output.</p>
+            <div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
+                    <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Graph: one node per mesh topology vertex, linked to its mesh neighbours.</li>
+                        <li>Outlets: vertices on the open edge of the mesh (water leaves the model there); a closed mesh drains at its lowest vertex.</li>
+                        <li>Depression filling (Priority-Flood): a flood grows inward from the outlets, lowest first; every vertex is raised to at least the level it was reached from, so each hollow fills to its spill level.</li>
+                        <li>Flow direction: steepest descent (drop / plan distance) on the filled surface; on flats and inside filled hollows a vertex drains to the vertex that flooded it, so every vertex reaches an outlet and there are no loops.</li>
+                        <li>Accumulation: one unit of rain per vertex, summed downstream; Streams follow vertices with accumulation at or above Threshold.</li>
+                        <li>Ponds: connected wet vertices (depth above Min Pond Depth) at one spill level; volume = depth × the vertex's share of the surrounding faces' plan area.</li>
+                        <li>Catchment: the outlet vertex each vertex drains to.</li>
+                    </ol>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Water leaves only at the mesh edge; hollows fill completely before they overflow (static spill level).</li>
+                        <li>Uniform rain per vertex, no infiltration, evaporation or storage in the soil.</li>
+                        <li>Use a regular mesh: accumulation counts vertices, so a denser area collects more.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Single flow direction per vertex (D8-style on mesh neighbours): no splitting of flow.</li>
+                        <li>Accumulation is a vertex count, not an area or a discharge.</li>
+                        <li>Pond volume is approximate (vertex area share); culverts, pipes and drains are not modelled.</li>
+                        <li>Fill Pits = false restores the old behaviour: flow stops in every hollow.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Workflow</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Terrain mesh (for example Site Fetch Terrain) -&gt; Terrain. Streams -&gt; Keypoint Engine. Ponds and Pond Depth show where water collects.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">References</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Barnes R., Lehman C. and Mulla D. (2014), Priority-Flood: an optimal depression-filling and watershed-labeling algorithm for digital elevation models, Computers and Geosciences 62.</li>
+                        <li>O'Callaghan J.F. and Mark D.M. (1984), the extraction of drainage networks from digital elevation data (D8).</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- method-notes:end -->
         </div>
     </main>
 

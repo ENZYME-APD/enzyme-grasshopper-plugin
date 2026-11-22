@@ -100,4 +100,109 @@ var ob=new List<OsmBuilding>(); var ot=new List<OsmTree>(); OsmParse.Parse(Syste
 Check(ob.Count==3 && ob[0].Height==12 && ob[1].Height==16.5 && ob[1].MinHeight==3 && ob[2].Height==9 && !ob[2].HeightFromTags && ob[2].Outers.Count==1 && ob[2].Outers[0].Count==5 && ob[2].Inners.Count==1, "OSM buildings: height, levels+roof, min_height, default, stitched relation with hole");
 Check(ot.Count==1 && Math.Abs(ot[0].Height-9.144)<1e-9 && ot[0].CrownDiameter==6.5 && ot[0].Species=="Platanus", "OSM trees: feet, decimal comma, genus");
 Check(double.IsNaN(OsmParse.ParseLength("tall")) && OsmParse.ParseLength("12;15")==12 && Math.Abs(OsmParse.ParseLength("10'6\"")-3.2004)<1e-9, "OSM length parsing");
+// hydrology: Priority-Flood depression filling + routing
+{
+    double[] hz={5,4,1,3,2,0}; var hn=new int[6][]; for(int i=0;i<6;i++){ var l=new List<int>(); if(i>0)l.Add(i-1); if(i<5)l.Add(i+1); hn[i]=l.ToArray(); }
+    var hout=new bool[6]; hout[0]=hout[5]=true;
+    var hr=Hydrology.Route(hz,hn,null,hout,true); var hacc=Hydrology.Accumulate(hr,new double[]{1,1,1,1,1,1});
+    Check(string.Join(",",hr.Filled)=="5,4,3,3,2,0" && hacc[5]==6 && hr.Outlet[2]==5 && hr.Down[2]==3, "Priority-Flood: pit filled to its spill level, all water reaches the outlet");
+    var hp=Hydrology.Ponds(hz,hr.Filled,hn,0.01,out int pc); Check(pc==1 && hp[2]==0 && hp[1]==-1, "ponds: one pond at the pit");
+    var hr0=Hydrology.Route(hz,hn,null,hout,false); var hacc0=Hydrology.Accumulate(hr0,new double[]{1,1,1,1,1,1});
+    Check(hr0.Down[2]==-1 && hacc0[2]==4 && hacc0[5]==2, "no fill: pit keeps its water (legacy behaviour)");
+    // 20x20 bowl with a rim lower on one side; plus a flat plateau: everything must drain, no cycles
+    int G=20; var gz=new double[G*G]; var gn=new int[G*G][]; var go=new bool[G*G];
+    for(int y=0;y<G;y++) for(int x=0;x<G;x++){ int i=y*G+x; double r=Math.Sqrt((x-9.5)*(x-9.5)+(y-9.5)*(y-9.5)); gz[i]= x>14&&y>14 ? 5 : r*0.3 + (x==0?-1:0); var l=new List<int>(); if(x>0)l.Add(i-1); if(x<G-1)l.Add(i+1); if(y>0)l.Add(i-G); if(y<G-1)l.Add(i+G); gn[i]=l.ToArray(); go[i]= x==0||y==0||x==G-1||y==G-1; }
+    var gr=Hydrology.Route(gz,gn,null,go,true); var gacc=Hydrology.Accumulate(gr,Enumerable.Repeat(1.0,G*G).ToArray());
+    double toOut=0; for(int i=0;i<G*G;i++) if(gr.Down[i]<0) toOut+=gacc[i];
+    bool steps=true; for(int i=0;i<G*G;i++){ int c=i,k=0; while(gr.Down[c]>=0&&k++<G*G) c=gr.Down[c]; if(k>=G*G||!go[c]) steps=false; }
+    Check(toOut==G*G && steps && Math.Abs(gr.Filled[9*G+9]-gr.Filled[9*G+10])<1e-12, "grid bowl + flat plateau: every cell reaches an edge outlet, no cycles");
+}
+// corridor: sections, daylight, cut/fill to subgrade, superelevation, mass haul
+{
+    var tpl=RoadTemplate.Parse("{\"fill_slope\":2,\"cut_slope\":1.5,\"parts\":[{\"type\":\"lane\",\"width\":3,\"slope\":0,\"layers\":[[\"base\",0.5]]}]}");
+    var sf=CorridorMath.Build(tpl,0,1,0,o=>0.0);
+    Check(Math.Abs(sf.FillArea-5.0)<1e-6 && sf.CutArea<1e-9 && Math.Abs(sf.O[0]+5)<1e-6 && Math.Abs(sf.O[sf.Count-1]-5)<1e-6 && sf.Kind[sf.Count-2]=="fill slope", $"corridor fill section: area {sf.FillArea:F4} (5.0), daylight at +-5 m");
+    var sc=CorridorMath.Build(tpl,0,1,0,o=>2.0);
+    Check(Math.Abs(sc.CutArea-10.5)<1e-6 && sc.FillArea<1e-9 && Math.Abs(sc.O[sc.Count-1]-4.5)<1e-6 && Math.Abs(sc.MaxCut-1.5)<1e-6, $"corridor cut section to subgrade: area {sc.CutArea:F4} (10.5), daylight at +-4.5 m");
+    Check(Math.Abs(sf.LayerArea["base"]-3.0)<1e-9 && Math.Abs(sf.SurfaceWidth["lane"]-6)<1e-9, "corridor layer quantities");
+    var rural=RoadTemplate.Preset("rural road"); var rf=CorridorMath.Build(rural,0,2,0,o=>0.0); var rc=CorridorMath.Build(rural,0,0,0,o=>3.0);
+    Check(rf.Count==rc.Count && rf.SurfaceWidth.ContainsKey("ditch")==false && rc.SurfaceWidth["ditch"]>2.9 && rf.LeftDaylit && rc.RightDaylit, "rural road: ditches only in cut, same breakpoint count");
+    var res=RoadTemplate.Preset("residential street"); var rs=CorridorMath.Build(res,0,0,0,o=>-0.3);
+    double zk; CorridorMath.Surface(rs,3.05,out zk,out _); Check(Math.Abs(zk-(-0.075+0.12))<1e-9, "kerb upstand 0.12 m above the channel");
+    var snog=CorridorMath.Build(tpl,0,1,0,o=>double.NaN); Check(!snog.LeftDaylit && !snog.RightDaylit && snog.FillArea==0, "no ground: not daylit, no volume");
+    Check(CorridorMath.LaneSlope(-2.5,0,true)==-2.5 && CorridorMath.LaneSlope(-2.5,1,true)==-0.5 && CorridorMath.LaneSlope(-2.5,6,true)==6 && CorridorMath.LaneSlope(-2.5,6,false)==-6 && CorridorMath.LaneSlope(-2.5,1,false)==-2.5, "superelevation lane slopes");
+    Check(Math.Abs(CorridorMath.Superelevation(300,50,25)-50.0*50/127/300*100)<1e-9 && CorridorMath.Superelevation(20,50,7)==7 && CorridorMath.Superelevation(100,50,0)==0, "superelevation rate");
+    var se=CorridorMath.Build(tpl,0,0,5,o=>0.0); double zl,zr; CorridorMath.Surface(se,-3,out zl,out _); CorridorMath.Surface(se,3,out zr,out _);
+    Check(Math.Abs(zl+0.15)<1e-9 && Math.Abs(zr-0.15)<1e-9, "left-hand curve: inside (left) edge down, outside up");
+    var st=new double[]{0,100,200,300,400};
+    var mh=MassHaul.Compute(st,new double[]{0,100,100,0,0},new double[]{0,0,0,100,100},1.0,200);
+    Check(Math.Abs(mh.Haul-40000)<1e-6 && Math.Abs(mh.MovedVolume-200)<1e-9 && Math.Abs(mh.AverageHaul-200)<1e-9 && Math.Abs(mh.Net)<1e-9 && mh.BalancePoints.Count==0 && Math.Abs(mh.OverhaulVolume-100)<1e-3, "mass haul: haul, average distance, overhaul beyond free haul");
+    var mh2=MassHaul.Compute(new double[]{0,100,200,300},new double[]{0,100,0,0},new double[]{0,0,150,50},1.0);
+    Check(mh2.BalancePoints.Count==1 && Math.Abs(mh2.BalancePoints[0]-166.6666667)<1e-4 && Math.Abs(mh2.Net+100)<1e-9, "mass haul: balance point and import");
+    Check(RoadTemplate.PresetNames.All(n=>RoadTemplate.Parse(n).HalfWidth(true)>0) && RoadTemplate.Parse(RoadTemplate.Preset("urban street").ToJson()).Right.Count==5, "presets parse and JSON round trip");
+}
+// road network topology
+{
+    var res=RoadTemplate.Preset("residential street");
+    NetEdgeInput E(double x0,double y0,double x1,double y1,string h){ var a=new V2(x0,y0); var b=new V2(x1,y1); var d=(b-a).Unit(); return new NetEdgeInput{Start=a,End=b,StartDir=d,EndDir=d,Length=(b-a).Length,Template=res,TemplateName="residential street",Hierarchy=h}; }
+    var radii=new double[]{6,6,9,12};
+    // crossroads, two edges reversed (ending at the node)
+    var xg=RoadNetworkGraph.Build(new List<NetEdgeInput>{E(0,0,50,0,"local"),E(0,50,0,0,"local"),E(-50,0,0,0,"local"),E(0,0,0,-50,"local")},0.5,radii);
+    var xn=xg.Nodes.First(nd=>nd.Arms.Count==4);
+    Check(xg.Nodes.Count==5 && xn.Type=="crossroads" && xn.Corners.Count==4 && xg.Corners.All(c=>Math.Abs(c.Angle-90)<1e-9 && !c.Straight), "network: crossroads found, 4 corners of 90 deg");
+    var xkf=xg.Corners[xn.Corners[0]].Lines[0];
+    Check(Math.Abs(xkf.Ta-9)<1e-9 && Math.Abs(xkf.Tb-9)<1e-9 && Math.Abs(xkf.Radius-6)<1e-9 && xn.Arms.All(a=>Math.Abs(xg.Arms[a].Mouth-10)<1e-9), "network: 6 m kerb return tangent at 9 m, mouths at 10 m");
+    double cdist=(xkf.Centre-xn.P).Length; Check(Math.Abs(cdist-Math.Sqrt(2)*9)<1e-9 && Math.Abs((xkf.Mid-xkf.Centre).Length-6)<1e-9, "network: kerb return centre and mid point");
+    var xl=xg.Corners[xn.Corners[0]].Lines; Check(xl.Count==4 && xl.Last().Role=="boundary" && Math.Abs(xl.Last().Radius-(6-2.65))<1e-9 && Math.Abs(xl.Last().Ta-9)<1e-9, "network: concentric footway / boundary returns share tangent stations");
+    Check(Math.Abs(xg.StartStation(0)-10)<1e-9 && Math.Abs(xg.EndStation(1)-40)<1e-9 && Math.Abs(xg.EndStation(0)-50)<1e-9, "network: corridor stations between mouths, none at dead ends");
+    // T: main E-W through, local side road north
+    var tj=RoadNetworkGraph.Build(new List<NetEdgeInput>{E(0,0,60,0,"main"),E(-60,0,0,0,"main"),E(0,0,0,40,"local")},0.5,radii);
+    var tn=tj.Nodes.First(nd=>nd.Arms.Count==3);
+    Check(tn.Type=="T" && tn.Through.Contains(0) && tn.Through.Contains(3) && tj.Corners.Count(c=>c.Straight)==1 && tj.Arms.Where(a=>a.Node==tn.Id).All(a=>Math.Abs(a.Mouth-10)<1e-9), "network: T junction, main road through, straight side and mouths");
+    var nj=tj.NodeJson(tn); Check((string)nj["type"]=="T" && (int)nj["degree"]==3 && nj["arms"].Count()==3 && !(bool)nj["skewed"] && tn.CarriagewayOutline.Count>20, "network: node JSON and junction outline");
+    // skewed Y, snap tolerance clustering
+    var yj=RoadNetworkGraph.Build(new List<NetEdgeInput>{E(0,0,50,0,"local"),E(0.3,0.2,40,30,"local"),E(-50,0,-0.2,0.1,"local")},0.5,radii);
+    Check(yj.Nodes.Count(nd=>nd.Arms.Count==3)==1 && (bool)yj.NodeJson(yj.Nodes.First(nd=>nd.Arms.Count==3))["skewed"] && yj.Arms.Where(a=>a.Node==yj.Nodes.First(nd=>nd.Arms.Count==3).Id).Max(a=>a.Mouth)>10, "network: ends within tolerance merged, skewed junction gets longer mouths");
+    // too short edge
+    var sh=RoadNetworkGraph.Build(new List<NetEdgeInput>{E(0,0,12,0,"local"),E(0,0,0,30,"local"),E(0,0,0,-30,"local"),E(12,0,12,30,"local"),E(12,0,12,-30,"local")},0.5,radii);
+    Check(sh.Warnings.Count==1 && sh.StartStation(0)<=sh.EndStation(0), "network: short link between junctions warned and shortened");
+}
+// road network: junction tags (roundabout, cul-de-sac, priority, radius)
+{
+    var res=RoadTemplate.Preset("residential street");
+    NetEdgeInput E2(double x0,double y0,double x1,double y1,string h,string nm){ var a=new V2(x0,y0); var b=new V2(x1,y1); var d=(b-a).Unit(); return new NetEdgeInput{Start=a,End=b,StartDir=d,EndDir=d,Length=(b-a).Length,Template=res,TemplateName="residential street",Hierarchy=h,Name=nm}; }
+    var radii=new double[]{6,6,9,12};
+    var arms4=new List<NetEdgeInput>{E2(0,0,80,0,"local","A"),E2(0,80,0,0,"local","B"),E2(-80,0,0,0,"local","C"),E2(0,0,0,-80,"local","D")};
+    var rb=RoadNetworkGraph.Build(arms4,0.5,radii,1.0,170,new List<JunctionTag>{new JunctionTag{P=new V2(1,1),Type="Roundabout",Name="R1"}});
+    var rn=rb.Nodes.First(nd=>nd.Arms.Count==4); double xr=Math.Sqrt(25*25-13*13);
+    Check(rn.Type=="roundabout" && rn.Control=="roundabout" && rn.RingRadius==15 && Math.Abs(rn.IslandRadius-9.5)<1e-9 && rb.Corners.Count==0 && rn.Arms.All(a=>Math.Abs(rb.Arms[a].Mouth-(xr+1))<1e-9), $"tag: roundabout R15, entries {xr:F2} m, mouths, no priority corners");
+    Check(rn.RingArcs.Count(a=>a.Role=="kerb face")==12 && rn.RingArcs.Count(a=>a.Role=="boundary")==12 && rn.IslandOutline.Count==49 && rn.CarriagewayOutline.Count>100, "tag: roundabout arcs (fillets + circle), island and outline");
+    var arcOk=rn.RingArcs.Where(a=>a.Role=="kerb face").All(a=>{ var pts=RoadNetworkGraph.ArcSampled(a,8); return pts.Count==9; });
+    var ringPts=rn.RingArcs.Where(a=>a.Role=="kerb face" && Math.Abs((a.A-rn.P).Length-15)<1e-6 && Math.Abs((a.B-rn.P).Length-15)<1e-6).ToList();
+    Check(arcOk && ringPts.Count==4 && ringPts.All(a=>Math.Abs((a.M-rn.P).Length-15)<1e-6), "tag: circle arcs between entries lie on the 15 m kerb circle");
+    Check(rb.LineTrims.ContainsKey((rn.Arms[0],'L',1)) && Math.Abs(rb.LineTrims[(rn.Arms[0],'L',1)].t-xr)<1e-9 && Math.Abs(rb.LineTrims[(rn.Arms[0],'L',4)].t-xr)<1e-9, "tag: kerb face and boundary trimmed at the entry fillet");
+    var cd=RoadNetworkGraph.Build(new List<NetEdgeInput>{E2(0,0,60,0,"local","Close")},0.5,radii,1.0,170,new List<JunctionTag>{new JunctionTag{P=new V2(0,0),Type="cul-de-sac"}});
+    var cn=cd.Nodes.First(nd=>nd.Arms.Count==1&&nd.IsRing); var bulb=cn.RingArcs.First(a=>a.Role=="kerb face" && Math.Abs((a.A-cn.P).Length-9)<1e-6);
+    Check(cn.RingRadius==9 && Math.Abs(cd.Arms[0].Mouth-13)<1e-9 && Math.Abs(bulb.M.X+9)<1e-6 && Math.Abs(bulb.M.Y)<1e-6 && Math.Abs(cd.StartStation(0)-13)<1e-9, "tag: cul-de-sac bulb R9 round the back of the dead end");
+    var pr=RoadNetworkGraph.Build(new List<NetEdgeInput>{E2(0,0,60,0,"main","High St"),E2(-60,0,0,0,"main","High St"),E2(0,0,0,40,"local","Side")},0.5,radii,1.0,170,
+        new List<JunctionTag>{new JunctionTag{P=new V2(0,0),Type="priority",Priority="Side",Radius=4}});
+    var pn=pr.Nodes.First(nd=>nd.Arms.Count==3);
+    Check(pn.Control=="priority" && pr.Corners.Where(c=>!c.Straight).All(c=>c.Radius==4) && pn.Through.SequenceEqual(new[]{0,3}), "tag: radius override; priority name with one arm keeps automatic priority");
+    Check(pr.Warnings.Any(w=>w.Contains("does not have two arms")) && RoadNetworkGraph.BaseName("High St (2)")=="High St", "tag: priority warning and split-edge base names");
+    var far=RoadNetworkGraph.Build(arms4,0.5,radii,1.0,170,new List<JunctionTag>{new JunctionTag{P=new V2(40,40),Type="roundabout"}});
+    Check(far.Warnings.Count==1 && far.Nodes.All(nd=>!nd.Tagged), "tag: far from any node is ignored with a warning");
+}
+{
+    var res=RoadTemplate.Preset("residential street"); var lst=new List<NetEdgeInput>();
+    foreach(double deg in new[]{0.0,120,240}){ double r=deg*Math.PI/180; var b=new V2(50*Math.Cos(r),50*Math.Sin(r)); lst.Add(new NetEdgeInput{Start=new V2(0,0),End=b,StartDir=b.Unit(),EndDir=b.Unit(),Length=50,Template=res,TemplateName="r",Hierarchy="local"}); }
+    var yg=RoadNetworkGraph.Build(lst,0.5,new double[]{6,6,9,12}); Check(yg.Nodes.First(nd=>nd.Arms.Count==3).Type=="Y", "network: three arms at 120 deg is a Y junction");
+}
+// method notes standard: every note states method, assumptions and simplifications; components exist
+foreach (var kv in MethodNotes.All)
+{
+    var nt=kv.Value; string info=MethodNotes.Info(kv.Key);
+    bool fileOk=System.IO.File.Exists(System.IO.Path.Combine(AppContext.BaseDirectory,"..","..","..","..","..","Components",kv.Key+".cs"));
+    Check(nt.Method?.Length>0 && nt.Assumptions?.Length>0 && nt.Simplifications?.Length>0 && info.Contains("METHOD:") && info.Contains("ASSUMPTIONS:") && info.Contains("SIMPLIFICATIONS AND LIMITS:")
+        && fileOk && !string.Join(" ",nt.Method.Concat(nt.Assumptions).Concat(nt.Simplifications)).Any(ch=>ch=='{'||ch=='}'||ch=='"'), $"method notes complete: {kv.Key}");
+}
 Console.WriteLine(fails==0?"ALL PASS":$"{fails} FAILED"); return fails;

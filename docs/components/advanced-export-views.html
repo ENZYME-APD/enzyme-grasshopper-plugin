@@ -66,6 +66,42 @@
                     </ul>
                 </div>
             </div>
+
+            <!-- method-notes:start -->
+            <h2 style="margin-top: 2rem;">Method, assumptions and simplifications</h2>
+            <p style="color: var(--text-secondary);">The same notes appear in the component's <strong>Info</strong> output.</p>
+            <div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
+                    <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>On a rising edge of Run it stores all settings and starts a state machine. For each name in GH States (or once, if empty) it sets Current GH State, waits 500 ms, then captures every view in Views (all Named Views if empty) from the active viewport with Rhino ViewCapture at Width × Height.</li>
+                        <li>Before capturing it optionally switches the active viewport to Display Style and restores the Layer State; afterwards it restores the original camera, display mode and layers.</li>
+                        <li>Files are named Prefix_State_View_Suffix.ext in Directory (Desktop if empty; created if missing); the DPI value is written as image metadata only.</li>
+                    </ol>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>The 500 ms delay is long enough for the Canvas State Manager and the downstream definition to finish recomputing.</li>
+                        <li>Named views, display modes and layer states are matched by name (case-insensitive for display modes and layer states, Rhino lookup for views).</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Unknown view names are skipped silently. DPI does not change pixel size; Transparent applies to PNG only.</li>
+                        <li>Output aspect is Width × Height; if it differs from the viewport aspect, ViewCapture shows more or less of the scene than the named view framed.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Workflow</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Create Named Views -&gt; Views. GH States list -&gt; GH States; Current GH State -&gt; Load Name of a Canvas State Manager.</li>
+                        <li>Paper Size To Pixels (Add Default Controls menu) -&gt; Width, Height, DPI. Saved Files -&gt; GIF Compiler or Report Metrics Maps.</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- method-notes:end -->
         </div>
     </main>
 

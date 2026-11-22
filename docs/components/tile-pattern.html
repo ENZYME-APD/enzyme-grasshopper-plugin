@@ -49,7 +49,7 @@
                     </ul>
                 </div>
                 <div class="io-col">
-                    <h3>Outputs (6)</h3>
+                    <h3>Outputs (7)</h3>
                     <ul>
                         <li><strong>Tile Status</strong> (Integer): 0 = full, 1 = trimmed</li>
                         <li><strong>Full Count</strong> (Integer): Number of full tiles</li>
@@ -57,9 +57,48 @@
                         <li><strong>All Tiles</strong> (Curve): All grid tiles (trimmed and full)</li>
                         <li><strong>Full Tiles</strong> (Curve): Tiles fully inside the boundary</li>
                         <li><strong>Trimmed Tiles</strong> (Curve): Tiles partially inside the boundary</li>
+                        <li><strong>Info</strong> (Text): Method, assumptions, simplifications and references.</li>
                     </ul>
                 </div>
             </div>
+
+            <!-- method-notes:start -->
+            <h2 style="margin-top: 2rem;">Method, assumptions and simplifications</h2>
+            <p style="color: var(--text-secondary);">The same notes appear in the component's <strong>Info</strong> output.</p>
+            <div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
+                    <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>A plane is taken from the base: the curve's own plane, or the surface or single planar Brep face normal at its mid parameters. Its origin is the area centroid, or Setout Point projected onto the plane. Direction (projected) sets the grid X axis and Rotation turns it in degrees.</li>
+                        <li>Cells are generated over the boundary's bounding box in that plane. Rectangular and offset rectangular use pitch X Dim + Grout by Y Dim + Grout, offset rows shifted by half a pitch; each tile is X Dim × Y Dim.</li>
+                        <li>Hexagonal uses flat-topped hexagons with circumradius X Dim / 2 at spacing 0.75 × X Dim by √3/2 × X Dim; triangular uses equilateral triangles of side X Dim. Grout shrinks each tile so the joint is Grout wide; Y Dim is ignored for these two.</li>
+                        <li>A tile whose corners and centre are all inside the boundary is full. Otherwise, if any of these points is inside or its outline crosses the boundary, it is intersected with the boundary (curve boolean, tolerance 0.001) and the pieces are output as trimmed.</li>
+                        <li>Tile Status is 0 for full and 1 for each trimmed piece, in the same order as All Tiles.</li>
+                    </ol>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>The base is planar and closed; the boundary is the first joined loop of the naked edges for surfaces and Breps.</li>
+                        <li>Grid Type is one of rectangular, offset_rectangular, hexagonal, triangular (lower case after conversion).</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Tiles are outline curves only, without thickness.</li>
+                        <li>Holes in a surface or Brep are ignored.</li>
+                        <li>Full tiles are decided from corners and centre only.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Workflow</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Facade panel or floor surface -&gt; Base; Full Tiles and Trimmed Tiles -&gt; counts, areas or extrusions.</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- method-notes:end -->
         </div>
     </main>
 

@@ -55,7 +55,7 @@
                     </ul>
                 </div>
                 <div class="io-col">
-                    <h3>Outputs (6)</h3>
+                    <h3>Outputs (7)</h3>
                     <ul>
                         <li><strong>Beams</strong> (Brep): Output beams</li>
                         <li><strong>Columns</strong> (Brep): Output columns</li>
@@ -63,9 +63,51 @@
                         <li><strong>Fins</strong> (Brep): Output fins</li>
                         <li><strong>HeaderPanels</strong> (Brep): Output header panels</li>
                         <li><strong>SillPanels</strong> (Brep): Output sill panels</li>
+                        <li><strong>Info</strong> (Text): Method, assumptions, simplifications and references.</li>
                     </ul>
                 </div>
             </div>
+
+            <!-- method-notes:start -->
+            <h2 style="margin-top: 2rem;">Method, assumptions and simplifications</h2>
+            <p style="color: var(--text-secondary);">The same notes appear in the component's <strong>Info</strong> output.</p>
+            <div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
+                    <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Each Bounds curve is one storey; its height comes from Heights at the same index in the same branch (default 4.0 if missing or 0.1 or less). Non-positive sizes fall back to the defaults.</li>
+                        <li>Offset side (area-offset method): a closed curve is offset by BeamDepth both ways and the larger result is taken as outside (inside if FlipDir). An open curve uses the positive offset side unless FlipDir.</li>
+                        <li>Beams: a closed solid between the curve and its offset, BeamWidth high, at the top of the storey (from h - BeamWidth to h). The first curve of each branch also gets a base beam at the storey base unless RemoveBaseBeam.</li>
+                        <li>Columns: each segment is divided into round(length / BayWidth) equal bays; at every division point a ColWidth × ColDepth box, pointing towards the offset curve, rises the full storey height. Points repeated at the same position and tangent are placed once.</li>
+                        <li>With HasPanel, each bay gets surfaces on the boundary line: a sill of SillHeight, glass for the vision height, and a header of HeaderDrop below the top beam. Vision height = h - BeamWidth - sill - header (each clipped to fit).</li>
+                        <li>Fins: each bay with vision height is divided into round(bay length / SubdivWidth) parts; at the inner division points a vertical fin surface FinDepth deep, outward, covers the vision height.</li>
+                        <li>Status: glass area and solid (sill + header) area = bay length × height, plus column and fin counts.</li>
+                    </ol>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Bounds are flat storey outlines at their floor level, in metres; Heights are floor-to-floor heights.</li>
+                        <li>Bounds within a branch belong to one building and the first curve is the lowest storey.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Glass, sill, header and fin elements are zero-thickness surfaces; only beams and columns are solids.</li>
+                        <li>At corners two columns are placed, one per segment, because their tangents differ.</li>
+                        <li>Columns run the full storey height and overlap the beams; the base beam overlaps the sill zone.</li>
+                        <li>Bays are equal within each segment, so the actual bay width differs from BayWidth.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Workflow</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Facade JSON Parser BoundsExt and Heights -&gt; Bounds and Heights.</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- method-notes:end -->
         </div>
     </main>
 

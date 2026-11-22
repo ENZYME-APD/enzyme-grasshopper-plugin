@@ -66,6 +66,45 @@
                     </ul>
                 </div>
             </div>
+
+            <!-- method-notes:start -->
+            <h2 style="margin-top: 2rem;">Method, assumptions and simplifications</h2>
+            <p style="color: var(--text-secondary);">The same notes appear in the component's <strong>Info</strong> output.</p>
+            <div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
+                    <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Works on mesh topology vertices, branch by branch of TargetMeshes.</li>
+                        <li>A vertex is a candidate peak if no direct neighbour is higher by more than 0.0001, and a candidate valley if none is lower.</li>
+                        <li>Candidates are then checked against all vertices within SearchRings topological rings (default 5): a peak must still be the highest and stand at least ProminenceLimit (default 0.5) above the lowest vertex in that neighbourhood; a valley the reverse.</li>
+                        <li>The mesh's absolute highest and lowest vertices are always added to peaks and valleys unless CullGlobals is on; AvoidBoundaries skips naked-edge vertices.</li>
+                        <li>The heatmap colours each mesh vertex by (z - zMin) / (zMax - zMin) of that mesh, either along CustomColors or with a built-in cyan-yellow-red ramp.</li>
+                        <li>The status shows total 3D mesh area, relief, mean vertex elevation (unweighted), extremes and counts; elevations are rounded to 0.01.</li>
+                    </ol>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Meshes are terrain-like and welded, so topology neighbours reflect real adjacency.</li>
+                        <li>ProminenceLimit is in model units; ring count stands in for a search radius, so its real size depends on mesh density.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Prominence is local relief within the ring neighbourhood, not true topographic prominence.</li>
+                        <li>Flat plateaus produce no peak or valley unless they stand above or below their surroundings by ProminenceLimit.</li>
+                        <li>Area is surface area, not plan area.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Workflow</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Site Fetch terrain or any terrain mesh -&gt; TargetMeshes. Dashboard Data -&gt; Analysis Dashboard.</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- method-notes:end -->
         </div>
     </main>
 

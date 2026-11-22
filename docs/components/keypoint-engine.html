@@ -54,6 +54,49 @@
                     </ul>
                 </div>
             </div>
+
+            <!-- method-notes:start -->
+            <h2 style="margin-top: 2rem;">Method, assumptions and simplifications</h2>
+            <p style="color: var(--text-secondary);">The same notes appear in the component's <strong>Info</strong> output.</p>
+            <div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
+                    <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Each stream curve is used as a polyline (curves are converted at 0.1 tolerance); streams with fewer than 4 vertices are skipped.</li>
+                        <li>The slope of each segment is (Z start - Z end) / horizontal length, positive downhill.</li>
+                        <li>Slopes are smoothed with a moving average over ±Smoothing segments (default 2).</li>
+                        <li>The keypoint is the vertex where the smoothed slope drops most from one segment to the next (largest steep-to-flat change). One keypoint per stream.</li>
+                        <li>The terrain is cut by a horizontal plane at the keypoint level; the contour closest to the keypoint is the Master Keyline if it lies within 5 model units.</li>
+                    </ol>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Stream curves are 3D, lie on the terrain and run downhill (start upstream), as from Hydro-DEM.</li>
+                        <li>Model units are metres (the 5 unit search distance).</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>The keypoint is the largest single drop in slope, not a true inflection (sign change of curvature); one per stream curve.</li>
+                        <li>The keyline is the whole contour at that level, not trimmed to the valley and shoulders.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Workflow</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Hydro-DEM streams + the same terrain mesh -&gt; Streams and Terrain; Master Keylines -&gt; offset for keyline ploughing patterns.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">References</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Yeomans P.A. (1958), The Challenge of Landscape: the development and practice of keyline.</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- method-notes:end -->
         </div>
     </main>
 

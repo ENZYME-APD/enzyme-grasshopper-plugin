@@ -45,12 +45,55 @@
                     </ul>
                 </div>
                 <div class="io-col">
-                    <h3>Outputs (1)</h3>
+                    <h3>Outputs (2)</h3>
                     <ul>
                         <li><strong>JSON_Payload</strong> (Text): Serialized JSON.</li>
+                        <li><strong>Info</strong> (Text): Method, assumptions, simplifications and references.</li>
                     </ul>
                 </div>
             </div>
+
+            <!-- method-notes:start -->
+            <h2 style="margin-top: 2rem;">Method, assumptions and simplifications</h2>
+            <p style="color: var(--text-secondary);">The same notes appear in the component's <strong>Info</strong> output.</p>
+            <div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
+                    <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Each referenced curve is read with its User Text: BuildingID (default Building_01), Program (Default), TowerID (Main_Tower), FloorHeight (3.5), Floors (1), Phase (0). Non-curves and Type = core objects are skipped.</li>
+                        <li>Each curve is projected flat to Z = 0, made anticlockwise if closed, and filleted when a Fillet_Config rule applies. Rules are checked in order (type Tower, Program or Building; match text or *; exact default true, otherwise contains; case-insensitive); the first match gives the radius, else default_radius.</li>
+                        <li>The fillet radius is capped at 0.49 × the shortest segment of the curve so corners do not overlap.</li>
+                        <li>Per building, blocks are sorted by Phase. A block sits on the top of the previous block of the same tower; the first block of a tower sits on the highest top reached by any earlier phase (0 if none). Top = base + FloorHeight × Floors.</li>
+                        <li>The JSON lists buildings (name, true_base_elevation = lowest curve Z of the building) and blocks (name Program_index, tower_id, program, floor_height, floors, base_z relative to the building base, boundary_segments).</li>
+                        <li>Segments are written as Line (start, end), Arc (start, mid, end) or Polyline (points from a 0.01 tolerance conversion), coordinates rounded to 4 decimals.</li>
+                        <li>When PushToRhino is True, each source curve is moved vertically so its lowest point sits at building base + base_z.</li>
+                    </ol>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Footprints are curves, one per block, with stacking data in Attribute User Text.</li>
+                        <li>Phase order defines construction and stacking order; blocks of one tower are listed in stacking order within a phase.</li>
+                        <li>Model units are metres.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Heights are uniform per block (FloorHeight × Floors); no slab thickness or transfer levels.</li>
+                        <li>Boundary coordinates are flat (Z = 0); elevation is carried only by base_z and true_base_elevation.</li>
+                        <li>Free-form segments are approximated by polylines.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Workflow</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Auto-Phase Assigner by Z first, to write Phase keys.</li>
+                        <li>JSON_Payload -&gt; a file writer or the masterplan JSON tools downstream.</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- method-notes:end -->
         </div>
     </main>
 

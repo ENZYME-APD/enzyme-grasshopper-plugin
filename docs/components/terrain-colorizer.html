@@ -49,14 +49,49 @@
                     </ul>
                 </div>
                 <div class="io-col">
-                    <h3>Outputs (3)</h3>
+                    <h3>Outputs (4)</h3>
                     <ul>
                         <li><strong>Colored Terrain</strong> (Mesh): Terrain mesh with vertex colors</li>
                         <li><strong>Contours</strong> (Curve): Normal contours</li>
                         <li><strong>Main Contours</strong> (Curve): Main contours</li>
+                        <li><strong>Info</strong> (Text): Method, assumptions, simplifications and references.</li>
                     </ul>
                 </div>
             </div>
+
+            <!-- method-notes:start -->
+            <h2 style="margin-top: 2rem;">Method, assumptions and simplifications</h2>
+            <p style="color: var(--text-secondary);">The same notes appear in the component's <strong>Info</strong> output.</p>
+            <div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
+                    <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Each vertex gets a colour from its normalised height t = (z - zMin) / (zMax - zMin) of the mesh bounding box, interpolated linearly in RGB along Colors (default green, yellow-green, goldenrod, brown, white).</li>
+                        <li>With Use Slope Color, the vertex normal's vertical component nz is compared with cos(Slope Angle): where |nz| is smaller (steeper than Slope Angle), the colour blends towards Slope Color by min((cos(Slope Angle) - |nz|) / 0.20, 1).</li>
+                        <li>Contours are cut every Contour Step from the first multiple of the step below the lowest point; a contour whose level is a multiple of Main Step (measured from Z = 0) goes to Main Contours, the rest to Contours.</li>
+                    </ol>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Terrain is a mesh in metres with Z up; vertex normals (recomputed here) represent the local slope.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>The slope blend runs over a fixed 0.20 range of the normal's vertical component, not a fixed number of degrees.</li>
+                        <li>Main contours only appear when Main Step is a multiple of Contour Step.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Workflow</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Site Fetch terrain or any terrain mesh -&gt; Terrain.</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- method-notes:end -->
         </div>
     </main>
 

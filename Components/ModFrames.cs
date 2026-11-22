@@ -65,10 +65,12 @@ namespace Enzyme.Components
             pManager.AddBrepParameter("Fins", "Fins", "Output fins", GH_ParamAccess.tree);
             pManager.AddBrepParameter("HeaderPanels", "HeaderPanels", "Output header panels", GH_ParamAccess.tree);
             pManager.AddBrepParameter("SillPanels", "SillPanels", "Output sill panels", GH_ParamAccess.tree);
+            pManager.AddTextParameter("Info", "Info", "Method, assumptions, simplifications and references.", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            if (DA.Iteration == 0 && Params.Output.Count > 6) DA.SetData(6, Enzyme.Utils.MethodNotes.Info("ModFrames"));
             GH_Structure<GH_Curve> boundsTree;
             GH_Structure<GH_Number> heightsTree;
             double BayWidth = 3.0;

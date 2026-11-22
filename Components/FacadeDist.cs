@@ -53,6 +53,7 @@ namespace Enzyme.Components
             pManager.AddGenericParameter("Horizontal_Bands", "Horizontal_Bands", "Horizontal_Bands", GH_ParamAccess.list);
             pManager.AddGenericParameter("Storefront_Mullions", "Storefront_Mullions", "Storefront_Mullions", GH_ParamAccess.list);
             pManager.AddGenericParameter("Storefront_Glass", "Storefront_Glass", "Storefront_Glass", GH_ParamAccess.list);
+            pManager.AddTextParameter("Info", "Info", "Method, assumptions, simplifications and references.", GH_ParamAccess.item);
         }
 
         private static Dictionary<string, string> _scriptCache = new Dictionary<string, string>();
@@ -60,6 +61,7 @@ namespace Enzyme.Components
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            if (DA.Iteration == 0 && Params.Output.Count > 3) DA.SetData(3, Enzyme.Utils.MethodNotes.Info("FacadeDist"));
             var watch = System.Diagnostics.Stopwatch.StartNew();
 
             GH_Structure<GH_Curve> crvsTree = null;

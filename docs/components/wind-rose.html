@@ -75,6 +75,49 @@
                     </ul>
                 </div>
             </div>
+
+            <!-- method-notes:start -->
+            <h2 style="margin-top: 2rem;">Method, assumptions and simplifications</h2>
+            <p style="color: var(--text-secondary);">The same notes appear in the component's <strong>Info</strong> output.</p>
+            <div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
+                    <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Reads wind direction (field 21) and speed (field 22) from every EPW hour, optionally filtered by Months and Hours (EPW hour 1-24 is taken as the hour starting one earlier); 999 codes are skipped. Or uses the Directions and Speeds lists.</li>
+                        <li>Hours with speed below Calm (default 0.5 m/s) are counted as calm. The others are binned into Sectors (default 16, 4-72) centred on N and into speed bands (lower edges, default 0, 2, 4, 6, 8, 10 m/s).</li>
+                        <li>Frequency = hours in a sector and band / all hours (calm included) × 100.</li>
+                        <li>Petals start at a calm circle of 0.12 × Radius and grow linearly with frequency up to Radius at the top ring (rounded up to a nice step), stacked by speed band, with a 10 % gap between sectors. Bearings are turned into the model with North (degrees anticlockwise from +Y).</li>
+                        <li>The Selector picks a sector; Speed is the mean, median, P90 (linear interpolation) or max of its non-calm hours, Frequency its share. Direction is the selector angle itself.</li>
+                    </ol>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Directions are meteorological (where the wind comes FROM, 0 = N, clockwise); EPW speeds are 10 m station values.</li>
+                        <li>The weather station represents the site.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Counts hours only: no correction for height, terrain roughness or local obstacles.</li>
+                        <li>All filtered hours weigh the same; calm hours have no direction.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Workflow</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>EPW file path -&gt; EPW; Direction and Speed -&gt; Fast CFD Direction and WindSpeed; Dashboard Data -&gt; Analysis Dashboard.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">References</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>EnergyPlus Auxiliary Programs documentation, EPW weather file format (fields 21 wind direction and 22 wind speed).</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- method-notes:end -->
         </div>
     </main>
 

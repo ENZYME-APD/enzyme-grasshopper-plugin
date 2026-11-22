@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Road Network - Enzyme Plugin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="../index.html" class="nav-brand">
+            <img src="../images/enzyme_logo.png" alt="Enzyme Logo" class="logo-img">
+        </a>
+        <div class="nav-links">
+            <a href="../index.html#components">Components</a>
+            <a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank">GitHub</a>
+        </div>
+    </nav>
+
+    <main class="container doc-page">
+        <div class="doc-header" style="display: flex; align-items: center;">
+            <div>
+                <h1>Road Network</h1>
+                <p class="doc-subtitle">Solves the road network topology (junctions, arms, priority, corner radii, mouths) from centrelines and draws the 2D road plan with kerb returns. Reads road_template / road_hierarchy / road_name User Text from the referenced Rhino curves.</p>
+                <div class="doc-meta">
+                    <span class="badge masterplan">Masterplan</span>
+                    <span>Nickname: <strong>RoadNet</strong></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="doc-content">
+            <h2>Overview</h2>
+            <p>Solves the road network topology (junctions, arms, priority, corner radii, mouths) from centrelines and draws the 2D road plan with kerb returns. Reads road_template / road_hierarchy / road_name User Text from the referenced Rhino curves.</p>
+
+            <div class="io-grid">
+                <div class="io-col">
+                    <h3>Inputs (11)</h3>
+                    <ul>
+                        <li><strong>Centrelines</strong> (Curve): Road centrelines. Reference them from Rhino to use their User Text (road_template, road_hierarchy, road_name).</li>
+                        <li><strong>Snap Tolerance</strong> (Number): Ends closer than this (m) to another centreline or end are joined.</li>
+                        <li><strong>Default Template</strong> (Text): Template for centrelines without one (preset name or JSON).</li>
+                        <li><strong>Default Hierarchy</strong> (Text): Hierarchy for centrelines without one: main, secondary or local.</li>
+                        <li><strong>Corner Radii</strong> (Number): Kerb return radius (m) by the lower hierarchy of the two roads at a corner: local, secondary, main.</li>
+                        <li><strong>Custom Templates</strong> (Text): Your own templates as JSON, each with a "name" that road_template can refer to.</li>
+                        <li><strong>Templates</strong> (Text): Optional override per centreline (same order), for centrelines made in Grasshopper that cannot carry User Text. Empty items fall through.</li>
+                        <li><strong>Hierarchies</strong> (Text): Optional override per centreline (same order).</li>
+                        <li><strong>Names</strong> (Text): Optional override per centreline (same order).</li>
+                        <li><strong>Junction Points</strong> (Point): Optional points referenced from Rhino, placed on junctions, with User Text: junction_type (auto, priority, signals, roundabout, mini-roundabout, cul-de-sac), junction_radius (kerb radius, or outer radius of a roundabout / cul-de-sac), junction_priority (road_name that runs through), junction_name.</li>
+                        <li><strong>Run</strong> (Boolean): False = keep showing the last results (cached).</li>
+                    </ul>
+                </div>
+                <div class="io-col">
+                    <h3>Outputs (18)</h3>
+                    <ul>
+                        <li><strong>Nodes</strong> (Point): Junctions, dead ends and joins.</li>
+                        <li><strong>Edges</strong> (Curve): Centrelines split at every junction (original 3D curves).</li>
+                        <li><strong>Corridor Edges</strong> (Curve): Edges trimmed between the junction mouths: feed Auto-Grade Road / Road Corridor so corridors stop where the junction starts.</li>
+                        <li><strong>Corridor Templates</strong> (Text): Template JSON of each Corridor Edge (same order): wire into Road Corridor's Template so the 3D uses the same street type as the plan.</li>
+                        <li><strong>Kerb Lines</strong> (Curve): 2D kerb face and kerb back lines, with kerb returns at the corners.</li>
+                        <li><strong>Edge Lines</strong> (Curve): 2D edges of the other parts (cycle tracks, footways, verges, shoulders) and the road boundary, with returns at the corners where they match.</li>
+                        <li><strong>Mouth Lines</strong> (Curve): 2D lines across each road where its junction ends.</li>
+                        <li><strong>Junction Areas</strong> (Curve): 2D carriageway outline of each junction (closed); roundabout islands too.</li>
+                        <li><strong>Road Areas</strong> (Curve): 2D closed strips per edge for hatching: carriageway and each part between the mouths.</li>
+                        <li><strong>Area Types</strong> (Text): Part type of each Road Area (carriageway, kerb, cycle, footway, verge ...).</li>
+                        <li><strong>Label Points</strong> (Point): Where to place labels (edge middles, nodes).</li>
+                        <li><strong>Labels</strong> (Text): Label text for each label point.</li>
+                        <li><strong>Node JSON</strong> (Text): Per node: type, arms (heading, widths, priority, mouth), corners (angle, radii, tangent points).</li>
+                        <li><strong>Edge JSON</strong> (Text): Per edge: name, template, hierarchy, where they came from, nodes, length, corridor start / end stations.</li>
+                        <li><strong>Network JSON</strong> (Text): The whole graph in one JSON.</li>
+                        <li><strong>Attributes Used</strong> (Text): Per edge: template | hierarchy | name | source (user text, list or default). Check for untagged roads.</li>
+                        <li><strong>Info</strong> (Text): Method, assumptions, simplifications and references.</li>
+                        <li><strong>Dashboard Data</strong> (Text): JSON metrics for Analysis Dashboard / Report Metrics.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- method-notes:start -->
+            <h2 style="margin-top: 2rem;">Method, assumptions and simplifications</h2>
+            <p style="color: var(--text-secondary);">The same notes appear in the component's <strong>Info</strong> output.</p>
+            <div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
+                    <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Centrelines are projected to the XY plane and split at every crossing (curve-curve intersection at document tolerance) and wherever an end comes within Snap Tolerance of another centreline; pieces shorter than the tolerance are dropped.</li>
+                        <li>Ends within the tolerance merge into one node; arms are sorted by heading. Node type by number of arms: dead end, continuation, T, Y (no pair of arms within 35 degrees of straight), crossroads, multi-arm.</li>
+                        <li>Priority (through) arms: the pair with the highest hierarchy, then the straightest; a junction_priority tag overrides.</li>
+                        <li>Kerb returns: the kerb-face lines are offset lines of the arms; with corner angle θ and kerb-face offsets w_a and w_b, they meet at x = (w_b + w_a cos θ) / sin θ along the arm, and the return of radius r touches the arm at x + r / tan(θ / 2). Lines further out use concentric returns (radius reduced by their extra offset). Corners of 170 degrees or more run straight.</li>
+                        <li>Corner radius by the lower hierarchy of the two roads (Corner Radii: local, secondary, main), or junction_radius.</li>
+                        <li>Mouth = farthest kerb-face tangent point + 1 m; corridors start and end at the mouths. Edges too short for both junctions get shorter mouths (warning).</li>
+                        <li>Roundabouts and cul-de-sacs: an outer kerb circle of radius R round the node; each arm's kerb face joins it with an entry fillet of radius r (at least 10 m on roundabouts) touching the arm at x = √((R + r)² − (w + r)²); circle arcs between arms; boundary lines concentric; central island R - 5.5 m (mini: 2 m).</li>
+                        <li>Plan lines are the template's part edges offset from each edge and sampled every 1 m; attributes come from User Text (road_template, road_hierarchy, road_name), override lists, then the defaults.</li>
+                    </ol>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Hierarchy is main, secondary or local; other values count as local (warning).</li>
+                        <li>Arms are straight near the junction (their direction at the node).</li>
+                        <li>Centrelines do not run on top of each other; overlapping stretches are ignored (warning).</li>
+                        <li>A junction point applies to the nearest node within max(5 m, 3 × Snap Tolerance).</li>
+                        <li>Default radii (6 / 9 / 12 m) and roundabout sizes (R 15 m, mini R 8 m, cul-de-sac R 9 m) are typical values: check them against local guidance and the design vehicle.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>2D only: levels are ignored here (Auto-Grade Road and Road Corridor add them).</li>
+                        <li>Arms that curve tightly at a junction can leave small kinks where returns meet the offset lines.</li>
+                        <li>When the two templates at a corner differ, only the kerb face, kerb back and boundary wrap round it; other lines stop at the mouth.</li>
+                        <li>Footway and verge hatches stop at the mouths; only the carriageway is filled inside junctions.</li>
+                        <li>Single-lane roundabouts without splitter islands; turning heads are drawn as bulbs; radii are not checked against vehicle swept paths.</li>
+                        <li>Junction density uses the bounding-box area of the network.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Workflow</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Tag centrelines in Rhino (UserText DB): road_template, road_hierarchy, road_name; reference them into Centrelines. Optional junction points with junction_type, junction_radius, junction_priority, junction_name.</li>
+                        <li>2D plan: Kerb Lines, Edge Lines, Mouth Lines, Junction Areas, Road Areas with Area Types for hatching, Labels.</li>
+                        <li>3D: Corridor Edges -&gt; Auto-Grade Road -&gt; Road Corridor with Corridor Templates; Node JSON for the junctions.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">References</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Kerb return geometry: offset-line intersection and tangent fillet (plane geometry).</li>
+                        <li>Roundabout sizes in the range of single-lane guidance, for example CROW 126 (NL) and DMRB CD 116 (UK).</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- method-notes:end -->
+        </div>
+    </main>
+
+    <footer>
+        <p><a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank" style="color: #a1a1aa; text-decoration: none; border-bottom: 1px solid #3f3f46; padding-bottom: 2px;">View on GitHub</a></p>
+    </footer>
+</body>
+</html>

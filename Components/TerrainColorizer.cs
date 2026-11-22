@@ -41,6 +41,7 @@ namespace Enzyme.Components
             pManager.AddMeshParameter("Colored Terrain", "T", "Terrain mesh with vertex colors", GH_ParamAccess.item);
             pManager.AddCurveParameter("Contours", "Ct", "Normal contours", GH_ParamAccess.list);
             pManager.AddCurveParameter("Main Contours", "MC", "Main contours", GH_ParamAccess.list);
+            pManager.AddTextParameter("Info", "Info", "Method, assumptions, simplifications and references.", GH_ParamAccess.item);
         }
 
         private void AutoWireDefaults(GH_Document document)
@@ -80,6 +81,7 @@ namespace Enzyme.Components
 
         protected override void Solve(IGH_DataAccess DA, System.Diagnostics.Stopwatch hudSw)
         {
+            if (DA.Iteration == 0 && Params.Output.Count > 3) DA.SetData(3, Enzyme.Utils.MethodNotes.Info("TerrainColorizer"));
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
 
             Mesh mesh = null;

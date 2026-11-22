@@ -35,6 +35,7 @@ namespace Enzyme.Components
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            if (DA.Iteration == 0 && Params.Output.Count > 1) DA.SetData(1, Enzyme.Utils.MethodNotes.Info("CreateNamedViews"));
             List<Point3d> locs = new List<Point3d>();
             List<Point3d> targets = new List<Point3d>();
             double lens = 50.0;
@@ -104,12 +105,7 @@ namespace Enzyme.Components
             string status = run ? $"Generated {generatedNames.Count} Named Views" : "Sleeping (Run is False)";
             Hud.Done(this, timer.Elapsed.TotalMilliseconds, $"{status}");
             
-            DA.SetData(1, "CREATE NAMED VIEWS\n"
-                + "\n"
-                + "METHODOLOGY:\n"
-                + "Iterates through the provided locations and targets, configures the active viewport camera, and saves a Rhino Named View for each frame.\n\n"
-                + "INTERPRETATION & IMPORTANCE:\n"
-                + "Decouples camera animation from exporting. Plug the output of this component into Advanced Export Views to apply Layer States, Canvas States, and high-res capturing to your flythrough paths.");
+            DA.SetData(1, Enzyme.Utils.MethodNotes.Info("CreateNamedViews"));
         }
 
         protected override System.Drawing.Bitmap Icon => Enzyme.IconLoader.Load("CreateNamedViews.png");

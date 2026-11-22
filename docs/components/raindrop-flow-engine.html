@@ -46,13 +46,51 @@
                     </ul>
                 </div>
                 <div class="io-col">
-                    <h3>Outputs (2)</h3>
+                    <h3>Outputs (3)</h3>
                     <ul>
                         <li><strong>FlowPaths</strong> (Curve): The generated water movement paths.</li>
                         <li><strong>DropPoints</strong> (Point): The valid starting grid points on the mesh.</li>
+                        <li><strong>Info</strong> (Text): Method, assumptions, simplifications and references.</li>
                     </ul>
                 </div>
             </div>
+
+            <!-- method-notes:start -->
+            <h2 style="margin-top: 2rem;">Method, assumptions and simplifications</h2>
+            <p style="color: var(--text-secondary);">The same notes appear in the component's <strong>Info</strong> output.</p>
+            <div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
+                    <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Seeds a regular XY grid of drops at GridSpacing over the mesh bounding box and projects them straight down onto TerrainMesh; each hit is a drop point.</li>
+                        <li>From each drop, the downhill direction on the current face is the steepest-descent vector (n × g) × n, with n the face normal and g pointing down.</li>
+                        <li>The drop moves StepSize along that direction, is pulled back to the closest mesh point, and the step is kept only if it is at least 1 mm lower; otherwise the path ends.</li>
+                        <li>Paths also end on near-flat faces (normal Z ≥ 0.9999) or after MaxSteps. Each path is output as a polyline in its own branch.</li>
+                    </ol>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Rain falls evenly over the bounding box; the mesh is a single-valued terrain surface in metres.</li>
+                        <li>StepSize is small compared with the mesh faces, so each step stays on the slope it started on.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Drops do not interact: no flow accumulation, ponding, infiltration or merging of paths.</li>
+                        <li>Paths stop in pits and on flats instead of filling or crossing them; a large StepSize can overshoot a valley and stop early on the opposite slope.</li>
+                        <li>Path length is limited to MaxSteps × StepSize.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Workflow</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Terrain mesh (Site Fetch, Terrain Generator Pro) -&gt; TerrainMesh. FlowPaths -&gt; Analysis Heatmap or drainage sketches; use Hydro-DEM for flow accumulation.</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- method-notes:end -->
         </div>
     </main>
 

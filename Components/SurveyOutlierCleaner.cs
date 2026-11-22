@@ -45,7 +45,8 @@ namespace Enzyme.Components
 
         protected override void Solve(IGH_DataAccess DA, Stopwatch sw)
         {
-            DA.SetData(6, InfoText);
+            if (DA.Iteration == 0 && Params.Output.Count > 6) DA.SetData(6, Enzyme.Utils.MethodNotes.Info("SurveyOutlierCleaner"));
+            DA.SetData(6, Enzyme.Utils.MethodNotes.Info("SurveyOutlierCleaner"));
 
             var pts = new List<Point3d>();
             DA.GetDataList(0, pts);

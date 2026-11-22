@@ -63,6 +63,7 @@ namespace Enzyme.Components
 
         protected override void Solve(IGH_DataAccess DA, Stopwatch sw)
         {
+            if (DA.Iteration == 0 && Params.Output.Count > 5) DA.SetData(5, Enzyme.Utils.MethodNotes.Info("AnalysisDifference"));
             Mesh mesh = null;
             var a = new List<double>();
             var b = new List<double>();
@@ -207,7 +208,7 @@ namespace Enzyme.Components
             DA.SetData(2, range);
             DA.SetDataList(3, stats);
             DA.SetData(4, j.ToString(Newtonsoft.Json.Formatting.None));
-            DA.SetData(5, InfoText);
+            DA.SetData(5, Enzyme.Utils.MethodNotes.Info("AnalysisDifference"));
 
             Hud.Done(this, sw,
                 Hud.Metric("Mean", (sumWD / sumW).ToString("+0.00;-0.00;0.00", inv)),

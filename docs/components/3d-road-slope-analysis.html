@@ -58,6 +58,42 @@
                     </ul>
                 </div>
             </div>
+
+            <!-- method-notes:start -->
+            <h2 style="margin-top: 2rem;">Method, assumptions and simplifications</h2>
+            <p style="color: var(--text-secondary);">The same notes appear in the component's <strong>Info</strong> output.</p>
+            <div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
+                    <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Each curve is cut into N = ceil(length / Segment Size) equal-length pieces (trimmed sub-curves, so actual piece length is at most Segment Size).</li>
+                        <li>Slope per segment uses the straight chord between the segment end points: horizontal distance H in plan and absolute height change V; degrees = atan(V / H), percent = V / H × 100, ratio = H / V (1:X).</li>
+                        <li>A segment is Compliant if slope ≤ Threshold (degrees or percent) or ratio ≥ Threshold (ratio mode, flat segments always compliant). Compliance % is the share of compliant segments over all curves.</li>
+                        <li>Outputs the 3D segments, slopes, mid-length points and status per curve branch, plus a Binary legend payload using Colors (default lime green and red).</li>
+                    </ol>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Curves are 3D road centrelines already at their design levels, in metres.</li>
+                        <li>Threshold is in the units chosen by Mode (default 8 %).</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Slope is the chord slope over each segment, so short steep pieces inside a segment are averaged out; uphill and downhill are not distinguished.</li>
+                        <li>Only longitudinal slope; no cross-fall, curvature or vertical curve checks. Colors only feed the legend; segments are not coloured by the component.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Workflow</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>3D centrelines -&gt; Curves; Status -&gt; colour the Segments with a Custom Preview; Dashboard Data -&gt; Legend Geometry or Analysis Dashboard.</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- method-notes:end -->
         </div>
     </main>
 

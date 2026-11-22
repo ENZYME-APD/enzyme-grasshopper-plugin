@@ -57,6 +57,41 @@
                     </ul>
                 </div>
             </div>
+
+            <!-- method-notes:start -->
+            <h2 style="margin-top: 2rem;">Method, assumptions and simplifications</h2>
+            <p style="color: var(--text-secondary);">The same notes appear in the component's <strong>Info</strong> output.</p>
+            <div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
+                    <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Parses the Dashboard Data JSON: Type (Discrete, Gradient or Blocks, default Discrete), Title, Colors (R, G, B objects), Labels and Metrics (Name, Value pairs).</li>
+                        <li>While Run is True it draws a screen-space HUD in every viewport: a dark box (opacity = Transparency) anchored to a corner with Offset X and Offset Y margins in pixels, the title in capitals, one line per metric and a colour legend with the last colour at the top.</li>
+                        <li>Legend labels: Discrete shows one label per colour; Blocks with one more label than colours shows ranges between consecutive labels; Gradient shows only the minimum and maximum labels.</li>
+                        <li>If the upstream component that supplies the data is locked (disabled), the payload is ignored and nothing is drawn.</li>
+                    </ol>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>The JSON follows the schema written by the Enzyme analysis components (keys are case-sensitive).</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Box width is estimated from character count × 0.65 × Size, so long labels or wide fonts can overflow the box.</li>
+                        <li>Nothing is drawn when the payload has no Colors, even if it has Metrics.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Workflow</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Any analysis component Dashboard Data output -&gt; Dashboard Data. Share one Run toggle with the analysis components.</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- method-notes:end -->
         </div>
     </main>
 

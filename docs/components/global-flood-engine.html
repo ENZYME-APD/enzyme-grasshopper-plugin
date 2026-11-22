@@ -57,6 +57,46 @@
                     </ul>
                 </div>
             </div>
+
+            <!-- method-notes:start -->
+            <h2 style="margin-top: 2rem;">Method, assumptions and simplifications</h2>
+            <p style="color: var(--text-secondary);">The same notes appear in the component's <strong>Info</strong> output.</p>
+            <div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
+                    <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Every mesh vertex starts with a water depth d = Rainfall × Duration / 1000 × Runoff Coefficient (in m; Rainfall in mm/h, Duration in h). Coefficients are a single value or one per mesh vertex.</li>
+                        <li>Each iteration, every wet vertex (d &gt; 0.1 mm) finds the connected neighbour with the lowest water level (ground Z + depth). If it is lower, half the level difference is moved to it, limited to the water the vertex holds.</li>
+                        <li>With Boundary Condition 1 (open), the water at naked-edge vertices is set to 0 after every iteration, so it drains off the model. With 0 (closed) it stays.</li>
+                        <li>The loop stops after Iterations steps or when no water moved.</li>
+                        <li>WaterDepths are the final depths per mesh vertex; FloodMesh is coloured light grey below 0.01 m and from cyan to dark blue by depth relative to the maximum.</li>
+                    </ol>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Every vertex stands for the same plan area, so moving depth between vertices conserves volume only on an evenly spaced mesh.</li>
+                        <li>All rain falls at once at the start; Duration only scales the total depth.</li>
+                        <li>Z is in metres and the mesh is a terrain (one height per plan location).</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>No infiltration over time, no flow velocity, roughness or travel time; Iterations are not time steps.</li>
+                        <li>Water moves at most one mesh edge per iteration, to one neighbour only, so on large or fine meshes the result depends on Iterations and may not reach equilibrium.</li>
+                        <li>No drainage network, buildings or culverts.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Workflow</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Terrain Mesher or a site mesh -&gt; TerrainMesh.</li>
+                        <li>WaterDepths with AnalysisPoints -&gt; legend, dashboard or threshold filters.</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- method-notes:end -->
         </div>
     </main>
 

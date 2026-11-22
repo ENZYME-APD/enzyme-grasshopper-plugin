@@ -109,7 +109,7 @@ namespace Enzyme.Components
                 "- Calibration assumes a long straight road; near the ends of short roads levels drift slightly low.\n" +
                 "- Points closer than ~spacing to a receiver can produce local hot spots; use a divide length smaller than the closest receiver distance.\n\n" +
                 "TYPICAL LAeq AT 10 m (presets): Highway 78, Arterial 70, Local 60, Pedestrian 50, Railway 80 dB(A).";
-            DA.SetData(2, info);
+            DA.SetData(2, (info) + "\n\n" + Enzyme.Utils.MethodNotes.Info("NoiseEmitterFromCurves"));
 
             sw.Stop();
             Hud.Done(this, sw.Elapsed.TotalMilliseconds, $"Points: {outPts.Count}");

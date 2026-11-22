@@ -73,6 +73,7 @@ namespace Enzyme.Components
 
                 protected override void Solve(IGH_DataAccess DA, System.Diagnostics.Stopwatch hudSw)
         {
+            if (DA.Iteration == 0 && Params.Output.Count > 2) DA.SetData(2, Enzyme.Utils.MethodNotes.Info("SlopeTerrainPlus"));
             List<Mesh> TargetMeshes = new List<Mesh>();
             DA.GetDataList(0, TargetMeshes);
 
@@ -268,7 +269,7 @@ namespace Enzyme.Components
 
             Hud.Done(this, exec_ms, $"Mode: {thresholdModeName}\nInput: {conversion_str}\n● {mode_str} | ○ Over: {final_pct_over:F1}%");
             
-            DA.SetData(2, "TERRAIN SLOPE\n\nMETHODOLOGY:\nExtracts face normals from the un-welded mesh via the cross-product of vertex edges. The Z-component of each normal (n.Z) provides the slope angle using acos(n.Z), converting to degrees or percentage. Faces are sorted and colored dynamically to identify areas exceeding maximum gradient thresholds.\n\nINTERPRETATION & IMPORTANCE:\nHighlights severity of topography and naturally draining facets. Critical for planning accessible paths, building foundations, and managing stormwater runoff without exceeding max legal grades.");
+            DA.SetData(2, Enzyme.Utils.MethodNotes.Info("SlopeTerrainPlus"));
         }
     }
 }

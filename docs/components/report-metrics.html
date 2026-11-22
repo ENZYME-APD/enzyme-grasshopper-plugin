@@ -69,6 +69,44 @@
                     </ul>
                 </div>
             </div>
+
+            <!-- method-notes:start -->
+            <h2 style="margin-top: 2rem;">Method, assumptions and simplifications</h2>
+            <p style="color: var(--text-secondary);">The same notes appear in the component's <strong>Info</strong> output.</p>
+            <div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
+                    <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Reads every Dashboard Data JSON item: each Metrics entry whose Value starts with a number becomes a metric (key = Prefix + snake_case name, %, &gt; and &lt; spelled out; _pct added for %), and each BandAreas entry becomes an area metric in ha (area / 10 000).</li>
+                        <li>Adds the hand-entered Keys, Values, Units and Scopes (scope defaults to site). Without Prefixes, several Dashboard items get d1, d2... prefixes.</li>
+                        <li>Each flag rates one metric: if Red ≥ Amber higher is worse (red when value ≥ Red, amber when ≥ Amber), otherwise lower is worse (red when ≤ Red, amber when ≤ Amber); n/a when the metric is missing.</li>
+                        <li>Builds the module JSON (module, plugin version, run date, inputs from Sources split on |, metrics, flags, maps with captions, confidence). With Merge on, metrics, flags, maps and inputs already in the existing file are kept and only this run's keys are replaced.</li>
+                        <li>Writes Folder/04_metrics/Module.json when Write is True.</li>
+                    </ol>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>The model is in metres, so areas in m² convert to ha.</li>
+                        <li>Metric keys are unique per key and scope; the last value wins.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Flags inherited from an existing file are not re-rated against new values; only this run's flag rules are evaluated.</li>
+                        <li>Metric values are parsed from display text, so precision is limited to what the source component printed.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Workflow</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Dashboard Data from Analysis Heatmap, Analysis Difference, Fast CFD, Noise... -&gt; Dashboard Data. Saved Files of Advanced Export Views -&gt; Maps.</li>
+                        <li>The 04_metrics files feed the Deep Site Analysis report and scorecard.</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- method-notes:end -->
         </div>
     </main>
 

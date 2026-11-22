@@ -64,10 +64,12 @@ namespace Enzyme.Masterplan
             pManager.AddBrepParameter("SolidPanels", "SP", "Solid panels", GH_ParamAccess.tree);
             pManager.AddBrepParameter("HeaderPanels", "HP", "Header panels", GH_ParamAccess.tree);
             pManager.AddBrepParameter("CornerPanels", "CP", "Corner panels", GH_ParamAccess.tree);
+            pManager.AddTextParameter("Info", "Info", "Method, assumptions, simplifications and references.", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            if (DA.Iteration == 0 && Params.Output.Count > 7) DA.SetData(7, Enzyme.Utils.MethodNotes.Info("ModRhythmBalc"));
             var watch = System.Diagnostics.Stopwatch.StartNew();
 
             GH_Structure<GH_Curve> ghBounds = null;

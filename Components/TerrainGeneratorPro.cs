@@ -131,6 +131,7 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            if (DA.Iteration == 0 && Params.Output.Count > 4) DA.SetData(4, Enzyme.Utils.MethodNotes.Info("TerrainGeneratorPro"));
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
@@ -439,7 +440,7 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
 
             double area = Rhino.Geometry.AreaMassProperties.Compute(boundary).Area;
             Hud.Done(this, stopwatch.Elapsed.TotalMilliseconds, $"Area: {area:N0} m2\nTrees: {treesOut.Count}");
-                    DA.SetData(4, "TERRAIN GENERATOR PRO\n" + "\n" + "HOW IT WORKS:\n" + "A procedural terrain generator developed specifically to test different analysis components across a wide variety of topographic conditions.\n\n" + "INTERPRETATION & IMPORTANCE:\n" + "Generates synthetic, highly controllable terrains (ridges, valleys, noise). This allows designers to rigorously test and calibrate drainage, slope, and wind analysis tools before applying them to real-world GIS data.");
+                    DA.SetData(4, Enzyme.Utils.MethodNotes.Info("TerrainGeneratorPro"));
         }
 
         private double[] Hash2D(double x, double y, int seed)

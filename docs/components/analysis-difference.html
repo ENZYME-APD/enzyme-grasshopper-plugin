@@ -62,6 +62,45 @@
                     </ul>
                 </div>
             </div>
+
+            <!-- method-notes:start -->
+            <h2 style="margin-top: 2rem;">Method, assumptions and simplifications</h2>
+            <p style="color: var(--text-secondary);">The same notes appear in the component's <strong>Info</strong> output.</p>
+            <div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
+                    <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Difference = ValuesA minus ValuesB for every vertex or face (detected from the count; A and B must have the same count).</li>
+                        <li>Area weights: per-face values use the face area; per-vertex values get an equal share (1/3 or 1/4) of the area of every unmasked face they belong to. Masked faces are excluded.</li>
+                        <li>Stats (area-weighted): mean change, % of area where the change is above +Threshold, below minus Threshold or within it, the largest increase and decrease, and with Level set the % of area above Level in A and in B (strictly greater).</li>
+                        <li>Colours: Palette (default Balance) sampled at 0.5 + 0.5 × Difference / Range, clamped, so zero sits at the centre. Range defaults to the largest absolute difference; masked cells are grey.</li>
+                        <li>BetterWhen (Lower or Higher) only renames the increased / decreased lines as improvement or worsening.</li>
+                        <li>Dashboard Data is a legend payload (gradient, labels minus Range and plus Range, stats as metrics).</li>
+                    </ol>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>A and B were computed on the same mesh with the same vertex or face order.</li>
+                        <li>Face areas are in model units² and the model is planar enough for triangle area sums to be meaningful.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>No statistical significance: every cell counts by area only.</li>
+                        <li>The Difference list still contains values for vertices touched only by masked faces; they are just excluded from the stats and coloured grey.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Workflow</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Two runs of Fast CFD, Sun Hours, Noise or Analysis Heatmap inputs on the same mesh -&gt; ValuesA, ValuesB.</li>
+                        <li>Difference -&gt; Analysis Heatmap with Min = minus Range and Max = Range for contour bands. Dashboard Data -&gt; Report Metrics or Analysis Dashboard.</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- method-notes:end -->
         </div>
     </main>
 

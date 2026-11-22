@@ -51,6 +51,47 @@
                     </ul>
                 </div>
             </div>
+
+            <!-- method-notes:start -->
+            <h2 style="margin-top: 2rem;">Method, assumptions and simplifications</h2>
+            <p style="color: var(--text-secondary);">The same notes appear in the component's <strong>Info</strong> output.</p>
+            <div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
+                    <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Looks up Name in a fixed table of palettes, each stored as 7 to 11 RGB stops (Viridis, Cividis, Magma, Turbo, Ladybug, ColorBrewer and cmocean sets, among others). Matching ignores case, spaces and hyphens; a trailing _r or reversed flips it; a number picks a palette by index.</li>
+                        <li>Reverse flips the stops; with Count &gt;= 2 (max 1024) the gradient is resampled to Count evenly spaced colours by linear interpolation in RGB, otherwise the palette's own stops are returned.</li>
+                    </ol>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Colours are used low to high, matching the order of the analysis values.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Stops are samples of the published colour maps; resampling is linear in RGB, not in a perceptual colour space, so very fine resampling is only approximately perceptually even.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Workflow</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Color Palette Colors -&gt; Colors or CustomColors input of any analysis component.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">References</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Nuñez J.R., Anderton C.R. and Renslow R.S. (2018), Optimizing colormaps with consideration for color vision deficiency, PLOS ONE: Cividis.</li>
+                        <li>Thyng K.M. et al. (2016), True colors of oceanography, Oceanography 29(3): cmocean palettes.</li>
+                        <li>Harrower M. and Brewer C.A. (2003), ColorBrewer.org, The Cartographic Journal 40(1).</li>
+                        <li>Moreland K. (2009), Diverging color maps for scientific visualization: Coolwarm.</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- method-notes:end -->
         </div>
     </main>
 

@@ -50,7 +50,8 @@ namespace Enzyme.Components
 
         protected override void Solve(IGH_DataAccess DA, Stopwatch sw)
         {
-            DA.SetData(4, InfoText);
+            if (DA.Iteration == 0 && Params.Output.Count > 4) DA.SetData(4, Enzyme.Utils.MethodNotes.Info("TerrainMesher"));
+            DA.SetData(4, Enzyme.Utils.MethodNotes.Info("TerrainMesher"));
 
             var survey = new List<Point3d>(); DA.GetDataList(0, survey);
             var breaks = new List<Curve>(); DA.GetDataList(1, breaks);

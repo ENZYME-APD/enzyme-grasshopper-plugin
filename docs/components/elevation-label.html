@@ -61,6 +61,43 @@
                     </ul>
                 </div>
             </div>
+
+            <!-- method-notes:start -->
+            <h2 style="margin-top: 2rem;">Method, assumptions and simplifications</h2>
+            <p style="color: var(--text-secondary);">The same notes appear in the component's <strong>Info</strong> output.</p>
+            <div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
+                    <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>For each input point it draws a vertical leader line of Length above the point and places a text entity at Length + Gap above it.</li>
+                        <li>The text is the LabelText for that item (or the last text of the matching branch), otherwise the point Z formatted to 2 decimals.</li>
+                        <li>The text plane is World XY, XZ (default) or YZ, rotated by Orientation degrees about its own normal; Anchor 1 to 9 sets the justification (default 2, bottom centre).</li>
+                        <li>Text height comes from the Rhino dimension style named in Style (text height × dimension scale), otherwise 2.0 model units.</li>
+                        <li>When Bake is True it deletes earlier objects carrying the same BakeName user string, then bakes every leader and text to BakeLayer (created if missing).</li>
+                    </ol>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Z values are read in model units relative to the model origin; no datum or sea-level offset is applied.</li>
+                        <li>Length, Gap, Style, TextPlane, Orientation, Anchor, Bake, BakeLayer and BakeName apply to all points.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Only the first item of each setting tree is used, although the inputs are tree access.</li>
+                        <li>Leaders are always vertical; labels do not avoid each other.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Workflow</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Points on terrain or levels -&gt; Points. Optional custom text -&gt; LabelText.</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- method-notes:end -->
         </div>
     </main>
 

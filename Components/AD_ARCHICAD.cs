@@ -56,10 +56,12 @@ namespace Enzyme.Components
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
             pManager.AddTextParameter("JSON_Payload", "J", "Output JSON payload", GH_ParamAccess.item);
+            pManager.AddTextParameter("Info", "Info", "Method, assumptions, simplifications and references.", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            if (DA.Iteration == 0 && Params.Output.Count > 1) DA.SetData(1, Enzyme.Utils.MethodNotes.Info("AD_ARCHICAD"));
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             if (!DA.GetDataTree(0, out GH_Structure<GH_Curve> contoursTree)) return;
             var floorContours = new List<Curve>();

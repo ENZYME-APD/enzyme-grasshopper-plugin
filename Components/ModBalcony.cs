@@ -62,10 +62,12 @@ namespace Enzyme.Components
             pManager.AddBrepParameter("SolidPanels", "SolidPanels", "Solid wall Breps", GH_ParamAccess.tree);
             pManager.AddBrepParameter("HeaderPanels", "HeaderPanels", "Header drop Breps", GH_ParamAccess.tree);
             pManager.AddBrepParameter("CornerPanels", "CornerPanels", "Corner window Breps", GH_ParamAccess.tree);
+            pManager.AddTextParameter("Info", "Info", "Method, assumptions, simplifications and references.", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            if (DA.Iteration == 0 && Params.Output.Count > 6) DA.SetData(6, Enzyme.Utils.MethodNotes.Info("ModBalcony"));
             var watch = System.Diagnostics.Stopwatch.StartNew();
 
             if (!DA.GetDataTree(0, out GH_Structure<GH_Curve> boundsTree)) return;

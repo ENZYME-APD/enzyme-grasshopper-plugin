@@ -252,12 +252,12 @@ namespace Enzyme.Components
             DA.SetDataList(6, _labels);
             DA.SetData(7, SectorTable(freq, sectorTotal, nSect, nBands, classes, width));
             DA.SetData(8, DashboardJson(classes, nBands, BandColor, prevailing, width, sectorTotal, selLabel, calmPct));
-            DA.SetData(9, $"WIND ROSE\n\nSource: {source}\nHours used: {total:N0}\nCalm (< {calm:0.0} m/s): {calmPct:0.0}%\n" +
+            DA.SetData(9, ($"WIND ROSE\n\nSource: {source}\nHours used: {total:N0}\nCalm (< {calm:0.0} m/s): {calmPct:0.0}%\n" +
                           $"Prevailing: {WindMath.CompassName(prevailing * width)} ({prevailing * width:0}°) {maxSector:0.0}%\n\n" +
                           "HOW TO READ: each petal shows where the wind blows FROM; its length is the share of hours, colours split it by speed band. " +
                           "Rings mark % of hours. Directions are meteorological (FROM, 0 = N, clockwise) and rotated by North into the model.\n\n" +
                           "DATA: EPW files are typical years from weather stations (often airports). Check the station is representative of the site " +
-                          "(distance, elevation, coast or valley effects).");
+                          "(distance, elevation, coast or valley effects).") + "\n\n" + Enzyme.Utils.MethodNotes.Info("WindRose"));
 
             Hud.Done(this, sw,
                 Hud.Metric("Hours", total),

@@ -63,10 +63,12 @@ namespace Enzyme.Components
             pManager.AddColourParameter("panel_colors", "C", "Panel colors", GH_ParamAccess.tree);
             pManager.AddTextParameter("panel_tags", "T", "Panel tags", GH_ParamAccess.tree);
             pManager.AddCurveParameter("panel_geometry", "G", "Panel geometry curves", GH_ParamAccess.tree);
+            pManager.AddTextParameter("Info", "Info", "Method, assumptions, simplifications and references.", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            if (DA.Iteration == 0 && Params.Output.Count > 4) DA.SetData(4, Enzyme.Utils.MethodNotes.Info("ColorMeshTiles"));
             var t_start = System.Diagnostics.Stopwatch.StartNew();
 
             GH_Structure<GH_Curve> polylinesTree;

@@ -58,6 +58,7 @@ namespace Enzyme.Components
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            if (DA.Iteration == 0 && Params.Output.Count > 3) DA.SetData(3, Enzyme.Utils.MethodNotes.Info("DataVisualizer"));
             var sw = System.Diagnostics.Stopwatch.StartNew();
 
             List<Point3d> pts = new List<Point3d>();
@@ -79,7 +80,7 @@ namespace Enzyme.Components
             if (!DA.GetDataList(5, thicknesses) || thicknesses.Count == 0)
             {
                 thicknesses.Add(0.5);
-                            DA.SetData(3, "LEAP DATA VISUALIZER\n" + "\n" + "HOW IT WORKS:\n" + "A generic visualization module that takes numerical data streams from LEAP components and maps them to charts, graphs, or colored geometry.\n\n" + "INTERPRETATION & IMPORTANCE:\n" + "Bridges the gap between raw spreadsheet data and spatial intuition. It allows designers to 'see' abstract ecological metrics directly overlaid on their 3D model.");
+                            DA.SetData(3, Enzyme.Utils.MethodNotes.Info("DataVisualizer"));
             }
 
             if (pts.Count == 0 || vals.Count == 0) return;
@@ -135,7 +136,7 @@ namespace Enzyme.Components
             DA.SetData(0, masterMesh);
             DA.SetDataList(1, outVals);
             DA.SetDataList(2, outColors);
-            DA.SetData(3, "LEAP DATA VISUALIZER\n" + "\n" + "HOW IT WORKS:\n" + "A generic visualization module that takes numerical data streams from LEAP components and maps them to charts, graphs, or colored geometry.\n\n" + "INTERPRETATION & IMPORTANCE:\n" + "Bridges the gap between raw spreadsheet data and spatial intuition. It allows designers to 'see' abstract ecological metrics directly overlaid on their 3D model.");
+            DA.SetData(3, Enzyme.Utils.MethodNotes.Info("DataVisualizer"));
         }
 
         private Color GetInterpolatedColor(double t, List<Color> palette)

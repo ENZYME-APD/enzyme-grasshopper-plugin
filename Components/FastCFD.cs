@@ -567,7 +567,7 @@ namespace Enzyme.Components
                 "- 2.5D Assumption: Simulates horizontal Venturi tunneling, gap flows, and recirculating wake eddies over 3D terrain, but does not capture 3D vertical skyscraper downdrafts.\n" +
                 "- Single Scenario Evaluation: True regulatory Lawson criteria evaluate multi-directional statistical exceedance over a full annual wind climate; this component computes the deterministic wind field for the specified wind vector.";
             
-            DA.SetData(6, infoStr);
+            DA.SetData(6, (infoStr) + "\n\n" + Enzyme.Utils.MethodNotes.Info("FastCFD"));
 
             sw.Stop();
             Hud.Done(this, sw.Elapsed.TotalMilliseconds, $"Grid: {cols}x{rows}\nAvg: {avgSpeed:F1} | Max: {maxSpeed:F1}\nComfort: {pctComfort:F1}%");

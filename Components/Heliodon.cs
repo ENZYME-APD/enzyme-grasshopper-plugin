@@ -40,10 +40,12 @@ namespace Enzyme.Components
             pManager.AddCurveParameter("Daily Arcs", "Arcs", "Visual sun path curves for the 21st of each month.", GH_ParamAccess.list);
             pManager.AddPointParameter("Sun Points", "Points", "Visual hourly sun positions.", GH_ParamAccess.list);
             pManager.AddCurveParameter("Base Circle", "Circle", "A flat circle framing the heliodon radius.", GH_ParamAccess.item);
+            pManager.AddTextParameter("Info", "Info", "Method, assumptions, simplifications and references.", GH_ParamAccess.item);
         }
 
                 protected override void Solve(IGH_DataAccess DA, System.Diagnostics.Stopwatch hudSw)
         {
+            if (DA.Iteration == 0 && Params.Output.Count > 4) DA.SetData(4, Enzyme.Utils.MethodNotes.Info("Heliodon"));
             System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
 
             double lat = 51.5;

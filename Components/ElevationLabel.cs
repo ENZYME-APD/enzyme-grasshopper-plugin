@@ -257,6 +257,7 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            if (DA.Iteration == 0 && Params.Output.Count > 3) DA.SetData(3, Enzyme.Utils.MethodNotes.Info("ElevationLabel"));
             SyncValueLists();
 
             var stopwatch = Stopwatch.StartNew();
@@ -315,7 +316,7 @@ Outputs:
                 {
                     var newLayer = new Rhino.DocObjects.Layer { Name = layerVal };
                     layerIdx = doc.Layers.Add(newLayer);
-                                    DA.SetData(3, "ELEVATION LABEL\n" + "\n" + "HOW IT WORKS:\n" + "Extracts sample points across the terrain and generates 3D text tags displaying their exact Z-height above sea level.\n\n" + "INTERPRETATION & IMPORTANCE:\n" + "Turns a purely visual 3D model into a readable engineering drawing. Essential for communicating precise ground levels to contractors and consultants.");
+                                    DA.SetData(3, Enzyme.Utils.MethodNotes.Info("ElevationLabel"));
                 }
 
                 if (!string.IsNullOrEmpty(bakeNameVal))

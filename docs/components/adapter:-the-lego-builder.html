@@ -47,12 +47,54 @@
                     </ul>
                 </div>
                 <div class="io-col">
-                    <h3>Outputs (1)</h3>
+                    <h3>Outputs (2)</h3>
                     <ul>
                         <li><strong>JSON_Payload</strong> (Text): JSON Payload</li>
+                        <li><strong>Info</strong> (Text): Method, assumptions, simplifications and references.</li>
                     </ul>
                 </div>
             </div>
+
+            <!-- method-notes:start -->
+            <h2 style="margin-top: 2rem;">Method, assumptions and simplifications</h2>
+            <p style="color: var(--text-secondary);">The same notes appear in the component's <strong>Info</strong> output.</p>
+            <div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
+                    <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>For each MassingBlocks Brep, the bounding box gives the bottom and top and the total height; the Brep is cut 0.01 m above its bottom and the largest closed section is taken as the footprint.</li>
+                        <li>Floor count = whole number of FloorHeights that fit in the block height (FloorHeights per block, default 4.0 m; zero or negative also falls back to 4.0 m).</li>
+                        <li>HeightResolution 0 (Strict Cutoff): one block with that many floors; the leftover height is discarded.</li>
+                        <li>HeightResolution 1 (Stretch Top Floor): if the leftover is more than 0.1 m, the block is split into the standard floors plus one top floor whose height is FloorHeight plus the leftover (program tagged (Top)).</li>
+                        <li>base_z of each block = block bottom minus the lowest bottom of its building (true_base_elevation), rounded to 1 mm. Footprints are written as line, arc or polyline segments, as in AD_CAKE.</li>
+                        <li>The JSON payload groups blocks per building name.</li>
+                    </ol>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Each Brep is a vertical extrusion of one footprint, so the section 0.01 m above its base is valid for all its floors.</li>
+                        <li>Programs, TowerIDs, BuildingNames and FloorHeights match MassingBlocks item by item; missing items default to Mixed_Use, Main_Mass, Building_01 and 4.0 m.</li>
+                        <li>Model units are metres.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Blocks lower than one FloorHeight produce no floors and are left out without a warning.</li>
+                        <li>In Stretch mode a leftover of 0.1 m or less is dropped; in Strict mode all leftover height is dropped.</li>
+                        <li>Only the largest closed section is kept: holes and extra pieces are lost; setbacks inside a block are ignored.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Workflow</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Multi-storey massing Breps -&gt; AD_LEGO -&gt; JSON payload for the Masterplan Engine.</li>
+                        <li>Use AD_CAKE instead when the model is already sliced floor by floor.</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- method-notes:end -->
         </div>
     </main>
 

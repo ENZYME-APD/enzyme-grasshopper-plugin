@@ -70,6 +70,45 @@
                     </ul>
                 </div>
             </div>
+
+            <!-- method-notes:start -->
+            <h2 style="margin-top: 2rem;">Method, assumptions and simplifications</h2>
+            <p style="color: var(--text-secondary);">The same notes appear in the component's <strong>Info</strong> output.</p>
+            <div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
+                    <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Each curve is divided into N = round(length / Divide Length) equal parts (at least 1); the actual spacing D = length / N is used.</li>
+                        <li>Each point gets a point-source level at 1 m, Lp1 = L_ref + 10 log10(D × RefDist / π), where L_ref is the Average Noises value for that curve (the last value is reused if the list is shorter).</li>
+                        <li>This comes from treating the road as a long straight line of incoherent point sources: summed intensity at perpendicular distance d is I1 × π / (D × d), so the field equals L_ref at RefDist and falls 3 dB per doubling of distance.</li>
+                        <li>The two end points of an open curve carry half a segment and get Lp1 − 3.01 dB; closed curves have no end correction.</li>
+                    </ol>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Average Noises is LAeq in dB(A) at RefDist from the road (default 10 m, minimum 1 m).</li>
+                        <li>Free-field spherical spreading from each point source, as used by the downstream noise analyser; sources are incoherent.</li>
+                        <li>Model units are metres.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Calibration assumes a long straight road; near the ends of short roads and on tight curves levels are slightly off.</li>
+                        <li>No ground absorption, barriers, traffic composition, speed or road surface: those must be built into the input level.</li>
+                        <li>Receivers closer than about one spacing to the road can see local hot spots near individual points.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Workflow</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Road or rail centrelines -&gt; Curve Paths; typical LAeq at 10 m from the value list (Highway 78, Arterial 70, Local 60, Pedestrian 50, Railway 80 dB(A)).</li>
+                        <li>Points and Noise Values -&gt; Fast Noise Analyzer (Power(dB) input).</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- method-notes:end -->
         </div>
     </main>
 

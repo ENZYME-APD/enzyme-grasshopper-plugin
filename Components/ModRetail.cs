@@ -78,10 +78,12 @@ namespace Enzyme.Components
             pManager.AddBrepParameter("Mullions", "Mullions", "Output Brep", GH_ParamAccess.tree);
             pManager.AddBrepParameter("Canopy", "Canopy", "Output Brep", GH_ParamAccess.tree);
             pManager.AddCurveParameter("Columns", "Columns", "Output Curve", GH_ParamAccess.tree);
+            pManager.AddTextParameter("Info", "Info", "Method, assumptions, simplifications and references.", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            if (DA.Iteration == 0 && Params.Output.Count > 6) DA.SetData(6, Enzyme.Utils.MethodNotes.Info("ModRetail"));
             var watch = System.Diagnostics.Stopwatch.StartNew();
 
             GH_Structure<GH_Curve> ghBounds;

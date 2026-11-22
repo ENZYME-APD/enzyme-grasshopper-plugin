@@ -67,10 +67,12 @@ namespace Enzyme.Components
             pManager.AddColourParameter("panel_colors", "C", "Colors of panels", GH_ParamAccess.tree);
             pManager.AddTextParameter("panel_tags", "T", "Panel tags", GH_ParamAccess.tree);
             pManager.AddCurveParameter("panel_geometry", "G", "Panel boundary curves", GH_ParamAccess.tree);
+            pManager.AddTextParameter("Info", "Info", "Method, assumptions, simplifications and references.", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            if (DA.Iteration == 0 && Params.Output.Count > 4) DA.SetData(4, Enzyme.Utils.MethodNotes.Info("PixelatedSurface"));
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             Random rnd = new Random(42);
             Stopwatch t_start = new Stopwatch();
