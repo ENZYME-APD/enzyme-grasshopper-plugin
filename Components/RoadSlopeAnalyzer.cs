@@ -103,10 +103,12 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
             pManager.AddPointParameter("Projected Points", "Projected Points", "Points projected onto terrain", GH_ParamAccess.list);
             pManager.AddLineParameter("Projection Lines", "Projection Lines", "Lines showing projection from original to terrain", GH_ParamAccess.list);
             pManager.AddTextParameter("Dashboard Data", "Dashboard", "JSON legend data", GH_ParamAccess.item);
+            pManager.AddTextParameter("Info", "Info", "Method, assumptions, simplifications and references.", GH_ParamAccess.item);
         }
 
                 protected override void SolveInstance(IGH_DataAccess DA)
         {
+            if (DA.Iteration == 0 && Params.Output.Count > 7) DA.SetData(7, Enzyme.Utils.MethodNotes.Info("RoadSlopeAnalyzer"));
             System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
 
             System.Collections.Generic.List<Rhino.Geometry.Curve> curves = new System.Collections.Generic.List<Rhino.Geometry.Curve>();

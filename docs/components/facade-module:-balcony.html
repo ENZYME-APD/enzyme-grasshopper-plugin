@@ -56,7 +56,7 @@
                     </ul>
                 </div>
                 <div class="io-col">
-                    <h3>Outputs (6)</h3>
+                    <h3>Outputs (7)</h3>
                     <ul>
                         <li><strong>Slabs</strong> (Brep): Slab Breps</li>
                         <li><strong>Railings</strong> (Brep): Railing Breps</li>
@@ -64,9 +64,49 @@
                         <li><strong>SolidPanels</strong> (Brep): Solid wall Breps</li>
                         <li><strong>HeaderPanels</strong> (Brep): Header drop Breps</li>
                         <li><strong>CornerPanels</strong> (Brep): Corner window Breps</li>
+                        <li><strong>Info</strong> (Text): Method, assumptions, simplifications and references.</li>
                     </ul>
                 </div>
             </div>
+
+            <!-- method-notes:start -->
+            <h2 style="margin-top: 2rem;">Method, assumptions and simplifications</h2>
+            <p style="color: var(--text-secondary);">The same notes appear in the component's <strong>Info</strong> output.</p>
+            <div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
+                    <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Each curve in a branch is one floor outline; its floor height comes from the matching item of Heights (4.0 m if missing).</li>
+                        <li>Balconies: BalconyPattern (0 and 1) picks which floors get one, repeating; the first floor of each branch is skipped unless FirstBalcony is True. A balcony is a flat ruled surface between the outline and its offset by Depth (FlipDir reverses the side), plus a RailHeight vertical surface on the offset line.</li>
+                        <li>Walls: each outline is split into segments. With SegLength on, segments shorter than 2 × BayWidth become corner pieces; otherwise CornerOffset trims that length off both ends as corner pieces.</li>
+                        <li>Remaining segments are divided into round(length / BayWidth) equal bays; VertPattern digits pick, per floor, which HorizPattern string to use, and its 1 and 0 characters set glass or solid bays in turn.</li>
+                        <li>A glass bay is split into a solid sill (SillHeight), glass, and a header (HeaderDrop) at the top; a solid bay is one full-height panel. Corner pieces are glass with sill and header when CornerWindow is True, else full-height panels on CornerPanels.</li>
+                        <li>The HUD reports areas as length × height for glass, solid, header and corner panels, and outline length × Depth for terrace.</li>
+                    </ol>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Outlines are planar, horizontal and placed at each floor level; units are metres.</li>
+                        <li>Outline direction decides the offset side for balconies and so the use of FlipDir.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>All elements are zero-thickness surfaces: no slab or railing thickness, no frames or mullions.</li>
+                        <li>Bay widths are rounded to fit each segment, so they differ from BayWidth.</li>
+                        <li>Terrace area is length × Depth, which overstates convex corners and understates concave ones.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Workflow</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Masterplan or Facade Parser floor outlines and heights -&gt; Bounds and Heights; outputs -&gt; custom previews or BIM export.</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- method-notes:end -->
         </div>
     </main>
 

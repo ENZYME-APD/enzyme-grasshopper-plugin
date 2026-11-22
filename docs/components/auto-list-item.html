@@ -49,6 +49,32 @@
                     </ul>
                 </div>
             </div>
+
+            <!-- method-notes:start -->
+            <h2 style="margin-top: 2rem;">Method, assumptions and simplifications</h2>
+            <p style="color: var(--text-secondary);">The same notes appear in the component's <strong>Info</strong> output.</p>
+            <div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
+                    <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Returns the item of List at Index. With Wrap Indices on (default, right-click menu) the index wraps around with a modulo, so negative and too-large values cycle; with it off the index is clamped to the first or last item.</li>
+                        <li>If a Number Slider feeds Index, its maximum is reset to the list length minus 1 on the next solution (and its value clamped). Auto-wire Index Slider adds an integer slider 0 to 10 when Index is empty.</li>
+                    </ol>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>List is a flat list per solution; on data trees the component runs once per branch like any list-access component.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>None beyond the wrap or clamp rule; an empty List gives no output.</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- method-notes:end -->
         </div>
     </main>
 

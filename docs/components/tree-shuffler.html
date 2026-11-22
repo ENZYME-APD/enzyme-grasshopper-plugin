@@ -50,6 +50,44 @@
                     </ul>
                 </div>
             </div>
+
+            <!-- method-notes:start -->
+            <h2 style="margin-top: 2rem;">Method, assumptions and simplifications</h2>
+            <p style="color: var(--text-secondary);">The same notes appear in the component's <strong>Info</strong> output.</p>
+            <div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
+                    <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Shuffles the Choices list once with a Fisher-Yates shuffle seeded by Seed (default 42).</li>
+                        <li>Walks the Tree branch by branch and replaces each item with the next item of the shuffled list, cycling back to the start when the list runs out. The output keeps the tree's paths and branch lengths.</li>
+                    </ol>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Only the structure of Tree matters; its item values are ignored.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Not independent random draws: when the tree has more items than Choices, the same shuffled sequence repeats, so every choice appears evenly.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Workflow</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Grid cells or panel tree -&gt; Tree; material or colour options -&gt; Choices.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">References</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Knuth D.E., The Art of Computer Programming, Vol. 2: Fisher-Yates shuffle.</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- method-notes:end -->
         </div>
     </main>
 

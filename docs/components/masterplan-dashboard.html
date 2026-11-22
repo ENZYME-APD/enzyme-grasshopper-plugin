@@ -61,6 +61,40 @@
                     </ul>
                 </div>
             </div>
+
+            <!-- method-notes:start -->
+            <h2 style="margin-top: 2rem;">Method, assumptions and simplifications</h2>
+            <p style="color: var(--text-secondary);">The same notes appear in the component's <strong>Info</strong> output.</p>
+            <div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
+                    <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Parses JSON Payload (keys programs, total_area and buildings) and draws a text table in the foreground of every Rhino viewport while Run is True.</li>
+                        <li>Global mode lists each program area; Group By Bldg lists program areas and a subtotal per building, then a target tracking section. Areas are formatted with two decimals plus Suffix.</li>
+                        <li>Target JSON maps program names (case-insensitive) to target areas; each program shows value / target and %, in red when it exceeds the target. Target Global does the same for the total.</li>
+                    </ol>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>The payload follows the Masterplan Engine summary schema: programs as name to area, buildings as name to an object with programs and total_area.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Box width is estimated from character counts, so long labels or proportional fonts can overflow.</li>
+                        <li>Display only: there are no outputs.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Workflow</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Masterplan Engine summary JSON -&gt; JSON Payload; a panel with program targets -&gt; Target JSON.</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- method-notes:end -->
         </div>
     </main>
 

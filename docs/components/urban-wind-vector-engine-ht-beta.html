@@ -74,6 +74,55 @@
                     </ul>
                 </div>
             </div>
+
+            <!-- method-notes:start -->
+            <h2 style="margin-top: 2rem;">Method, assumptions and simplifications</h2>
+            <p style="color: var(--text-secondary);">The same notes appear in the component's <strong>Info</strong> output.</p>
+            <div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
+                    <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>A grid of GridSpacing is laid over the terrain bounding box; each cell is ray-cast down to the terrain and lifted by AnalysisHeight. The wind direction is projected onto the local face plane and speed is scaled by (1 + dirZ × SlopeSpeedup), so uphill flow speeds up and downhill flow slows down.</li>
+                        <li>Points inside a closed building mesh get speed 0. Otherwise three factors multiply the baseline speed: wake, corner and gap.</li>
+                        <li>Wake: a ray is cast upwind; if it hits a building at distance d below L = min(building height × WakeLengthRatio, 0.35 × site diagonal), the factor is max(0.12, (d / L)²).</li>
+                        <li>Corner: for every building wall within 2.5 × GridSpacing whose normal is nearly parallel to the flow (|n · dir| &lt; CornerTangency), the direction is bent towards the wall tangent with weight b = 1 − dist / (2.5 × GridSpacing) and speed is multiplied by (1 + CornerBoost × b).</li>
+                        <li>Gap: if another building within the same radius has a wall facing the nearest one (normals dot product below −0.2), speed is multiplied by 1 + GapBoost × (1 − corridor width / (5 × GridSpacing)). GapBoost 0.45 caps the gap speed-up near the 1.45 to 1.5 times seen in wind-tunnel and CFD studies.</li>
+                        <li>With Iterations above 1 each point re-evaluates the factors from its own previous direction and blends the result with Damping; no information is exchanged between points.</li>
+                        <li>Outputs: tiles coloured by speed normalised between the run minimum and maximum (CustomColors or a default blue to pink ramp), vectors of length 0.5 × speed, and streamlines traced from seed cells by stepping 0.2 units along the nearest cell direction until they leave the grid, hit a solid cell or reach MaxSteps. Comfort % is the share of open points at or below 5 m/s.</li>
+                    </ol>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>WindSpeed is the reference speed at pedestrian height in m/s; model units are metres.</li>
+                        <li>ContextBuildings are closed meshes; their height is the bounding-box height.</li>
+                        <li>The terrain is a height field seen from above; one wind direction per run.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>This is a rule-based screening model, not CFD: no pressure or continuity solve, no turbulence, no vertical wind profile, and no interaction between neighbouring points.</li>
+                        <li>Wake, corner and gap factors are empirical rules of thumb with tunable coefficients; results show patterns, not reliable absolute speeds or comfort classes.</li>
+                        <li>Colours are relative to the run speed range, and the comfort share uses a single 5 m/s threshold, not a Lawson or similar criterion with frequency of exceedance.</li>
+                        <li>Streamlines use the nearest-cell direction (no interpolation) with a fixed 0.2 step.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Workflow</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Terrain mesh -&gt; TerrainMesh; context massing (closed meshes) -&gt; ContextBuildings; prevailing wind direction and speed from a wind rose.</li>
+                        <li>Dashboard Data -&gt; Legend Geometry; for more reliable results use Fast CFD and Streamlines.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">References</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Lawson T.V. (1978), The wind content of the built environment: pedestrian wind comfort criteria (for context on the 5 m/s comfort threshold).</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- method-notes:end -->
         </div>
     </main>
 

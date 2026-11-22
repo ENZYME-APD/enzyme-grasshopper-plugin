@@ -28,10 +28,12 @@ namespace Enzyme.Components
         {
             pManager.AddCurveParameter("3D Road", "R3D", "The optimized, slope-constrained 3D centerline", GH_ParamAccess.item);
             pManager.AddCurveParameter("Existing Ground", "EG", "The raw draped profile on the terrain", GH_ParamAccess.item);
+            pManager.AddTextParameter("Info", "Info", "Method, assumptions, simplifications and references.", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            if (DA.Iteration == 0 && Params.Output.Count > 2) DA.SetData(2, Enzyme.Utils.MethodNotes.Info("AutoGrade"));
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             
             Curve crv = null;

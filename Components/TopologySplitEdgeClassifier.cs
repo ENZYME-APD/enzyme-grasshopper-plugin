@@ -52,10 +52,12 @@ namespace Enzyme.Components
             pManager.AddCurveParameter("InternalPartitions", "IP", "The flattened (Z=0) internal shared partition curves", GH_ParamAccess.tree);
             pManager.AddTextParameter("MetadataOut", "MO", "JSON serialized spatial parameters for orientation reconstruction", GH_ParamAccess.tree);
             pManager.AddCurveParameter("FloorSlabs", "FS", "The flattened (Z=0) combined boolean union of the rooms", GH_ParamAccess.tree);
+            pManager.AddTextParameter("Info", "Info", "Method, assumptions, simplifications and references.", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            if (DA.Iteration == 0 && Params.Output.Count > 5) DA.SetData(5, Enzyme.Utils.MethodNotes.Info("TopologySplitEdgeClassifier"));
             var sw = System.Diagnostics.Stopwatch.StartNew();
 
             string instructionsOut = @"CANVAS INSTRUCTIONS:

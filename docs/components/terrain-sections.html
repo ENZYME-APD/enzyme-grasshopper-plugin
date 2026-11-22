@@ -64,6 +64,42 @@
                     </ul>
                 </div>
             </div>
+
+            <!-- method-notes:start -->
+            <h2 style="margin-top: 2rem;">Method, assumptions and simplifications</h2>
+            <p style="color: var(--text-secondary);">The same notes appear in the component's <strong>Info</strong> output.</p>
+            <div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
+                    <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>For each mesh, its bounding box is taken in the RotationPlane orientation. SectionsX cut planes (spanned by the plane X axis and Z axis) are placed at equal steps of width / (SectionsX + 1) along the plane Y axis, so no cut sits on the edges; SectionsY works the same way along the X axis.</li>
+                        <li>Each plane is intersected with the mesh (mesh-plane intersection polylines); every polyline piece goes to SectionOutlinesX or SectionOutlinesY, with X-SEC n or Y-SEC n labels 2 units beyond the first and last piece.</li>
+                        <li>With LayoutFlat on, each section is rotated flat into the XY plane (X sections: along-section direction to X, height to Y; Y sections: along-section to Y, height to X) and stacked beside the site, with a gap of 5 % of the overall bounding box diagonal. Section metadata (id, plane origin, direction) is output as JSON text.</li>
+                        <li>With Bake true, sections are baked to Site Sections::Terrain Sections and Site Sections::Unrolled Sections in a group named BakeName, replacing objects previously baked with the same BakeName.</li>
+                    </ol>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Meshes are terrain or site models; units are model units (label offset of 2 assumes metres).</li>
+                        <li>RotationPlane Z axis is vertical for true vertical sections.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Flat sections keep only shape: their position on the sheet is relative, so absolute elevations and chainage are not kept and must be annotated separately.</li>
+                        <li>Section positions depend on each mesh own bounding box, so with several meshes the cuts do not line up between them.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Workflow</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Terrain mesh -&gt; TargetMeshes; FlatSections and flat labels -&gt; layout drawings; 3D outlines -&gt; site model views.</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- method-notes:end -->
         </div>
     </main>
 

@@ -32,8 +32,9 @@ namespace Enzyme.Components
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            if (DA.Iteration == 0 && Params.Output.Count > 1) DA.SetData(1, Enzyme.Utils.MethodNotes.Info("SaveNamedView"));
             var sw = System.Diagnostics.Stopwatch.StartNew();
-            DA.SetData(1, "SAVE NAMED VIEW\n\nHOW IT WORKS:\nSaves the current active Rhino viewport as a Named View.\n\nINTERPRETATION & IMPORTANCE:\nAutomates viewpoint documentation so you don't have to manually save angles during parametric iterations.");
+            DA.SetData(1, Enzyme.Utils.MethodNotes.Info("SaveNamedView"));
 
             try
             {

@@ -55,10 +55,12 @@ namespace Enzyme.Components
             pManager.AddBrepParameter("Glass", "G", "Glass", GH_ParamAccess.tree);
             pManager.AddBrepParameter("Spandrels", "S", "Spandrels", GH_ParamAccess.tree);
             pManager.AddBrepParameter("Mullions", "M", "Mullions", GH_ParamAccess.tree);
+            pManager.AddTextParameter("Info", "Info", "Method, assumptions, simplifications and references.", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            if (DA.Iteration == 0 && Params.Output.Count > 3) DA.SetData(3, Enzyme.Utils.MethodNotes.Info("ModSpandrel"));
             GH_Structure<GH_Curve> ghBounds;
             if (!DA.GetDataTree(0, out ghBounds)) return;
 

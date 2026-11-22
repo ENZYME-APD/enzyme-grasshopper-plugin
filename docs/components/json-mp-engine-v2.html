@@ -43,7 +43,7 @@
                     </ul>
                 </div>
                 <div class="io-col">
-                    <h3>Outputs (6)</h3>
+                    <h3>Outputs (7)</h3>
                     <ul>
                         <li><strong>Masses_JSON</strong> (Text): Masses JSON</li>
                         <li><strong>Slab_JSON</strong> (Text): Slab JSON</li>
@@ -51,9 +51,53 @@
                         <li><strong>Facade_JSON</strong> (Text): Facade JSON</li>
                         <li><strong>Railings_JSON</strong> (Text): Railings JSON</li>
                         <li><strong>Dashboard_JSON</strong> (Text): Dashboard JSON</li>
+                        <li><strong>Info</strong> (Text): Method, assumptions, simplifications and references.</li>
                     </ul>
                 </div>
             </div>
+
+            <!-- method-notes:start -->
+            <h2 style="margin-top: 2rem;">Method, assumptions and simplifications</h2>
+            <p style="color: var(--text-secondary);">The same notes appear in the component's <strong>Info</strong> output.</p>
+            <div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
+                    <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Reads the buildings payload: each block has tower_id, program, floor_height (default 4.0), floors (default 1), base_z and a boundary; the boundary is rebuilt from Line, Arc and Polyline segments and moved down to Z = 0.</li>
+                        <li>Floor indices: within each tower, all floor levels (base_z + j × floor_height, rounded to 0.001) are sorted and numbered from 0.</li>
+                        <li>Slabs: for each level of each tower, the outlines of the blocks below that end there and of the floors inside blocks are unioned (tolerance 0.01). A block's own base level is only used at ground level or in towers whose id contains podium. Slab area comes from planar Breps.</li>
+                        <li>Roofs: the slab is intersected with the union of all blocks of the building that continue above that level. If that overlap is under 0.1 m² the slab is a Roof Top; if slab area minus overlap exceeds 1.0 m² it is a Setback Roof (Podium Roof in podium towers). roof_area = slab area - overlap.</li>
+                        <li>Railings: the exposed roof outline (slab minus overlap) is split into segments and a segment is kept when its midpoint is more than 0.05 from the outlines above.</li>
+                        <li>Facades: for each floor of a block, a segment of the block outline is exterior when its midpoint lies within 0.05 of the slab outline at that level; these are output as BoundsExt with the closed outline as BoundsClosed.</li>
+                        <li>Masses and Dashboard: gross area = block outline area × floors, summed per program and per building. Colours come from ColorPalette, else a pseudo-random colour (70 to 199 per channel) seeded from the program name.</li>
+                    </ol>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Model units are metres: the fixed tolerances 0.001, 0.01 and 0.05 and the thresholds 0.1 m² and 1.0 m² are absolute.</li>
+                        <li>Block outlines are flat, closed and non-self-intersecting; true Z = true_base_elevation + relative level.</li>
+                        <li>Gross area is the full outline area of every floor (no deductions for cores, voids or double-height spaces).</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>If a curve boolean fails at 0.001 it is retried at 0.05; if the difference still fails the whole slab is treated as exposed, so railings run round the full outline.</li>
+                        <li>Only the first joined curve of a boundary is kept, so multi-loop boundaries lose their extra loops.</li>
+                        <li>Exterior and railing tests use segment midpoints only, so partly shared segments are all-or-nothing.</li>
+                        <li>Palette or payload errors are caught: an invalid palette is ignored silently; an invalid payload gives one error message and empty outputs.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Workflow</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>AD_ARCHICAD or AD_SCULPT -&gt; JSON_Payload. Master JSON Config Builder JSON_Palette -&gt; ColorPalette.</li>
+                        <li>Masses, Slab, Roof, Facade and Railings JSON -&gt; the matching Masses, Slab, Roof, Facade and Railing JSON Parsers. Dashboard_JSON -&gt; Masterplan Dashboard.</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- method-notes:end -->
         </div>
     </main>
 

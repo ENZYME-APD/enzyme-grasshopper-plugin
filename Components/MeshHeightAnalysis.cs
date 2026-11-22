@@ -97,6 +97,7 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
 
         protected override void Solve(IGH_DataAccess DA, System.Diagnostics.Stopwatch hudSw)
         {
+            if (DA.Iteration == 0 && Params.Output.Count > 11) DA.SetData(11, Enzyme.Utils.MethodNotes.Info("MeshHeightAnalysis"));
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             var t_start = System.Diagnostics.Stopwatch.StartNew();
             GH_Structure<GH_Mesh> targetMeshes = new GH_Structure<GH_Mesh>();
@@ -365,7 +366,7 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
 
             if (this.Params.Output.Count > 11)
             {
-                DA.SetData(11, "TERRAIN HEIGHT ANALYSIS\n" + "\n" + "HOW IT WORKS:\n" + "Analyzes mesh elevations to generate detailed HUD metrics (average, min, max heights) and identifies localized peaks and valleys.\n\n" + "INTERPRETATION & IMPORTANCE:\n" + "Provides quantitative tabular data summarizing the site's verticality. Knowing the highest peaks and lowest basins is critical for locating water towers, telecom equipment, or drainage ponds.");
+                DA.SetData(11, Enzyme.Utils.MethodNotes.Info("MeshHeightAnalysis"));
             }
 
             double terrainRelief = totalVerticesCount > 0 ? Math.Round(globalTerrainZMax - globalTerrainZMin, 2) : 0.0;

@@ -52,6 +52,7 @@ namespace Enzyme.Components
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
             pManager.AddTextParameter("JSON_Payload", "J", "JSON Payload", GH_ParamAccess.item);
+            pManager.AddTextParameter("Info", "Info", "Method, assumptions, simplifications and references.", GH_ParamAccess.item);
         }
         
         protected override System.Drawing.Bitmap Icon => IconLoader.Load("AD_LEGO.png");
@@ -130,6 +131,7 @@ namespace Enzyme.Components
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            if (DA.Iteration == 0 && Params.Output.Count > 1) DA.SetData(1, Enzyme.Utils.MethodNotes.Info("AD_LEGO"));
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             List<Brep> massingBlocks = new List<Brep>();
             List<string> programs = new List<string>();

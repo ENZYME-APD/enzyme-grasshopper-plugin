@@ -53,6 +53,37 @@
                     </ul>
                 </div>
             </div>
+
+            <!-- method-notes:start -->
+            <h2 style="margin-top: 2rem;">Method, assumptions and simplifications</h2>
+            <p style="color: var(--text-secondary);">The same notes appear in the component's <strong>Info</strong> output.</p>
+            <div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
+                    <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Each curve is split into its segments; at each corner the turning angle θ between the incoming and outgoing tangents is measured. Corners with θ &lt; 0.05 rad (about 3°) and the two ends of open curves get radius 0.</li>
+                        <li>The allowed tangent length is L = threshold_pct × the shorter adjacent segment length (threshold_pct is a fraction, capped at 0.49). The radius limit is min(L, L / tan(θ/2)).</li>
+                        <li>If radius exceeds the limit, the corner is skipped (skip True, radius 0) or the radius is clamped to the limit (skip False). With round_dec the radius is rounded down to that many decimals.</li>
+                        <li>Fillet arcs are made with Rhino CreateFilletCurves (tolerance 0.001), the segments are trimmed at the arc ends and everything is joined (join tolerance 0.01).</li>
+                        <li>radii lists the radius chosen for every corner, one branch per input curve.</li>
+                    </ol>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>threshold_pct is a fraction of the segment (0.25 = 25 %), not a percentage.</li>
+                        <li>Curves are made of segments (polylines, polycurves); a single smooth curve has no corners and is returned unchanged.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>The radius is also capped at L itself, which is more conservative than the geometric limit for corners turning less than 90°.</li>
+                        <li>Fixed absolute tolerances (0.001 and 0.01) are used regardless of model units.</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- method-notes:end -->
         </div>
     </main>
 

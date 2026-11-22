@@ -55,10 +55,12 @@ namespace Enzyme.Components
         {
             pManager.AddBrepParameter("transoms", "transoms", "transoms", GH_ParamAccess.tree);
             pManager.AddLineParameter("divLines", "divLines", "divLines", GH_ParamAccess.tree);
+            pManager.AddTextParameter("Info", "Info", "Method, assumptions, simplifications and references.", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            if (DA.Iteration == 0 && Params.Output.Count > 2) DA.SetData(2, Enzyme.Utils.MethodNotes.Info("CWT"));
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
 
             if (!DA.GetDataTree(0, out GH_Structure<GH_Curve> curves)) return;

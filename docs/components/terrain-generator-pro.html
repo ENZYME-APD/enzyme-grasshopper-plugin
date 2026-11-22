@@ -72,6 +72,52 @@
                     </ul>
                 </div>
             </div>
+
+            <!-- method-notes:start -->
+            <h2 style="margin-top: 2rem;">Method, assumptions and simplifications</h2>
+            <p style="color: var(--text-secondary);">The same notes appear in the component's <strong>Info</strong> output.</p>
+            <div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
+                    <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>The Boundary is flattened and tessellated: a grid of Resolution columns across its width (rows in proportion) inside the boundary, plus points along the boundary at about one grid step, are triangulated with Rhino CreateFromTessellation.</li>
+                        <li>Each vertex height = MinHeight + t × (MaxHeight − MinHeight), where t is fractal gradient (Perlin-style) noise: one octave per PatternSizeXY / PatternHeightZ pair (defaults 500, 150, 30 m and 1, 0.3, 0.05), octave i seeded with Seed + i and each octave's coordinates rotated about 37°.</li>
+                        <li>TerrainStyle 0 (soft hills): weighted mean of the octaves mapped to 0 to 1 and clamped. TerrainStyle 1 (ridged): weighted mean of (1 − |n|)².</li>
+                        <li>Vertex colours follow the Colors gradient by relative height. With UseSlopeColor, vertices whose normal Z is below cos(SlopeAngle) blend towards SlopeColor over 0.2 of normal Z.</li>
+                        <li>Contours are cut every ContourStep from the mesh; those at multiples of MainStep go to MainContours.</li>
+                        <li>Trees: on triangles with normal Z ≥ 0.7 and relative height between TreeZMin and TreeZMax, a forest mask noise (150 m scale, TreeSeed) below TreeMsk gives an expected count of (1 − mask / TreeMsk) × TreeDns × 3 trees per triangle at random positions.</li>
+                        <li>Solid adds a flat base at min height − max(1 m, 10% of the height range) and side walls from the naked edges.</li>
+                    </ol>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Units are metres; the noise uses absolute world X and Y, so moving the Boundary changes the terrain.</li>
+                        <li>The result is synthetic test terrain, not a model of a real site.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Heights stay inside MinHeight to MaxHeight but rarely reach them: the noise is not stretched to the full range.</li>
+                        <li>Tree count is per triangle, not per area, so density per hectare changes with Resolution.</li>
+                        <li>No erosion, drainage or geological process is modelled.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Workflow</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Closed curve -&gt; Boundary. Mesh -&gt; Raindrop Flow Engine, Hydro-DEM, slope or wind tools to test them on varied topography.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">References</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Perlin K. (2002), Improving noise, ACM SIGGRAPH: quintic fade curve used in the noise.</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- method-notes:end -->
         </div>
     </main>
 

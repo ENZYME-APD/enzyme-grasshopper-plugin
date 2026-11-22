@@ -51,10 +51,12 @@ namespace Enzyme.Components
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
             pManager.AddTextParameter("JSON_Payload", "JSON", "Serialized JSON.", GH_ParamAccess.item);
+            pManager.AddTextParameter("Info", "Info", "Method, assumptions, simplifications and references.", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            if (DA.Iteration == 0 && Params.Output.Count > 1) DA.SetData(1, Enzyme.Utils.MethodNotes.Info("BimJson"));
             Stopwatch sw = Stopwatch.StartNew();
 
             List<IGH_Goo> gooGuids = new List<IGH_Goo>();

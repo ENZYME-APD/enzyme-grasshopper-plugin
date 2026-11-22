@@ -58,6 +58,7 @@ namespace Enzyme.Components
 
         protected override void Solve(IGH_DataAccess DA, Stopwatch sw)
         {
+            if (DA.Iteration == 0 && Params.Output.Count > 4) DA.SetData(4, Enzyme.Utils.MethodNotes.Info("PointProbe"));
             Mesh mesh = null;
             GH_Structure<GH_Number> tree;
             var pts = new List<Point3d>();
@@ -144,7 +145,7 @@ namespace Enzyme.Components
             DA.SetDataList(1, anchors);
             DA.SetDataList(2, labels);
             DA.SetData(3, csv.ToString());
-            DA.SetData(4, InfoText);
+            DA.SetData(4, Enzyme.Utils.MethodNotes.Info("PointProbe"));
 
             var lines = new List<string> { Hud.Metric("Points", pts.Count), Hud.Metric("Sets", sets.Count) };
             if (onMesh < pts.Count) lines.Add(Hud.Metric("Off mesh", pts.Count - onMesh));

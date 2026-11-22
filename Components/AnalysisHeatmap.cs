@@ -97,6 +97,7 @@ namespace Enzyme.Components
 
         protected override void Solve(IGH_DataAccess DA, Stopwatch sw)
         {
+            if (DA.Iteration == 0 && Params.Output.Count > 9) DA.SetData(9, Enzyme.Utils.MethodNotes.Info("AnalysisHeatmap"));
             Mesh mesh = null;
             var values = new List<double>();
             if (!DA.GetData(0, ref mesh) || mesh == null || !DA.GetDataList(1, values) || values.Count == 0)
@@ -214,7 +215,7 @@ namespace Enzyme.Components
             DA.SetDataList(6, stats);
             DA.SetDataList(7, g.BandArea);
             DA.SetData(8, LegendJson(g, mode, scheme, stops, title, totalArea));
-            DA.SetData(9, InfoText);
+            DA.SetData(9, Enzyme.Utils.MethodNotes.Info("AnalysisHeatmap"));
 
             var lines = new List<string>
             {

@@ -66,6 +66,7 @@ namespace Enzyme.Components
 
         protected override void Solve(IGH_DataAccess DA, Stopwatch sw)
         {
+            if (DA.Iteration == 0 && Params.Output.Count > 4) DA.SetData(4, Enzyme.Utils.MethodNotes.Info("ReportMetricsExport"));
             string module = "C1"; DA.GetData(0, ref module);
             var dash = new List<string>(); DA.GetDataList(1, dash);
             var prefixes = new List<string>(); DA.GetDataList(2, prefixes);
@@ -153,7 +154,7 @@ namespace Enzyme.Components
             DA.SetDataList(1, card);
             DA.SetDataList(2, mlist);
             DA.SetData(3, written);
-            DA.SetData(4, InfoText);
+            DA.SetData(4, Enzyme.Utils.MethodNotes.Info("ReportMetricsExport"));
 
             var lines = new List<string> { Hud.Metric("Module", module), Hud.Metric("Metrics", mlist.Count) };
             if (card.Count > 0) lines.Add(Hud.Metric("Flags", reds + " red, " + ambers + " amber"));

@@ -54,6 +54,42 @@
                     </ul>
                 </div>
             </div>
+
+            <!-- method-notes:start -->
+            <h2 style="margin-top: 2rem;">Method, assumptions and simplifications</h2>
+            <p style="color: var(--text-secondary);">The same notes appear in the component's <strong>Info</strong> output.</p>
+            <div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
+                    <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Reads a legend payload from Color Legend: the standard JSON string (Title, Type, Colors, Labels, SubLabels) from analysis components, or two older object formats (slope threshold and height range).</li>
+                        <li>Gradient legends: a strip 1 × Scale wide and 0.5 × Scale high is split into 10 to 40 swatches (4 per colour stop) coloured by linear interpolation between all stops; the first two Labels go at the left and right ends and the first SubLabel below the centre.</li>
+                        <li>Blocks legends: one swatch per colour. With one label more than colours, labels sit on the band edges; with one label per colour (more than 2 colours) they sit under each block, staggered on two rows; otherwise the first and last labels go at the ends.</li>
+                        <li>Outputs the swatch rectangles, labels, label points and colours, and previews filled swatches with Arial text 0.2 × Scale high. The title sits above the strip at Base Point.</li>
+                    </ol>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Legend is drawn in the World XY plane at Base Point; Scale is in model units.</li>
+                        <li>Other legend types (for example Binary or Discrete) are not drawn: only the title appears.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Text is a viewport preview only; the Labels and Label Positions outputs are needed to bake text.</li>
+                        <li>If the JSON cannot be parsed a single error label is returned.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Workflow</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Dashboard Data or Color Legend output of an analysis component (Terrain Slope, wind, streamlines, etc.) -&gt; Color Legend.</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- method-notes:end -->
         </div>
     </main>
 

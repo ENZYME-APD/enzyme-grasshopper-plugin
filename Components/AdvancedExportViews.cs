@@ -85,6 +85,7 @@ namespace Enzyme.Components
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            if (DA.Iteration == 0 && Params.Output.Count > 2) DA.SetData(2, Enzyme.Utils.MethodNotes.Info("AdvancedExportViews"));
             var sw = System.Diagnostics.Stopwatch.StartNew();
             bool run = false;
             DA.GetData("Run", ref run);
@@ -196,7 +197,7 @@ namespace Enzyme.Components
                 "HOW IT WORKS:\n" +
                 "This component acts as an automated state-machine. It cycles through the provided 'GH States' and 'Views', pausing to let Grasshopper generate the new geometry, and then captures high-res images directly to your specified folder.\n\n" +
                 "Wire the 'Current GH State' output to your Canvas State Manager to animate your definitions safely.";
-            DA.SetData(2, info);
+            DA.SetData(2, Enzyme.Utils.MethodNotes.Info("AdvancedExportViews"));
             
             sw.Stop();
             Hud.Done(this, sw.Elapsed.TotalMilliseconds, $"{_statusInfo}");

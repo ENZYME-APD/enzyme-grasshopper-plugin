@@ -70,6 +70,7 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
 
         protected override void Solve(IGH_DataAccess DA, System.Diagnostics.Stopwatch hudSw)
         {
+            if (DA.Iteration == 0 && Params.Output.Count > 9) DA.SetData(9, Enzyme.Utils.MethodNotes.Info("TerrainSections"));
             var t_start = System.Diagnostics.Stopwatch.StartNew();
             
             GH_Structure<GH_Mesh> targetMeshes = new GH_Structure<GH_Mesh>();
@@ -119,7 +120,7 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
                         var m = ghMesh.Value.DuplicateMesh();
                         m.Transform(xformToRot);
                         globalRotBB.Union(m.GetBoundingBox(true));
-                                            DA.SetData(9, "TERRAIN SECTIONS\n" + "\n" + "HOW IT WORKS:\n" + "Slices the 3D terrain mesh using a configurable grid of X and Y planes, extracting both 3D contours 'in-place' and cleanly unrolled 2D flat profiles.\n\n" + "INTERPRETATION & IMPORTANCE:\n" + "Standard architectural deliverable. Allows designers and engineers to understand the topographic profile across the entire site, which is vital for designing stepped foundations and underground structures.");
+                                            DA.SetData(9, Enzyme.Utils.MethodNotes.Info("TerrainSections"));
                     }
                 }
             }

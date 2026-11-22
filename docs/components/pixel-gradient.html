@@ -50,15 +50,55 @@
                     </ul>
                 </div>
                 <div class="io-col">
-                    <h3>Outputs (4)</h3>
+                    <h3>Outputs (5)</h3>
                     <ul>
                         <li><strong>panel_mesh</strong> (Mesh): Consolidated panels</li>
                         <li><strong>panel_colors</strong> (Colour): Panel colors</li>
                         <li><strong>panel_tags</strong> (Text): Panel tags</li>
                         <li><strong>panel_geometry</strong> (Curve): Panel geometry curves</li>
+                        <li><strong>Info</strong> (Text): Method, assumptions, simplifications and references.</li>
                     </ul>
                 </div>
             </div>
+
+            <!-- method-notes:start -->
+            <h2 style="margin-top: 2rem;">Method, assumptions and simplifications</h2>
+            <p style="color: var(--text-secondary);">The same notes appear in the component's <strong>Info</strong> output.</p>
+            <div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
+                    <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>For every cell curve in Grid Cells, the bounding-box centre is read on the chosen axis (0 = X, 1 = Y, 2 = Z). These values are normalised between the minimum and maximum over all cells in all branches to a parameter t from 0 to 1.</li>
+                        <li>If jitter_pct is above 0, a random offset uniformly in ± jitter_pct / 200 is added to t; t is clamped and the colour is picked by stepping: index = floor(t × number of gradient_colors). There is no blending between colours.</li>
+                        <li>If accent_color is set and accent_pct is above 0, each cell is replaced by the accent colour with probability accent_pct / 100.</li>
+                        <li>Each cell polyline is scaled about its bounding-box centre by inset_factor (clamped 0 to 1) and meshed as a triangle fan from that centre. Cells of the same colour in a branch are merged into one mesh, tagged Tile n (n = position of the colour in gradient_colors) or Accent Tile.</li>
+                        <li>When bake_trigger is true, meshes are baked to Rhino on layers Tiles::HexFacade_TileN with a matching layer material, grouped per branch, with user strings ElefrontBakeName, Surface_Path, Surface_ID and Material_Tag. Objects previously baked with the same bake_name are deleted first.</li>
+                    </ol>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Grid cells are closed polylines (at least 3 distinct vertices); other curves are skipped.</li>
+                        <li>Cells are star-shaped from their bounding-box centre (convex cells such as rectangles or hexagons), so the triangle fan does not fold.</li>
+                        <li>The random generator uses a fixed seed (42), so the same inputs always give the same pattern.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Colour depends only on the cell centre position along one world axis, not on distance along the facade or on the surface parametrisation.</li>
+                        <li>The random pattern changes if cells are added, removed or reordered, because each cell draws from one shared random sequence in input order.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Workflow</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Facade grid cells (for example from a panelling component) -&gt; Grid Cells; a list of swatches -&gt; gradient_colors.</li>
+                        <li>panel_tags and the HUD counts give a tile schedule per colour.</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- method-notes:end -->
         </div>
     </main>
 

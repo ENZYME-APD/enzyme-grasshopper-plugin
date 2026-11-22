@@ -57,10 +57,12 @@ namespace Enzyme.Components
             pManager.AddLineParameter("Lines", "L", "Lines", GH_ParamAccess.tree);
             pManager.AddIntegerParameter("Categories", "C", "Categories", GH_ParamAccess.tree);
             pManager.AddPlaneParameter("LabelPlanes", "P", "Label Planes", GH_ParamAccess.tree);
+            pManager.AddTextParameter("Info", "Info", "Method, assumptions, simplifications and references.", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            if (DA.Iteration == 0 && Params.Output.Count > 4) DA.SetData(4, Enzyme.Utils.MethodNotes.Info("Clearance"));
             List<Curve> outlines = new List<Curve>();
             if (!DA.GetDataList(0, outlines)) return;
 

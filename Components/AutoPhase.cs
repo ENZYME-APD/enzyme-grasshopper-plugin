@@ -47,10 +47,12 @@ namespace Enzyme.Components
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
         {
             pManager.AddTextParameter("Log", "Log", "Execution log", GH_ParamAccess.list);
+            pManager.AddTextParameter("Info", "Info", "Method, assumptions, simplifications and references.", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            if (DA.Iteration == 0 && Params.Output.Count > 1) DA.SetData(1, Enzyme.Utils.MethodNotes.Info("AutoPhase"));
             List<Grasshopper.Kernel.Types.IGH_Goo> goos = new List<Grasshopper.Kernel.Types.IGH_Goo>();
             if (!DA.GetDataList(0, goos)) return;
             

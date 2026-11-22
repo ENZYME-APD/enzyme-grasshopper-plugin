@@ -35,6 +35,7 @@ namespace Enzyme.Components
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            if (DA.Iteration == 0 && Params.Output.Count > 0) DA.SetData(0, Enzyme.Utils.MethodNotes.Info("ActivateViewSettings"));
             var sw = System.Diagnostics.Stopwatch.StartNew();
             
             bool run = false;
@@ -126,7 +127,7 @@ namespace Enzyme.Components
                 activeView.Redraw();
             }
 
-            DA.SetData(0, info);
+            DA.SetData(0, Enzyme.Utils.MethodNotes.Info("ActivateViewSettings"));
 
             sw.Stop();
             Hud.Done(this, sw.Elapsed.TotalMilliseconds, $"View: {statusView}\nStyle: {statusStyle}\nLayer: {statusLayer}");

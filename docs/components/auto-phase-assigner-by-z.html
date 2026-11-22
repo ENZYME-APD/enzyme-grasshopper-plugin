@@ -43,12 +43,51 @@
                     </ul>
                 </div>
                 <div class="io-col">
-                    <h3>Outputs (1)</h3>
+                    <h3>Outputs (2)</h3>
                     <ul>
                         <li><strong>Log</strong> (Text): Execution log</li>
+                        <li><strong>Info</strong> (Text): Method, assumptions, simplifications and references.</li>
                     </ul>
                 </div>
             </div>
+
+            <!-- method-notes:start -->
+            <h2 style="margin-top: 2rem;">Method, assumptions and simplifications</h2>
+            <p style="color: var(--text-secondary);">The same notes appear in the component's <strong>Info</strong> output.</p>
+            <div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
+                    <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>When Run is True, each referenced Rhino object is read with its User Text keys BuildingID (default Building_01), TowerID (default Main) and Type; objects with Type = core are skipped.</li>
+                        <li>Blocks are grouped by BuildingID. A block whose TowerID contains podium (any case) is a podium block; the others are grouped by TowerID.</li>
+                        <li>Podium blocks of a building are sorted by the lowest Z of their bounding box and numbered 0, 1, 2...</li>
+                        <li>Each tower's blocks are sorted by lowest Z and numbered from the last podium phase + 1 upwards. All towers of a building start from the same number, so towers rise in parallel.</li>
+                        <li>The number is written to the object's Phase User Text and committed to the Rhino document; the Log lists every assignment.</li>
+                    </ol>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Each object is one block (one stacking step) and its bounding-box bottom is its level.</li>
+                        <li>Podium blocks are recognised only by the word podium in TowerID.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Blocks at the same Z in one group get consecutive phases in input order, not the same phase.</li>
+                        <li>Phase is a simple vertical sequence; no construction logic, areas or dates.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Workflow</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Referenced massing blocks with User Text -&gt; Guids; Button -&gt; Run.</li>
+                        <li>Then BIM Attribute Serializer reads the Phase key to stack blocks.</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- method-notes:end -->
         </div>
     </main>
 

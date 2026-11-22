@@ -46,12 +46,54 @@
                     </ul>
                 </div>
                 <div class="io-col">
-                    <h3>Outputs (1)</h3>
+                    <h3>Outputs (2)</h3>
                     <ul>
                         <li><strong>JSON_Payload</strong> (Text): Universal Data Format payload</li>
+                        <li><strong>Info</strong> (Text): Method, assumptions, simplifications and references.</li>
                     </ul>
                 </div>
             </div>
+
+            <!-- method-notes:start -->
+            <h2 style="margin-top: 2rem;">Method, assumptions and simplifications</h2>
+            <p style="color: var(--text-secondary);">The same notes appear in the component's <strong>Info</strong> output.</p>
+            <div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
+                    <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Each FloorBreps item is one floor volume. Its bounding box gives the bottom (MinZ) and top (MaxZ); the Brep is cut by a horizontal plane 0.01 m above MinZ and the largest closed section curve is taken as the floor outline (moved back down to MinZ).</li>
+                        <li>Floors are grouped by BuildingNames, then by TowerIDs, and each tower is sorted bottom to top.</li>
+                        <li>Gap healing: when the base of a floor is within SnapTolerance (default 0.15 m) of the top of the floor below, above or below it, but more than 1 mm off, its base is snapped to that top. Floor height = MaxZ minus the healed base.</li>
+                        <li>The building base (true_base_elevation) is the lowest healed base in the building; every floor gets base_z = healed base minus building base, rounded to 1 mm.</li>
+                        <li>The outline is written as line, arc or polyline segments: the curve is first converted to arcs and lines (0.05 tolerance), then segments that are linear or arcs within 0.001 are stored exactly and anything else is polylined (0.01 tolerance). Coordinates are rounded to 4 decimals.</li>
+                        <li>Output: one JSON block per floor (floors = 1, floor_height, base_z, program, tower_id, boundary_segments), grouped per building.</li>
+                    </ol>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Every Brep is exactly one storey and the list is flat; Programs, TowerIDs and BuildingNames match it item by item (missing items default to Mixed_Use, Main_Mass and Building_01).</li>
+                        <li>Floors of a tower are vertical extrusions, so the outline 0.01 m above the base represents the whole floor.</li>
+                        <li>Model units are metres (the 0.01 slice offset and the 0.15 m default tolerance are absolute).</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Only the largest closed section is kept: courtyards, holes and second pieces of the same floor are dropped.</li>
+                        <li>Floors whose slice gives no curve are skipped without a warning.</li>
+                        <li>Healing changes base_z and floor_height only; the outline geometry keeps its original absolute coordinates, including Z.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Workflow</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Floor-by-floor massing Breps from Rhino -&gt; AD_CAKE -&gt; JSON payload for the Masterplan Engine.</li>
+                        <li>Use AD_LEGO instead when each Brep is a multi-storey block.</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- method-notes:end -->
         </div>
     </main>
 

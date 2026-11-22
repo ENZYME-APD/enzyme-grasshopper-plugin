@@ -158,7 +158,7 @@ namespace Enzyme.Components
 
             if (!run)
             {
-                DA.SetData(6, BuildInfo(null));
+                DA.SetData(6, (BuildInfo(null)) + "\n\n" + Enzyme.Utils.MethodNotes.Info("FastNoiseAnalyzer"));
                 Hud.Off(this);
                 return;
             }
@@ -401,7 +401,7 @@ namespace Enzyme.Components
             DA.SetDataList(3, testPointsIn);
             DA.SetDataList(4, testDbValues.ToList());
             DA.SetData(5, jsonOut);
-            DA.SetData(6, BuildInfo(stats));
+            DA.SetData(6, (BuildInfo(stats)) + "\n\n" + Enzyme.Utils.MethodNotes.Info("FastNoiseAnalyzer"));
 
             Hud.Done(this, sw.Elapsed.TotalMilliseconds, $"Max: {globalMaxDb:F1} dB(A)\nMin: {globalMinDb:F1} dB(A)");
         }

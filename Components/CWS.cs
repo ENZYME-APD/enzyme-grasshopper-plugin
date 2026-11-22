@@ -67,10 +67,12 @@ namespace Enzyme.Components
             pManager.AddBrepParameter("Transoms", "T", "Generated horizontal transoms.", GH_ParamAccess.tree);
             pManager.AddBrepParameter("CornerMullions", "CM", "Vertical mullions generated specifically at sharp vertices.", GH_ParamAccess.tree);
             pManager.AddBrepParameter("GlassWall", "GW", "Uncapped extruded glass surfaces.", GH_ParamAccess.tree);
+            pManager.AddTextParameter("Info", "Info", "Method, assumptions, simplifications and references.", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            if (DA.Iteration == 0 && Params.Output.Count > 4) DA.SetData(4, Enzyme.Utils.MethodNotes.Info("CWS"));
             // 1. START TIMER
             System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
 

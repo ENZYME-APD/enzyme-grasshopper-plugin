@@ -48,16 +48,61 @@
                     </ul>
                 </div>
                 <div class="io-col">
-                    <h3>Outputs (5)</h3>
+                    <h3>Outputs (6)</h3>
                     <ul>
                         <li><strong>Points</strong> (Point): Analysis points.</li>
                         <li><strong>Feels Like</strong> (Number): Perceived temperature in Celsius.</li>
                         <li><strong>Category</strong> (Text): Comfort category label.</li>
                         <li><strong>Colors</strong> (Colour): Gradient color mapping.</li>
                         <li><strong>Dashboard Data</strong> (Text): JSON Legend Data</li>
+                        <li><strong>Info</strong> (Text): Method, assumptions, simplifications and references.</li>
                     </ul>
                 </div>
             </div>
+
+            <!-- method-notes:start -->
+            <h2 style="margin-top: 2rem;">Method, assumptions and simplifications</h2>
+            <p style="color: var(--text-secondary);">The same notes appear in the component's <strong>Info</strong> output.</p>
+            <div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
+                    <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Each point takes Air Temp, Humidity, Wind Speed and Solar Factor from the lists by index (the last value is reused if a list is shorter; defaults 25 °C, 50 %, 1 m/s, 1.0).</li>
+                        <li>Method 0: Apparent Temperature AT = T + 0.33 e - 0.70 v - 4.0, e = RH/100 × 6.105 × exp(17.27 T / (237.7 + T)) hPa, plus 4 °C × Solar Factor.</li>
+                        <li>Method 1: mean radiant temperature is set to T + 15 °C × Solar Factor; UTCI is evaluated with a polynomial in T, v, Tmrt - T and vapour pressure (Magnus formula, kPa, capped at 5). T is clamped to -50..50 °C and v to 0.5..30 m/s.</li>
+                        <li>Categories: AT uses fixed bands (40, 32, 27, 20, 10, 0 °C); UTCI uses the standard stress bands from very strong heat (38+) to very strong cold (below -27).</li>
+                        <li>Colours run from dark blue at -10 °C to dark red at 40 °C through 5 fixed stops.</li>
+                    </ol>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Inputs are point values for the same moment (one hour or design condition); the points only carry the results, the tool does not look at geometry.</li>
+                        <li>Wind Speed is at 10 m height; Solar Factor 0-1 comes from a sun or shade study.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Radiation is a fixed add-on (+4 °C AT, +15 °C Tmrt in full sun), not a computed mean radiant temperature.</li>
+                        <li>No clothing, activity or local wind reduction; AT categories are not from a standard.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Workflow</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Sun Hours Analysis exposure -&gt; Solar Factor; wind results (Fast CFD) -&gt; Wind Speed; EPW hour values -&gt; Air Temp and Humidity.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">References</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Steadman R.G. (1994), Norms of apparent temperature in Australia, Australian Meteorological Magazine 43; the Australian Bureau of Meteorology apparent temperature formula.</li>
+                        <li>Bröde P. et al. (2012), Deriving the operational procedure for the Universal Thermal Climate Index (UTCI), International Journal of Biometeorology 56.</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- method-notes:end -->
         </div>
     </main>
 

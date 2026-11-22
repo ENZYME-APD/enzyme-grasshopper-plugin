@@ -58,6 +58,49 @@
                     </ul>
                 </div>
             </div>
+
+            <!-- method-notes:start -->
+            <h2 style="margin-top: 2rem;">Method, assumptions and simplifications</h2>
+            <p style="color: var(--text-secondary);">The same notes appear in the component's <strong>Info</strong> output.</p>
+            <div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
+                    <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>For each point, the Neighbours (K, default 12, minimum 4) nearest points in plan (XY) are found with an R-tree.</li>
+                        <li>A local ground plane z = a + b·dx + c·dy is fitted to the neighbours by least squares (falling back to a line fit for collinear neighbours, e.g. a road string, and to the median for a single cluster).</li>
+                        <li>Neighbours whose residual exceeds max(3 × MAD, Min Deviation) are dropped and the plane is refitted; MAD is the median absolute deviation × 1.4826 (a robust standard deviation).</li>
+                        <li>Deviation = point Z minus the plane at the point; Score = |Deviation| / max(MAD, Min Deviation / Threshold). A point is flagged when Score &gt; Threshold (default 3) and |Deviation| &gt; Min Deviation (default 0.3).</li>
+                        <li>Passes (default 2, maximum 5) repeat the test with flagged points removed from the neighbour pool, so clusters of bad shots cannot support each other; flags come from the last pass.</li>
+                    </ol>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Ground varies smoothly over the K-neighbour scale, so a local plane represents it.</li>
+                        <li>Min Deviation is in model units (metres).</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Breaklines (kerbs, walls, retaining edges) can be flagged because a plane cannot follow a step.</li>
+                        <li>Nothing is deleted: Clean and Outliers split the input; review Outliers before meshing.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Workflow</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Survey points (DWG import) -&gt; Points; Clean -&gt; Delaunay mesh or terrain components; Flags -&gt; Cull Pattern.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">References</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Rousseeuw P.J. and Croux C. (1993), Alternatives to the median absolute deviation, Journal of the American Statistical Association 88: MAD × 1.4826 as a robust standard deviation.</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- method-notes:end -->
         </div>
     </main>
 

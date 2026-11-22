@@ -46,15 +46,61 @@
                     </ul>
                 </div>
                 <div class="io-col">
-                    <h3>Outputs (4)</h3>
+                    <h3>Outputs (5)</h3>
                     <ul>
                         <li><strong>Distances</strong> (Number): Distances</li>
                         <li><strong>Lines</strong> (Line): Lines</li>
                         <li><strong>Categories</strong> (Integer): Categories</li>
                         <li><strong>LabelPlanes</strong> (Plane): Label Planes</li>
+                        <li><strong>Info</strong> (Text): Method, assumptions, simplifications and references.</li>
                     </ul>
                 </div>
             </div>
+
+            <!-- method-notes:start -->
+            <h2 style="margin-top: 2rem;">Method, assumptions and simplifications</h2>
+            <p style="color: var(--text-secondary);">The same notes appear in the component's <strong>Info</strong> output.</p>
+            <div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
+                    <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Each outline is represented by the centre of its bounding box.</li>
+                        <li>Method 0 (Delaunay): the centres are triangulated in plan (Grasshopper Delaunay, needs at least 3 outlines) and each triangle edge is a candidate neighbour pair.</li>
+                        <li>Method 1 (Proximity): pairs whose bounding boxes, grown by SearchRadius, overlap are candidates; a pair is skipped when any other centre lies closer to its mid-point than 0.85 × half the centre distance (a view-blocking test).</li>
+                        <li>For each pair the clearance is the shortest distance between the two curves (curve closest points); pairs farther than SearchRadius are dropped.</li>
+                        <li>Category = 0 if distance &lt; L1, 1 if L1 &lt;= distance &lt;= L2, 2 if greater; LabelPlanes sit at the mid-point of each clearance line, rotated to read left to right.</li>
+                        <li>Each pair is listed once, in the branch of the first outline of the pair.</li>
+                    </ol>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Outlines are closed plan curves at the same level; distances are 3D, so curves at different heights include the vertical offset.</li>
+                        <li>Model units are metres (defaults SearchRadius 200, L1 50, L2 100).</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Neighbours are chosen from bounding-box centres, not true centroids or the outline shapes, so long or L-shaped towers can miss a near neighbour.</li>
+                        <li>Overlapping or touching outlines give 0 m clearance; no check for containment.</li>
+                        <li>With fewer than 3 outlines the Delaunay method returns nothing without a warning.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Workflow</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Tower footprints -&gt; Outlines. Lines and Categories -&gt; custom preview or Analysis Dashboard; LabelPlanes and Distances -&gt; text tags.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">References</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Delaunay B. (1934), Sur la sphère vide: Delaunay triangulation.</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- method-notes:end -->
         </div>
     </main>
 

@@ -46,12 +46,53 @@
                     </ul>
                 </div>
                 <div class="io-col">
-                    <h3>Outputs (1)</h3>
+                    <h3>Outputs (2)</h3>
                     <ul>
                         <li><strong>JSON_Payload</strong> (Text): Output JSON Payload</li>
+                        <li><strong>Info</strong> (Text): Method, assumptions, simplifications and references.</li>
                     </ul>
                 </div>
             </div>
+
+            <!-- method-notes:start -->
+            <h2 style="margin-top: 2rem;">Method, assumptions and simplifications</h2>
+            <p style="color: var(--text-secondary);">The same notes appear in the component's <strong>Info</strong> output.</p>
+            <div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
+                    <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Massing Breps are grouped by BuildingNames (default Building_01); each building takes its base level from the lowest bounding-box Z of its Breps and its top from the highest.</li>
+                        <li>RecipeJSON is a list of objects with floors, program and height (defaults 1, Office, 4.0 m); each object is expanded into that many floors, stacked upwards from the building base.</li>
+                        <li>Floor levels are added while the level is more than 0.1 m below the building top; when the recipe runs out the stack stops, unless RepeatLast is True, in which case the last floor type repeats to the top.</li>
+                        <li>Each Brep is cut by a horizontal plane 0.01 m above every floor level that lies inside its own bounding box (0.05 m tolerance); the section curves are dropped back by 0.01 m.</li>
+                        <li>Section curves are rationalised to arcs and lines (tolerance 0.05 m, angle 0.1 rad, segments 0.1 to 1000 m) and each segment is written as Line, Arc (start, mid, end) or Polyline (0.01 m tolerance), with coordinates rounded to 4 decimals.</li>
+                        <li>Every section becomes one block with name Floor_relative level_TowerID, tower_id, program, floor_height, floors = 1 and base_z relative to the building base; the JSON_Payload lists buildings with true_base_elevation and their blocks.</li>
+                    </ol>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Model units are metres; the default floor height is 4.0 m.</li>
+                        <li>TowerIDs and BuildingNames are parallel to Massing; missing entries fall back to Main_Mass and Building_01.</li>
+                        <li>All Breps of one building share one floor grid measured from the lowest Brep of that building.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>One block per section curve and per floor: floors are not merged into multi-floor blocks.</li>
+                        <li>Free-form section curves are approximated by arcs, lines and polylines.</li>
+                        <li>Breps that do not reach a grid level inside their own height get no section at that level, so a Brep that starts between grid levels loses its lowest part.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Workflow</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Massing Breps (with tower and building names) -&gt; AD_SCULPT -&gt; Masterplan Engine (JSON payload).</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- method-notes:end -->
         </div>
     </main>
 

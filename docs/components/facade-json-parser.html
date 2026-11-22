@@ -47,15 +47,51 @@
                     </ul>
                 </div>
                 <div class="io-col">
-                    <h3>Outputs (4)</h3>
+                    <h3>Outputs (5)</h3>
                     <ul>
                         <li><strong>BoundsExt</strong> (Curve): Open Exterior Physical Lines</li>
                         <li><strong>BoundsClosed</strong> (Curve): Closed Master Polygon for orientation</li>
                         <li><strong>Heights</strong> (Number): Floor-to-floor height</li>
                         <li><strong>Programs</strong> (Text): Tags/Labels</li>
+                        <li><strong>Info</strong> (Text): Method, assumptions, simplifications and references.</li>
                     </ul>
                 </div>
             </div>
+
+            <!-- method-notes:start -->
+            <h2 style="margin-top: 2rem;">Method, assumptions and simplifications</h2>
+            <p style="color: var(--text-secondary);">The same notes appear in the component's <strong>Info</strong> output.</p>
+            <div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
+                    <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Expects JSON of the form building -&gt; program -&gt; list of floors, each floor with tower_id, floor_index, true_z, height, BoundsClosed and BoundsExt (segment lists of Line, Arc or Polyline).</li>
+                        <li>Buildings, programs, towers and levels are filtered. Text filters match if any entry matches: ExactMatch True needs equal text (case-insensitive); otherwise the entry is contained in the name, or used as a wildcard pattern with * and ?.</li>
+                        <li>Segments are rebuilt and joined (0.01 tolerance); BoundsClosed takes the first joined curve and closes it if open. All curves are moved up by true_z.</li>
+                        <li>For every exterior curve one item is output in each tree: the curve, the closed outline, the floor height and a label building | tower | program - Lvl n. Branch paths are (building index; program index).</li>
+                    </ol>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>The JSON is a facade export with the keys above (not the BIM Attribute Serializer payload).</li>
+                        <li>Segment coordinates are relative to the floor level; true_z gives the absolute level.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Missing true_z or height read as 0; missing floor_index reads as -1.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Workflow</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Facade JSON text -&gt; Facade_JSON; BoundsExt and Heights -&gt; facade modules such as Facade Module: Vertical Fins or Rhythmic Balconies.</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- method-notes:end -->
         </div>
     </main>
 

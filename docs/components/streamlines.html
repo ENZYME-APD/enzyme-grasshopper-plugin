@@ -63,6 +63,52 @@
                     </ul>
                 </div>
             </div>
+
+            <!-- method-notes:start -->
+            <h2 style="margin-top: 2rem;">Method, assumptions and simplifications</h2>
+            <p style="color: var(--text-secondary);">The same notes appear in the component's <strong>Info</strong> output.</p>
+            <div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
+                    <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Field: if FieldPoints lie on a regular XY lattice (holes allowed, spacing = most common gap between coordinates, 5 % tolerance), vectors are read with bilinear interpolation from the 4 surrounding cells, needing at least 3 of them. Otherwise inverse distance weighting with weights 1 / d² over points within SearchRadius in plan is used.</li>
+                        <li>Only the X and Y components of FieldVectors are used; the ground height Z is interpolated the same way so lines drape over the field points.</li>
+                        <li>From each SeedPoint a line is integrated with 4th-order Runge-Kutta on the unit direction field, so each step advances StepSize along the line; Direction 1 traces upstream and downstream and joins them, 0 downstream only, −1 upstream only.</li>
+                        <li>A line stops when it leaves the field (or reaches a missing grid cell such as a building), local speed drops below MinSpeed, it stalls, it returns within StepSize / 2 of its seed after more than 8 steps, or after MaxSteps.</li>
+                        <li>Points are lifted by MoveUp. Speeds are the local vector magnitudes at each vertex; with TubeRadius above 0 a 6-sided tube mesh is built, coloured by speed between the overall minimum and maximum using Palette (default Wind).</li>
+                    </ol>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>FieldVectors are velocities in m/s (MinSpeed and the legend use m/s).</li>
+                        <li>The flow is essentially horizontal (2.5D).</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Steady field: lines are streamlines of a single snapshot, not particle paths through time-varying flow.</li>
+                        <li>Inverse distance weighting smooths the field and does not respect obstacles; with scattered points lines stop at buildings only if no field point lies within SearchRadius.</li>
+                        <li>Tube colours are relative to the speed range of this run.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Workflow</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Fast CFD or a wind engine grid points and vectors -&gt; FieldPoints and FieldVectors; seed points along the upwind edge -&gt; SeedPoints.</li>
+                        <li>Tubes -&gt; preview; Dashboard Data -&gt; Legend Geometry.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">References</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Press W.H. et al., Numerical Recipes: classical 4th-order Runge-Kutta integration.</li>
+                        <li>Shepard D. (1968), A two-dimensional interpolation function for irregularly-spaced data (inverse distance weighting).</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- method-notes:end -->
         </div>
     </main>
 

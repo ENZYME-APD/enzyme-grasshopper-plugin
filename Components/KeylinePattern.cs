@@ -55,6 +55,7 @@ namespace Enzyme.Components
 
         protected override void Solve(IGH_DataAccess DA, System.Diagnostics.Stopwatch hudSw)
         {
+            if (DA.Iteration == 0 && Params.Output.Count > 1) DA.SetData(1, Enzyme.Utils.MethodNotes.Info("KeylinePattern"));
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             Mesh terrain = null;
             if (!DA.GetData(0, ref terrain) || terrain == null) return;
@@ -125,13 +126,7 @@ namespace Enzyme.Components
             metrics.Add(new JObject { ["Name"] = "Total Length", ["Value"] = $"{totalLen:F1} m" });
             payload["Metrics"] = metrics;
             
-            DA.SetData(1, "KEYLINE PATTERN\n"
-                + "\n"
-                + "METHODOLOGY:\n"
-                + "Generates agricultural earthworks (swales, plow lines) via contour-parallel offsetting originating from the Master Keyline. "
-                + "Because hills naturally spread apart while valleys converge, offsetting downward from the keyline naturally creates a slightly off-contour geometry with a constant fall toward the ridges.\n\n"
-                + "INTERPRETATION & IMPORTANCE:\n"
-                + "Passively rehydrates landscapes without pumping by naturally intercepting surface runoff and distributing it from wet valleys out to dry ridges, maximizing soil moisture infiltration.");
+            DA.SetData(1, Enzyme.Utils.MethodNotes.Info("KeylinePattern"));
             DA.SetData(2, payload.ToString(Newtonsoft.Json.Formatting.None));
 
             DA.SetDataList(0, keylines);

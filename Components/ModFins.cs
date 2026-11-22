@@ -56,10 +56,12 @@ namespace Enzyme.Masterplan
             pManager.AddBrepParameter("Glass", "G", "Vision Glass", GH_ParamAccess.tree);
             pManager.AddBrepParameter("Spandrels", "S", "Spandrels", GH_ParamAccess.tree);
             pManager.AddBrepParameter("Fins", "F", "Fins", GH_ParamAccess.tree);
+            pManager.AddTextParameter("Info", "Info", "Method, assumptions, simplifications and references.", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            if (DA.Iteration == 0 && Params.Output.Count > 3) DA.SetData(3, Enzyme.Utils.MethodNotes.Info("ModFins"));
             var watch = System.Diagnostics.Stopwatch.StartNew();
 
             GH_Structure<GH_Curve> boundsTree;

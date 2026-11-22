@@ -136,6 +136,7 @@ namespace Enzyme.Components
 
         protected override void Solve(IGH_DataAccess DA, System.Diagnostics.Stopwatch hudSw)
         {
+            if (DA.Iteration == 0 && Params.Output.Count > 8) DA.SetData(8, Enzyme.Utils.MethodNotes.Info("ThermalComfortAnalyzer"));
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             var sw = System.Diagnostics.Stopwatch.StartNew();
 
@@ -382,15 +383,7 @@ namespace Enzyme.Components
             DA.SetDataList(6, comfortValues);
             DA.SetDataList(7, comfortColors);
 
-            DA.SetData(8, "HIGROTHERMAL COMFORT\n"
-                + "\n"
-                + "METHODOLOGY (STEADMAN 1994):\n"
-                + "Calculates Apparent Temperature (AT) combining ambient dry-bulb temperature, relative humidity, and wind speed. "
-                + "Vapor pressure is derived using e = (RH/100) * 6.105 * exp(17.27*T / (237.7+T)). "
-                + "AT is calculated as T + 0.33*e - 0.70*v - 4.00 (where v is wind speed in m/s).\n\n"
-                + "INTERPRETATION & IMPORTANCE:\n"
-                + "Best/Worst points flag where pedestrian comfort is strongest or weakest relative to IdealTemperature. "
-                + "Use this after wind analysis to verify whether high-speed corridors or sheltered wakes improve or degrade outdoor comfort.");
+            DA.SetData(8, Enzyme.Utils.MethodNotes.Info("ThermalComfortAnalyzer"));
 
             sw.Stop();
             if (execute)

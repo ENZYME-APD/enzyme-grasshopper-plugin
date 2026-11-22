@@ -124,6 +124,60 @@
                 </div>
             </div>
 
+            <!-- method-notes:start -->
+            <h2 style="margin-top: 2rem;">Method, assumptions and simplifications</h2>
+            <p style="color: var(--text-secondary);">The same notes appear in the component's <strong>Info</strong> output.</p>
+            <div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
+                    <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>A regular plan grid of CellSize cells (minimum 0.5 m, at most 100,000 cells) covers BoundaryMask or the terrain. Each cell centre is draped onto TerrainMesh at AnalysisHeight; cells whose draped point is inside a closed ContextMeshes mesh are solid.</li>
+                        <li>Inflow speed = WindSpeed × (AnalysisHeight / RefHeight)^0.25 (power law, only when AnalysisHeight &lt; RefHeight), in the direction of WindVector or of Direction and North.</li>
+                        <li>The initial field is the inflow scaled by a terrain factor 1 + 0.5 × slope along the wind, clamped to 0.7 to 1.4.</li>
+                        <li>Each time step solves 2D incompressible flow in the style of Stam's Stable Fluids: semi-Lagrangian advection (Courant number 0.5), implicit Jacobi diffusion with Viscosity (10 passes), and pressure projection by red-black SOR (ω = 1.6, 12 to 40 passes) with zero velocity in solid cells and zero-gradient pressure at their faces.</li>
+                        <li>Inflow is imposed on the two upwind domain edges and zero-gradient outflow with p = 0 on the downwind edges; ground drag multiplies speeds by exp(−Friction / max(0.5, AnalysisHeight) × Δt) each step.</li>
+                        <li>Steps = max(Iterations, min(250, 3 × cells along the longest side)); after that many steps the run stops early once the largest change on a sample of cells is below 0.005 m/s.</li>
+                        <li>Turbulence intensity per cell comes from a Smagorinsky estimate (Cs = 0.12): k = (0.12 × CellSize × strain rate)², σ = √(2k/3), TI = σ / speed; a gust speed = speed × (1 + 1.2 × TI) is classed with Lawson-style limits 4, 6, 8 and 10 m/s.</li>
+                        <li>Outputs: coloured WindMesh (0 to 1.5 × inflow speed), points, vectors and speeds outside buildings and inside the mask, VertexSpeeds (NaN in buildings), BuildingMask, Dashboard Data and Info.</li>
+                    </ol>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Model units are metres and the wind speed is a mean speed measured at RefHeight (default 10 m).</li>
+                        <li>The power-law exponent 0.25 fits suburban or wooded terrain; open or dense urban terrain would need another exponent.</li>
+                        <li>Buildings are closed meshes; anything shorter than AnalysisHeight above the terrain is not an obstacle.</li>
+                        <li>One steady wind direction and speed are analysed.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>2.5D: one horizontal layer at pedestrian height. No vertical flow, so downwash from tall buildings, roof overflow and thermal effects are missing.</li>
+                        <li>Not a validated CFD: no turbulence model in the momentum equations, coarse grids, and comfort classes from one wind scenario instead of an annual exceedance analysis.</li>
+                        <li>Gust factor speed × (1 + 1.2 × TI) is a heuristic and is not the gust-equivalent mean used by Lawson LDDC criteria.</li>
+                        <li>The terrain slope factor only sets the initial field; inflow and advection replace it as the domain is flushed.</li>
+                        <li>Cells where the ray misses the terrain are kept as open flow cells at the domain floor level.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Workflow</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Terrain mesh -&gt; TerrainMesh; building meshes -&gt; ContextMeshes; EPW or Wind Rose direction -&gt; Direction.</li>
+                        <li>WindMesh and VertexSpeeds -&gt; Analysis Heatmap or Analysis Difference; Dashboard Data -&gt; Analysis Dashboard.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">References</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Stam J. (1999), Stable Fluids, SIGGRAPH 99: semi-Lagrangian advection and pressure projection.</li>
+                        <li>Smagorinsky J. (1963), General circulation experiments with the primitive equations, Monthly Weather Review 91(3).</li>
+                        <li>Lawson T.V. (2001), Building Aerodynamics, Imperial College Press: pedestrian comfort criteria.</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- method-notes:end -->
+
             <h2 style="margin-top: 2rem;">Best Practices & Guidelines</h2>
             <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem;">
                 <ul style="padding-left: 1.5rem; line-height: 1.8;">

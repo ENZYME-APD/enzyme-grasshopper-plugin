@@ -53,6 +53,7 @@ namespace Enzyme.Components
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            if (DA.Iteration == 0 && Params.Output.Count > 4) DA.SetData(4, Enzyme.Utils.MethodNotes.Info("TurntableCamera"));
             Point3d target = Point3d.Origin;
             double radius = 100.0;
             double elevation = 50.0;
@@ -177,12 +178,7 @@ namespace Enzyme.Components
             
             Message = Hud.Build(this.NickName, $"{_lastExportDuration}", new[] { $"Last: {_lastExportDate}", $"Frames: {_lastExportFrames}" });
 
-            DA.SetData(4, "TURNTABLE CAMERA ENGINE\n"
-                + "\n"
-                + "METHODOLOGY:\n"
-                + "Calculates an orbital path around the target point and locks the active Rhino viewport camera to each step. Uses Enzyme's Advanced Export Engine settings to dump high-resolution imagery per frame.\n\n"
-                + "INTERPRETATION & IMPORTANCE:\n"
-                + "Perfect for architectural and product presentations, creating seamless rotating GIFs or video sequences of your Grasshopper geometry in its final display state.");
+            DA.SetData(4, Enzyme.Utils.MethodNotes.Info("TurntableCamera"));
         }
 
         public override void AddedToDocument(GH_Document document)

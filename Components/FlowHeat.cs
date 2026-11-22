@@ -59,6 +59,7 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
 
         protected override void Solve(IGH_DataAccess DA, System.Diagnostics.Stopwatch hudSw)
         {
+            if (DA.Iteration == 0 && Params.Output.Count > 2) DA.SetData(2, Enzyme.Utils.MethodNotes.Info("FlowHeat"));
             var watch = System.Diagnostics.Stopwatch.StartNew();
             
             Mesh terrainMesh = null;
@@ -139,7 +140,7 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
                 "[OUTPUTS]\n" +
                 "HeatmapMesh  : Mesh (Item Access) - Colorized mesh displaying flow accumulation.\n" +
                 "VertexCounts : int (Tree Access) - Raw numerical data of water traffic mapped 1-to-1 with mesh vertices.";
-            DA.SetData(2, instructions);
+            DA.SetData(2, Enzyme.Utils.MethodNotes.Info("FlowHeat"));
 
             watch.Stop();
             double durationMs = watch.Elapsed.TotalMilliseconds;

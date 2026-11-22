@@ -45,6 +45,7 @@ namespace Enzyme.Components
 
         protected override void Solve(IGH_DataAccess DA, System.Diagnostics.Stopwatch hudSw)
         {
+            if (DA.Iteration == 0 && Params.Output.Count > 3) DA.SetData(3, Enzyme.Utils.MethodNotes.Info("GlobalFloodEngine"));
             Mesh TerrainMesh = null;
             if (!DA.GetData(0, ref TerrainMesh)) return;
 
@@ -207,7 +208,7 @@ namespace Enzyme.Components
                 "- Boundary Condition: 0 (Closed) forces water to pool at the edges of the mesh. 1 (Open) allows water to naturally drain off the map.\n\n" +
                 "INTERPRETATION & IMPORTANCE:\n" +
                 "Essential for flood risk assessment. Reveals trapped water areas, calculates retention pond volumes, and shows submerged regions during storms. It shows the 'destination' of water.";
-            DA.SetData(3, info);
+            DA.SetData(3, Enzyme.Utils.MethodNotes.Info("GlobalFloodEngine"));
 
             sw.Stop();
             Hud.Done(this, sw.Elapsed.TotalMilliseconds, $"● Flooded: {floodedVertexCount} | ○ Dry: {numVertices - floodedVertexCount}");

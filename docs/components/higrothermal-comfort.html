@@ -65,6 +65,51 @@
                     </ul>
                 </div>
             </div>
+
+            <!-- method-notes:start -->
+            <h2 style="margin-top: 2rem;">Method, assumptions and simplifications</h2>
+            <p style="color: var(--text-secondary);">The same notes appear in the component's <strong>Info</strong> output.</p>
+            <div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
+                    <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Apparent temperature (Steadman, shade version as used by the Australian Bureau of Meteorology): e = (RH / 100) × 6.105 × exp(17.27 T / (237.7 + T)) hPa, AT = T + 0.33 e − 0.70 v − 4.00 °C, with T = Temperature, RH = Humidity and v = each VelocityValues speed.</li>
+                        <li>Best / Worst: for each TagPoint the deviation |AT − IdealTemperature| is computed; points within ComfortTolerance × (max − min deviation) of the smallest deviation are Best, those within it of the largest are Worst.</li>
+                        <li>ComfortMesh: each TerrainMesh vertex takes the AT of its nearest TagPoint (hash-grid search on the tag points' plan extent, brute force as a fallback).</li>
+                        <li>Vertex colours are the deviation scaled between the mesh minimum and maximum, on CustomColors or a default green to red ramp.</li>
+                    </ol>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Temperature and Humidity are single values for the whole site; only wind varies in space.</li>
+                        <li>VelocityValues are mean wind speeds in m/s matched index by index to TagPoints.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>No solar or long-wave radiation, clothing or activity: shade AT only, so sunny and shaded spots read the same.</li>
+                        <li>Colours are relative to the run (min to max deviation), not an absolute comfort scale.</li>
+                        <li>The mesh mapping is nearest-sample, not interpolated, so the colouring shows steps at the sample spacing.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Workflow</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Fast CFD or wind engine TagPoints and VelocityValues -&gt; TagPoints, VelocityValues; terrain -&gt; TerrainMesh.</li>
+                        <li>ComfortValues -&gt; Analysis Heatmap for UTCI-style bands; Dashboard Data -&gt; Analysis Dashboard.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">References</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Steadman R.G. (1994), Norms of apparent temperature in Australia, Australian Meteorological Magazine 43.</li>
+                        <li>Australian Bureau of Meteorology, Thermal comfort observations: apparent temperature formula.</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- method-notes:end -->
         </div>
     </main>
 

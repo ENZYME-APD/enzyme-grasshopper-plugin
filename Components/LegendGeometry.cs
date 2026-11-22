@@ -141,6 +141,7 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            if (DA.Iteration == 0 && Params.Output.Count > 4) DA.SetData(4, Enzyme.Utils.MethodNotes.Info("LegendGeometry"));
             var hudSw = System.Diagnostics.Stopwatch.StartNew();
             // Input variables
             object legendData = null;
@@ -196,7 +197,7 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
             DA.SetDataList(2, result.LabelPositions);
             DA.SetDataList(3, result.Colors);
             Hud.Done(this, hudSw, Hud.Metric("Swatches", result.Rectangles.Count), Hud.Metric("Scale", scale, "", 2));
-                    DA.SetData(4, "LEGEND GEOMETRY\n" + "\n" + "HOW IT WORKS:\n" + "Reads the domains and color gradients from the analysis components (Slope, Height, Flow) and bakes a scaled 3D legend into the Rhino scene.\n\n" + "INTERPRETATION & IMPORTANCE:\n" + "Ensures that visual diagrams are scientifically readable. Without a legend, a heatmap is just pretty colors with it, it becomes an actionable data map.");
+                    DA.SetData(4, Enzyme.Utils.MethodNotes.Info("LegendGeometry"));
         }
 
                 private LegendResult CreateLegendGeometry(object legendData, Rhino.Geometry.Point3d basePoint, double scale)

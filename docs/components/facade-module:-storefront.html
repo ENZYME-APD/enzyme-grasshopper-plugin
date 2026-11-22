@@ -55,7 +55,7 @@
                     </ul>
                 </div>
                 <div class="io-col">
-                    <h3>Outputs (6)</h3>
+                    <h3>Outputs (7)</h3>
                     <ul>
                         <li><strong>Glass</strong> (Brep): Output Brep</li>
                         <li><strong>SolidPanels</strong> (Brep): Output Brep</li>
@@ -63,9 +63,51 @@
                         <li><strong>Mullions</strong> (Brep): Output Brep</li>
                         <li><strong>Canopy</strong> (Brep): Output Brep</li>
                         <li><strong>Columns</strong> (Curve): Output Curve</li>
+                        <li><strong>Info</strong> (Text): Method, assumptions, simplifications and references.</li>
                     </ul>
                 </div>
             </div>
+
+            <!-- method-notes:start -->
+            <h2 style="margin-top: 2rem;">Method, assumptions and simplifications</h2>
+            <p style="color: var(--text-secondary);">The same notes appear in the component's <strong>Info</strong> output.</p>
+            <div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
+                    <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Each Bounds curve is split into segments and each segment into bays: count = round(segment length / BayWidth), at least 1, so bays are equal within a segment. Heights are matched by branch path and index; 4.5 is used when missing.</li>
+                        <li>Each bay is extruded into up to three bands: kickplate from 0 to BaseHeight (solid), middle band from BaseHeight to TransomHeight (glass or solid), header from TransomHeight to the full height. Heights are clamped so the bands never go negative.</li>
+                        <li>The glass or solid choice per bay comes from a 0 and 1 string in HorizPattern (1 = glass), repeated along the curve. VertPattern digits choose which HorizPattern line each curve uses (curve index modulo).</li>
+                        <li>Mullions are vertical fins of depth MullionDepth, perpendicular to the bay, at both ends of every bay (duplicates removed by position rounded to 3 decimals), spanning the middle band. FlipMullions reverses their side.</li>
+                        <li>Where CanopyPattern has 1 for that curve index and CanopyDepth &gt; 0, a flat canopy is lofted between the curve at transom height and its plan offset by CanopyDepth (sharp corners, offset tolerance 0.1). FlipCanopy offsets to the other side.</li>
+                        <li>With ShowColumns, a column line is drawn at each mullion position, set ColumnOffset in from the offset canopy edge, from the ground to transom height.</li>
+                    </ol>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Bounds are planar curves in world XY; heights are measured from the curve's Z.</li>
+                        <li>Model units are metres; areas in the HUD are bay length × band height in m².</li>
+                        <li>BayWidth, MullionDepth and ColumnOffset of 0 or less are replaced by 2.5, 0.2 and 0.2; BaseHeight, TransomHeight and CanopyDepth may be 0.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>All elements are zero-thickness surfaces; columns are lines only.</li>
+                        <li>Canopies are flat surfaces at transom height; there is no structural logic beyond spacing columns at mullions.</li>
+                        <li>Bay widths are rounded per segment, so they differ from BayWidth and from segment to segment.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Workflow</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Masterplan facade outlines and floor heights -&gt; Bounds and Heights.</li>
+                        <li>Glass, SolidPanels, HeaderPanels -&gt; previews or area take-offs.</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- method-notes:end -->
         </div>
     </main>
 

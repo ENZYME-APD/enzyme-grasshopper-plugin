@@ -49,14 +49,53 @@
                     </ul>
                 </div>
                 <div class="io-col">
-                    <h3>Outputs (3)</h3>
+                    <h3>Outputs (4)</h3>
                     <ul>
                         <li><strong>Glass</strong> (Brep): Vision Glass</li>
                         <li><strong>Spandrels</strong> (Brep): Spandrels</li>
                         <li><strong>Fins</strong> (Brep): Fins</li>
+                        <li><strong>Info</strong> (Text): Method, assumptions, simplifications and references.</li>
                     </ul>
                 </div>
             </div>
+
+            <!-- method-notes:start -->
+            <h2 style="margin-top: 2rem;">Method, assumptions and simplifications</h2>
+            <p style="color: var(--text-secondary);">The same notes appear in the component's <strong>Info</strong> output.</p>
+            <div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
+                    <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Each boundary curve (one per floor, height from Heights by path and index, default 4.0 m) is extruded into glass up to height - HeaderDrop, and a spandrel band of HeaderDrop above it.</li>
+                        <li>The curve is split into its segments; each segment is divided into round(length / Spacing) equal parts (at least 1), so fins sit at both ends and the real spacing is close to Spacing. Points repeated at shared corners (within 1 mm) are used once.</li>
+                        <li>Fin positions are numbered along the whole curve; a fin is placed where the active horizontal pattern has 1 (the pattern repeats).</li>
+                        <li>The active pattern for the i-th curve in a branch is HorizPattern[VertPattern digit i] (both wrap round), so VertPattern picks a pattern per floor.</li>
+                        <li>Each fin is a flat surface Depth deep, perpendicular to the segment on its left side (FlipDir reverses), and the full floor height tall.</li>
+                        <li>The HUD reports fin count and glass and spandrel areas (curve length × height).</li>
+                    </ol>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Bounds are horizontal facade lines or outlines at each floor level; units are metres.</li>
+                        <li>Defaults: Spacing 1.5 m, Depth 0.3 m, HeaderDrop 0 m; non-positive Spacing or Depth fall back to the defaults.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>All parts are zero-thickness surfaces; no mullions, frames or slab edges.</li>
+                        <li>Fins are not adjusted at corners; patterns ignore segment breaks.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Workflow</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Facade JSON Parser BoundsExt and Heights -&gt; Bounds and Heights; outputs -&gt; Custom Preview or bake.</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- method-notes:end -->
         </div>
     </main>
 

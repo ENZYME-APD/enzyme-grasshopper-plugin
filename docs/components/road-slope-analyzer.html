@@ -46,7 +46,7 @@
                     </ul>
                 </div>
                 <div class="io-col">
-                    <h3>Outputs (7)</h3>
+                    <h3>Outputs (8)</h3>
                     <ul>
                         <li><strong>Analyzed Segments</strong> (Curve): Road segments with slope analysis</li>
                         <li><strong>Slope Values</strong> (Number): Slope values for each segment</li>
@@ -55,9 +55,48 @@
                         <li><strong>Projected Points</strong> (Point): Points projected onto terrain</li>
                         <li><strong>Projection Lines</strong> (Line): Lines showing projection from original to terrain</li>
                         <li><strong>Dashboard Data</strong> (Text): JSON legend data</li>
+                        <li><strong>Info</strong> (Text): Method, assumptions, simplifications and references.</li>
                     </ul>
                 </div>
             </div>
+
+            <!-- method-notes:start -->
+            <h2 style="margin-top: 2rem;">Method, assumptions and simplifications</h2>
+            <p style="color: var(--text-secondary);">The same notes appear in the component's <strong>Info</strong> output.</p>
+            <div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
+                    <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Each curve is divided into ceil(length / Segment Size) pieces by equal parameter steps.</li>
+                        <li>Both ends of each piece are dropped vertically onto the Terrain (ray from above the mesh; if that misses, from below).</li>
+                        <li>The slope of the straight chord between the two projected points is computed as degrees atan(Δz / Δxy), percentage Δz / Δxy × 100, or ratio Δxy / Δz (Threshold Mode 0, 1, 2).</li>
+                        <li>A piece is compliant if its slope is at or below Threshold (for the ratio mode, at or above Threshold). Results go to branch 0 (compliant) or 1 (non-compliant); Compliance Percentage is the share of compliant pieces by count.</li>
+                    </ol>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Curves lie roughly in plan over the terrain; their own Z is ignored.</li>
+                        <li>The top-most terrain surface is the road surface.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Slope is a straight chord between piece ends; bumps inside a piece are not seen.</li>
+                        <li>Compliance is by number of pieces, not by length.</li>
+                        <li>No cross slope, no vertical curve design; this checks existing ground along the alignment only.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Workflow</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Road centrelines and Terrain Mesher output -&gt; Curves and Terrain.</li>
+                        <li>Dashboard -&gt; Analysis Dashboard legend.</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- method-notes:end -->
         </div>
     </main>
 

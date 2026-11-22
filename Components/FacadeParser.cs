@@ -58,10 +58,12 @@ namespace Enzyme.Components
             pManager.AddCurveParameter("BoundsClosed", "BoundsClosed", "Closed Master Polygon for orientation", GH_ParamAccess.tree);
             pManager.AddNumberParameter("Heights", "Heights", "Floor-to-floor height", GH_ParamAccess.tree);
             pManager.AddTextParameter("Programs", "Programs", "Tags/Labels", GH_ParamAccess.tree);
+            pManager.AddTextParameter("Info", "Info", "Method, assumptions, simplifications and references.", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            if (DA.Iteration == 0 && Params.Output.Count > 4) DA.SetData(4, Enzyme.Utils.MethodNotes.Info("FacadeParser"));
             Stopwatch sw = Stopwatch.StartNew();
 
             string jsonIn = null;

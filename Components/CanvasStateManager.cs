@@ -55,6 +55,7 @@ namespace Enzyme.Components
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            if (DA.Iteration == 0 && Params.Output.Count > 1) DA.SetData(1, Enzyme.Utils.MethodNotes.Info("CanvasStateManager"));
             var sw = System.Diagnostics.Stopwatch.StartNew();
             bool save = false, load = false, offNew = true;
             string saveName = "", loadName = "";
@@ -168,7 +169,7 @@ namespace Enzyme.Components
             _prevLoadName = loadName;
 
             DA.SetDataList(0, _states.Keys.ToList());
-            DA.SetData(1, "CANVAS STATE MANAGER\n\nHOW IT WORKS:\nSaves and restores the Enabled/Disabled (Locked) and Preview (Hidden) states of all components on the canvas.\n\nINTERPRETATION & IMPORTANCE:\nAllows you to swap between different visualization or computation modes instantly.");
+            DA.SetData(1, Enzyme.Utils.MethodNotes.Info("CanvasStateManager"));
             
             try {
                 string exportJson = Newtonsoft.Json.JsonConvert.SerializeObject(_states);

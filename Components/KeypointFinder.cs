@@ -54,6 +54,7 @@ namespace Enzyme.Components
 
         protected override void Solve(IGH_DataAccess DA, System.Diagnostics.Stopwatch hudSw)
         {
+            if (DA.Iteration == 0 && Params.Output.Count > 2) DA.SetData(2, Enzyme.Utils.MethodNotes.Info("KeypointFinder"));
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             Mesh terrain = null;
             if (!DA.GetData(0, ref terrain) || terrain == null) return;
@@ -173,14 +174,7 @@ namespace Enzyme.Components
             metrics.Add(new JObject { ["Name"] = "Points Found", ["Value"] = keypoints.Count.ToString() });
             payload["Metrics"] = metrics;
             
-            DA.SetData(2, "KEYPOINT FINDER\n"
-                + "\n"
-                + "METHODOLOGY:\n"
-                + "Applies topographic curvature analysis along identified valley thalwegs (stream networks). "
-                + "It calculates the second derivative of elevation along the flow path to isolate the exact point of inflection—"
-                + "the geomorphic transition where a steep, convex valley head flattens into a concave valley floor.\n\n"
-                + "INTERPRETATION & IMPORTANCE:\n"
-                + "In P.A. Yeomans' Keyline Design, the Keypoint is the optimal location for capturing and storing water (dams), as it represents the highest workable contour where water can be gravity-fed away from the valley toward drier ridges.");
+            DA.SetData(2, Enzyme.Utils.MethodNotes.Info("KeypointFinder"));
             DA.SetData(3, payload.ToString(Newtonsoft.Json.Formatting.None));
 
             DA.SetDataList(0, keypoints);

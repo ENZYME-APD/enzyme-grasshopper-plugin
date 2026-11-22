@@ -52,15 +52,55 @@
                     </ul>
                 </div>
                 <div class="io-col">
-                    <h3>Outputs (4)</h3>
+                    <h3>Outputs (5)</h3>
                     <ul>
                         <li><strong>panel_mesh</strong> (Mesh): Meshes colored by palette</li>
                         <li><strong>panel_colors</strong> (Colour): Colors of panels</li>
                         <li><strong>panel_tags</strong> (Text): Panel tags</li>
                         <li><strong>panel_geometry</strong> (Curve): Panel boundary curves</li>
+                        <li><strong>Info</strong> (Text): Method, assumptions, simplifications and references.</li>
                     </ul>
                 </div>
             </div>
+
+            <!-- method-notes:start -->
+            <h2 style="margin-top: 2rem;">Method, assumptions and simplifications</h2>
+            <p style="color: var(--text-secondary);">The same notes appear in the component's <strong>Info</strong> output.</p>
+            <div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
+                    <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Loads the image from Image Path (cached until the path changes). Only cells that are polylines are used.</li>
+                        <li>Mapping plane: Mapping Plane if given, else the plane of the first planar cell. The image is stretched over the bounding rectangle of all cell vertices in that plane.</li>
+                        <li>Each cell is sampled at one pixel under the average of its vertices (nearest pixel); Rotation turns the sample position about the image centre in normalised image coordinates.</li>
+                        <li>Brightness is the HSL lightness of that pixel (0 to 1); Jitter Pct adds uniform noise of ± Jitter Pct / 100; the colour index is round(brightness × (number of Colors - 1)), from dark to light.</li>
+                        <li>With an Accent Color, each cell is replaced by the accent with probability Accent Pct / 100. The random generator uses a fixed seed (42), so results repeat.</li>
+                        <li>Inset Factor (0.01 to 1) scales each cell about its vertex average; cells are triangulated as a fan from that point and joined into one mesh per colour.</li>
+                        <li>Bake writes the meshes to layers under Tiles, with one material per colour, and deletes earlier objects with the same Bake Name.</li>
+                    </ol>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Cells are planar, convex polylines lying roughly in one plane (a flat or gently curved facade).</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>One pixel per cell, no averaging over the cell area; aspect ratio of the image is not kept.</li>
+                        <li>Brightness is HSL lightness, not perceived luminance.</li>
+                        <li>End colours of the palette get half-width brightness bands because of rounding.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Workflow</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Grid cells (for example from a hexagon or square grid on a facade) -&gt; Grid Cells.</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- method-notes:end -->
         </div>
     </main>
 

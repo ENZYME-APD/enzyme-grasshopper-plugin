@@ -12,6 +12,8 @@ Running log of changes made on `main` going forward. Intended to eventually be f
 - Rhino-free `Hydrology`, `Corridor` and `RoadNetwork` helpers with tests.
 - **Method notes standard**: `Utils/MethodNotes.cs` holds each component's method, assumptions, simplifications, workflow and references; the component shows them in an **Info** output and `gen_docs.py` writes the same text into a "Method, assumptions and simplifications" section of its docs page (CI keeps them in sync, tests require all three parts). Applied to Sun Hours Analysis and Site Fetch (Info appended as last output), Hydro-DEM (Info text replaced), Road Corridor and Road Network. Water Analysis Guide updated for the Hydro-DEM pit filling.
 - Road Network: Y junction detection fixed (three arms with no straight pair).
+- Method notes written for **all 115 components** (docs pages + Info outputs): fixed-text Info outputs now show the notes; Info outputs with run values (Fast CFD, Fast Noise Analyzer, Noise Emitter From Curves, Wind Rose) keep them and append the notes; 30 analysis / generator / data components without an Info output get one as their last output. Outdated Info claims corrected (Keypoint Engine, Keyline Engine, Legend Geometry, Data Visualizer, Elevation Label, Analysis Heatmap).
+- New `PROJECT_CONTEXT.md` (hand-over context: standards, build / release, decision log, open issues, next steps), `CLAUDE.md` / `AGENTS.md` pointers for AI assistants, and `REVIEW_FINDINGS.md` (250 candidate findings from the code review, prioritised in the context file).
 
 ## 1.12.0
 
