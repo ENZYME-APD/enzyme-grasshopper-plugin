@@ -2,6 +2,13 @@
 
 Running log of changes made on `main` going forward. Intended to eventually be folded into `DEVELOPMENT_GUIDE.md` / `docs/` once reviewed.
 
+## Unreleased
+
+**Earthworks and roads (methods seen in Open Infra Studio, OpenAEC Foundation; GPL, so written from scratch from the published methods):**
+- New **Road Corridor** (Masterplan): a cross-section template (lanes, kerbs with upstands, cycle tracks, footways, verges, shoulders, ditches only in cut, pavement layers) swept along a 3D centreline; cut / fill slopes daylight to the terrain; superelevation on curves with runoff; earthworks measured to subgrade (average end area); mass haul with balance points, average haul and volume beyond free haul; pavement layer volumes, surface areas, kerb length; design surface coloured by part, subgrade, feature / daylight lines, sections, mass haul diagram. Presets: residential street, urban street, rural road, cycle path, access track, or a JSON template.
+- **Hydro-DEM**: depressions filled with Priority-Flood (Barnes, Lehman & Mulla 2014) before routing, so streams run through hollows to the terrain edge; new Fill Pits / Min Pond Depth inputs and Pond Depth, Ponds (water surface) and Catchment outputs; dashboard adds catchments, ponds, pond volume, max depth.
+- Rhino-free `Hydrology` and `Corridor` helpers with tests.
+
 ## 1.12.0
 
 **Site context and porous trees (ideas adapted from VoxCity, Fujiwara et al. 2025, NUS / Takenaka, MIT):**

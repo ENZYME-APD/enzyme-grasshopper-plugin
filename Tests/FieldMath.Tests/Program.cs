@@ -117,4 +117,28 @@ Check(double.IsNaN(OsmParse.ParseLength("tall")) && OsmParse.ParseLength("12;15"
     bool steps=true; for(int i=0;i<G*G;i++){ int c=i,k=0; while(gr.Down[c]>=0&&k++<G*G) c=gr.Down[c]; if(k>=G*G||!go[c]) steps=false; }
     Check(toOut==G*G && steps && Math.Abs(gr.Filled[9*G+9]-gr.Filled[9*G+10])<1e-12, "grid bowl + flat plateau: every cell reaches an edge outlet, no cycles");
 }
+// corridor: sections, daylight, cut/fill to subgrade, superelevation, mass haul
+{
+    var tpl=RoadTemplate.Parse("{\"fill_slope\":2,\"cut_slope\":1.5,\"parts\":[{\"type\":\"lane\",\"width\":3,\"slope\":0,\"layers\":[[\"base\",0.5]]}]}");
+    var sf=CorridorMath.Build(tpl,0,1,0,o=>0.0);
+    Check(Math.Abs(sf.FillArea-5.0)<1e-6 && sf.CutArea<1e-9 && Math.Abs(sf.O[0]+5)<1e-6 && Math.Abs(sf.O[sf.Count-1]-5)<1e-6 && sf.Kind[sf.Count-2]=="fill slope", $"corridor fill section: area {sf.FillArea:F4} (5.0), daylight at +-5 m");
+    var sc=CorridorMath.Build(tpl,0,1,0,o=>2.0);
+    Check(Math.Abs(sc.CutArea-10.5)<1e-6 && sc.FillArea<1e-9 && Math.Abs(sc.O[sc.Count-1]-4.5)<1e-6 && Math.Abs(sc.MaxCut-1.5)<1e-6, $"corridor cut section to subgrade: area {sc.CutArea:F4} (10.5), daylight at +-4.5 m");
+    Check(Math.Abs(sf.LayerArea["base"]-3.0)<1e-9 && Math.Abs(sf.SurfaceWidth["lane"]-6)<1e-9, "corridor layer quantities");
+    var rural=RoadTemplate.Preset("rural road"); var rf=CorridorMath.Build(rural,0,2,0,o=>0.0); var rc=CorridorMath.Build(rural,0,0,0,o=>3.0);
+    Check(rf.Count==rc.Count && rf.SurfaceWidth.ContainsKey("ditch")==false && rc.SurfaceWidth["ditch"]>2.9 && rf.LeftDaylit && rc.RightDaylit, "rural road: ditches only in cut, same breakpoint count");
+    var res=RoadTemplate.Preset("residential street"); var rs=CorridorMath.Build(res,0,0,0,o=>-0.3);
+    double zk; CorridorMath.Surface(rs,3.05,out zk,out _); Check(Math.Abs(zk-(-0.075+0.12))<1e-9, "kerb upstand 0.12 m above the channel");
+    var snog=CorridorMath.Build(tpl,0,1,0,o=>double.NaN); Check(!snog.LeftDaylit && !snog.RightDaylit && snog.FillArea==0, "no ground: not daylit, no volume");
+    Check(CorridorMath.LaneSlope(-2.5,0,true)==-2.5 && CorridorMath.LaneSlope(-2.5,1,true)==-0.5 && CorridorMath.LaneSlope(-2.5,6,true)==6 && CorridorMath.LaneSlope(-2.5,6,false)==-6 && CorridorMath.LaneSlope(-2.5,1,false)==-2.5, "superelevation lane slopes");
+    Check(Math.Abs(CorridorMath.Superelevation(300,50,25)-50.0*50/127/300*100)<1e-9 && CorridorMath.Superelevation(20,50,7)==7 && CorridorMath.Superelevation(100,50,0)==0, "superelevation rate");
+    var se=CorridorMath.Build(tpl,0,0,5,o=>0.0); double zl,zr; CorridorMath.Surface(se,-3,out zl,out _); CorridorMath.Surface(se,3,out zr,out _);
+    Check(Math.Abs(zl+0.15)<1e-9 && Math.Abs(zr-0.15)<1e-9, "left-hand curve: inside (left) edge down, outside up");
+    var st=new double[]{0,100,200,300,400};
+    var mh=MassHaul.Compute(st,new double[]{0,100,100,0,0},new double[]{0,0,0,100,100},1.0,200);
+    Check(Math.Abs(mh.Haul-40000)<1e-6 && Math.Abs(mh.MovedVolume-200)<1e-9 && Math.Abs(mh.AverageHaul-200)<1e-9 && Math.Abs(mh.Net)<1e-9 && mh.BalancePoints.Count==0 && Math.Abs(mh.OverhaulVolume-100)<1e-3, "mass haul: haul, average distance, overhaul beyond free haul");
+    var mh2=MassHaul.Compute(new double[]{0,100,200,300},new double[]{0,100,0,0},new double[]{0,0,150,50},1.0);
+    Check(mh2.BalancePoints.Count==1 && Math.Abs(mh2.BalancePoints[0]-166.6666667)<1e-4 && Math.Abs(mh2.Net+100)<1e-9, "mass haul: balance point and import");
+    Check(RoadTemplate.PresetNames.All(n=>RoadTemplate.Parse(n).HalfWidth(true)>0) && RoadTemplate.Parse(RoadTemplate.Preset("urban street").ToJson()).Right.Count==5, "presets parse and JSON round trip");
+}
 Console.WriteLine(fails==0?"ALL PASS":$"{fails} FAILED"); return fails;

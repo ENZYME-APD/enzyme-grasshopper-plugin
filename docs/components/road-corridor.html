@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Road Corridor - Enzyme Plugin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="../index.html" class="nav-brand">
+            <img src="../images/enzyme_logo.png" alt="Enzyme Logo" class="logo-img">
+        </a>
+        <div class="nav-links">
+            <a href="../index.html#components">Components</a>
+            <a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank">GitHub</a>
+        </div>
+    </nav>
+
+    <main class="container doc-page">
+        <div class="doc-header" style="display: flex; align-items: center;">
+            <div>
+                <h1>Road Corridor</h1>
+                <p class="doc-subtitle">Sweeps a road cross-section template along a 3D centreline (e.g. from Auto-Grade Road), daylights cut and fill slopes to the terrain, and reports earthworks to subgrade, pavement quantities and a mass haul.</p>
+                <div class="doc-meta">
+                    <span class="badge masterplan">Masterplan</span>
+                    <span>Nickname: <strong>Corridor</strong></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="doc-content">
+            <h2>Overview</h2>
+            <p>Sweeps a road cross-section template along a 3D centreline (e.g. from Auto-Grade Road), daylights cut and fill slopes to the terrain, and reports earthworks to subgrade, pavement quantities and a mass haul.</p>
+
+            <div class="io-grid">
+                <div class="io-col">
+                    <h3>Inputs (10)</h3>
+                    <ul>
+                        <li><strong>Centreline</strong> (Curve): 3D road centreline. Its Z is the finished road level on the axis (use Auto-Grade Road for a draped, slope-limited profile).</li>
+                        <li><strong>Terrain</strong> (Mesh): Existing ground mesh.</li>
+                        <li><strong>Template</strong> (Text): Preset name (residential street, urban street, rural road, cycle path, access track) or a JSON template. See the Template output for the format.</li>
+                        <li><strong>Interval</strong> (Number): Distance between cross sections (m).</li>
+                        <li><strong>Design Speed</strong> (Number): Design speed (km/h), used for superelevation on curves.</li>
+                        <li><strong>Max Superelevation</strong> (Number): Maximum superelevation (%). 0 = keep the normal crown (typical for urban streets).</li>
+                        <li><strong>Runoff Length</strong> (Number): Length (m) over which superelevation is introduced.</li>
+                        <li><strong>Cut Reuse Factor</strong> (Number): Share of bank cut that can be reused as compacted fill (0 to 1).</li>
+                        <li><strong>Free Haul</strong> (Number): Free-haul distance (m) for the overhaul figure.</li>
+                        <li><strong>Run</strong> (Boolean): False = keep showing the last results (cached).</li>
+                    </ul>
+                </div>
+                <div class="io-col">
+                    <h3>Outputs (13)</h3>
+                    <ul>
+                        <li><strong>Design Surface</strong> (Mesh): Finished road surface with daylight slopes, coloured by part.</li>
+                        <li><strong>Subgrade</strong> (Mesh): Underside of the pavement build-up (formation level for earthworks).</li>
+                        <li><strong>Feature Lines</strong> (Curve): 3D lines along every part edge.</li>
+                        <li><strong>Daylight Lines</strong> (Curve): Where the cut / fill slopes meet the ground, left and right.</li>
+                        <li><strong>Sections</strong> (Curve): Design cross section at each station (3D).</li>
+                        <li><strong>Ground Sections</strong> (Curve): Existing ground along each cross section (3D).</li>
+                        <li><strong>Stations</strong> (Number): Chainage of each cross section (m).</li>
+                        <li><strong>Cut Areas</strong> (Number): Cut area to subgrade per section (m²).</li>
+                        <li><strong>Fill Areas</strong> (Number): Fill area to subgrade per section (m²).</li>
+                        <li><strong>Mass Haul</strong> (Curve): Mass haul diagram drawn below the corridor: mass line and balance (zero) line. X = chainage, Y = scaled volume.</li>
+                        <li><strong>Quantities</strong> (Text): JSON: earthworks, mass haul, pavement layer volumes, surface areas, kerb length.</li>
+                        <li><strong>Template</strong> (Text): The template used, as editable JSON.</li>
+                        <li><strong>Dashboard Data</strong> (Text): JSON legend and metrics (for Analysis Dashboard and Report Metrics).</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p><a href="https://github.com/enzyme-apd/enzyme-grasshopper-plugin" target="_blank" style="color: #a1a1aa; text-decoration: none; border-bottom: 1px solid #3f3f46; padding-bottom: 2px;">View on GitHub</a></p>
+    </footer>
+</body>
+</html>

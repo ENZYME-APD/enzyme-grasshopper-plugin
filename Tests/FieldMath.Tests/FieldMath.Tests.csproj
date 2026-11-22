@@ -14,6 +14,7 @@
     <Compile Include="..\..\Utils\ReportMetrics.cs" />
     <Compile Include="..\..\Utils\CanopyMath.cs" />
     <Compile Include="..\..\Utils\Hydrology.cs" />
+    <Compile Include="..\..\Utils\Corridor.cs" />
     <Compile Include="..\..\Utils\GeoTiff.cs" />
     <Compile Include="..\..\Utils\GeoProj.cs" />
     <Compile Include="..\..\Utils\SiteData.cs" />
