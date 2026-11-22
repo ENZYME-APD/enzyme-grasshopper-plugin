@@ -52,7 +52,7 @@ namespace Enzyme.Components
             pManager.AddCurveParameter("Streams", "S", "Extracted stream networks (Polylines)", GH_ParamAccess.list);
             pManager.AddIntegerParameter("Accumulation", "A", "Flow accumulation value per topology vertex", GH_ParamAccess.list);
             pManager.AddPointParameter("Topology Points", "P", "Topology vertices matching the accumulation list", GH_ParamAccess.list);
-            pManager.AddTextParameter("Info", "Info", "Component information and methodology", GH_ParamAccess.item);
+            pManager.AddTextParameter("Info", "Info", "Method, assumptions, simplifications and references.", GH_ParamAccess.item);
             pManager.AddTextParameter("Dashboard Data", "Dashboard Data", "Unified JSON payload containing legend and key analysis metrics for the Analysis Dashboard", GH_ParamAccess.item);
             pManager.AddNumberParameter("Pond Depth", "Depth", "Water depth per topology vertex when hollows fill up (0 = dry).", GH_ParamAccess.list);
             pManager.AddMeshParameter("Ponds", "Ponds", "Water surface of every pond at its spill level.", GH_ParamAccess.item);
@@ -212,14 +212,7 @@ namespace Enzyme.Components
             metrics.Add(new JObject { ["Name"] = "Max pond depth", ["Value"] = maxDepth.ToString("F2", System.Globalization.CultureInfo.InvariantCulture) + " m" });
             payload["Metrics"] = metrics;
             
-            DA.SetData(3, "HYDROLOGICAL DEM\n"
-                + "\n"
-                + "METHODOLOGY:\n"
-                + "Depressions are first filled with Priority-Flood (Barnes, Lehman & Mulla 2014): a flood grows inward from the terrain edge, lowest first, so each hollow fills to its spill level. "
-                + "Each vertex then drains to its steepest-descent neighbour on the filled surface (through filled hollows and flats along the flood order), so every stream reaches the terrain edge. "
-                + "Rainfall (1 unit per vertex) is then accumulated down these natural gradients. Flow networks are generated where accumulation exceeds the specified threshold.\n\n"
-                + "INTERPRETATION & IMPORTANCE:\n"
-                + "Critical for predicting natural drainage, identifying flood-prone catchments, and optimizing agricultural water capture systems before detailed engineering begins.");
+            DA.SetData(3, MethodNotes.Info("HydroDEM"));
             DA.SetData(4, payload.ToString(Newtonsoft.Json.Formatting.None));
 
             DA.SetDataList(0, streams);

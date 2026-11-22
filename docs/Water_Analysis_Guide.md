@@ -23,7 +23,8 @@ The components in this category are designed around **kinematic physical simulat
 LEAP (Landscape & Ecological Advanced Planning) contains tools that use **strict topological and GIS-standard mathematics**, analyzing slope relationships of the terrain graph.
 
 ### Hydro-DEM Engine
-* **How it works:** Uses standard GIS algorithms (like the D8 flow direction model). Evaluates every vertex against its neighbors to calculate flow direction and accumulation, automatically extracting a strict, connected vector "stream network".
+* **How it works:** Fills hollows first with Priority-Flood (Barnes, Lehman & Mulla 2014), then routes every vertex to its steepest-descent neighbour on the filled surface (D8-style on the mesh), accumulates one unit of rain per vertex downstream and extracts a connected vector "stream network". Streams run through hollows to the terrain edge; the hollows are reported as **Ponds** (depth, water surface, volume) and every vertex gets a **Catchment** (the edge point it drains to).
+* **Assumptions & simplifications:** water leaves only at the mesh edge; hollows fill completely before overflowing; no infiltration; one flow direction per vertex; accumulation counts vertices, so use a regular mesh. Full notes in the component's Info output and docs page.
 * **Interpretation & Importance:** The scientific, industry-standard approach to hydrology. Yields perfectly connected, single-line stream segments rather than overlapping curves.
 
 ### Keypoint & Keyline Engines

@@ -55,7 +55,7 @@
                     </ul>
                 </div>
                 <div class="io-col">
-                    <h3>Outputs (12)</h3>
+                    <h3>Outputs (13)</h3>
                     <ul>
                         <li><strong>Terrain</strong> (Mesh): Terrain mesh (Copernicus GLO-30, EGM2008 heights in m).</li>
                         <li><strong>Land Cover</strong> (Mesh): Terrain mesh coloured by ESA WorldCover class (one colour per cell).</li>
@@ -69,9 +69,66 @@
                         <li><strong>Georeference</strong> (Text): JSON: UTM zone, EPSG, easting/northing of the local origin, lat/lon.</li>
                         <li><strong>Dashboard Data</strong> (Text): JSON legend, site metrics and land cover areas (for Report Metrics).</li>
                         <li><strong>Sources</strong> (Text): Data sources and required attribution.</li>
+                        <li><strong>Info</strong> (Text): Method, assumptions, simplifications and references.</li>
                     </ul>
                 </div>
             </div>
+
+            <!-- method-notes:start -->
+            <h2 style="margin-top: 2rem;">Method, assumptions and simplifications</h2>
+            <p style="color: var(--text-secondary);">The same notes appear in the component's <strong>Info</strong> output.</p>
+            <div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
+                    <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Local frame: UTM zone of the site centre (Krüger series, WGS84); the centre is moved to 0,0 so Rhino keeps full precision. Georeference gives the EPSG code and the origin easting and northing.</li>
+                        <li>Terrain: Copernicus DEM GLO-30 tiles (1 degree, Cloud-Optimised GeoTIFF) read with HTTP range requests, so only the needed tiles and blocks are downloaded; heights are sampled bilinearly at every grid vertex.</li>
+                        <li>Land cover: ESA WorldCover 2021 v200 (10 m) sampled at each cell centre (nearest pixel) and coloured with the official class colours.</li>
+                        <li>Buildings and trees: OpenStreetMap through the Overpass API (ways and multipolygon relations tagged building, nodes tagged natural=tree), with a margin round the site.</li>
+                        <li>Building height = height tag; else building:levels × Level Height (+ half of roof:levels); else Default Height. min_height or building:min_level lifts the underside.</li>
+                        <li>Each building is a closed extrusion standing at the lowest terrain level under its footprint; courtyards (inner rings) are kept.</li>
+                        <li>Each tree is a closed crown: a sphere of radius min(crown diameter / 2, 0.45 × height) touching the tree top.</li>
+                        <li>Downloads are cached on disk, so a re-run of the same site reads from the cache.</li>
+                    </ol>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Copernicus GLO-30 is a surface model (DSM): in towns and forests it includes some building and canopy height, smoothed to 30 m. Treat it as terrain for site-scale studies, not for detailed grading.</li>
+                        <li>Heights are orthometric (EGM2008 geoid), not ellipsoidal.</li>
+                        <li>OpenStreetMap completeness and tagging vary by place: untagged buildings get the Default Height (the Dashboard shows the share with real height data).</li>
+                        <li>A building belongs to the site when the centre of its largest outline is inside the square.</li>
+                        <li>Land cover is the 2021 snapshot.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Flat roofs: roof shapes are not modelled; building:part pieces are not used.</li>
+                        <li>Buildings sit on one base level (no stepped bases on slopes).</li>
+                        <li>Tree crowns are spheres; tree heights and crown diameters default when not tagged.</li>
+                        <li>Rhino Y is UTM grid north, which differs slightly from true north away from the zone centre.</li>
+                        <li>Sites up to 5 km square; sea tiles with no DEM get elevation 0.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Workflow</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Run once per site (Run gate). Building Mesh -&gt; Context of Sun Hours, Fast CFD, noise. Tree Crowns -&gt; Trees of Sun Hours. Terrain -&gt; Hydro-DEM, Road Corridor.</li>
+                        <li>Put the Sources text on every drawing or report that uses the data (OpenStreetMap attribution is required).</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">References</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Copernicus DEM GLO-30, ESA / Airbus, distributed on AWS Open Data.</li>
+                        <li>Zanaga D. et al. (2022), ESA WorldCover 10 m 2021 v200, CC BY 4.0.</li>
+                        <li>OpenStreetMap contributors (ODbL); Overpass API.</li>
+                        <li>Karney C.F.F. (2011), Transverse Mercator with an accuracy of a few nanometers (Krüger series).</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- method-notes:end -->
         </div>
     </main>
 

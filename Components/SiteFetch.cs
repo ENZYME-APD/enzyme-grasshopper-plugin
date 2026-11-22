@@ -61,6 +61,7 @@ namespace Enzyme.Components
             pManager.AddTextParameter("Georeference", "Geo", "JSON: UTM zone, EPSG, easting/northing of the local origin, lat/lon.", GH_ParamAccess.item);
             pManager.AddTextParameter("Dashboard Data", "Dashboard", "JSON legend, site metrics and land cover areas (for Report Metrics).", GH_ParamAccess.item);
             pManager.AddTextParameter("Sources", "Sources", "Data sources and required attribution.", GH_ParamAccess.item);
+            pManager.AddTextParameter("Info", "Info", "Method, assumptions, simplifications and references.", GH_ParamAccess.item);
         }
 
         protected override void Solve(IGH_DataAccess DA, System.Diagnostics.Stopwatch sw)
@@ -309,6 +310,7 @@ namespace Enzyme.Components
             DA.SetData(9, geo.ToString());
             DA.SetData(10, dash.ToString());
             DA.SetData(11, SiteSources.Attribution);
+            DA.SetData(12, MethodNotes.Info("SiteFetch"));
         }
 
         // ---------------- helpers

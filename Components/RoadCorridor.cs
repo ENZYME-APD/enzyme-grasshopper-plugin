@@ -56,6 +56,7 @@ namespace Enzyme.Components
             pManager.AddCurveParameter("Mass Haul", "MassHaul", "Mass haul diagram drawn below the corridor: mass line and balance (zero) line. X = chainage, Y = scaled volume.", GH_ParamAccess.list);
             pManager.AddTextParameter("Quantities", "Qty", "JSON: earthworks, mass haul, pavement layer volumes, surface areas, kerb length.", GH_ParamAccess.item);
             pManager.AddTextParameter("Template", "Tpl", "The template used, as editable JSON.", GH_ParamAccess.item);
+            pManager.AddTextParameter("Info", "Info", "Method, assumptions, simplifications and references.", GH_ParamAccess.item);
             pManager.AddTextParameter("Dashboard Data", "Dashboard", "JSON legend and metrics (for Analysis Dashboard and Report Metrics).", GH_ParamAccess.item);
         }
 
@@ -317,7 +318,8 @@ namespace Enzyme.Components
             DA.SetDataList(9, massCurves);
             DA.SetData(10, qty.ToString());
             DA.SetData(11, tpl.ToJson());
-            DA.SetData(12, dash.ToString());
+            DA.SetData(12, MethodNotes.Info("RoadCorridor"));
+            DA.SetData(13, dash.ToString());
         }
 
         private static void AddQuad(Mesh mesh, Point3d a, Point3d b, Point3d c, Point3d d, Color col)

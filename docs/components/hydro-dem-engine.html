@@ -59,6 +59,55 @@
                     </ul>
                 </div>
             </div>
+
+            <!-- method-notes:start -->
+            <h2 style="margin-top: 2rem;">Method, assumptions and simplifications</h2>
+            <p style="color: var(--text-secondary);">The same notes appear in the component's <strong>Info</strong> output.</p>
+            <div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
+                    <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Graph: one node per mesh topology vertex, linked to its mesh neighbours.</li>
+                        <li>Outlets: vertices on the open edge of the mesh (water leaves the model there); a closed mesh drains at its lowest vertex.</li>
+                        <li>Depression filling (Priority-Flood): a flood grows inward from the outlets, lowest first; every vertex is raised to at least the level it was reached from, so each hollow fills to its spill level.</li>
+                        <li>Flow direction: steepest descent (drop / plan distance) on the filled surface; on flats and inside filled hollows a vertex drains to the vertex that flooded it, so every vertex reaches an outlet and there are no loops.</li>
+                        <li>Accumulation: one unit of rain per vertex, summed downstream; Streams follow vertices with accumulation at or above Threshold.</li>
+                        <li>Ponds: connected wet vertices (depth above Min Pond Depth) at one spill level; volume = depth × the vertex's share of the surrounding faces' plan area.</li>
+                        <li>Catchment: the outlet vertex each vertex drains to.</li>
+                    </ol>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Water leaves only at the mesh edge; hollows fill completely before they overflow (static spill level).</li>
+                        <li>Uniform rain per vertex, no infiltration, evaporation or storage in the soil.</li>
+                        <li>Use a regular mesh: accumulation counts vertices, so a denser area collects more.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Single flow direction per vertex (D8-style on mesh neighbours): no splitting of flow.</li>
+                        <li>Accumulation is a vertex count, not an area or a discharge.</li>
+                        <li>Pond volume is approximate (vertex area share); culverts, pipes and drains are not modelled.</li>
+                        <li>Fill Pits = false restores the old behaviour: flow stops in every hollow.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Workflow</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Terrain mesh (for example Site Fetch Terrain) -&gt; Terrain. Streams -&gt; Keypoint Engine. Ponds and Pond Depth show where water collects.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">References</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Barnes R., Lehman C. and Mulla D. (2014), Priority-Flood: an optimal depression-filling and watershed-labeling algorithm for digital elevation models, Computers and Geosciences 62.</li>
+                        <li>O'Callaghan J.F. and Mark D.M. (1984), the extraction of drainage networks from digital elevation data (D8).</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- method-notes:end -->
         </div>
     </main>
 

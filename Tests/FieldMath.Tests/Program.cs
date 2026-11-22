@@ -192,4 +192,17 @@ Check(double.IsNaN(OsmParse.ParseLength("tall")) && OsmParse.ParseLength("12;15"
     var far=RoadNetworkGraph.Build(arms4,0.5,radii,1.0,170,new List<JunctionTag>{new JunctionTag{P=new V2(40,40),Type="roundabout"}});
     Check(far.Warnings.Count==1 && far.Nodes.All(nd=>!nd.Tagged), "tag: far from any node is ignored with a warning");
 }
+{
+    var res=RoadTemplate.Preset("residential street"); var lst=new List<NetEdgeInput>();
+    foreach(double deg in new[]{0.0,120,240}){ double r=deg*Math.PI/180; var b=new V2(50*Math.Cos(r),50*Math.Sin(r)); lst.Add(new NetEdgeInput{Start=new V2(0,0),End=b,StartDir=b.Unit(),EndDir=b.Unit(),Length=50,Template=res,TemplateName="r",Hierarchy="local"}); }
+    var yg=RoadNetworkGraph.Build(lst,0.5,new double[]{6,6,9,12}); Check(yg.Nodes.First(nd=>nd.Arms.Count==3).Type=="Y", "network: three arms at 120 deg is a Y junction");
+}
+// method notes standard: every note states method, assumptions and simplifications; components exist
+foreach (var kv in MethodNotes.All)
+{
+    var nt=kv.Value; string info=MethodNotes.Info(kv.Key);
+    bool fileOk=System.IO.File.Exists(System.IO.Path.Combine(AppContext.BaseDirectory,"..","..","..","..","..","Components",kv.Key+".cs"));
+    Check(nt.Method?.Length>0 && nt.Assumptions?.Length>0 && nt.Simplifications?.Length>0 && info.Contains("METHOD:") && info.Contains("ASSUMPTIONS:") && info.Contains("SIMPLIFICATIONS AND LIMITS:")
+        && fileOk && !string.Join(" ",nt.Method.Concat(nt.Assumptions).Concat(nt.Simplifications)).Any(ch=>ch=='{'||ch=='}'||ch=='"'), $"method notes complete: {kv.Key}");
+}
 Console.WriteLine(fails==0?"ALL PASS":$"{fails} FAILED"); return fails;

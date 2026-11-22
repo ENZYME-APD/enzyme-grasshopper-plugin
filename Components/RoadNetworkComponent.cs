@@ -67,6 +67,7 @@ namespace Enzyme.Components
             pManager.AddTextParameter("Edge JSON", "EdgeJson", "Per edge: name, template, hierarchy, where they came from, nodes, length, corridor start / end stations.", GH_ParamAccess.list);
             pManager.AddTextParameter("Network JSON", "NetJson", "The whole graph in one JSON.", GH_ParamAccess.item);
             pManager.AddTextParameter("Attributes Used", "Attr", "Per edge: template | hierarchy | name | source (user text, list or default). Check for untagged roads.", GH_ParamAccess.list);
+            pManager.AddTextParameter("Info", "Info", "Method, assumptions, simplifications and references.", GH_ParamAccess.item);
             pManager.AddTextParameter("Dashboard Data", "Dashboard", "JSON metrics for Analysis Dashboard / Report Metrics.", GH_ParamAccess.item);
         }
 
@@ -399,7 +400,8 @@ namespace Enzyme.Components
             DA.SetDataList(13, edgeJson);
             DA.SetData(14, g.NetworkJson().ToString());
             DA.SetDataList(15, attrs);
-            DA.SetData(16, dash.ToString());
+            DA.SetData(16, MethodNotes.Info("RoadNetworkComponent"));
+            DA.SetData(17, dash.ToString());
         }
 
         // ---------------- helpers

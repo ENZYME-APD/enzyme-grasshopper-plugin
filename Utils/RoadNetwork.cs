@@ -251,7 +251,7 @@ namespace Enzyme.Utils
                     node.Through = pair;
                     foreach (int id in pair) g.Arms[id].Priority = true;
                     double straightness = -g.Arms[pair[0]].Dir.Dot(g.Arms[pair[1]].Dir);
-                    if (deg == 3 && straightness < Math.Cos((180 - 35) * Math.PI / 180)) node.Type = "Y";
+                    if (deg == 3 && straightness < Math.Cos(35 * Math.PI / 180)) node.Type = "Y";
 
                     for (int i = 0; i < deg; i++)
                     {

@@ -40,7 +40,7 @@
                     <ul>
                         <li><strong>Centreline</strong> (Curve): 3D road centreline. Its Z is the finished road level on the axis (use Auto-Grade Road for a draped, slope-limited profile).</li>
                         <li><strong>Terrain</strong> (Mesh): Existing ground mesh.</li>
-                        <li><strong>Template</strong> (Text): Preset name (residential street, urban street, rural road, cycle path, access track) or a JSON template. See the Template output for the format.</li>
+                        <li><strong>Template</strong> (Text): Preset name (residential street, urban street, rural road, cycle path, access track), a JSON template, or Road Network's Corridor Templates (one per Corridor Edge) so the 3D matches the 2D plan.</li>
                         <li><strong>Interval</strong> (Number): Distance between cross sections (m).</li>
                         <li><strong>Design Speed</strong> (Number): Design speed (km/h), used for superelevation on curves.</li>
                         <li><strong>Max Superelevation</strong> (Number): Maximum superelevation (%). 0 = keep the normal crown (typical for urban streets).</li>
@@ -51,7 +51,7 @@
                     </ul>
                 </div>
                 <div class="io-col">
-                    <h3>Outputs (13)</h3>
+                    <h3>Outputs (14)</h3>
                     <ul>
                         <li><strong>Design Surface</strong> (Mesh): Finished road surface with daylight slopes, coloured by part.</li>
                         <li><strong>Subgrade</strong> (Mesh): Underside of the pavement build-up (formation level for earthworks).</li>
@@ -65,10 +65,64 @@
                         <li><strong>Mass Haul</strong> (Curve): Mass haul diagram drawn below the corridor: mass line and balance (zero) line. X = chainage, Y = scaled volume.</li>
                         <li><strong>Quantities</strong> (Text): JSON: earthworks, mass haul, pavement layer volumes, surface areas, kerb length.</li>
                         <li><strong>Template</strong> (Text): The template used, as editable JSON.</li>
+                        <li><strong>Info</strong> (Text): Method, assumptions, simplifications and references.</li>
                         <li><strong>Dashboard Data</strong> (Text): JSON legend and metrics (for Analysis Dashboard and Report Metrics).</li>
                     </ul>
                 </div>
             </div>
+
+            <!-- method-notes:start -->
+            <h2 style="margin-top: 2rem;">Method, assumptions and simplifications</h2>
+            <p style="color: var(--text-secondary);">The same notes appear in the component's <strong>Info</strong> output.</p>
+            <div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
+                    <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Cross sections every Interval along the centreline (and at its end), square to its plan direction.</li>
+                        <li>Each side of the template is built outward from the axis: an optional rise (kerb upstand), then the part width at its cross slope (negative % falls away from the axis).</li>
+                        <li>Superelevation on curves: e = min(eMax, V² / 127 R) %, applied to lane parts (outside lane up to +e, inside to -max(crown, e)), smoothed with a moving average over the Runoff Length.</li>
+                        <li>Daylight: from the outer edge a cut slope rises (or a fill slope falls) at 1 : H until it meets the terrain, found by 0.25 m steps then bisection, up to the template's maximum daylight width.</li>
+                        <li>Earthwork line: the subgrade (surface minus the pavement layer depth) under paved parts, the finished surface elsewhere. Cut and fill areas integrate the gap to the existing ground every 0.1 m across the section.</li>
+                        <li>Volumes by average end area between sections; pavement layer volumes and surface areas the same way.</li>
+                        <li>Mass haul: cumulative (cut × Cut Reuse Factor - fill) along the road; balance points where it crosses zero; haul = area between the mass line and zero (m³ × m); average haul = haul / volume moved; volume beyond free haul = loop height above the level where the loop is Free Haul wide.</li>
+                    </ol>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>The centreline Z is the finished road level on the axis (use Auto-Grade Road for a draped, slope-limited profile).</li>
+                        <li>Daylight slopes are given as H:V (2 = 1 vertical in 2 horizontal).</li>
+                        <li>Cut Reuse Factor turns bank cut into usable compacted fill (losses and shrinkage together).</li>
+                        <li>Preset templates use typical dimensions for early design, not a specific standard: check them against the local street design guide.</li>
+                        <li>Ground is read by vertical rays onto the terrain mesh; sections off the terrain or beyond the maximum daylight are flagged (partial volumes).</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Superelevation ignores side friction (e = V² / 127 R, capped at eMax), which overstates it on gentle curves.</li>
+                        <li>No prismoidal or curvature correction to average end area; on tight curves the inner sides of sections can overlap and volumes are overstated.</li>
+                        <li>Topsoil strip and bulking are not separated; earthwork under kerbs uses the kerb bed depth.</li>
+                        <li>Conditional parts (ditches only in cut) are tested at the part's start.</li>
+                        <li>Junctions are not handled here: feed Road Network's Corridor Edges so corridors stop at the junction mouths.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Workflow</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>Road Network -&gt; Corridor Edges -&gt; Auto-Grade Road -&gt; Centreline; Corridor Templates -&gt; Template; terrain -&gt; Terrain.</li>
+                        <li>Quantities and Dashboard Data -&gt; Report Metrics; Mass Haul curves are drawn below the corridor.</li>
+                    </ul>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">References</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
+                        <li>AASHTO, A Policy on Geometric Design of Highways and Streets (Green Book): e + f = V² / 127 R.</li>
+                        <li>Average end area method and mass haul (Brückner) diagram: standard earthworks practice.</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- method-notes:end -->
         </div>
     </main>
 
