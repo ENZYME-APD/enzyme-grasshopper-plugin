@@ -62,11 +62,11 @@
                     <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
                     <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
                         <li>Massing Breps are grouped by BuildingNames (default Building_01); each building takes its base level from the lowest bounding-box Z of its Breps and its top from the highest.</li>
-                        <li>RecipeJSON is a list of objects with floors, program and height (defaults 1, Office, 4.0 m); each object is expanded into that many floors, stacked upwards from the building base.</li>
+                        <li>RecipeJSON is a list of objects with floors, program and height (defaults 1, Office, 4.0 m); each object is expanded into that many floors, stacked upwards from the building base. If RecipeJSON cannot be read, a warning is shown and one 4.0 m Mixed_Use floor is used.</li>
                         <li>Floor levels are added while the level is more than 0.1 m below the building top; when the recipe runs out the stack stops, unless RepeatLast is True, in which case the last floor type repeats to the top.</li>
                         <li>Each Brep is cut by a horizontal plane 0.01 m above every floor level that lies inside its own bounding box (0.05 m tolerance); the section curves are dropped back by 0.01 m.</li>
-                        <li>Section curves are rationalised to arcs and lines (tolerance 0.05 m, angle 0.1 rad, segments 0.1 to 1000 m) and each segment is written as Line, Arc (start, mid, end) or Polyline (0.01 m tolerance), with coordinates rounded to 4 decimals.</li>
-                        <li>Every section becomes one block with name Floor_relative level_TowerID, tower_id, program, floor_height, floors = 1 and base_z relative to the building base; the JSON_Payload lists buildings with true_base_elevation and their blocks.</li>
+                        <li>Section curves are rationalised to arcs and lines (tolerance 0.05 m, angle 0.1 rad, segments 0.1 to 1000 m) and each segment is written as Line, Arc (start, mid, end) or Polyline (0.01 m tolerance), with coordinates rounded to 4 decimals. A segment that cannot be written as an arc is written as a polyline; if a segment cannot be written at all a warning says the boundary is open.</li>
+                        <li>Every section becomes one block named Floor_relative level_TowerID (level with up to 2 decimals; repeated names within a building get the suffix _2, _3 and so on), with tower_id, program, floor_height, floors = 1 and base_z relative to the building base; the JSON_Payload lists buildings with true_base_elevation and their blocks.</li>
                     </ol>
                 </div>
                 <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">

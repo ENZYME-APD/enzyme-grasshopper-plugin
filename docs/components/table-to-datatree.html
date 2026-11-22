@@ -58,7 +58,7 @@
                     <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
                     <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
                         <li>Splits TableData into lines (empty lines dropped) and each line into cells by tab if the text contains any tab, otherwise by comma.</li>
-                        <li>Each trimmed cell is parsed as a number: whole numbers become integers, others decimals, the rest text.</li>
+                        <li>Each trimmed cell is parsed as a number with invariant culture (dot decimal point, no thousands separators): whole numbers that fit a 32-bit integer become integers, others decimals, the rest text.</li>
                         <li>ByColumn True puts each column in its own branch (one branch per column index); False puts each row in its own branch.</li>
                     </ol>
                 </div>

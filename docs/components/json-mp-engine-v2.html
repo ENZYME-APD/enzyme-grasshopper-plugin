@@ -22,7 +22,7 @@
         <div class="doc-header" style="display: flex; align-items: center;">
             <div>
                 <h1>JSON MP Engine V2</h1>
-                <p class="doc-subtitle">A high-performance topological coordinator. Evaluates spatial intersections, identifies setbacks/roofs, and broadcasts lightweight JSON architectures.</p>
+                <p class="doc-subtitle">Reads a buildings JSON payload (from an adapter) and computes slabs per level, roof tops and setback roofs, railings on exposed roof edges, exterior facade edges per floor and gross areas per program and building, output as JSON for the Masses, Slab, Roof, Facade and Railing parsers and the Masterplan Dashboard.</p>
                 <div class="doc-meta">
                     <span class="badge json-masterplan-beta">JSON Masterplan (Beta)</span>
                     <span>Nickname: <strong>MP ENGINE</strong></span>
@@ -69,7 +69,7 @@
                         <li>Roofs: the slab is intersected with the union of all blocks of the building that continue above that level. If that overlap is under 0.1 m² the slab is a Roof Top; if slab area minus overlap exceeds 1.0 m² it is a Setback Roof (Podium Roof in podium towers). roof_area = slab area - overlap.</li>
                         <li>Railings: the exposed roof outline (slab minus overlap) is split into segments and a segment is kept when its midpoint is more than 0.05 from the outlines above.</li>
                         <li>Facades: for each floor of a block, a segment of the block outline is exterior when its midpoint lies within 0.05 of the slab outline at that level; these are output as BoundsExt with the closed outline as BoundsClosed.</li>
-                        <li>Masses and Dashboard: gross area = block outline area × floors, summed per program and per building. Colours come from ColorPalette, else a pseudo-random colour (70 to 199 per channel) seeded from the program name.</li>
+                        <li>Masses and Dashboard: gross area = block outline area × floors, summed per program and per building. Colours come from ColorPalette, else a pseudo-random colour (70 to 199 per channel) seeded with a stable FNV-1a hash of the program name, so it is the same in every session. Blocks whose boundary is not a closed planar curve count 0 m² and raise a warning.</li>
                     </ol>
                 </div>
                 <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
@@ -86,6 +86,7 @@
                         <li>If a curve boolean fails at 0.001 it is retried at 0.05; if the difference still fails the whole slab is treated as exposed, so railings run round the full outline.</li>
                         <li>Only the first joined curve of a boundary is kept, so multi-loop boundaries lose their extra loops.</li>
                         <li>Exterior and railing tests use segment midpoints only, so partly shared segments are all-or-nothing.</li>
+                        <li>In non-podium towers a block's own base level is not in the slab outlines, so facade edges of setbacks (or one-floor blocks) at that level can be missing from BoundsExt.</li>
                         <li>Palette or payload errors are caught: an invalid palette is ignored silently; an invalid payload gives one error message and empty outputs.</li>
                     </ul>
                 </div>

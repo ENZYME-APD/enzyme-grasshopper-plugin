@@ -29,7 +29,7 @@ namespace Enzyme.Components
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
         {
-            pManager.AddTextParameter("View Names", "Names", "List of generated Named View names (Plug this into Advanced Export Views!)", GH_ParamAccess.list);
+            pManager.AddTextParameter("View Names", "Names", "Named View names (Prefix + 4-digit index), listed whether or not Run is True. Plug this into Advanced Export Views.", GH_ParamAccess.list);
             pManager.AddTextParameter("Info", "Info", "Component execution HUD.", GH_ParamAccess.item);
         }
 
@@ -56,7 +56,7 @@ namespace Enzyme.Components
             if (run)
             {
                 var doc = RhinoDoc.ActiveDoc;
-                RhinoView activeView = doc.Views.ActiveView;
+                RhinoView activeView = doc?.Views.ActiveView;
                 
                 if (activeView != null)
                 {
@@ -96,6 +96,12 @@ namespace Enzyme.Components
                     activeView.ActiveViewport.PushViewInfo(originalCam, false);
                     activeView.Redraw();
                 }
+            }
+
+            else
+            {
+                // List the names even when Run is False: an empty list would make Advanced Export Views export ALL named views.
+                for (int i = 0; i < locs.Count; i++) generatedNames.Add($"{prefix}{i:D4}");
             }
 
             timer.Stop();

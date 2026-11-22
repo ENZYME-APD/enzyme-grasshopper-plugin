@@ -58,7 +58,7 @@
                     <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
                     <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
                         <li>Returns the item of List at Index. With Wrap Indices on (default, right-click menu) the index wraps around with a modulo, so negative and too-large values cycle; with it off the index is clamped to the first or last item.</li>
-                        <li>If a Number Slider feeds Index, its maximum is reset to the list length minus 1 on the next solution (and its value clamped). Auto-wire Index Slider adds an integer slider 0 to 10 when Index is empty.</li>
+                        <li>If a Number Slider feeds Index, its maximum is reset to the longest list length over all branches minus 1 after each solution (and its value clamped). Auto-wire Index Slider adds an integer slider 0 to 10 when Index is empty.</li>
                     </ol>
                 </div>
                 <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">

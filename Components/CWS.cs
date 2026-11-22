@@ -15,7 +15,7 @@ namespace Enzyme.Components
     {
         public CWSComponent()
           : base("CurtainWallSystem", "CWS",
-              "Generates a detailed LOD 300 curtain wall system from base curves.",
+              "Generates a curtain wall (glass surface, mullions, transoms, corner mullions) from base curves. Without profile curves the members are zero-thickness fins and the glass is one unsplit surface; supply profiles for solid members.",
               "Enzyme", "Facade")
         {
         }
@@ -180,7 +180,7 @@ namespace Enzyme.Components
                     }
                     if (height <= 0)
                     {
-                        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Heights must contain positive values.");
+                        AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Skipping base curve with a non-positive height; Heights must contain positive values.");
                         curveIndex++;
                         continue;
                     }
@@ -215,9 +215,12 @@ namespace Enzyme.Components
                     baseCornerPoints.Add(baseCurve.PointAt(discontinuityT));
                     while (baseCurve.GetNextDiscontinuity(Continuity.C2_locus_continuous, discontinuityT, baseCurve.Domain.T1, out discontinuityT))
                     {
-                        baseCornerPoints.Add(baseCurve.PointAt(discontinuityT));
+                        Point3d discPt = baseCurve.PointAt(discontinuityT);
+                        // Closed curves: the seam end equals the start; never add a second mullion on the same spot.
+                        if (!baseCornerPoints.Any(cp => cp.DistanceTo(discPt) < Tol))
+                            baseCornerPoints.Add(discPt);
                     }
-                    if (!baseCornerPoints.Last().Equals(baseCurve.PointAtEnd))
+                    if (!baseCornerPoints.Any(cp => cp.DistanceTo(baseCurve.PointAtEnd) < Tol))
                     {
                         baseCornerPoints.Add(baseCurve.PointAtEnd);
                     }
@@ -227,7 +230,7 @@ namespace Enzyme.Components
                         Curve segment = segments[i];
                         if (!segment.IsValid) continue;
 
-                        bool isCurved = !segment.IsLinear(RhinoDoc.ActiveDoc.ModelAbsoluteTolerance);
+                        bool isCurved = !segment.IsLinear(Tol);
                         List<double> currentGridVertical = isCurved && curvedGridVertical != null && curvedGridVertical.Count > 0 && curvedGridVertical.All(v => v > 0)
                             ? curvedGridVertical
                             : gridVertical;
@@ -239,7 +242,10 @@ namespace Enzyme.Components
                         {
                             double normalizedT = verticalDivisions[j] / segmentLength;
                             Point3d pt = segment.PointAtNormalizedLength(normalizedT);
-                            double param = segment.Domain.T0 + normalizedT * (segment.Domain.T1 - segment.Domain.T0);
+                            // Tangent at the same arc-length position as the point (not a linear parameter map).
+                            double param;
+                            if (!segment.NormalizedLengthParameter(normalizedT, out param))
+                                param = segment.Domain.T0 + normalizedT * (segment.Domain.T1 - segment.Domain.T0);
                             Vector3d tangent = segment.TangentAt(param);
                             Vector3d normal = Vector3d.CrossProduct(tangent, Vector3d.ZAxis);
                             normal.Unitize();
@@ -286,7 +292,7 @@ namespace Enzyme.Components
                         List<Point3d> curvatureTransitionPoints = FindCurvatureTransitions(segment);
                         foreach (var pt in curvatureTransitionPoints)
                         {
-                            if (!baseCornerPoints.Any(cp => cp.DistanceTo(pt) < RhinoDoc.ActiveDoc.ModelAbsoluteTolerance))
+                            if (!baseCornerPoints.Any(cp => cp.DistanceTo(pt) < Tol))
                             {
                                 baseCornerPoints.Add(pt);
                             }
@@ -303,10 +309,10 @@ namespace Enzyme.Components
                         int adjacentCount = 0;
                         for (int i = 0; i < segments.Length; i++)
                         {
-                            if (segments[i].PointAtStart.DistanceTo(cornerPt) < RhinoDoc.ActiveDoc.ModelAbsoluteTolerance ||
-                                segments[i].PointAtEnd.DistanceTo(cornerPt) < RhinoDoc.ActiveDoc.ModelAbsoluteTolerance)
+                            if (segments[i].PointAtStart.DistanceTo(cornerPt) < Tol ||
+                                segments[i].PointAtEnd.DistanceTo(cornerPt) < Tol)
                             {
-                                double tSegment = segments[i].PointAtStart.DistanceTo(cornerPt) < RhinoDoc.ActiveDoc.ModelAbsoluteTolerance ? 0 : 1;
+                                double tSegment = segments[i].PointAtStart.DistanceTo(cornerPt) < Tol ? 0 : 1;
                                 double param = segments[i].Domain.T0 + tSegment * (segments[i].Domain.T1 - segments[i].Domain.T0);
                                 Vector3d tangent = segments[i].TangentAt(param);
                                 Vector3d segNormal = Vector3d.CrossProduct(tangent, Vector3d.ZAxis);
@@ -353,6 +359,9 @@ namespace Enzyme.Components
             }
         }
 
+        // Model tolerance, with a fallback when no Rhino document is active (headless / Rhino.Compute).
+        private static double Tol => RhinoDoc.ActiveDoc != null ? RhinoDoc.ActiveDoc.ModelAbsoluteTolerance : 0.001;
+
         private List<Point3d> FindCurvatureTransitions(Curve curve)
         {
             List<Point3d> transitionPoints = new List<Point3d>();
@@ -376,20 +385,20 @@ namespace Enzyme.Components
             if (parameters == null || parameters.Length < 2) return transitionPoints;
 
             double previousCurvature = curve.CurvatureAt(parameters[0]).Length;
-            bool previousIsStraight = Math.Abs(previousCurvature) < RhinoDoc.ActiveDoc.ModelAbsoluteTolerance;
+            bool previousIsStraight = Math.Abs(previousCurvature) < Tol;
 
             for (int i = 1; i < parameters.Length; i++)
             {
                 double t = parameters[i];
                 Vector3d curvatureVector = curve.CurvatureAt(t);
                 double curvature = curvatureVector.Length;
-                bool isStraight = Math.Abs(curvature) < RhinoDoc.ActiveDoc.ModelAbsoluteTolerance;
+                bool isStraight = Math.Abs(curvature) < Tol;
 
                 if (previousIsStraight != isStraight || 
                     (!previousIsStraight && !isStraight && Math.Abs(curvature - previousCurvature) > 0.1 * Math.Max(curvature, previousCurvature)))
                 {
                     Point3d pt = curve.PointAt(t);
-                    if (!transitionPoints.Any(p => p.DistanceTo(pt) < RhinoDoc.ActiveDoc.ModelAbsoluteTolerance))
+                    if (!transitionPoints.Any(p => p.DistanceTo(pt) < Tol))
                     {
                         transitionPoints.Add(pt);
                     }
@@ -465,7 +474,7 @@ namespace Enzyme.Components
                 Point3d railStart = rail.PointAtStart;
                 Vector3d railTangent = rail.TangentAtStart;
                 Vector3d profilePlaneNormal = Vector3d.CrossProduct(railTangent, normal);
-                if (profilePlaneNormal.Length < RhinoDoc.ActiveDoc.ModelAbsoluteTolerance)
+                if (profilePlaneNormal.Length < Tol)
                 {
                     profilePlaneNormal = Vector3d.ZAxis;
                 }

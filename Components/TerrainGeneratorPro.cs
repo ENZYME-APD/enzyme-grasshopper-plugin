@@ -97,8 +97,8 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
             pManager.AddNumberParameter("MaxHeight", "MaxHeight", "Maximum elevation in meters", GH_ParamAccess.item, 100.0);
             pManager.AddNumberParameter("MinHeight", "MinHeight", "Minimum elevation in meters", GH_ParamAccess.item, 0.0);
             pManager.AddIntegerParameter("Seed", "Seed", "Randomization seed", GH_ParamAccess.item, 42);
-            pManager.AddNumberParameter("PatternSizeXY", "PatternSizeXY", "List of feature sizes in meters", GH_ParamAccess.list);
-            pManager.AddNumberParameter("PatternHeightZ", "PatternHeightZ", "List of relative feature strengths", GH_ParamAccess.list);
+            pManager.AddNumberParameter("PatternSizeXY", "PatternSizeXY", "List of feature sizes in meters, one per octave (if empty: 500, 150, 30; the auto-wired panel gives 150, 50, 20).", GH_ParamAccess.list);
+            pManager.AddNumberParameter("PatternHeightZ", "PatternHeightZ", "List of relative feature strengths, one per octave (if empty: 1, 0.3, 0.05; the auto-wired panel gives 1.0, 0.3, 0.1).", GH_ParamAccess.list);
             pManager.AddNumberParameter("ContourStep", "ContourStep", "Interval for normal contour lines", GH_ParamAccess.item, 1.0);
             pManager.AddNumberParameter("MainStep", "MainStep", "Interval for main contour lines", GH_ParamAccess.item, 5.0);
             pManager.AddColourParameter("Colors", "Colors", "List of gradient colors based on height", GH_ParamAccess.list);
@@ -127,6 +127,22 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
             pManager.AddCurveParameter("MainContours", "MainContours", "Major interval contour lines", GH_ParamAccess.list);
             pManager.AddPointParameter("Trees", "Trees", "Scattered point coordinates for trees", GH_ParamAccess.list);
                     pManager.AddTextParameter("Info", "Info", "Component information and interpretation", GH_ParamAccess.item);
+        }
+
+        static string AreaUnit()
+        {
+            var doc = Rhino.RhinoDoc.ActiveDoc;
+            if (doc == null) return "m²";
+            switch (doc.ModelUnitSystem)
+            {
+                case Rhino.UnitSystem.Meters: return "m²";
+                case Rhino.UnitSystem.Millimeters: return "mm²";
+                case Rhino.UnitSystem.Centimeters: return "cm²";
+                case Rhino.UnitSystem.Kilometers: return "km²";
+                case Rhino.UnitSystem.Feet: return "ft²";
+                case Rhino.UnitSystem.Inches: return "in²";
+                default: return "units²";
+            }
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
@@ -172,6 +188,12 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
             DA.GetData(18, ref tree_seed);
             DA.GetData(19, ref tree_zmin);
             DA.GetData(20, ref tree_zmax);
+
+            if (min_h > max_h)
+            {
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "MinHeight is greater than MaxHeight: the two values were swapped.");
+                double tmp = min_h; min_h = max_h; max_h = tmp;
+            }
 
             if (sizes.Count == 0) sizes.AddRange(new double[] { 500.0, 150.0, 30.0 });
             if (weights.Count == 0) weights.AddRange(new double[] { 1.0, 0.3, 0.05 });
@@ -439,7 +461,7 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
             DA.SetDataList(3, treesOut);
 
             double area = Rhino.Geometry.AreaMassProperties.Compute(boundary).Area;
-            Hud.Done(this, stopwatch.Elapsed.TotalMilliseconds, $"Area: {area:N0} m2\nTrees: {treesOut.Count}");
+            Hud.Done(this, stopwatch.Elapsed.TotalMilliseconds, $"Area: {area.ToString("N0", System.Globalization.CultureInfo.InvariantCulture)} {AreaUnit()}\nTrees: {treesOut.Count}");
                     DA.SetData(4, Enzyme.Utils.MethodNotes.Info("TerrainGeneratorPro"));
         }
 

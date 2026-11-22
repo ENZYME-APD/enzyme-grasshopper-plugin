@@ -36,6 +36,8 @@ namespace Enzyme.Components
         private string _displayStyle;
         private string _layerState;
         private string _statusInfo = "Idle";
+        private string _lastState = null;
+        private bool _warnAllViews = false;
         
         private List<string> _savedFiles = new List<string>();
 
@@ -98,6 +100,8 @@ namespace Enzyme.Components
                 // Initialize State Machine
                 _viewNames = new List<string>();
                 DA.GetDataList("Views", _viewNames);
+                // A connected but empty Views list (e.g. Create Named Views with Run off) silently means ALL named views.
+                _warnAllViews = _viewNames.Count == 0 && Params.Input[1].SourceCount > 0;
 
                 _ghStates = new List<string>();
                 DA.GetDataList("GH States", _ghStates);
@@ -144,11 +148,15 @@ namespace Enzyme.Components
                     {
                         // Output the current state to prevent grasshopper warnings while waiting
                         DA.SetDataList(0, _savedFiles);
+                        // Re-emit the state being captured so a Canvas State Manager does not see the output go empty.
+                        DA.SetData(1, _ghStates[_stateIndex]);
+                        if (_warnAllViews) AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Views is connected but empty: exporting ALL named views.");
                         return;
                     }
                     _taskPending = true;
 
                     string currentState = _ghStates[_stateIndex];
+                    _lastState = currentState;
                     DA.SetData(1, currentState);
                     _statusInfo = $"Exporting State {_stateIndex + 1}/{_ghStates.Count}\n{currentState}";
 
@@ -179,6 +187,7 @@ namespace Enzyme.Components
                     _taskPending = false;
                     _statusInfo = "Export Complete\n" + _savedFiles.Count + " images";
                     DA.SetDataList(0, _savedFiles);
+                    if (_lastState != null) DA.SetData(1, _lastState);
                     
                     // Automatically reset the run state in case it was a toggle
                     _prevRun = true; // Prevents it from immediately restarting on next frame if they left it true
@@ -188,6 +197,8 @@ namespace Enzyme.Components
             else
             {
                 DA.SetDataList(0, _savedFiles);
+                // Keep the last exported state on the output so the Canvas State Manager is not reloaded.
+                if (_lastState != null) DA.SetData(1, _lastState);
                 if (_savedFiles.Count == 0) _statusInfo = "Idle";
             }
 
@@ -198,6 +209,7 @@ namespace Enzyme.Components
                 "This component acts as an automated state-machine. It cycles through the provided 'GH States' and 'Views', pausing to let Grasshopper generate the new geometry, and then captures high-res images directly to your specified folder.\n\n" +
                 "Wire the 'Current GH State' output to your Canvas State Manager to animate your definitions safely.";
             DA.SetData(2, Enzyme.Utils.MethodNotes.Info("AdvancedExportViews"));
+            if (_isExporting && _warnAllViews) AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Views is connected but empty: exporting ALL named views.");
             
             sw.Stop();
             Hud.Done(this, sw.Elapsed.TotalMilliseconds, $"{_statusInfo}");

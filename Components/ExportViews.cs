@@ -38,7 +38,7 @@ namespace Enzyme.Components
             pManager.AddBooleanParameter("Grid", "G", "Show Grid.", GH_ParamAccess.item, false);
             pManager.AddBooleanParameter("World Axes", "WA", "Show World Axes.", GH_ParamAccess.item, false);
             pManager.AddBooleanParameter("CPlane Axes", "CA", "Show CPlane Axes.", GH_ParamAccess.item, false);
-            pManager.AddBooleanParameter("Transparent", "T", "Transparent background (PNG only).", GH_ParamAccess.item, false);
+            pManager.AddBooleanParameter("Transparent", "T", "Transparent background (PNG or TIFF; ignored for JPG and BMP, which have no alpha channel).", GH_ParamAccess.item, false);
 
             pManager[1].Optional = true; // Views can be empty
             pManager[2].Optional = true; // Display Style
@@ -157,7 +157,8 @@ namespace Enzyme.Components
                         {
                             Width = width,
                             Height = height,
-                            TransparentBackground = transparent,
+                            // JPG and BMP have no alpha channel: a transparent capture would save a black background.
+                            TransparentBackground = transparent && !new[] { "jpg", "jpeg", "bmp" }.Contains((formatStr ?? "png").ToLower().Trim()),
                             DrawGrid = grid,
                             DrawAxes = worldAxes,
                             DrawGridAxes = cplaneAxes

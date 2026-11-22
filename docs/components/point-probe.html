@@ -68,7 +68,7 @@
                     <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
                     <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
                         <li>Each probe point is moved to the closest point on the Mesh (ignored if further than MaxDistance; 0 = no limit).</li>
-                        <li>For per-vertex values the result is interpolated with the barycentric weights of that point inside the hit face; vertices with no value are left out and the weights rescaled. For per-face values the face value is used.</li>
+                        <li>For per-vertex values the result is interpolated with the barycentric weights of that point inside the hit face; vertices with no value are left out and the weights rescaled. For per-face values the face value is used. If the mesh has as many vertices as faces, values are read as per-vertex and a warning flags the ambiguity.</li>
                         <li>Each branch of Values is one result set and one CSV column; branches must have one value per vertex or per face.</li>
                         <li>Labels show name: value(s) unit; the CSV has Name, X, Y, Z (closest mesh point, 2 decimals) and one column per set.</li>
                     </ol>

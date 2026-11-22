@@ -76,7 +76,8 @@
                         <li>Brightness is the HSL lightness of that pixel (0 to 1); Jitter Pct adds uniform noise of ± Jitter Pct / 100; the colour index is round(brightness × (number of Colors - 1)), from dark to light.</li>
                         <li>With an Accent Color, each cell is replaced by the accent with probability Accent Pct / 100. The random generator uses a fixed seed (42), so results repeat.</li>
                         <li>Inset Factor (0.01 to 1) scales each cell about its vertex average; cells are triangulated as a fan from that point and joined into one mesh per colour.</li>
-                        <li>Bake writes the meshes to layers under Tiles, with one material per colour, and deletes earlier objects with the same Bake Name.</li>
+                        <li>Tile counts in panel_tags and the status count cells per colour.</li>
+                        <li>Bake writes the meshes to sublayers of Tiles named HexFacade_tag_colour hex, one per palette colour, with one material per colour. Without a Bake Name, baking happens once each time Bake turns True; with a Bake Name, earlier objects with that name are replaced on every solve while Bake is True.</li>
                     </ol>
                 </div>
                 <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">

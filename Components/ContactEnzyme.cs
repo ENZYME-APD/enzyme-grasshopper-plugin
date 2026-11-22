@@ -36,13 +36,17 @@ namespace Enzyme.Components
         }
 
         public string CurrentMessage { get; set; } = "";
+        /// <summary>The raw Message input, used as the email body (CurrentMessage holds HUD formatting).</summary>
+        public string RawMessage { get; set; } = "";
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             string msg = "";
+            RawMessage = "";
             if (DA.GetData(0, ref msg))
             {
+                RawMessage = msg ?? "";
                 stopwatch.Stop();
                 CurrentMessage = Hud.Build(this.NickName, Hud.FormatTime(stopwatch.Elapsed.TotalMilliseconds), new[] { msg });
             }
@@ -135,7 +139,7 @@ namespace Enzyme.Components
                 {
                     try {
                         var comp = Owner as ContactEnzyme;
-                        string msg = comp?.CurrentMessage ?? "";
+                        string msg = comp?.RawMessage ?? "";
                         string url = "mailto:hello@weareenzyme.com?subject=Enzyme%20Grasshopper%20Plugin";
                         if (!string.IsNullOrEmpty(msg))
                         {

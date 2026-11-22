@@ -46,7 +46,7 @@ namespace Enzyme.Components
             pManager.AddIntegerParameter("Months", "Months", "Optional months to include (1-12), e.g. summer only. EPW only.", GH_ParamAccess.list);
             pManager.AddIntegerParameter("Hours", "Hours", "Optional hours of day to include (0-23), e.g. 8-20 for daytime. EPW only.", GH_ParamAccess.list);
             pManager.AddPlaneParameter("Plane", "Plane", "Where the rose sits in the model (centre and orientation).", GH_ParamAccess.item, Plane.WorldXY);
-            pManager.AddNumberParameter("Radius", "Radius", "Rose radius in model units; the busiest sector reaches it.", GH_ParamAccess.item, 50.0);
+            pManager.AddNumberParameter("Radius", "Radius", "Rose radius in model units; the outermost frequency ring reaches it (the busiest sector rounded up to the next ring step), so the longest petal is usually a little shorter.", GH_ParamAccess.item, 50.0);
             pManager.AddNumberParameter("North", "North", "Angle of true north from the model +Y axis, degrees counter-clockwise (Ladybug convention).", GH_ParamAccess.item, 0.0);
             pManager.AddColourParameter("Colors", "Colors", "Optional colours for the speed bands (low to high), e.g. from Color Palette.", GH_ParamAccess.list);
             pManager.AddIntegerParameter("Display", "Display", "0 = on site (world), 1 = screen HUD, 2 = both.", GH_ParamAccess.item, 2);
@@ -60,7 +60,7 @@ namespace Enzyme.Components
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
         {
-            pManager.AddNumberParameter("Direction", "Dir", "Selected direction in degrees (FROM, 0 = N) — plug into Fast CFD Direction.", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Direction", "Dir", "Selected direction in degrees (FROM, 0 = N), as given by Selector — plug into Fast CFD Direction. Speed and Frequency are the statistics of the whole sector containing it.", GH_ParamAccess.item);
             pManager.AddNumberParameter("Speed", "Speed", "Wind speed of the selected sector (m/s, statistic chosen by Speed Stat) — plug into Fast CFD WindSpeed.", GH_ParamAccess.item);
             pManager.AddNumberParameter("Frequency", "Freq", "Share of all hours the wind blows from the selected sector (%).", GH_ParamAccess.item);
             pManager.AddMeshParameter("Rose", "Rose", "Coloured rose mesh (bakeable).", GH_ParamAccess.item);
@@ -173,6 +173,9 @@ namespace Enzyme.Components
             int selS = SectorOf(selDeg, width, nSect);
             double selSpeed = Stat(sectorSpeeds[selS], stat);
             double selFreq = sectorTotal[selS];
+            double selOff = Math.Abs(selDeg - selS * width) % 360.0;
+            if (Math.Min(selOff, 360.0 - selOff) > 0.01)
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"Selector {selDeg.ToString("0.#", System.Globalization.CultureInfo.InvariantCulture)}° is not a sector centre: Speed and Frequency are for the sector centred at {(selS * width).ToString("0.#", System.Globalization.CultureInfo.InvariantCulture)}°, while Direction keeps {selDeg.ToString("0.#", System.Globalization.CultureInfo.InvariantCulture)}°.");
 
             // ---- Geometry (model space) ----
             double ringStep = NiceStep(maxSector);

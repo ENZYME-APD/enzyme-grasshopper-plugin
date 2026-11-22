@@ -65,7 +65,7 @@
                     <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
                         <li>On a rising edge of Save, the Locked (disabled) and Hidden (preview off) flags of every other object on the canvas are stored under Save Name, keyed by object instance GUID.</li>
                         <li>On a rising edge of Load, or when Load Name changes while Load is held true, a solution is scheduled that restores the stored flags. With Turn Off New Nodes, objects not in the stored state get their preview turned off (they are not disabled).</li>
-                        <li>States are saved inside the Grasshopper file and can be copied or pasted as JSON from the component menu; Export JSON outputs them.</li>
+                        <li>States are saved inside the Grasshopper file and can be copied or pasted as JSON from the component menu; Export JSON outputs them. States can also be merged from another State Manager through the Import JSON input; they are merged when the input text changes, replacing states of the same name.</li>
                     </ol>
                 </div>
                 <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">

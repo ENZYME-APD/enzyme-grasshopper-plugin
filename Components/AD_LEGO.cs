@@ -11,7 +11,7 @@ namespace Enzyme.Components
     {
         public AD_LEGO()
           : base("Adapter: The Lego Builder", "AD_LEGO",
-              "STAGE 1 ADAPTER: THE LEGO BUILDER (METHOD 3) - VERBOSE DIAGNOSTICS & FIXED STACKING",
+              "Converts multi-storey massing Breps into floor blocks for the Masterplan Engine: slices each Brep's footprint, counts the whole floors that fit its height and outputs the JSON payload grouped per building.",
               "Enzyme", "JSON Masterplan (Beta)")
         {
         }
@@ -33,11 +33,11 @@ namespace Enzyme.Components
 
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddBrepParameter("MassingBlocks", "MB", "MassingBlocks", GH_ParamAccess.list);
-            pManager.AddTextParameter("Programs", "P", "Programs", GH_ParamAccess.list);
-            pManager.AddTextParameter("TowerIDs", "TID", "TowerIDs", GH_ParamAccess.list);
-            pManager.AddTextParameter("BuildingNames", "BN", "BuildingNames", GH_ParamAccess.list);
-            pManager.AddNumberParameter("FloorHeights", "FH", "FloorHeights", GH_ParamAccess.list);
+            pManager.AddBrepParameter("MassingBlocks", "MB", "Massing Breps, one vertical extrusion per block (flat list).", GH_ParamAccess.list);
+            pManager.AddTextParameter("Programs", "P", "Program of each block, item by item (default Mixed_Use).", GH_ParamAccess.list);
+            pManager.AddTextParameter("TowerIDs", "TID", "Tower tag of each block, item by item (default Main_Mass).", GH_ParamAccess.list);
+            pManager.AddTextParameter("BuildingNames", "BN", "Building name of each block, item by item (default Building_01).", GH_ParamAccess.list);
+            pManager.AddNumberParameter("FloorHeights", "FH", "Floor-to-floor height of each block in m, item by item (default 4.0).", GH_ParamAccess.list);
             pManager.AddIntegerParameter("HeightResolution", "HR", "0 = Strict Cutoff, 1 = Stretch Top Floor", GH_ParamAccess.item, 0);
 
             pManager[0].Optional = true;
@@ -199,8 +199,9 @@ namespace Enzyme.Components
                             
                             string serializedCrv = SerializeExactCurve(baseCrv);
 
-                            int numFullFloors = (int)(totalHeight / fh);
-                            double remainder = Math.Round(totalHeight % fh, 3);
+                            // 1 mm tolerance so a block modelled at 11.9999 m with 4 m floors counts 3 floors, not 2 plus a 3.9999 m remainder.
+                            int numFullFloors = (int)Math.Floor((totalHeight + 0.001) / fh);
+                            double remainder = Math.Round(Math.Max(0.0, totalHeight - numFullFloors * fh), 3);
 
                             if (!buildings.ContainsKey(bname))
                             {
@@ -274,9 +275,9 @@ namespace Enzyme.Components
                 foreach (var block in bdata.Blocks)
                 {
                     blocksJsonList.Add($@"{{
-      ""name"": ""{block.Name}"",
-      ""tower_id"": ""{block.TowerID}"",
-      ""program"": ""{block.Program}"",
+      ""name"": {Newtonsoft.Json.JsonConvert.ToString(block.Name)},
+      ""tower_id"": {Newtonsoft.Json.JsonConvert.ToString(block.TowerID)},
+      ""program"": {Newtonsoft.Json.JsonConvert.ToString(block.Program)},
       ""floor_height"": {block.FloorHeight.ToString(System.Globalization.CultureInfo.InvariantCulture)},
       ""floors"": {block.Floors},
       ""base_z"": {block.BaseZ.ToString(System.Globalization.CultureInfo.InvariantCulture)},
@@ -285,7 +286,7 @@ namespace Enzyme.Components
                 }
 
                 outputBuildings.Add($@"{{
-  ""name"": ""{bname}"",
+  ""name"": {Newtonsoft.Json.JsonConvert.ToString(bname)},
   ""true_base_elevation"": {Math.Round(bdata.TrueBaseElevation, 3).ToString(System.Globalization.CultureInfo.InvariantCulture)},
   ""blocks"": [
     {string.Join(",\n    ", blocksJsonList)}

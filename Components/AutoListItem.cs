@@ -10,6 +10,7 @@ namespace Enzyme.Components
     public class AutoListItem : GH_Component
     {
         private bool _wrap = true;
+        private int _maxCount = -1; // longest list over all branches of the current solution
 
         public AutoListItem()
           : base("Auto List Item", "AutoItem",
@@ -40,13 +41,45 @@ namespace Enzyme.Components
             int index = 0;
             if (!DA.GetData(1, ref index)) return;
 
+            // The connected slider is updated once after all branches (AfterSolveInstance), to the longest list
+            if (list.Count > _maxCount) _maxCount = list.Count;
+
+            int count = list.Count;
+            if (_wrap)
+            {
+                index = index % count;
+                if (index < 0) index += count;
+            }
+            else
+            {
+                if (index < 0) index = 0;
+                if (index >= count) index = count - 1;
+            }
+
+            DA.SetData(0, list[index]);
+        
+            stopwatch.Stop();
+            Hud.Done(this, stopwatch.Elapsed.TotalMilliseconds);
+        }
+
+        protected override void BeforeSolveInstance()
+        {
+            base.BeforeSolveInstance();
+            _maxCount = -1;
+        }
+
+        protected override void AfterSolveInstance()
+        {
+            base.AfterSolveInstance();
+            if (_maxCount < 0) return;
+
             // Automatically update the domain of the connected slider
             var indexParam = Params.Input[1];
             if (indexParam.SourceCount > 0)
             {
                 if (indexParam.Sources[0] is Grasshopper.Kernel.Special.GH_NumberSlider slider)
                 {
-                    int maxVal = list.Count - 1;
+                    int maxVal = _maxCount - 1;
                     if (maxVal < 0) maxVal = 0;
 
                     if ((int)slider.Slider.Maximum != maxVal)
@@ -67,22 +100,6 @@ namespace Enzyme.Components
                 }
             }
 
-            int count = list.Count;
-            if (_wrap)
-            {
-                index = index % count;
-                if (index < 0) index += count;
-            }
-            else
-            {
-                if (index < 0) index = 0;
-                if (index >= count) index = count - 1;
-            }
-
-            DA.SetData(0, list[index]);
-        
-            stopwatch.Stop();
-            Hud.Done(this, stopwatch.Elapsed.TotalMilliseconds);
         }
 
         protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)

@@ -69,7 +69,7 @@
             <a href="components/adapter:-the-lego-builder.html" class="card" data-category="json-masterplan-beta">
                 <span class="badge json-masterplan-beta">JSON Masterplan (Beta)</span>
                 <h3>Adapter: The Lego Builder</h3>
-                <p>STAGE 1 ADAPTER: THE LEGO BUILDER (METHOD 3) - VERBOSE DIAGNOSTICS &amp; FIXED STACKING</p>
+                <p>Converts multi-storey massing Breps into floor blocks for the Masterplan Engine: slices each Brep's footprint, counts the whole floors that fit its height and outputs the JSON payload grouped per building.</p>
                 <div class="card-meta">
                     <span>6 Inputs</span>
                     <span>2 Outputs</span>
@@ -209,7 +209,7 @@
             <a href="components/curtainwallsystem.html" class="card" data-category="facade">
                 <span class="badge facade">Facade</span>
                 <h3>CurtainWallSystem</h3>
-                <p>Generates a detailed LOD 300 curtain wall system from base curves.</p>
+                <p>Generates a curtain wall (glass surface, mullions, transoms, corner mullions) from base curves. Without profile curves the members are zero-thickness fins and the glass is one unsplit surface; supply profiles for solid members.</p>
                 <div class="card-meta">
                     <span>11 Inputs</span>
                     <span>5 Outputs</span>
@@ -219,7 +219,7 @@
             <a href="components/cwt.html" class="card" data-category="facade">
                 <span class="badge facade">Facade</span>
                 <h3>CWT</h3>
-                <p>CWT</p>
+                <p>Curtain wall transoms: divides each closed planar outline into modules of about modSize and places, at every division point, a rectangular transom profile (tDepth outwards, perpendicular to the outline, by tHeight upwards). Outputs the profiles as surfaces and the outward division lines.</p>
                 <div class="card-meta">
                     <span>4 Inputs</span>
                     <span>3 Outputs</span>
@@ -249,7 +249,7 @@
             <a href="components/canvas-style.html" class="card" data-category="utilities">
                 <span class="badge utilities">Utilities</span>
                 <h3>Canvas Style</h3>
-                <p>Modifies the global canvas background, grid, and panel default colors.</p>
+                <p>Modifies the global canvas background, grid, and panel default colors. The change applies to the whole Grasshopper application and stays after this component or file is closed; to go back, set the colours you want again (the previous colours are not restored).</p>
                 <div class="card-meta">
                     <span>3 Inputs</span>
                     <span>0 Outputs</span>
@@ -279,7 +279,7 @@
             <a href="components/masterplan-clearance-engine.html" class="card" data-category="masterplan">
                 <span class="badge masterplan">Masterplan</span>
                 <h3>Masterplan Clearance Engine</h3>
-                <p>Calculates topological (Delaunay) or proximity-based clearances between tower outlines with dynamic categorization.</p>
+                <p>Calculates the shortest clearances between neighbouring tower outlines and categorises them by L1 and L2. Neighbour pairs come from a Delaunay triangulation (Method 0) or a proximity search (Method 1) of the outline bounding-box centres.</p>
                 <div class="card-meta">
                     <span>5 Inputs</span>
                     <span>5 Outputs</span>
@@ -289,7 +289,7 @@
             <a href="components/pixel-gradient.html" class="card" data-category="facade">
                 <span class="badge facade">Facade</span>
                 <h3>Pixel Gradient</h3>
-                <p>BIM-ready Idempotent Engine. Consolidates Mega-Meshes per surface and binds them into Rhino Groups.</p>
+                <p>Colours facade grid cells by a stepped gradient along one axis (with optional jitter and accent), merges cells of one colour into one mesh per branch, and can bake them to Rhino layers and groups (re-bakes replace earlier ones only when bake_name is set).</p>
                 <div class="card-meta">
                     <span>9 Inputs</span>
                     <span>5 Outputs</span>
@@ -389,7 +389,7 @@
             <a href="components/facade-module-distributor.html" class="card" data-category="facade">
                 <span class="badge facade">Facade</span>
                 <h3>Facade Module Distributor</h3>
-                <p>Dynamically streams procedural facade modules with high-performance hot-reloading.</p>
+                <p>Loads the facade_modules.py Python script (downloaded from GitHub, or a local file in Dev_Mode) and runs it to build facade bands, storefront mullions and glass. A changed script file is re-read the next time the component solves.</p>
                 <div class="card-meta">
                     <span>5 Inputs</span>
                     <span>4 Outputs</span>
@@ -499,7 +499,7 @@
             <a href="components/enzyme-heliodon.html" class="card" data-category="site-analysis">
                 <span class="badge site-analysis">Site Analysis</span>
                 <h3>Enzyme Heliodon</h3>
-                <p>Generates a 3D solar dome and calculates annual sun vectors for environmental analysis.</p>
+                <p>Generates a 3D solar dome and hourly sun vectors on the 21st of each selected month (one representative day per month) for environmental analysis.</p>
                 <div class="card-meta">
                     <span>8 Inputs</span>
                     <span>5 Outputs</span>
@@ -519,7 +519,7 @@
             <a href="components/bim-key-initializer.html" class="card" data-category="json-masterplan-beta">
                 <span class="badge json-masterplan-beta">JSON Masterplan (Beta)</span>
                 <h3>BIM Key Initializer</h3>
-                <p>Safely injects default BIM attributes into referenced Rhino curves.</p>
+                <p>Safely injects default BIM attributes (user text keys) into referenced Rhino objects of any type; existing keys are never overwritten.</p>
                 <div class="card-meta">
                     <span>2 Inputs</span>
                     <span>1 Outputs</span>
@@ -549,7 +549,7 @@
             <a href="components/keypoint-engine.html" class="card" data-category="site-analysis">
                 <span class="badge site-analysis">Site Analysis</span>
                 <h3>Keypoint Engine</h3>
-                <p>Analyzes stream slopes to find the inflection point (Keypoint) and extracts the Master Keyline contour.</p>
+                <p>Analyzes stream slopes to find the Keypoint (the vertex with the largest steep-to-flat drop in smoothed slope) and extracts the Master Keyline contour.</p>
                 <div class="card-meta">
                     <span>4 Inputs</span>
                     <span>4 Outputs</span>
@@ -609,7 +609,7 @@
             <a href="components/json-mp-engine-v2.html" class="card" data-category="json-masterplan-beta">
                 <span class="badge json-masterplan-beta">JSON Masterplan (Beta)</span>
                 <h3>JSON MP Engine V2</h3>
-                <p>A high-performance topological coordinator. Evaluates spatial intersections, identifies setbacks/roofs, and broadcasts lightweight JSON architectures.</p>
+                <p>Reads a buildings JSON payload (from an adapter) and computes slabs per level, roof tops and setback roofs, railings on exposed roof edges, exterior facade edges per floor and gross areas per program and building, output as JSON for the Masses, Slab, Roof, Facade and Railing parsers and the Masterplan Dashboard.</p>
                 <div class="card-meta">
                     <span>2 Inputs</span>
                     <span>7 Outputs</span>
@@ -629,7 +629,7 @@
             <a href="components/terrain-height.html" class="card" data-category="site-analysis">
                 <span class="badge site-analysis">Site Analysis</span>
                 <h3>Terrain Height</h3>
-                <p>Analyzes mesh extremes, unrolls sections bi-directionally, and generates 3D/2D metadata labels.</p>
+                <p>Finds local and global peaks and valleys of terrain meshes, colours a vertex heatmap by elevation and outputs Dashboard Data (elevation legend).</p>
                 <div class="card-meta">
                     <span>8 Inputs</span>
                     <span>12 Outputs</span>
@@ -639,7 +639,7 @@
             <a href="components/microclimate-comfort.html" class="card" data-category="site-analysis">
                 <span class="badge site-analysis">Site Analysis</span>
                 <h3>Microclimate Comfort</h3>
-                <p>Calculates the perceived 'Feels Like' temperature using Fast Apparent Temperature or Precise UTCI.</p>
+                <p>Calculates the perceived 'Feels Like' temperature using Fast Apparent Temperature or UTCI (full Broede et al. 2012 polynomial). In UTCI mode the mean radiant temperature is not computed: it is approximated as air temperature + 15 C x Solar Factor, which dominates the uncertainty.</p>
                 <div class="card-meta">
                     <span>7 Inputs</span>
                     <span>6 Outputs</span>
@@ -649,7 +649,7 @@
             <a href="components/facade-module:-balcony.html" class="card" data-category="json-masterplan-beta">
                 <span class="badge json-masterplan-beta">JSON Masterplan (Beta)</span>
                 <h3>Facade Module: Balcony</h3>
-                <p>Continuous balconies with 2D wall patterns and intelligent corners.</p>
+                <p>Continuous balconies with 2D wall patterns; corner pieces are the segment ends trimmed by CornerOffset (or short segments when SegLength is on).</p>
                 <div class="card-meta">
                     <span>15 Inputs</span>
                     <span>7 Outputs</span>
@@ -669,7 +669,7 @@
             <a href="components/facade-module:-frames.html" class="card" data-category="json-masterplan-beta">
                 <span class="badge json-masterplan-beta">JSON Masterplan (Beta)</span>
                 <h3>Facade Module: Frames</h3>
-                <p>Deep structural exoskeleton grid utilizing the robust Area-Offset Method.</p>
+                <p>Facade frame on storey outlines: beams between each outline and its offset (BeamDepth), columns at equal bays, and optional sill, glass and header panels and vertical fins.</p>
                 <div class="card-meta">
                     <span>14 Inputs</span>
                     <span>7 Outputs</span>
@@ -679,7 +679,7 @@
             <a href="components/facade-module:-storefront.html" class="card" data-category="json-masterplan-beta">
                 <span class="badge json-masterplan-beta">JSON Masterplan (Beta)</span>
                 <h3>Facade Module: Storefront</h3>
-                <p>Generates patterned storefronts with intelligent canopies and structure.</p>
+                <p>Generates patterned storefronts from planar outline curves: bays with a solid kickplate, a glass or solid middle band and a header band, mullion fins, optional flat canopies and column lines at the mullions.</p>
                 <div class="card-meta">
                     <span>14 Inputs</span>
                     <span>7 Outputs</span>
@@ -689,7 +689,7 @@
             <a href="components/facade-module:-rhythmic-balconies.html" class="card" data-category="json-masterplan-beta">
                 <span class="badge json-masterplan-beta">JSON Masterplan (Beta)</span>
                 <h3>Facade Module: Rhythmic Balconies</h3>
-                <p>2D patterned balconies with merge logic, corner isolation, and fast math.</p>
+                <p>2D patterned balconies with merge logic and corner isolation. The slab area in the HUD is a quick estimate (bay length x Depth), approximate for curved bays.</p>
                 <div class="card-meta">
                     <span>14 Inputs</span>
                     <span>8 Outputs</span>
@@ -729,7 +729,7 @@
             <a href="components/polyline-healer.html" class="card" data-category="curve">
                 <span class="badge curve">Curve</span>
                 <h3>Polyline Healer</h3>
-                <p>Heals polylines by extending segments and creating boolean regions.</p>
+                <p>Heals nearly closed polylines: extends every segment at both ends by Tolerance, builds boolean regions from the extended lines and returns the largest unioned outline (holes and separate islands are dropped). Non-polylines are returned unchanged.</p>
                 <div class="card-meta">
                     <span>2 Inputs</span>
                     <span>1 Outputs</span>
@@ -799,7 +799,7 @@
             <a href="components/randomtreesplit.html" class="card" data-category="data">
                 <span class="badge data">Data</span>
                 <h3>RandomTreeSplit</h3>
-                <p>RandomTreeSplit</p>
+                <p>Randomly splits the branches of a tree into three trees: a share pA of the branches goes to A, a share pB to B and the rest to C. Paths are kept; the same seed gives the same split.</p>
                 <div class="card-meta">
                     <span>4 Inputs</span>
                     <span>3 Outputs</span>
@@ -899,7 +899,7 @@
             <a href="components/terrain-slope.html" class="card" data-category="site-analysis">
                 <span class="badge site-analysis">Site Analysis</span>
                 <h3>Terrain Slope</h3>
-                <p>Ultra-fast mesh slope analyzer using raw C# sequential array processing and safe UI automation.</p>
+                <p>Colours terrain mesh faces by slope (angle of the face normal from vertical): binary over / under a threshold in degrees, percent or 1:X, or a gradient across the slope range of all input meshes.</p>
                 <div class="card-meta">
                     <span>6 Inputs</span>
                     <span>3 Outputs</span>
@@ -1039,7 +1039,7 @@
             <a href="components/urban-wind-vector-engine-ht-beta.html" class="card" data-category="site-analysis">
                 <span class="badge site-analysis">Site Analysis</span>
                 <h3>Urban Wind Vector Engine HT (Beta)</h3>
-                <p>Simulates urban wind fields using terrain-parallel raycasting. Outputs a perfectly flat, crisp XY pixel-screen heatmap at a custom elevation.</p>
+                <p>Heuristic urban wind screening: terrain-parallel wind deflected by building wakes, corner channelling and gaps, coloured as a heatmap draped on the terrain (DrapeHeatmap, default) or flat at a custom elevation, with vectors and streamlines.</p>
                 <div class="card-meta">
                     <span>19 Inputs</span>
                     <span>9 Outputs</span>
@@ -1076,9 +1076,9 @@
                 </div>
                 <span class="card-link">View docs &rarr;</span>
             </a>
-            <a href="components/higrothermal-comfort.html" class="card" data-category="site-analysis">
+            <a href="components/hygrothermal-comfort.html" class="card" data-category="site-analysis">
                 <span class="badge site-analysis">Site Analysis</span>
-                <h3>Higrothermal Comfort</h3>
+                <h3>Hygrothermal Comfort</h3>
                 <p>Maps wind-engine velocity samples onto apparent ("feels like") temperature and locates the best/worst comfort points, without requiring a regular grid.</p>
                 <div class="card-meta">
                     <span>9 Inputs</span>

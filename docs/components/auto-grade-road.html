@@ -65,7 +65,7 @@
                         <li>The Centerline is divided into equal-length steps of about Resolution (number of steps = floor(length / Resolution), minimum 2).</li>
                         <li>Each division point is draped onto the Terrain by a vertical ray cast down from 10 000 m above it; the first hit gives the existing ground level (EG). Points off the mesh keep the Z of the centerline.</li>
                         <li>A forward pass then a backward pass clamp each level so the rise or fall to the previous (then next) point is at most Max Slope × horizontal distance. This gives the profile closest to EG that respects the grade limit.</li>
-                        <li>The profile is smoothed by Smoothing passes of a moving average over ±(steps / 20) neighbours (minimum ±1), with the first and last levels pinned after every pass.</li>
+                        <li>The profile is smoothed by Smoothing passes of a moving average over ±(steps / 20) neighbours (minimum ±1), with the first and last levels pinned after every pass. A forward and a backward pass then clamp the interior levels again to Max Slope (end levels stay pinned), so the point profile never exceeds Max Slope; smoothing alone could steepen the steps next to the ends.</li>
                         <li>3D Road is a degree-3 curve interpolated through the smoothed levels (polyline if that fails); Existing Ground is a polyline through the draped levels.</li>
                         <li>The HUD reports the maximum grade of the smoothed point profile and the maximum cut and fill against EG at the division points.</li>
                     </ol>
@@ -73,7 +73,7 @@
                 <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
                     <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
                     <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
-                        <li>Model units are metres; Max Slope is a ratio (0.08 = 8 %), default 0.08; Resolution default 2 m; Smoothing default 5.</li>
+                        <li>Model units are metres; Max Slope is a ratio (0.08 = 8 %), default 0.08; Resolution default 2 m; Smoothing default 5. Resolution must be positive and Max Slope zero or positive, otherwise the component stops with an error.</li>
                         <li>The Terrain is a single surface seen from above (the topmost hit is used) and lies below Centerline Z + 10 000.</li>
                         <li>The road ends are meant to meet fixed levels, so the end levels are kept from the slope-clamped profile.</li>
                     </ul>

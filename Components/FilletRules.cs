@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Grasshopper.Kernel;
 using Newtonsoft.Json;
 using Enzyme.Utils;
@@ -70,6 +71,11 @@ namespace Enzyme.Components
 
             int ruleCount = Math.Min(Math.Min(ruleTypes.Count, ruleMatches.Count), ruleRadii.Count);
             
+            int longest = Math.Max(Math.Max(ruleTypes.Count, ruleMatches.Count), ruleRadii.Count);
+            if (longest > ruleCount)
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"RuleTypes ({ruleTypes.Count}), RuleMatches ({ruleMatches.Count}) and RuleRadii ({ruleRadii.Count}) differ in length: only the first {ruleCount} rule(s) are written.");
+
+            string[] knownTypes = { "Tower", "Program", "Building" };
             var rules = new List<object>();
 
             for (int i = 0; i < ruleCount; i++)
@@ -80,9 +86,15 @@ namespace Enzyme.Components
                     isExact = exactMatches[i];
                 }
 
+                // BIM_JSON compares types case-sensitively: normalise the case of known types, warn on unknown ones.
+                string ruleType = ruleTypes[i]?.Trim() ?? "";
+                string known = knownTypes.FirstOrDefault(k => string.Equals(k, ruleType, StringComparison.OrdinalIgnoreCase));
+                if (known != null) ruleType = known;
+                else AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Rule {i}: type '{ruleType}' is not Tower, Program or Building; BIM_JSON will never match it.");
+
                 rules.Add(new
                 {
-                    type = ruleTypes[i]?.Trim() ?? "",
+                    type = ruleType,
                     match = ruleMatches[i]?.Trim() ?? "",
                     radius = ruleRadii[i],
                     exact = isExact

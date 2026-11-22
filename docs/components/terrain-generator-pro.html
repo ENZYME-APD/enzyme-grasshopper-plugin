@@ -81,7 +81,7 @@
                     <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
                     <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
                         <li>The Boundary is flattened and tessellated: a grid of Resolution columns across its width (rows in proportion) inside the boundary, plus points along the boundary at about one grid step, are triangulated with Rhino CreateFromTessellation.</li>
-                        <li>Each vertex height = MinHeight + t × (MaxHeight − MinHeight), where t is fractal gradient (Perlin-style) noise: one octave per PatternSizeXY / PatternHeightZ pair (defaults 500, 150, 30 m and 1, 0.3, 0.05), octave i seeded with Seed + i and each octave's coordinates rotated about 37°.</li>
+                        <li>If MinHeight is greater than MaxHeight the two are swapped and a warning is shown. Each vertex height = MinHeight + t × (MaxHeight − MinHeight), where t is fractal gradient (Perlin-style) noise: one octave per PatternSizeXY / PatternHeightZ pair (defaults when the inputs are empty 500, 150, 30 m and 1, 0.3, 0.05; the auto-wired panels give 150, 50, 20 and 1.0, 0.3, 0.1), octave i seeded with Seed + i and each octave's coordinates rotated about 37°.</li>
                         <li>TerrainStyle 0 (soft hills): weighted mean of the octaves mapped to 0 to 1 and clamped. TerrainStyle 1 (ridged): weighted mean of (1 − |n|)².</li>
                         <li>Vertex colours follow the Colors gradient by relative height. With UseSlopeColor, vertices whose normal Z is below cos(SlopeAngle) blend towards SlopeColor over 0.2 of normal Z.</li>
                         <li>Contours are cut every ContourStep from the mesh; those at multiples of MainStep go to MainContours.</li>
@@ -102,6 +102,8 @@
                         <li>Heights stay inside MinHeight to MaxHeight but rarely reach them: the noise is not stretched to the full range.</li>
                         <li>Tree count is per triangle, not per area, so density per hectare changes with Resolution.</li>
                         <li>No erosion, drainage or geological process is modelled.</li>
+                        <li>The sine-based hash loses precision at large (UTM-size) coordinates, so the noise degrades far from the origin.</li>
+                        <li>With Solid on, the mesh is welded at any angle, so wall and base colours can bleed into the terrain edge.</li>
                     </ul>
                 </div>
                 <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">

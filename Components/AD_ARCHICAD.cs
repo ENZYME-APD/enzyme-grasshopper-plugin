@@ -63,7 +63,7 @@ namespace Enzyme.Components
         {
             if (DA.Iteration == 0 && Params.Output.Count > 1) DA.SetData(1, Enzyme.Utils.MethodNotes.Info("AD_ARCHICAD"));
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
-            if (!DA.GetDataTree(0, out GH_Structure<GH_Curve> contoursTree)) return;
+            if (!DA.GetDataTree(0, out GH_Structure<GH_Curve> contoursTree)) { Hud.Waiting(this, "FloorContours"); return; }
             var floorContours = new List<Curve>();
             foreach (var path in contoursTree.Paths)
             {
@@ -77,14 +77,15 @@ namespace Enzyme.Components
                 }
             }
 
-            if (!DA.GetDataTree(1, out GH_Structure<GH_Number> heightsTree)) return;
+            if (!DA.GetDataTree(1, out GH_Structure<GH_Number> heightsTree)) { Hud.Waiting(this, "FloorHeights"); return; }
             var floorHeights = new List<double>();
             foreach (var path in heightsTree.Paths)
             {
                 var branch = heightsTree.get_Branch(path);
                 foreach (GH_Number ghNum in branch)
                 {
-                    if (ghNum != null) floorHeights.Add(ghNum.Value);
+                    // Keep a placeholder for null heights (like null curves) so later heights stay on their floor.
+                    floorHeights.Add(ghNum != null ? ghNum.Value : double.NaN);
                 }
             }
 
@@ -132,7 +133,7 @@ namespace Enzyme.Components
 
             if (floorContours.Count == 0 || floorHeights.Count == 0)
             {
-                
+                Hud.Waiting(this, "FloorContours and FloorHeights");
                 return;
             }
 
@@ -145,6 +146,7 @@ namespace Enzyme.Components
                 if (crv == null) continue;
 
                 double h = floorHeights[i];
+                if (double.IsNaN(h) || double.IsInfinity(h)) continue;
                 string prog = (programs.Count > i) ? programs[i] : "Mixed_Use";
                 string tid = (towerIds.Count > i) ? towerIds[i] : "Main_Mass";
                 string bname = (buildingNames.Count > i) ? buildingNames[i] : "Building_01";

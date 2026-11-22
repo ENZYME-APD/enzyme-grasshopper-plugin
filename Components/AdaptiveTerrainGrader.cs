@@ -226,9 +226,10 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
             List<Point3d> basePoints = ptsBag.ToList();
             Point3d[] modifiedPoints = new Point3d[basePoints.Count];
 
-            System.Threading.Tasks.Parallel.For(0, basePoints.Count, i =>
+            // Graded height of a terrain point: pad plane inside a pad, otherwise the original Z clamped
+            // into the BlendAngle slope envelope around all pads. Used for the samples and for the volumes.
+            Func<Point3d, double> gradeZ = pt =>
             {
-                Point3d pt = basePoints[i];
                 bool insideAnyPad = false;
                 double zOffset = pt.Z;
 
@@ -271,7 +272,13 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
                     else if (pt.Z < minZAllowed) zOffset = minZAllowed;
                 }
 
-                modifiedPoints[i] = new Point3d(pt.X, pt.Y, zOffset);
+                return zOffset;
+            };
+
+            System.Threading.Tasks.Parallel.For(0, basePoints.Count, i =>
+            {
+                Point3d pt = basePoints[i];
+                modifiedPoints[i] = new Point3d(pt.X, pt.Y, gradeZ(pt));
             });
 
             Mesh resultMesh = Rhino.Geometry.Mesh.CreateFromTessellation(modifiedPoints, null, Plane.WorldXY, false);
@@ -297,12 +304,13 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
                     Ray3d ray = new Ray3d(new Point3d(cx, cy, bbox.Max.Z + 100), Vector3d.ZAxis * -1);
                     
                     double tBase = Rhino.Geometry.Intersect.Intersection.MeshRay(Mesh, ray);
-                    double tMod = Rhino.Geometry.Intersect.Intersection.MeshRay(resultMesh, ray);
 
-                    if (tBase >= 0 && tMod >= 0)
+                    if (tBase >= 0)
                     {
+                        // Compare the original terrain with the grading rule at the same point (not with the
+                        // re-triangulated ModMesh), so resampling error away from the pads is not counted.
                         double zBase = bbox.Max.Z + 100 - tBase;
-                        double zMod = bbox.Max.Z + 100 - tMod;
+                        double zMod = gradeZ(new Point3d(cx, cy, zBase));
                         double diff = zMod - zBase;
 
                         if (diff > 0.01) localFill += (diff * cellArea);
@@ -369,8 +377,10 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
 
             if (ShowContours)
             {
-                int zMin = (int)Math.Floor(bbox.Min.Z) - 1;
-                int zMax = (int)Math.Ceiling(bbox.Max.Z) + 1;
+                // Contour range covers both terrains, so pads set above or below the existing terrain are included.
+                BoundingBox modBox = resultMesh.GetBoundingBox(true);
+                int zMin = (int)Math.Floor(Math.Min(bbox.Min.Z, modBox.Min.Z)) - 1;
+                int zMax = (int)Math.Ceiling(Math.Max(bbox.Max.Z, modBox.Max.Z)) + 1;
 
                 System.Threading.Tasks.Parallel.For(zMin, zMax + 1, z =>
                 {

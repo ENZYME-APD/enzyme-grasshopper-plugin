@@ -134,6 +134,10 @@ namespace Enzyme.Components
                 }
             }
 
+            // One undo record for the whole run, so Ctrl+Z in Rhino restores the previous Phase values.
+            uint undoSn = doc.BeginUndoRecord("Auto-Phase Assigner");
+            try
+            {
             foreach (var kvp in buildings)
             {
                 string bId = kvp.Key;
@@ -147,8 +151,7 @@ namespace Enzyme.Components
                     int currentPhase = i;
                     maxPodiumPhase = currentPhase;
 
-                    podiums[i].Obj.Attributes.SetUserString("Phase", currentPhase.ToString());
-                    podiums[i].Obj.CommitChanges();
+                    SetPhase(doc, podiums[i].Obj, currentPhase.ToString());
                     modifyCount++;
                     log.Add($"-> {bId} ({podiums[i].TowerId}): Assigned Phase {currentPhase}");
                 }
@@ -163,12 +166,17 @@ namespace Enzyme.Components
                         int newPhase = maxPodiumPhase + 1 + i;
                         string newPhaseStr = newPhase.ToString();
 
-                        tItems[i].Obj.Attributes.SetUserString("Phase", newPhaseStr);
-                        tItems[i].Obj.CommitChanges();
+                        SetPhase(doc, tItems[i].Obj, newPhaseStr);
                         modifyCount++;
                         log.Add($"-> {bId} (Tower: {tId}): Assigned Phase {newPhaseStr}");
                     }
                 }
+            }
+
+            }
+            finally
+            {
+                if (undoSn != 0) doc.EndUndoRecord(undoSn);
             }
 
             string statusLine;
@@ -191,6 +199,18 @@ namespace Enzyme.Components
 
             Message = _cachedMsg; // built with Hud.Build
             DA.SetDataList(0, _cachedLog);
+        }
+
+        // Writes the Phase User Text through the object table so the change is recorded for undo.
+        private static void SetPhase(RhinoDoc doc, RhinoObject obj, string phase)
+        {
+            var attr = obj.Attributes.Duplicate();
+            attr.SetUserString("Phase", phase);
+            if (!doc.Objects.ModifyAttributes(obj, attr, true))
+            {
+                obj.Attributes.SetUserString("Phase", phase);
+                obj.CommitChanges();
+            }
         }
 
         protected override System.Drawing.Bitmap Icon

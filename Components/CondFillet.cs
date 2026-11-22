@@ -38,7 +38,7 @@ namespace Enzyme.Components
         {
             pManager.AddCurveParameter("curves", "curves", "Input geometry (Polylines, Curves, Arcs)", GH_ParamAccess.tree);
             pManager.AddNumberParameter("radius", "radius", "The ideal fillet size you want.", GH_ParamAccess.item);
-            pManager.AddNumberParameter("threshold_pct", "threshold_pct", "Max % of a segment the fillet can consume.", GH_ParamAccess.item);
+            pManager.AddNumberParameter("threshold_pct", "threshold_pct", "Max fraction (not percent) of the shorter adjacent segment the fillet can consume: 0.25 = 25 %. Capped at 0.49.", GH_ParamAccess.item);
             pManager.AddBooleanParameter("skip", "skip", "True to skip tight corners; False to clamp.", GH_ParamAccess.item);
             pManager.AddIntegerParameter("round_dec", "round_dec", "[Optional] Decimals to round down to.", GH_ParamAccess.item);
             pManager[4].Optional = true;
@@ -68,6 +68,14 @@ namespace Enzyme.Components
 
             int round_dec = -1;
             bool hasRoundDec = DA.GetData(4, ref round_dec);
+
+            if (threshold_pct < 0)
+            {
+                Hud.Error(this, "threshold_pct must be a fraction between 0 and 0.49 (0.25 = 25 %).");
+                return;
+            }
+            if (threshold_pct > 0.49)
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, "threshold_pct is a fraction (0.25 = 25 %) and is capped at 0.49.");
 
             string status_msg = skip ? "Skip: on" : "Skip: off (clamp)";
             string round_msg = hasRoundDec ? $"Round: {round_dec} dec (floor)" : "Round: off";
@@ -221,7 +229,13 @@ namespace Enzyme.Components
 
                     Curve[] res = Curve.CreateFilletCurves(c1, p1, c2, p2, r, false, false, true, calc_tol, 0.1);
 
-                    if (res != null && res.Length > 0)
+                    if (res == null || res.Length == 0)
+                    {
+                        // Fillet failed: the corner stays sharp, so report radius 0 for it.
+                        calc_radii[calc_radii.Count - 1] = 0.0;
+                        AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "A fillet could not be created at one or more corners; they were left sharp (radius 0).");
+                    }
+                    else
                     {
                         Curve arc = res[0];
                         Point3d A = arc.PointAtStart;
@@ -296,10 +310,21 @@ namespace Enzyme.Components
                     }
                     else
                     {
-                        PolyCurve pc = new PolyCurve();
-                        foreach (Curve p in parts) pc.Append(p);
-                        if (pc.IsValid) return pc;
-                        return joined[0];
+                        // Only chain the parts if each starts where the previous ends; otherwise keep the input curve.
+                        bool continuous = true;
+                        for (int k = 1; k < parts.Count; k++)
+                        {
+                            if (parts[k - 1].PointAtEnd.DistanceTo(parts[k].PointAtStart) > 0.01) { continuous = false; break; }
+                        }
+                        if (continuous)
+                        {
+                            PolyCurve pc = new PolyCurve();
+                            foreach (Curve p in parts) pc.Append(p);
+                            if (pc.IsValid) return pc;
+                        }
+                        AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "The filleted parts of a curve could not be joined; the input curve was returned unchanged.");
+                        for (int k = 0; k < calc_radii.Count; k++) calc_radii[k] = 0.0;
+                        return crv;
                     }
                 }
             }
@@ -321,7 +346,7 @@ namespace Enzyme.Components
         private void AutoWireDefaultInputs(GH_Document document)
         {
                 Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 1, 0.0, 3.0, 1.5, 330, -40);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 0.0, 3.0, 1.5, 330, 0);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 0.0, 0.49, 0.25, 330, 0);
                 Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 4, 0.0, 2.0, 1, 330, 40);
                 Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 0, "curve", 220, 0);
             }

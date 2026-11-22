@@ -34,8 +34,8 @@ namespace Enzyme.Components
             pManager.AddIntegerParameter("Iterations", "Iterations", "Simulation steps (time steps). Automatically adapts to domain scale if lower than minimum flush.", GH_ParamAccess.item, 50);
             pManager.AddNumberParameter("AnalysisHeight", "AnalysisHeight", "Drape offset above terrain for pedestrian evaluation (m)", GH_ParamAccess.item, 1.5);
             pManager.AddNumberParameter("Viscosity", "Viscosity", "Kinematic viscosity (diffusion/turbulence in m²/s, default 0.1)", GH_ParamAccess.item, 0.1);
-            pManager.AddNumberParameter("Friction", "Friction", "Surface drag coefficient (0.0 to 1.0). Accepts item or list.", GH_ParamAccess.list, 0.1);
-            pManager.AddNumberParameter("ComfortThreshold", "ComfortThreshold", "User threshold for pedestrian comfort (m/s)", GH_ParamAccess.item, 5.0);
+            pManager.AddNumberParameter("Friction", "Friction", "Surface drag coefficient (0.0 to 1.0). Accepts one value or a per-cell list ordered column by column: columns from minimum X, cells in each column from minimum Y (the last value repeats).", GH_ParamAccess.list, 0.1);
+            pManager.AddNumberParameter("ComfortThreshold", "ComfortThreshold", "User threshold for pedestrian comfort (m/s), compared with the mean speed (the Lawson classes use the gust speed)", GH_ParamAccess.item, 5.0);
             pManager.AddCurveParameter("BoundaryMask", "BoundaryMask", "Optional closed curve to crop the simulation domain and lock grid coordinates.", GH_ParamAccess.item);
             pManager.AddColourParameter("Colors", "Colors", "Custom color spectrum override (min to max)", GH_ParamAccess.list);
             pManager.AddNumberParameter("WindRefHeight", "RefHeight", "Meteorological measurement height for input WindSpeed (m). Default = 10.0m (scales to pedestrian height via ABL power law).", GH_ParamAccess.item, 10.0);
@@ -258,7 +258,7 @@ namespace Enzyme.Components
 
                     // Slope component aligned with wind direction
                     double slopeAlongWind = dz_dx * windDir.X + dz_dy * windDir.Y;
-                    // Jackson & Hunt hill speedup factor: ~1 + 0.6 * slope (clamped between 0.7x and 1.4x)
+                    // Heuristic hill speed-up: 1 + 0.5 * slope along the wind, clamped to 0.7x .. 1.4x (not the Jackson & Hunt formula)
                     double factor = 1.0 + 0.5 * slopeAlongWind;
                     terrainSlopeFactor[idx] = (float)Math.Max(0.7, Math.Min(1.4, factor));
                 }
@@ -281,8 +281,9 @@ namespace Enzyme.Components
             float dt = 0.5f / wSpeed_cells;
             if (dt > 0.5f) dt = 0.5f;
 
-            // Physical time step in seconds
-            float dt_sec = dt * (float)(cellSize / wSpeed);
+            // Physical time step in seconds: velocities are in cells per second, so the advection step dt is already in seconds.
+            // Diffusion and friction use the same step, so Viscosity (m²/s) and Friction act independently of CellSize and wind speed.
+            float dt_sec = dt;
 
             // Initialize interior velocities with terrain slope modulation
             Parallel.For(1, N + 1, i =>
@@ -305,10 +306,21 @@ namespace Enzyme.Components
             // Dynamic Poisson relaxation count per time step
             int poissonPasses = Math.Max(12, Math.Min(40, Math.Max(N, M) / 3));
 
+            // Convergence is checked every 10 steps after the domain flush, against the field of the previous full step.
+            int convergenceStart = minDomainFlushes;
+            float[] uPrev = new float[totalCells];
+            float[] vPrev = new float[totalCells];
+
             int executedSteps = 0;
             for (int iter = 0; iter < totalSteps; iter++)
             {
                 executedSteps++;
+                bool checkConvergence = iter >= convergenceStart && iter % 10 == 0;
+                if (checkConvergence)
+                {
+                    Array.Copy(u, uPrev, totalCells);
+                    Array.Copy(v, vPrev, totalCells);
+                }
 
                 // Apply domain boundaries (Inflow, Outflow, Free-slip, preserving building obstacles)
                 SetDomainBoundaries(N, M, obstacles, u, v, p, windU_cells, windV_cells);
@@ -348,7 +360,7 @@ namespace Enzyme.Components
                 });
 
                 // Convergence check every 10 steps after domain flush
-                if (iter >= minDomainFlushes && iter % 10 == 0)
+                if (checkConvergence)
                 {
                     float maxDelta = 0.0f;
                     for (int chk = 1; chk <= N; chk += 2)
@@ -357,8 +369,8 @@ namespace Enzyme.Components
                         {
                             int idx = IX(chk, jhk, N);
                             if (obstacles[idx]) continue;
-                            float du = (u[idx] - u0[idx]) * (float)cellSize;
-                            float dv = (v[idx] - v0[idx]) * (float)cellSize;
+                            float du = (u[idx] - uPrev[idx]) * (float)cellSize;
+                            float dv = (v[idx] - vPrev[idx]) * (float)cellSize;
                             float delta = (float)Math.Sqrt(du * du + dv * dv);
                             if (delta > maxDelta) maxDelta = delta;
                         }
@@ -528,8 +540,8 @@ namespace Enzyme.Components
   ""Labels"": {labelsJson},
   ""Metrics"": [
     {{ ""Name"": ""Avg Speed"", ""Value"": ""{avgSpeed:F1} m/s"" }},
-    {{ ""Name"": ""Comfort ({comfortThreshold:F1} m/s)"", ""Value"": ""{pctComfort:F1}%"" }},
-    {{ ""Name"": ""Sitting (<4 m/s)"", ""Value"": ""{pctSitting:F1}%"" }},
+    {{ ""Name"": ""Comfort (mean <= {comfortThreshold:F1} m/s)"", ""Value"": ""{pctComfort:F1}%"" }},
+    {{ ""Name"": ""Sitting (gust <4 m/s)"", ""Value"": ""{pctSitting:F1}%"" }},
     {{ ""Name"": ""Standing (<6 m/s)"", ""Value"": ""{pctStanding:F1}%"" }},
     {{ ""Name"": ""Strolling (<8 m/s)"", ""Value"": ""{pctStrolling:F1}%"" }},
     {{ ""Name"": ""Business (<10 m/s)"", ""Value"": ""{pctBusinessWalk:F1}%"" }},
@@ -549,19 +561,19 @@ namespace Enzyme.Components
                 $"- Inlet Wind: {windSpeed:F1} m/s @ {refHeight:F1}m reference height -> {pedestrianSpeed:F1} m/s @ {analysisHeight:F1}m pedestrian level\n" +
                 $"- Steps Executed: {executedSteps} time steps (dt = {dt_sec:F3}s) | Poisson SOR Passes: {poissonPasses} per step\n" +
                 $"- Velocity Field: Avg = {avgSpeed:F1} m/s | Min = {minSpeed:F1} m/s | Max = {maxSpeed:F1} m/s\n\n" +
-                "LAWSON-STYLE PEDESTRIAN COMFORT CLASSES (SINGLE WIND SCENARIO):\n" +
+                "LAWSON-STYLE PEDESTRIAN COMFORT CLASSES (SINGLE WIND SCENARIO, HEURISTIC GUST SPEED = speed x (1 + 1.2 TI)):\n" +
                 $"- Sitting / Outdoor Dining (<4.0 m/s): {pctSitting:F1}%\n" +
                 $"- Standing / Pedestrian Waiting (<6.0 m/s): {pctStanding:F1}%\n" +
                 $"- Strolling / Leisure Walking (<8.0 m/s): {pctStrolling:F1}%\n" +
                 $"- Business Walking / Transit (<10.0 m/s): {pctBusinessWalk:F1}%\n" +
                 $"- Uncomfortable / High Gusts (>10.0 m/s): {pctUncomfort:F1}%\n" +
-                $"- Custom Threshold Comfort (<= {comfortThreshold:F1} m/s): {pctComfort:F1}%\n" +
+                $"- Custom Threshold Comfort (mean speed <= {comfortThreshold:F1} m/s, not comparable with the gust classes above): {pctComfort:F1}%\n" +
                 $"- Peak Turbulence Intensity (TI): {maxTurbulenceIntensity:P1}\n\n" +
                 "NUMERICAL & PHYSICAL SPECIFICATIONS:\n" +
                 "1. Multi-Core Solver: Thread-safe Parallel.For advection, diffusion, and Red-Black Successive Over-Relaxation (SOR) with warm-start pressure projection.\n" +
                 "2. Non-Reflecting Domain Boundaries: Open Neumann outflow and Dirichlet pressure anchors at domain exit; windward boundaries enforce clean inflow without erasing edge buildings.\n" +
                 "3. Zero-Gradient Neumann Obstacles: Solid facades enforce dp/dn = 0, preventing artificial vacuum suction holes and accurately developing stagnation zones and deflecting wakes.\n" +
-                "4. Topographic Modulation: Integrates wind-aligned terrain slope acceleration (speed-up over ridges, deceleration in depressions).\n" +
+                "4. Topographic Modulation: A wind-aligned terrain slope factor (speed-up over ridges, deceleration in depressions) seeds the initial field only; inflow and advection largely replace it once the domain is flushed.\n" +
                 "5. Grid-Independent Physics: Kinematic viscosity and friction decay are non-dimensionalised against physical cell size and time step.\n\n" +
                 "LIMITATIONS & METHODOLOGY NOTE:\n" +
                 "- 2.5D Assumption: Simulates horizontal Venturi tunneling, gap flows, and recirculating wake eddies over 3D terrain, but does not capture 3D vertical skyscraper downdrafts.\n" +

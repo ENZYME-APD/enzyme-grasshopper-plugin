@@ -10,7 +10,7 @@ namespace Enzyme.Components
     {
         public CanvasStyle()
           : base("Canvas Style", "CanvasStyle",
-              "Modifies the global canvas background, grid, and panel default colors.",
+              "Modifies the global canvas background, grid, and panel default colors. The change applies to the whole Grasshopper application and stays after this component or file is closed; to go back, set the colours you want again (the previous colours are not restored).",
               "Enzyme", "Utilities")
         {
         }

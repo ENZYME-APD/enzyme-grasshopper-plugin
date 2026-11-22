@@ -7,7 +7,10 @@ namespace Enzyme.Components
 {
     public class ChangePulse : GH_Component
     {
-        private string _prevHash = null;
+        // Previous text form per solve iteration (so list inputs compare item i with item i of the previous solution).
+        // A missing key means "never seen": the first value only initialises and does not pulse (e.g. on file open).
+        private readonly System.Collections.Generic.Dictionary<int, string> _prevByIteration = new System.Collections.Generic.Dictionary<int, string>();
+        private const string EmptyMarker = "\u0000<empty>";
 
         public ChangePulse()
           : base("Change Pulse", "Pulse",
@@ -30,13 +33,16 @@ namespace Enzyme.Components
         {
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
 
+            int iteration = DA.Iteration;
+            bool seen = _prevByIteration.TryGetValue(iteration, out string prevHash);
+
             IGH_Goo data = null;
-            if (!DA.GetData(0, ref data)) 
+            if (!DA.GetData(0, ref data) || data == null)
             {
                 // If data stream is disconnected or empty
-                if (_prevHash != null)
+                _prevByIteration[iteration] = EmptyMarker;
+                if (seen && prevHash != EmptyMarker)
                 {
-                    _prevHash = null;
                     DA.SetData(0, true);
                     ScheduleReset();
                 }
@@ -48,10 +54,10 @@ namespace Enzyme.Components
             }
 
             string currentHash = data.ToString();
-            
-            if (_prevHash == null || currentHash != _prevHash)
+            _prevByIteration[iteration] = currentHash;
+
+            if (seen && currentHash != prevHash)
             {
-                _prevHash = currentHash;
                 DA.SetData(0, true);
                 ScheduleReset();
             }

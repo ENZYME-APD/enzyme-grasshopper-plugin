@@ -20,7 +20,7 @@ namespace Enzyme.Terrain
 
         public MeshHeightAnalysis()
           : base("Terrain Height", "TerrainHeight",
-              "Analyzes mesh extremes, unrolls sections bi-directionally, and generates 3D/2D metadata labels.",
+              "Finds local and global peaks and valleys of terrain meshes, colours a vertex heatmap by elevation and outputs Dashboard Data (elevation legend).",
               "Enzyme", "Site Analysis")
         {
         }
@@ -62,19 +62,39 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
             bool result = base.Read(reader);
             if (result)
             {
-                // Force sync outputs 10 onwards to clean up legacy section outputs
-                while (Params.Output.Count > 10)
+                // Current layout (Dashboard Data at 10, Info at 11): leave it alone so saved wires survive.
+                bool isCurrent = Params.Output.Count == 12
+                    && Params.Output[10].Name == "Dashboard Data"
+                    && Params.Output[11].Name == "Info";
+                if (!isCurrent)
                 {
-                    Params.UnregisterOutputParameter(Params.Output[Params.Output.Count - 1], true);
+                    // Legacy files: drop old section outputs after index 9, but keep an existing
+                    // legend output at index 10 (Color Legend / Dashboard Data) so its wires survive.
+                    bool keepLegend = Params.Output.Count > 10
+                        && (Params.Output[10].Name == "Color Legend" || Params.Output[10].Name == "Dashboard Data");
+                    int keep = keepLegend ? 11 : 10;
+                    while (Params.Output.Count > keep)
+                    {
+                        Params.UnregisterOutputParameter(Params.Output[Params.Output.Count - 1], true);
+                    }
+
+                    if (!keepLegend)
+                    {
+                        var legendParam = new Grasshopper.Kernel.Parameters.Param_String();
+                        legendParam.Name = "Dashboard Data";
+                        legendParam.NickName = "Dashboard Data";
+                        legendParam.Description = "JSON Legend Data";
+                        legendParam.Access = GH_ParamAccess.item;
+                        Params.RegisterOutputParam(legendParam);
+                    }
+
+                    var infoParam = new Grasshopper.Kernel.Parameters.Param_String();
+                    infoParam.Name = "Info";
+                    infoParam.NickName = "Info";
+                    infoParam.Description = "Component information and interpretation";
+                    infoParam.Access = GH_ParamAccess.item;
+                    Params.RegisterOutputParam(infoParam);
                 }
-                
-                // Re-add the Color Legend parameter at index 10
-                var legendParam = new Grasshopper.Kernel.Parameters.Param_GenericObject();
-                legendParam.Name = "Color Legend";
-                legendParam.NickName = "Color Legend";
-                legendParam.Description = "JSON Legend Data";
-                legendParam.Access = GH_ParamAccess.item;
-                Params.RegisterOutputParam(legendParam);
             }
             return result;
         }
@@ -166,6 +186,9 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
             double padding = globalBB.IsValid ? globalBB.Diagonal.Length * 0.05 : 10.0;
             double cursorYXSecs = globalBB.IsValid ? globalBB.Min.Y - padding : -padding;
             double cursorXYSecs = globalBB.IsValid ? globalBB.Min.X - padding : -padding;
+            // One elevation range for all heatmaps, so the colours match the Dashboard Data legend.
+            double heatZMin = globalBB.IsValid ? globalBB.Min.Z : 0.0;
+            double heatZMax = globalBB.IsValid ? globalBB.Max.Z : 0.0;
 
             for (int pathIdx = 0; pathIdx < targetMeshes.Paths.Count; pathIdx++)
             {
@@ -198,7 +221,19 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
                     Mesh mesh = ghMesh.Value;
                     var topology = mesh.TopologyVertices;
                     var vertices = mesh.Vertices;
-                    bool[] isNakedEdge = mesh.GetNakedEdgePointStatus();
+                    bool[] isNakedVertex = mesh.GetNakedEdgePointStatus();
+                    // GetNakedEdgePointStatus is per mesh vertex: map it to topology vertices.
+                    bool[] isNakedEdge = new bool[topology.Count];
+                    if (isNakedVertex != null)
+                    {
+                        for (int ti = 0; ti < topology.Count; ti++)
+                        {
+                            foreach (int mvi in topology.MeshVertexIndices(ti))
+                            {
+                                if (mvi >= 0 && mvi < isNakedVertex.Length && isNakedVertex[mvi]) { isNakedEdge[ti] = true; break; }
+                            }
+                        }
+                    }
 
                     var amp = AreaMassProperties.Compute(mesh);
                     if (amp != null) totalTerrainArea += amp.Area;
@@ -322,7 +357,7 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
                         for (int i = 0; i < vertices.Count; i++)
                         {
                             double zVal = heatmapDup.Vertices[i].Z;
-                            Color c = ComputeHeatmapColor(zVal, zMin, zMax, customColorList);
+                            Color c = ComputeHeatmapColor(zVal, heatZMin, heatZMax, customColorList);
                             heatmapDup.VertexColors.Add(c);
                         }
                         heatmapMeshes.Append(new GH_Mesh(heatmapDup), currentPath);
@@ -347,7 +382,7 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
             if (enableHeatmap && totalVerticesCount > 0)
             {
                 var jColors = new JArray();
-                var cList = customColorList.Count > 0 ? customColorList : new List<Color> { Color.Blue, Color.Cyan, Color.Lime, Color.Yellow, Color.Red };
+                var cList = customColorList.Count > 0 ? customColorList : new List<Color> { Color.Cyan, Color.Yellow, Color.Red };
                 foreach (var c in cList) jColors.Add(new JObject { ["R"] = c.R, ["G"] = c.G, ["B"] = c.B });
                 
                 var legendObj = new JObject
@@ -412,6 +447,7 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
 
         private Color ComputeHeatmapColor(double val, double minVal, double maxVal, List<Color> colorList)
         {
+            if (colorList != null && colorList.Count == 1) return colorList[0];
             if (Math.Abs(maxVal - minVal) < 1e-9) return Color.Gray;
             double param = Math.Max(0.0, Math.Min(1.0, (val - minVal) / (maxVal - minVal)));
 

@@ -170,11 +170,24 @@ namespace Enzyme.Components
                             out_bounds.Append(new GH_Curve(c), path);
 
                             Extrusion extrusion = Extrusion.Create(c, height, true);
-                            if (extrusion != null)
+                            // Extrusion.Create follows the curve plane normal, so a clockwise boundary can extrude
+                            // downwards: blocks always go up from true_z.
+                            if (extrusion != null && height > 0)
                             {
-                                Brep b_rep = extrusion.ToBrep();
-                                if (b_rep != null) out_volumes.Append(new GH_Brep(b_rep), path);
+                                double baseZ = c.GetBoundingBox(true).Min.Z;
+                                if (extrusion.GetBoundingBox(true).Min.Z < baseZ - 0.5 * height)
+                                {
+                                    Extrusion flipped = Extrusion.Create(c, -height, true);
+                                    if (flipped != null) extrusion = flipped;
+                                }
                             }
+                            Brep b_rep = extrusion?.ToBrep();
+                            if (b_rep != null) out_volumes.Append(new GH_Brep(b_rep), path);
+                            else AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"No volume for block {label}: boundary could not be extruded.");
+                        }
+                        else
+                        {
+                            AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"No boundary for block {label}: Volumes, BaseBounds and Areas skip it.");
                         }
                         match_count++;
                     }
@@ -284,17 +297,23 @@ namespace Enzyme.Components
             }
 
             if (crvs.Count == 0) return null;
-            if (crvs.Count == 1) return crvs[0];
 
-            Curve[] joined = Curve.JoinCurves(crvs, 0.01);
-            if (joined != null && joined.Length > 0)
+            Curve crv = null;
+            if (crvs.Count == 1) crv = crvs[0];
+            else
             {
-                Curve crv = joined[0];
-                if (!crv.IsClosed) crv.MakeClosed(0.01);
-                return crv;
+                Curve[] joined = Curve.JoinCurves(crvs, 0.01);
+                if (joined != null && joined.Length > 0) crv = joined[0];
             }
+            if (crv == null) return null;
 
-            return null;
+            // Close the boundary (also a single open segment): first within tolerance, otherwise with a closing line
+            if (!crv.IsClosed && !crv.MakeClosed(0.01))
+            {
+                Curve[] closed = Curve.JoinCurves(new Curve[] { crv, new LineCurve(crv.PointAtEnd, crv.PointAtStart) }, 0.01);
+                if (closed != null && closed.Length > 0) crv = closed[0];
+            }
+            return crv;
         }
 
         protected override System.Drawing.Bitmap Icon

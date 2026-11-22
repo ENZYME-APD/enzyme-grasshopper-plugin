@@ -98,6 +98,7 @@ namespace Enzyme.Components
 
             double glassArea = 0, spandrelArea = 0;
             int mullionCount = 0;
+            int defaultHeightFloors = 0;
 
             for (int p = 0; p < ghBounds.PathCount; p++)
             {
@@ -120,6 +121,7 @@ namespace Enzyme.Components
                     if (crv == null) continue;
 
                     double h = (hts.Count > i) ? hts[i] : 4.0;
+                    if (hts.Count <= i) defaultHeightFloors++;
                     double crvLen = crv.GetLength();
 
                     if (SillHeight > 0)
@@ -205,6 +207,9 @@ namespace Enzyme.Components
             }
 
             watch.Stop();
+
+            if (defaultHeightFloors > 0)
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, defaultHeightFloors + " floor outline(s) have no matching value in Heights; 4.0 m was used.");
 
             DA.SetDataTree(0, outGlass);
             DA.SetDataTree(1, outSpandrel);

@@ -48,9 +48,11 @@ namespace Enzyme.Components
                 double max = double.MinValue;
                 foreach (double v in values)
                 {
+                    if (double.IsNaN(v) || double.IsInfinity(v)) continue;
                     if (v < min) min = v;
                     if (v > max) max = v;
                 }
+                if (min > max) { min = 0.0; max = 1.0; } // no finite values
                 domain = new Interval(min, max);
             }
 
@@ -59,6 +61,11 @@ namespace Enzyme.Components
             {
                 domain = new Interval(domain.Min, domain.Min + 1e-9);
             }
+
+            // Map from T0 to T1 (signed), so a reversed Source Domain (e.g. 10 to 0) flips the gradient
+            double d0 = domain.T0;
+            double dLen = domain.T1 - domain.T0;
+            int nanCount = 0;
 
             List<Color> customColors = new List<Color>();
             DA.GetDataList(2, customColors);
@@ -81,7 +88,8 @@ namespace Enzyme.Components
 
             foreach (double val in values)
             {
-                double t = (val - domain.Min) / domain.Length;
+                double t = (val - d0) / dLen;
+                if (double.IsNaN(t)) { t = 0.0; nanCount++; }
                 if (t < 0.0) t = 0.0;
                 if (t > 1.0) t = 1.0;
 
@@ -100,6 +108,9 @@ namespace Enzyme.Components
 
                 mappedColors.Add(Color.FromArgb(255, r, g, b));
             }
+
+            if (nanCount > 0)
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, nanCount + " value(s) are not numbers (NaN); they get the first colour.");
 
             DA.SetDataList(0, mappedColors);
         

@@ -60,12 +60,12 @@
                 <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
                     <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
                     <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
-                        <li>Each referenced curve is read with its User Text: BuildingID (default Building_01), Program (Default), TowerID (Main_Tower), FloorHeight (3.5), Floors (1), Phase (0). Non-curves and Type = core objects are skipped.</li>
+                        <li>Each referenced curve is read with its User Text: BuildingID (default Building_01), Program (Default), TowerID (Main_Tower), FloorHeight (3.5), Floors (1), Phase (0). Numbers are read with invariant culture (dot decimal); values that cannot be read fall back to these defaults with a warning. Non-curves and Type = core objects are skipped.</li>
                         <li>Each curve is projected flat to Z = 0, made anticlockwise if closed, and filleted when a Fillet_Config rule applies. Rules are checked in order (type Tower, Program or Building; match text or *; exact default true, otherwise contains; case-insensitive); the first match gives the radius, else default_radius.</li>
                         <li>The fillet radius is capped at 0.49 × the shortest segment of the curve so corners do not overlap.</li>
                         <li>Per building, blocks are sorted by Phase. A block sits on the top of the previous block of the same tower; the first block of a tower sits on the highest top reached by any earlier phase (0 if none). Top = base + FloorHeight × Floors.</li>
                         <li>The JSON lists buildings (name, true_base_elevation = lowest curve Z of the building) and blocks (name Program_index, tower_id, program, floor_height, floors, base_z relative to the building base, boundary_segments).</li>
-                        <li>Segments are written as Line (start, end), Arc (start, mid, end) or Polyline (points from a 0.01 tolerance conversion), coordinates rounded to 4 decimals.</li>
+                        <li>Segments are written as Line (start, end), Arc (start, mid, end) or Polyline (points from a 0.01 tolerance conversion), coordinates rounded to 4 decimals. Arc segments that cannot be read as an exact arc are written as a Polyline approximation.</li>
                         <li>When PushToRhino is True, each source curve is moved vertically so its lowest point sits at building base + base_z.</li>
                     </ol>
                 </div>

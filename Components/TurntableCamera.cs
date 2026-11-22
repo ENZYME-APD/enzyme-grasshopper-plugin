@@ -103,16 +103,23 @@ namespace Enzyme.Components
             pline.Add(camPoints[0]); // close it
             Curve orbitPath = pline.ToNurbsCurve();
 
-            if (run && !string.IsNullOrWhiteSpace(dir))
+            if (run && string.IsNullOrWhiteSpace(dir))
+            {
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Directory is empty: no frames were exported.");
+            }
+            else if (run)
             {
                 if (!Directory.Exists(dir))
                 {
-                    try { Directory.CreateDirectory(dir); } catch { }
+                    try { Directory.CreateDirectory(dir); }
+                    catch (Exception ex) { AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Directory could not be created (" + ex.Message + "): no frames were exported."); }
                 }
 
                 if (Directory.Exists(dir))
                 {
-                    RhinoView activeView = RhinoDoc.ActiveDoc.Views.ActiveView;
+                    RhinoView activeView = RhinoDoc.ActiveDoc?.Views.ActiveView;
+                    if (activeView == null)
+                        AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "No active Rhino document or view: no frames were exported.");
                     if (activeView != null)
                     {
                         var originalCam = new Rhino.DocObjects.ViewInfo(activeView.ActiveViewport);

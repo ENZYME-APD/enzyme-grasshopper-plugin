@@ -66,7 +66,7 @@
                 <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
                     <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
                     <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
-                        <li>Each boundary curve (one per floor, height from Heights by path and index, default 4.0 m) is extruded into glass up to height - HeaderDrop, and a spandrel band of HeaderDrop above it.</li>
+                        <li>Each boundary curve (one per floor, height from Heights by path and index, default 4.0 m) is extruded straight up along world Z, whatever its orientation, into glass up to height - HeaderDrop, and a spandrel band of HeaderDrop above it.</li>
                         <li>The curve is split into its segments; each segment is divided into round(length / Spacing) equal parts (at least 1), so fins sit at both ends and the real spacing is close to Spacing. Points repeated at shared corners (within 1 mm) are used once.</li>
                         <li>Fin positions are numbered along the whole curve; a fin is placed where the active horizontal pattern has 1 (the pattern repeats).</li>
                         <li>The active pattern for the i-th curve in a branch is HorizPattern[VertPattern digit i] (both wrap round), so VertPattern picks a pattern per floor.</li>
@@ -86,6 +86,7 @@
                     <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
                         <li>All parts are zero-thickness surfaces; no mullions, frames or slab edges.</li>
                         <li>Fins are not adjusted at corners; patterns ignore segment breaks.</li>
+                        <li>VertPattern is indexed by the item index within a branch, so each branch must hold one building's floors in order.</li>
                     </ul>
                 </div>
                 <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">

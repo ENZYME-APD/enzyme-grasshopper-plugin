@@ -66,7 +66,7 @@
                 <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
                     <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
                     <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
-                        <li>Each curve in a branch is one floor outline, with floor height from the matching item of Heights (4.0 m if missing).</li>
+                        <li>Each curve in a branch is one floor outline, with floor height from the matching item of Heights; floors without a matching Heights value use 4.0 m and raise a warning.</li>
                         <li>The whole outline is extruded into a sill band of SillHeight, a glass band from SillHeight to height − HeaderDrop, and a header band of HeaderDrop; sill and header go to Spandrels.</li>
                         <li>Each outline segment is divided into round(length / BayWidth) equal bays; at every division point (duplicates removed, 1 mm rounding) a mullion fin of MullionDepth is placed perpendicular to the segment in plan.</li>
                         <li>Fins span the glass height, or the full floor height when FullHeightMullions is True; FlipDir turns them to the other side.</li>

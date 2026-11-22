@@ -12,7 +12,7 @@ namespace Enzyme.Components
     {
         public InitKeysComponent()
           : base("BIM Key Initializer", "INITKEYS",
-              "Safely injects default BIM attributes into referenced Rhino curves.",
+              "Safely injects default BIM attributes (user text keys) into referenced Rhino objects of any type; existing keys are never overwritten.",
               "Enzyme", "JSON Masterplan (Beta)")
         {
         }

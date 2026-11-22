@@ -73,7 +73,8 @@ namespace Enzyme.Components
                 int floor = floors[i];
 
                 sb.AppendLine("  {");
-                sb.AppendLine($"    \"program\": \"{prog}\",");
+                // Escape the name (quotes, backslashes, control characters) so the JSON stays valid.
+                sb.AppendLine($"    \"program\": {Newtonsoft.Json.JsonConvert.ToString(prog ?? "")},");
                 // Use InvariantCulture for numbers to ensure dot as decimal separator
                 sb.AppendLine($"    \"height\": {height.ToString(System.Globalization.CultureInfo.InvariantCulture)},");
                 sb.AppendLine($"    \"floors\": {floor}");

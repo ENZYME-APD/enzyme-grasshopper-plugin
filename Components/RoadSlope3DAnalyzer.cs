@@ -32,7 +32,7 @@ namespace Enzyme.Components
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
         {
             pManager.AddCurveParameter("Analyzed Segments", "Segments", "Segmented 3D road curves", GH_ParamAccess.tree);
-            pManager.AddNumberParameter("Slope Values", "Slopes", "Slope values for each segment", GH_ParamAccess.tree);
+            pManager.AddNumberParameter("Slope Values", "Slopes", "Chord slope of each segment in the Mode unit (degrees, percent, or X of 1:X). A vertical segment gives 90 degrees, infinite percent or 1:0 and is non-compliant; a flat segment gives infinity in ratio mode (left out of the HUD average).", GH_ParamAccess.tree);
             pManager.AddPointParameter("Center Points", "Centers", "Center points of segments", GH_ParamAccess.tree);
             pManager.AddTextParameter("Segment Status", "Status", "Status (Compliant / Non-Compliant) per segment", GH_ParamAccess.tree);
             pManager.AddNumberParameter("Compliance Percentage", "Compliance %", "Overall compliance percentage", GH_ParamAccess.item);
@@ -56,6 +56,11 @@ namespace Enzyme.Components
             DA.GetData(2, ref segmentSize);
             DA.GetData(3, ref mode);
             DA.GetDataList(4, customColors);
+            if (segmentSize <= 0)
+            {
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Segment Size must be greater than 0.");
+                return;
+            }
 
             if (customColors.Count < 2)
             {
@@ -100,7 +105,12 @@ namespace Enzyme.Components
                     double verticalDistance = Math.Abs(p1.Z - p0.Z);
                     double slopeValue = 0.0;
 
-                    if (horizontalDistance > 0)
+                    if (horizontalDistance <= 0 && verticalDistance > 0)
+                    {
+                        // Vertical segment: 90 degrees, infinite percentage, ratio 1:0 (never compliant)
+                        slopeValue = mode == 0 ? 90.0 : (mode == 1 ? double.PositiveInfinity : 0.0);
+                    }
+                    else if (horizontalDistance > 0)
                     {
                         if (mode == 0) // Degrees
                         {
@@ -112,7 +122,8 @@ namespace Enzyme.Components
                         }
                         else if (mode == 2) // Ratio 1:X
                         {
-                            slopeValue = horizontalDistance / verticalDistance;
+                            // A flat segment is 1:infinity in Slope Values (excluded from the HUD average)
+                            slopeValue = verticalDistance > 0 ? horizontalDistance / verticalDistance : double.PositiveInfinity;
                         }
                     }
 
@@ -123,7 +134,7 @@ namespace Enzyme.Components
                     }
                     else
                     {
-                        isCompliant = slopeValue <= threshold;
+                        isCompliant = slopeValue <= threshold && !(horizontalDistance <= 0 && verticalDistance > 0);
                     }
 
                     outSegments.Append(new GH_Curve(segment), path);
@@ -149,24 +160,21 @@ namespace Enzyme.Components
                 ["Type"] = "Binary",
                 ["Title"] = "3D Road Slope",
                 ["Colors"] = jColors,
-                ["Labels"] = new JArray($"<= {threshold}{unit}", $"> {threshold}{unit}"),
+                ["Labels"] = new JArray(mode == 2
+                    ? new object[] { "1:X, X >= " + threshold.ToString(System.Globalization.CultureInfo.InvariantCulture), "1:X, X < " + threshold.ToString(System.Globalization.CultureInfo.InvariantCulture) }
+                    : new object[] { "<= " + threshold.ToString(System.Globalization.CultureInfo.InvariantCulture) + unit, "> " + threshold.ToString(System.Globalization.CultureInfo.InvariantCulture) + unit }),
                 ["SubLabels"] = new JArray($"Compliance: {compliancePct}%")
             };
 
             sw.Stop();
 
-            string infoText = "3D ROAD SLOPE ANALYZER\n\n" + 
-                              "HOW IT WORKS:\n" + 
-                              "Evaluates 3D curves directly to calculate the longitudinal slope at discrete intervals. Does not require a terrain mesh.\n\n" + 
-                              "INTERPRETATION & IMPORTANCE:\n" + 
-                              "Ensures road networks comply with accessibility and vehicular safety standards. Used for finalized grading analysis.";
             double maxVal = double.MinValue;
             double minVal = double.MaxValue;
             double sumVal = 0;
             int countVal = 0;
             foreach (Grasshopper.Kernel.Types.GH_Number val in outSlopes.AllData(true))
             {
-                if(val != null) {
+                if(val != null && !double.IsInfinity(val.Value) && !double.IsNaN(val.Value)) {
                     double v = val.Value;
                     if(v > maxVal) maxVal = v;
                     if(v < minVal) minVal = v;
@@ -198,7 +206,8 @@ namespace Enzyme.Components
         public override void AddedToDocument(GH_Document document)
         {
             base.AddedToDocument(document);
-            if (this.Params.Input[3].SourceCount == 0)
+            // Only on a fresh drop: a component read from a file or pasted keeps its Mode wiring as saved
+            if (!_readFromFile && this.Params.Input[3].SourceCount == 0)
             {
                 var vl = new Grasshopper.Kernel.Special.GH_ValueList();
                 vl.CreateAttributes();
@@ -211,6 +220,14 @@ namespace Enzyme.Components
                 document.AddObject(vl, false);
                 this.Params.Input[3].AddSource(vl);
             }
+        }
+
+        private bool _readFromFile = false;
+
+        public override bool Read(GH_IO.Serialization.GH_IReader reader)
+        {
+            _readFromFile = true;
+            return base.Read(reader);
         }
 
         public override GH_Exposure Exposure => GH_Exposure.primary;

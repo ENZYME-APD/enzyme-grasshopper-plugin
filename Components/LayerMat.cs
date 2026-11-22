@@ -48,7 +48,7 @@ namespace Enzyme.Components
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
         {
-            pManager.AddTextParameter("Instructions_Out", "IO", "Component interface documentation.", GH_ParamAccess.item);
+            pManager.AddTextParameter("Instructions_Out", "IO", "Usage instructions, then the method, assumptions and simplifications (this output plays the role of Info).", GH_ParamAccess.item);
             pManager.AddTextParameter("LogOutput", "LO", "Persistent execution log.", GH_ParamAccess.item);
             pManager.AddIntegerParameter("UpdatedCount", "UC", "Number of layers that received a new material.", GH_ParamAccess.item);
             pManager.AddIntegerParameter("SkippedCount", "SC", "Number of layers that already had a material.", GH_ParamAccess.item);
@@ -122,7 +122,7 @@ OUTPUTS:
             DA.GetData(1, ref useFullPath);
             DA.GetData(2, ref runScript);
 
-            DA.SetData(0, Instructions);
+            DA.SetData(0, Instructions + "\n\n" + Enzyme.Utils.MethodNotes.Info("LayerMat"));
 
             if (runScript)
             {

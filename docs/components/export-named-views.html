@@ -72,7 +72,7 @@
                     <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
                     <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
                         <li>When Run is True it collects the Named Views given in Views (all named views if empty), optionally sets the active viewport to Display Style and restores Layer State.</li>
-                        <li>For each view it pushes the view onto the active viewport, captures it with Rhino ViewCapture at Width × Height pixels (grid, world axes and CPlane axes on or off, optional transparent background) and saves it as png, jpg, bmp or tif with DPI written as metadata.</li>
+                        <li>For each view it pushes the view onto the active viewport, captures it with Rhino ViewCapture at Width × Height pixels (grid, world axes and CPlane axes on or off, optional transparent background for PNG and TIFF only, ignored for JPG and BMP which have no alpha channel) and saves it as png, jpg, bmp or tif with DPI written as metadata.</li>
                         <li>Files are named Prefix_view name_Suffix in Directory (Desktop if empty, created if missing); afterwards the original view, display mode and layer state are restored.</li>
                     </ol>
                 </div>

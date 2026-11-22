@@ -41,6 +41,7 @@ namespace Enzyme.Components
             }
 
             Surface surface = null;
+            BrepFace face = null;
 
             if (input_item != null)
             {
@@ -52,7 +53,8 @@ namespace Enzyme.Components
                 {
                     if (brep.Faces.Count == 1)
                     {
-                        surface = brep.Faces[0].UnderlyingSurface();
+                        face = brep.Faces[0];
+                        surface = face.UnderlyingSurface();
                     }
                     else
                     {
@@ -79,12 +81,21 @@ namespace Enzyme.Components
                     double v = surface.Domain(1).Mid;
 
                     Vector3d normal = surface.NormalAt(u, v);
+                    // A Brep face can be reversed relative to its underlying surface: follow the face.
+                    if (face != null && face.OrientationIsReversed) normal.Reverse();
                     normal.Unitize();
 
                     Vector3d reverse_normal = -normal;
                     Point3d centroid;
 
-                    if (surface is PlaneSurface planeSrf)
+                    if (face != null)
+                    {
+                        // Centroid of the visible (trimmed) face, not of the untrimmed underlying surface.
+                        var faceBrep = face.DuplicateFace(false);
+                        var amp = faceBrep != null ? AreaMassProperties.Compute(faceBrep) : null;
+                        centroid = amp != null ? amp.Centroid : surface.PointAt(u, v);
+                    }
+                    else if (surface is PlaneSurface planeSrf)
                     {
                         BoundingBox bbox = planeSrf.GetBoundingBox(true);
                         centroid = bbox.Center;
@@ -122,6 +133,7 @@ namespace Enzyme.Components
                 else
                 {
                     stopwatch.Stop();
+                    AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Surface is not planar within the document absolute tolerance: no plane is output.");
                     Hud.Done(this, stopwatch.Elapsed.TotalMilliseconds, "Surface is NOT planar.");
                 }
             }

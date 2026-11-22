@@ -68,7 +68,7 @@
                     <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
                         <li>Each curve is cut into N = ceil(length / Segment Size) equal-length pieces (trimmed sub-curves, so actual piece length is at most Segment Size).</li>
                         <li>Slope per segment uses the straight chord between the segment end points: horizontal distance H in plan and absolute height change V; degrees = atan(V / H), percent = V / H × 100, ratio = H / V (1:X).</li>
-                        <li>A segment is Compliant if slope ≤ Threshold (degrees or percent) or ratio ≥ Threshold (ratio mode, flat segments always compliant). Compliance % is the share of compliant segments over all curves.</li>
+                        <li>A segment is Compliant if slope ≤ Threshold (degrees or percent) or ratio ≥ Threshold (ratio mode, flat segments always compliant). A vertical segment reads 90 degrees, infinite percent or 1:0 and is Non-Compliant. In ratio mode a flat segment is infinity in Slope Values and the HUD statistics use finite values only. Compliance % is the share of compliant segments over all curves.</li>
                         <li>Outputs the 3D segments, slopes, mid-length points and status per curve branch, plus a Binary legend payload using Colors (default lime green and red).</li>
                     </ol>
                 </div>

@@ -150,6 +150,25 @@ namespace Enzyme.Components
                 if (!((JArray)j["metrics"]).Any(m => m["key"]?.ToString() == r.Key))
                     AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Flag '" + r.Theme + "' uses metric '" + r.Key + "', which is not in this module. See the Metrics output for available keys.");
 
+            // Warnings only (the rating logic lives in Utils/ReportMetrics.Build):
+            // the same key at several scopes makes the flag lookup ambiguous (first metric wins).
+            var jm = (JArray)j["metrics"];
+            foreach (var r in rules)
+            {
+                int nScopes = jm.Where(m => m["key"]?.ToString() == r.Key).Select(m => m["scope"]?.ToString() ?? "site").Distinct().Count();
+                if (nScopes > 1)
+                    AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Flag '" + r.Theme + "': metric '" + r.Key + "' exists at " + nScopes + " scopes; the flag rates the first one only.");
+            }
+            // flags kept from the existing file (Merge) are not re-rated: warn when this run changed the metric they rate.
+            var runKeys = new HashSet<string>(metrics.Select(m => m.Key));
+            var ruleIds = new HashSet<string>(rules.Select(r => r.Theme + "|" + r.Key));
+            foreach (JObject f in ((JArray)j["flags"]).OfType<JObject>())
+            {
+                string fk = f["metric"]?.ToString() ?? "";
+                if (ruleIds.Contains(f["theme"] + "|" + fk) || !runKeys.Contains(fk)) continue;
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Flag '" + f["theme"] + "' was kept from the existing file and still shows its old rating, but this run updated metric '" + fk + "'. Re-enter the flag rule to re-rate it.");
+            }
+
             DA.SetData(0, text);
             DA.SetDataList(1, card);
             DA.SetDataList(2, mlist);

@@ -22,7 +22,7 @@
         <div class="doc-header" style="display: flex; align-items: center;">
             <div>
                 <h1>Facade Module: Balcony</h1>
-                <p class="doc-subtitle">Continuous balconies with 2D wall patterns and intelligent corners.</p>
+                <p class="doc-subtitle">Continuous balconies with 2D wall patterns; corner pieces are the segment ends trimmed by CornerOffset (or short segments when SegLength is on).</p>
                 <div class="doc-meta">
                     <span class="badge json-masterplan-beta">JSON Masterplan (Beta)</span>
                     <span>Nickname: <strong>Mod_Balcony</strong></span>
@@ -77,10 +77,11 @@
                     <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
                     <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
                         <li>Each curve in a branch is one floor outline; its floor height comes from the matching item of Heights (4.0 m if missing).</li>
-                        <li>Balconies: BalconyPattern (0 and 1) picks which floors get one, repeating; the first floor of each branch is skipped unless FirstBalcony is True. A balcony is a flat ruled surface between the outline and its offset by Depth (FlipDir reverses the side), plus a RailHeight vertical surface on the offset line.</li>
+                        <li>Balconies: BalconyPattern (0 and 1) picks which floors get one, repeating; the first floor of each branch is skipped unless FirstBalcony is True. A balcony is a flat ruled surface between the outline and its offset by Depth (FlipDir reverses the side), plus a RailHeight vertical surface on the offset line. If the offset splits into several pieces that do not join, only the first is used and a warning is shown.</li>
                         <li>Walls: each outline is split into segments. With SegLength on, segments shorter than 2 × BayWidth become corner pieces; otherwise CornerOffset trims that length off both ends as corner pieces.</li>
                         <li>Remaining segments are divided into round(length / BayWidth) equal bays; VertPattern digits pick, per floor, which HorizPattern string to use, and its 1 and 0 characters set glass or solid bays in turn.</li>
                         <li>A glass bay is split into a solid sill (SillHeight), glass, and a header (HeaderDrop) at the top; a solid bay is one full-height panel. Corner pieces are glass with sill and header when CornerWindow is True, else full-height panels on CornerPanels.</li>
+                        <li>All wall, rail and corner surfaces are extruded straight up along world Z.</li>
                         <li>The HUD reports areas as length × height for glass, solid, header and corner panels, and outline length × Depth for terrace.</li>
                     </ol>
                 </div>

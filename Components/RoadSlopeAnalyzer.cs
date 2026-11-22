@@ -99,7 +99,7 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
             pManager.AddCurveParameter("Analyzed Segments", "Analyzed Segments", "Road segments with slope analysis", GH_ParamAccess.list);
             pManager.AddNumberParameter("Slope Values", "Slope Values", "Slope values for each segment", GH_ParamAccess.list);
             pManager.AddPointParameter("Center Points", "Center Points", "Center points of segments", GH_ParamAccess.list);
-            pManager.AddNumberParameter("Compliance Percentage", "Compliance Percentage", "Percentage of compliant/non-compliant segments", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Compliance Percentage", "Compliance Percentage", "Percentage (0 to 100) of analysed segments that are compliant", GH_ParamAccess.item);
             pManager.AddPointParameter("Projected Points", "Projected Points", "Points projected onto terrain", GH_ParamAccess.list);
             pManager.AddLineParameter("Projection Lines", "Projection Lines", "Lines showing projection from original to terrain", GH_ParamAccess.list);
             pManager.AddTextParameter("Dashboard Data", "Dashboard", "JSON legend data", GH_ParamAccess.item);
@@ -122,6 +122,17 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
             DA.GetData(2, ref threshold);
             DA.GetData(3, ref segmentSize);
             DA.GetData(4, ref mode);
+
+            if (mode < 0 || mode > 2)
+            {
+                Hud.Error(this, "Threshold Mode must be 0 (degrees), 1 (percentage) or 2 (ratio 1:X).");
+                return;
+            }
+            if (segmentSize <= 0)
+            {
+                Hud.Error(this, "Segment Size must be greater than 0.");
+                return;
+            }
 
             var result = AnalyzeRoadSlopes(curves, terrain, threshold, segmentSize, mode);
 
@@ -148,7 +159,7 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
             int countVal = 0;
             foreach (Grasshopper.Kernel.Types.GH_Number val in result.SlopeValues.AllData(true))
             {
-                if(val != null) {
+                if(val != null && !double.IsInfinity(val.Value) && !double.IsNaN(val.Value)) {
                     double v = val.Value;
                     if(v > maxVal) maxVal = v;
                     if(v < minVal) minVal = v;
@@ -198,8 +209,12 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
 
                 for (int i = 0; i < segmentCount; i++)
                 {
-                    double t0 = curve.Domain.ParameterAt((double)i / segmentCount);
-                    double t1 = curve.Domain.ParameterAt((double)(i + 1) / segmentCount);
+                    // Equal-length pieces (equal parameter steps gave unequal lengths on non-uniform curves).
+                    double t0, t1;
+                    if (!curve.NormalizedLengthParameter((double)i / segmentCount, out t0))
+                        t0 = curve.Domain.ParameterAt((double)i / segmentCount);
+                    if (!curve.NormalizedLengthParameter((double)(i + 1) / segmentCount, out t1))
+                        t1 = curve.Domain.ParameterAt((double)(i + 1) / segmentCount);
 
                     Rhino.Geometry.Point3d p0 = curve.PointAt(t0);
                     Rhino.Geometry.Point3d p1 = curve.PointAt(t1);
@@ -214,8 +229,14 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
                         double horizontalDistance = System.Math.Sqrt(System.Math.Pow(p1Projected.X - p0Projected.X, 2) + System.Math.Pow(p1Projected.Y - p0Projected.Y, 2));
                         double verticalDistance = System.Math.Abs(p1Projected.Z - p0Projected.Z);
                         double slopeValue = 0;
+                        bool vertical = horizontalDistance <= 1e-9 && verticalDistance > 0;
 
-                        if (horizontalDistance > 0)
+                        if (vertical)
+                        {
+                            // Same convention as 3D Road Slope: 90 degrees, infinite percent, 1:0; never compliant.
+                            slopeValue = mode == 0 ? 90.0 : mode == 1 ? double.PositiveInfinity : 0.0;
+                        }
+                        else if (horizontalDistance > 0)
                         {
                             if (mode == 0) // Degrees
                             {
@@ -227,16 +248,16 @@ protected override void RegisterInputParams(GH_InputParamManager pManager)
                             }
                             else if (mode == 2) // Ratio 1:X
                             {
-                                slopeValue = horizontalDistance / verticalDistance;
+                                slopeValue = verticalDistance > 0 ? horizontalDistance / verticalDistance : double.PositiveInfinity;
                             }
                         }
 
                         bool isCompliant = false;
                         if (mode == 2) {
                             // For ratio, a larger number means flatter, so compliant if >= threshold
-                            isCompliant = slopeValue >= threshold || verticalDistance == 0;
+                            isCompliant = !vertical && (slopeValue >= threshold || verticalDistance == 0);
                         } else {
-                            isCompliant = slopeValue <= threshold;
+                            isCompliant = !vertical && slopeValue <= threshold;
                         }
 
                         int branchIndex = isCompliant ? 0 : 1;

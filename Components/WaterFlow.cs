@@ -43,8 +43,8 @@ namespace Enzyme.Terrain
 protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddMeshParameter("TerrainMesh", "TM", "The unified topological surface.", GH_ParamAccess.item);
-            pManager.AddNumberParameter("GridSpacing", "GS", "The XY distance between starting raindrops.", GH_ParamAccess.item);
-            pManager.AddNumberParameter("StepSize", "SS", "Distance the water travels per tick.", GH_ParamAccess.item);
+            pManager.AddNumberParameter("GridSpacing", "GS", "The XY distance between starting raindrops (model units, > 0).", GH_ParamAccess.item);
+            pManager.AddNumberParameter("StepSize", "SS", "Distance the water travels per tick (model units, > 0).", GH_ParamAccess.item);
             pManager.AddIntegerParameter("MaxSteps", "MS", "Safety limit for the simulation loop.", GH_ParamAccess.item);
             pManager.AddBooleanParameter("Run", "Run", "Optional. False = skip the analysis and keep showing the last results (cached). Share one toggle with the Analysis Dashboard to switch everything on/off together.", GH_ParamAccess.item, true);
             pManager[pManager.ParamCount - 1].Optional = true;
@@ -72,6 +72,9 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
             if (!DA.GetData(2, ref stepSize)) return;
             if (!DA.GetData(3, ref maxSteps)) return;
 
+            if (!(gridSpacing > 0)) throw new ArgumentException("GridSpacing must be greater than 0.");
+            if (!(stepSize > 0)) throw new ArgumentException("StepSize must be greater than 0.");
+
             terrainMesh.FaceNormals.ComputeFaceNormals();
 
             BoundingBox bbox = terrainMesh.GetBoundingBox(true);
@@ -81,11 +84,20 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
             double maxY = bbox.Max.Y;
             double maxZ = bbox.Max.Z + 1.0;
 
-            List<Point3d> startGridPoints = new List<Point3d>();
-            for (double currentX = minX; currentX <= maxX; currentX += gridSpacing)
+            // Integer counts instead of accumulating doubles: a tiny spacing at large coordinates can never advance.
+            double nxD = Math.Floor((maxX - minX) / gridSpacing + 1e-9) + 1;
+            double nyD = Math.Floor((maxY - minY) / gridSpacing + 1e-9) + 1;
+            if (nxD * nyD > 1000000)
+                throw new ArgumentException("GridSpacing is too small for this mesh: " + (nxD * nyD).ToString("N0", System.Globalization.CultureInfo.InvariantCulture) + " seeds (limit 1,000,000).");
+            int nx = (int)nxD, ny = (int)nyD;
+
+            List<Point3d> startGridPoints = new List<Point3d>(nx * ny);
+            for (int ix = 0; ix < nx; ix++)
             {
-                for (double currentY = minY; currentY <= maxY; currentY += gridSpacing)
+                double currentX = minX + ix * gridSpacing;
+                for (int iy = 0; iy < ny; iy++)
                 {
+                    double currentY = minY + iy * gridSpacing;
                     startGridPoints.Add(new Point3d(currentX, currentY, maxZ));
                 }
             }
@@ -191,9 +203,9 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
         
         private void AutoWireDefaultInputs(GH_Document document)
         {
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 1, 0.0, 10.0, 5.0, 330, -40);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 0.0, 10.0, 5.0, 330, 0);
-                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 3, 0.0, 10.0, 10, 330, 40);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 1, 0.1, 10.0, 5.0, 330, -40);
+                Enzyme.Utils.AutoWireHelper.WireSlider(this, document, 2, 0.1, 10.0, 5.0, 330, 0);
+                Enzyme.Utils.AutoWireHelper.WireSliderInt(this, document, 3, 1, 2000, 500, 330, 40);
                 Enzyme.Utils.AutoWireHelper.WireCurvePreview(this, document, 0, System.Drawing.Color.DeepSkyBlue, 0.06, 300, -30);
                 Enzyme.Utils.AutoWireHelper.WireOutputParam(this, document, 1, "point", 300, 50);
             }

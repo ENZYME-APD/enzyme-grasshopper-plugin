@@ -22,7 +22,7 @@
         <div class="doc-header" style="display: flex; align-items: center;">
             <div>
                 <h1>Polyline Healer</h1>
-                <p class="doc-subtitle">Heals polylines by extending segments and creating boolean regions.</p>
+                <p class="doc-subtitle">Heals nearly closed polylines: extends every segment at both ends by Tolerance, builds boolean regions from the extended lines and returns the largest unioned outline (holes and separate islands are dropped). Non-polylines are returned unchanged.</p>
                 <div class="doc-meta">
                     <span class="badge curve">Curve</span>
                     <span>Nickname: <strong>P-Heal</strong></span>
@@ -57,7 +57,7 @@
                 <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
                     <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
                     <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
-                        <li>Each input curve that is a polyline is split into segments; each segment longer than 0.001 is extended at both ends by Tolerance (an absolute length in model units).</li>
+                        <li>Each input curve that is a polyline is split into segments; each segment longer than 0.001 is extended at both ends by Tolerance (an absolute length in model units, default 1.5).</li>
                         <li>The extended lines are intersected into closed regions with Rhino Boolean regions in the polyline best-fit plane (World XY if fitting fails), the regions are unioned, and the curve with the largest area is returned as the healed outline.</li>
                         <li>If anything fails (not a polyline, no regions), the original curve is returned unchanged.</li>
                     </ol>

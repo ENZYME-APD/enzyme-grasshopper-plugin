@@ -74,7 +74,8 @@
                     <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
                         <li>Profile: each curve is sampled at 201 points; each point is plotted on Base Plane at x = 3D length along the curve from its start and y = Z × Z Exaggeration, and a degree-3 interpolated curve is fitted through them.</li>
                         <li>Analysis: the curve is cut into N = ceil(length / Segment Size) equal-length pieces. Slope per segment uses the straight chord between the segment end points: horizontal distance H in plan and absolute height change V; degrees = atan(V / H), percent = V / H × 100, ratio = H / V (1:X).</li>
-                        <li>A segment is Compliant if slope ≤ Threshold (degrees or percent) or ratio ≥ Threshold (ratio mode, flat segments always compliant). Compliance % is the share of compliant segments over all curves.</li>
+                        <li>A segment is Compliant if slope ≤ Threshold (degrees or percent) or ratio ≥ Threshold (ratio mode, flat segments always compliant). A vertical segment (no plan length) reads 90 degrees, infinite percent or 1:0 and is Non-Compliant. Compliance % is the share of compliant segments over all curves.</li>
+                        <li>In ratio mode a flat segment is infinity (1:infinity) in Slope Values; HUD statistics use finite values only.</li>
                         <li>Segments, centre points and status are drawn on the same profile graph.</li>
                         <li>Alignment: the curve is split into its own segments (polyline spans, arcs, splines); a vertical line drops from each break point to Ref Y, and each span is labelled Line L, Arc R or Spline L (rounded to 0.1) at Ref Y − 2 × Z Exaggeration.</li>
                     </ol>

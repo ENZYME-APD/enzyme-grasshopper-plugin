@@ -62,6 +62,7 @@ namespace Enzyme.Components
             HashSet<string> progs = new HashSet<string>();
             HashSet<string> types = new HashSet<string>();
             HashSet<int> levels = new HashSet<int>();
+            int skippedLevels = 0;
 
             try
             {
@@ -83,7 +84,7 @@ namespace Enzyme.Components
                                     if (item is JObject itemDict)
                                     {
                                         if (itemDict.ContainsKey("tower_id")) towers.Add(itemDict["tower_id"].ToString());
-                                        if (itemDict.ContainsKey("floor_index")) levels.Add(itemDict["floor_index"].Value<int>());
+                                        if (itemDict.ContainsKey("floor_index")) { if (!TryAddLevel(itemDict["floor_index"], levels)) skippedLevels++; }
                                         if (itemDict.ContainsKey("type")) types.Add(itemDict["type"].ToString());
                                     }
                                 }
@@ -99,7 +100,7 @@ namespace Enzyme.Components
                                 if (itemDict.ContainsKey("tower_id")) towers.Add(itemDict["tower_id"].ToString());
                                 if (itemDict.ContainsKey("program")) progs.Add(itemDict["program"].ToString());
                                 if (itemDict.ContainsKey("type")) types.Add(itemDict["type"].ToString());
-                                if (itemDict.ContainsKey("floor_index")) levels.Add(itemDict["floor_index"].Value<int>());
+                                if (itemDict.ContainsKey("floor_index")) { if (!TryAddLevel(itemDict["floor_index"], levels)) skippedLevels++; }
                                 
                                 if (itemDict.ContainsKey("programs_above") && itemDict["programs_above"] is JArray programsAbove)
                                 {
@@ -128,6 +129,9 @@ namespace Enzyme.Components
                 double execTime = stopwatch.Elapsed.TotalMilliseconds;
                 int totalTags = outBldgs.Count + outTowers.Count + outProgs.Count + outTypes.Count + outLevels.Count;
 
+                if (skippedLevels > 0)
+                    AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"{skippedLevels} floor_index value(s) are not whole numbers and were skipped.");
+
                 Hud.Done(this, execTime, $"Tags Found: {totalTags}");
 
                 DA.SetDataList(0, outBldgs);
@@ -140,6 +144,33 @@ namespace Enzyme.Components
             {
                 Hud.Error(this, "JSON: " + ex.Message, false);
             }
+        }
+
+        // Reads floor_index as a whole number (integer, integral float or integer text); returns false otherwise.
+        private static bool TryAddLevel(JToken token, HashSet<int> levels)
+        {
+            if (token == null) return false;
+            if (token.Type == JTokenType.Integer)
+            {
+                long l = token.Value<long>();
+                if (l < int.MinValue || l > int.MaxValue) return false;
+                levels.Add((int)l);
+                return true;
+            }
+            if (token.Type == JTokenType.Float)
+            {
+                double d = token.Value<double>();
+                if (double.IsNaN(d) || d != Math.Floor(d) || d < int.MinValue || d > int.MaxValue) return false;
+                levels.Add((int)d);
+                return true;
+            }
+            if (token.Type == JTokenType.String &&
+                int.TryParse(token.ToString().Trim(), System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out int parsed))
+            {
+                levels.Add(parsed);
+                return true;
+            }
+            return false;
         }
 
         protected override System.Drawing.Bitmap Icon

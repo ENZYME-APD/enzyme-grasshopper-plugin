@@ -60,9 +60,6 @@ namespace Enzyme.Components
                 return;
             }
 
-            stopwatch.Stop();
-            string convStr = convType ? "SQM > SQFT" : "SQFT > SQM";
-            Hud.Done(this, stopwatch.Elapsed.TotalMilliseconds, $"{convStr}");
 
             GH_Structure<IGH_Goo> resultTree = new GH_Structure<IGH_Goo>();
             double factor = 10.7639104;
@@ -91,6 +88,10 @@ namespace Enzyme.Components
             }
 
             DA.SetDataTree(0, resultTree);
+
+            stopwatch.Stop();
+            string convStr = convType ? "SQM > SQFT" : "SQFT > SQM";
+            Hud.Done(this, stopwatch.Elapsed.TotalMilliseconds, $"{convStr}");
         }
 
         protected override System.Drawing.Bitmap Icon

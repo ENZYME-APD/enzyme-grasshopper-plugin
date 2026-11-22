@@ -56,8 +56,9 @@
                 <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
                     <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
                     <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
-                        <li>Compares the text form (ToString) of Data with the value stored at the previous solution.</li>
-                        <li>If it differs (or on the first solution, or when Data becomes empty) Pulse is True and a new solution is scheduled 5 ms later, in which Pulse returns to False.</li>
+                        <li>Compares the text form (ToString) of Data with the value stored at the previous solution; with a list input, each item is compared with the item at the same index in the previous solution.</li>
+                        <li>If it differs from the stored value, or Data becomes empty or returns after being empty, Pulse is True and a new solution is scheduled 5 ms later, in which Pulse returns to False.</li>
+                        <li>The first value after the file opens or the component is placed only initialises the memory and does not pulse.</li>
                     </ol>
                 </div>
                 <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">

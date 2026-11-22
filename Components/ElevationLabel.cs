@@ -165,6 +165,42 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
             return defaultVal;
         }
 
+        // Per-point setting: branch i (or the last branch), item j (or the last item); null when the tree is empty.
+        private static TGoo PickGoo<TGoo>(GH_Structure<TGoo> tree, int i, int j) where TGoo : class, IGH_Goo
+        {
+            if (tree == null || tree.PathCount == 0) return null;
+            var b = tree.get_Branch(tree.get_Path(Math.Min(i, tree.PathCount - 1)));
+            if (b == null || b.Count == 0) return null;
+            return b[Math.Min(j, b.Count - 1)] as TGoo;
+        }
+
+        // Finds or creates a layer by full path; nested paths such as A::B create each parent level.
+        private static int EnsureLayer(RhinoDoc doc, string fullPath)
+        {
+            int idx = doc.Layers.FindByFullPath(fullPath, -1);
+            if (idx >= 0) return idx;
+            string[] parts = fullPath.Split(new[] { "::" }, StringSplitOptions.None);
+            Guid parentId = Guid.Empty;
+            string pathSoFar = "";
+            idx = -1;
+            foreach (string rawPart in parts)
+            {
+                string part = rawPart.Trim();
+                if (part.Length == 0) continue;
+                pathSoFar = pathSoFar.Length == 0 ? part : pathSoFar + "::" + part;
+                idx = doc.Layers.FindByFullPath(pathSoFar, -1);
+                if (idx < 0)
+                {
+                    var layer = new Rhino.DocObjects.Layer { Name = part };
+                    if (parentId != Guid.Empty) layer.ParentLayerId = parentId;
+                    idx = doc.Layers.Add(layer);
+                    if (idx < 0) return -1;
+                }
+                parentId = doc.Layers[idx].Id;
+            }
+            return idx;
+        }
+
         private void SyncValueLists()
         {
             var doc = RhinoDoc.ActiveDoc;
@@ -275,12 +311,12 @@ protected override void RegisterInputParams(GH_Component.GH_InputParamManager pM
             DA.GetDataTree(9, out GH_Structure<GH_String> bakeLayerTree);
             DA.GetDataTree(10, out GH_Structure<GH_String> bakeNameTree);
 
-            double lengthVal = GetItem(lengthTree, 10.0);
-            double gapVal = GetItem(gapTree, 2.0);
-            string styleVal = GetItem(styleTree, "Default");
-            int planeVal = GetItem(textPlaneTree, 1);
-            double orientVal = GetItem(orientationTree, 0.0);
-            int anchorVal = GetItem(anchorTree, 2);
+            const double lengthDefault = 10.0;
+            const double gapDefault = 2.0;
+            const string styleDefault = "Default";
+            const int planeDefault = 1;
+            const double orientDefault = 0.0;
+            const int anchorDefault = 2;
             bool bakeVal = GetItem(bakeTree, false);
             string layerVal = GetItem(bakeLayerTree, "Elevations");
             string bakeNameVal = GetItem(bakeNameTree, "");
@@ -311,13 +347,13 @@ Outputs:
             int layerIdx = -1;
             if (bakeVal && doc != null)
             {
-                layerIdx = doc.Layers.FindByFullPath(layerVal, -1);
+                layerIdx = EnsureLayer(doc, string.IsNullOrWhiteSpace(layerVal) ? "Elevations" : layerVal);
                 if (layerIdx < 0)
-                {
-                    var newLayer = new Rhino.DocObjects.Layer { Name = layerVal };
-                    layerIdx = doc.Layers.Add(newLayer);
-                                    DA.SetData(3, Enzyme.Utils.MethodNotes.Info("ElevationLabel"));
-                }
+                    AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Bake layer '" + layerVal + "' could not be created; nothing was baked.");
+
+                // Without a BakeName every solution with Bake on would add duplicates: replace this component's own earlier bake instead.
+                if (string.IsNullOrEmpty(bakeNameVal))
+                    bakeNameVal = "ElevLabel_" + InstanceGuid.ToString();
 
                 if (!string.IsNullOrEmpty(bakeNameVal))
                 {
@@ -332,7 +368,7 @@ Outputs:
                 }
             }
 
-            var dimStyle = doc?.DimStyles.FindName(styleVal);
+            var dimStyles = new Dictionary<string, DimensionStyle>();
 
             var leaderLineTree = new GH_Structure<GH_Curve>();
             var textTree = new GH_Structure<GH_ObjectWrapper>();
@@ -365,6 +401,20 @@ Outputs:
                     var ptGoo = branch[j] as GH_Point;
                     if (ptGoo == null) continue;
                     var pt = ptGoo.Value;
+
+                    // Settings per point (tree access): matching branch and item, else the last one, else the default.
+                    double lengthVal = PickGoo(lengthTree, i, j)?.Value ?? lengthDefault;
+                    double gapVal = PickGoo(gapTree, i, j)?.Value ?? gapDefault;
+                    string styleVal = PickGoo(styleTree, i, j)?.Value ?? styleDefault;
+                    int planeVal = PickGoo(textPlaneTree, i, j)?.Value ?? planeDefault;
+                    double orientVal = PickGoo(orientationTree, i, j)?.Value ?? orientDefault;
+                    int anchorVal = PickGoo(anchorTree, i, j)?.Value ?? anchorDefault;
+                    DimensionStyle dimStyle = null;
+                    if (doc != null && styleVal != null && !dimStyles.TryGetValue(styleVal, out dimStyle))
+                    {
+                        dimStyle = doc.DimStyles.FindName(styleVal);
+                        dimStyles[styleVal] = dimStyle;
+                    }
 
                     var p1 = pt;
                     var p2 = new Point3d(pt.X, pt.Y, pt.Z + lengthVal);

@@ -32,7 +32,7 @@ namespace Enzyme.Components
             pManager.AddNumberParameter("Pillar Sep", "PS", "Distance between bridge pillars", GH_ParamAccess.item, 20.0);
             pManager.AddNumberParameter("Blend Angle", "A", "Embankment cut/fill slope angle (degrees)", GH_ParamAccess.item, 45.0);
             pManager.AddNumberParameter("Subdivide", "SD", "Resolution along the road for terrain modification", GH_ParamAccess.item, 2.0);
-            pManager.AddBooleanParameter("Colorize", "Col", "Colorize terrain/volumes for Cut (Red) and Fill (Blue)", GH_ParamAccess.item, true);
+            pManager.AddBooleanParameter("Colorize", "Col", "Colorize the cut (red) and fill (blue) volume meshes. The rebuilt terrain is not coloured.", GH_ParamAccess.item, true);
             
             pManager[1].Optional = true;
         }
@@ -95,8 +95,8 @@ namespace Enzyme.Components
             pManager.AddCurveParameter("Pillars", "P", "Bridge pillar lines", GH_ParamAccess.list);
             pManager.AddMeshParameter("Cut Volume", "C", "Excavated earth volume", GH_ParamAccess.list);
             pManager.AddMeshParameter("Fill Volume", "F", "Added earth volume", GH_ParamAccess.list);
-            pManager.AddCurveParameter("Contours", "Ct", "Normal contours (1m)", GH_ParamAccess.list);
-            pManager.AddCurveParameter("Main Contours", "MC", "Main contours (5m)", GH_ParamAccess.list);
+            pManager.AddCurveParameter("Contours", "Ct", "Contours of the output terrain every 1 m (levels that are not multiples of 5 m)", GH_ParamAccess.list);
+            pManager.AddCurveParameter("Main Contours", "MC", "Contours of the output terrain every 5 m", GH_ParamAccess.list);
             pManager.AddTextParameter("Info", "Info", "Method, assumptions, simplifications and references.", GH_ParamAccess.item);
         }
 
@@ -124,6 +124,15 @@ namespace Enzyme.Components
             DA.GetData(8, ref angle);
             DA.GetData(9, ref subDist);
             DA.GetData(10, ref colorize);
+
+            if (subDist <= 0)
+            {
+                Hud.Error(this, "Subdivide must be greater than 0.");
+                return;
+            }
+            var unitDoc = Rhino.RhinoDoc.ActiveDoc;
+            if (unitDoc != null && unitDoc.ModelUnitSystem != Rhino.UnitSystem.Meters)
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "This component assumes the model is in metres (fixed 0.1 m, 2 m, 150 m and 10 000 m values); model units are " + unitDoc.ModelUnitSystem + ".");
 
             double totalLanes = dirs * lanes;
             double roadHalfWidth = (totalLanes * laneW) / 2.0;
@@ -245,7 +254,8 @@ namespace Enzyme.Components
 
                         if (deltaZ > threshold)
                         {
-                            double currDist = length * ((double)i / tParams.Length);
+                            // True arc length from the curve start to this station.
+                            double currDist = nCrv.GetLength(new Interval(nCrv.Domain.T0, t));
                             if (currDist - lastPillarDist >= pillarSep)
                             {
                                 rd.pillars.Add(new LineCurve(pt, new Point3d(pt.X, pt.Y, zTerrain)));
@@ -463,6 +473,32 @@ namespace Enzyme.Components
             DA.SetDataList(4, pillarsOut);
             DA.SetDataList(5, cutVols);
             DA.SetDataList(6, fillVols);
+
+            // Contours of the output terrain: every 1 m (Contours) and every 5 m (Main Contours), metres assumed.
+            List<Curve> contours = new List<Curve>();
+            List<Curve> mainContours = new List<Curve>();
+            if (modTerrain != null && modTerrain.Faces.Count > 0)
+            {
+                BoundingBox tbox = modTerrain.GetBoundingBox(false);
+                int zMin = (int)Math.Ceiling(tbox.Min.Z);
+                int zMax = (int)Math.Floor(tbox.Max.Z);
+                if (zMax - zMin > 5000)
+                {
+                    AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Terrain height range is over 5000 units; contours were not generated (check model units).");
+                }
+                else
+                {
+                    for (int z = zMin; z <= zMax; z++)
+                    {
+                        Curve[] crvs = Mesh.CreateContourCurves(modTerrain, new Rhino.Geometry.Plane(new Point3d(0, 0, z), Vector3d.ZAxis), 0.01);
+                        if (crvs == null || crvs.Length == 0) continue;
+                        if (z % 5 == 0) mainContours.AddRange(crvs);
+                        else contours.AddRange(crvs);
+                    }
+                }
+            }
+            DA.SetDataList(7, contours);
+            DA.SetDataList(8, mainContours);
             
             stopwatch.Stop();
             Hud.Done(this, stopwatch.Elapsed.TotalMilliseconds, $"Lanes: {totalLanes}\nWidth: {totalHalfWidth*2:F1}m\n---\nCut: {totalCutM3:N0} m3\nFill: {totalFillM3:N0} m3");

@@ -67,7 +67,7 @@
                     <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
                         <li>Expects JSON of the form building -&gt; program -&gt; list of floors, each floor with tower_id, floor_index, true_z, height, BoundsClosed and BoundsExt (segment lists of Line, Arc or Polyline).</li>
                         <li>Buildings, programs, towers and levels are filtered. Text filters match if any entry matches: ExactMatch True needs equal text (case-insensitive); otherwise the entry is contained in the name, or used as a wildcard pattern with * and ?.</li>
-                        <li>Segments are rebuilt and joined (0.01 tolerance); BoundsClosed takes the first joined curve and closes it if open. All curves are moved up by true_z.</li>
+                        <li>Segments are rebuilt and joined (0.01 tolerance); BoundsClosed takes the first joined curve and closes it if open; floors without a BoundsClosed polygon give a null item (kept for index alignment) and a warning. All curves are moved up by true_z.</li>
                         <li>For every exterior curve one item is output in each tree: the curve, the closed outline, the floor height and a label building | tower | program - Lvl n. Branch paths are (building index; program index).</li>
                     </ol>
                 </div>
@@ -82,6 +82,7 @@
                     <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
                     <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
                         <li>Missing true_z or height read as 0; missing floor_index reads as -1.</li>
+                        <li>Branch indices count only the buildings and programs that pass the filters, so paths shift when filters change.</li>
                     </ul>
                 </div>
                 <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">

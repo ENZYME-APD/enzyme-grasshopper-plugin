@@ -14,9 +14,10 @@ namespace Enzyme.Components
 {
     public class ColorMeshTiles : GH_Component
     {
+        private bool _lastBake = false; // bake_trigger state of the previous solution (rising-edge detection)
         public ColorMeshTiles()
           : base("Pixel Gradient", "PixGrad",
-              "BIM-ready Idempotent Engine. Consolidates Mega-Meshes per surface and binds them into Rhino Groups.",
+              "Colours facade grid cells by a stepped gradient along one axis (with optional jitter and accent), merges cells of one colour into one mesh per branch, and can bake them to Rhino layers and groups (re-bakes replace earlier ones only when bake_name is set).",
               "Enzyme", "Facade")
         {
         }
@@ -227,10 +228,39 @@ namespace Enzyme.Components
                         cell_color = accent_color;
                     }
                     
-                    global_color_counts[cell_color]++;
-                    
                     Mesh target_mesh = local_mesh_buckets[cell_color];
+
+                    // The triangle fan from the bounding-box centre only works if that centre sees every edge
+                    // (convex or star-shaped cells). If any fan triangle is flipped or degenerate (concave cell),
+                    // triangulate the closed outline instead.
+                    Vector3d poly_normal = Vector3d.Zero;
+                    for (int j = 0; j < num_vertices; j++)
+                    {
+                        Point3d a = pts[j], b = pts[(j + 1) % num_vertices];
+                        poly_normal += new Vector3d((a.Y - b.Y) * (a.Z + b.Z), (a.Z - b.Z) * (a.X + b.X), (a.X - b.X) * (a.Y + b.Y));
+                    }
+                    bool fan_ok = true;
+                    for (int j = 0; j < num_vertices && fan_ok; j++)
+                    {
+                        Vector3d tri_n = Vector3d.CrossProduct(pts[j] - center_pt, pts[(j + 1) % num_vertices] - center_pt);
+                        if (tri_n * poly_normal <= 0) fan_ok = false;
+                    }
+                    if (!fan_ok)
+                    {
+                        Mesh cell_mesh = Mesh.CreateFromClosedPolyline(polyline);
+                        if (cell_mesh != null && cell_mesh.Faces.Count > 0)
+                        {
+                            cell_mesh.VertexColors.CreateMonotoneMesh(cell_color);
+                            target_mesh.Append(cell_mesh);
+                            global_color_counts[cell_color]++;
+                            branch_geometries.Add(new GH_Curve(polyline.ToPolylineCurve()));
+                            total_panels++;
+                            continue;
+                        }
+                    }
+
                     int v_start_idx = target_mesh.Vertices.Count;
+                    global_color_counts[cell_color]++;
                     
                     target_mesh.Vertices.Add(center_pt);
                     target_mesh.VertexColors.Add(cell_color);
@@ -290,7 +320,16 @@ namespace Enzyme.Components
             string bake_status = "";
             int items_replaced = 0;
 
-            if (do_bake)
+            // Without a bake_name earlier bakes cannot be found and replaced, so only bake once per press
+            // (false -> true). With a bake_name every solution replaces the previous bake (idempotent).
+            bool bake_edge = do_bake && !_lastBake;
+            _lastBake = do_bake;
+            if (do_bake && string.IsNullOrEmpty(b_name) && !bake_edge)
+            {
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, "bake_trigger is still on but bake_name is empty: not re-baked (would duplicate). Set bake_name to re-bake and replace, or use a button.");
+            }
+
+            if (do_bake && (bake_edge || !string.IsNullOrEmpty(b_name)))
             {
                 var doc = RhinoDoc.ActiveDoc;
                 if (doc != null)
@@ -406,11 +445,14 @@ namespace Enzyme.Components
 
             List<string> ui_lines = new List<string>();
 
+            // One line per distinct colour (a colour repeated in gradient_colors shares one count and one tag)
+            HashSet<Color> listed_colors = new HashSet<Color>();
             for (int i = 0; i < gradient_colors.Count; i++)
             {
                 Color col = gradient_colors[i];
+                if (!listed_colors.Add(col)) continue;
                 int count = global_color_counts.ContainsKey(col) ? global_color_counts[col] : 0;
-                ui_lines.Add($"Tile {i + 1}: {count}");
+                ui_lines.Add($"{color_to_tag[col]}: {count}");
             }
 
             if (has_accent && global_color_counts.ContainsKey(accent_color) && global_color_counts[accent_color] > 0)

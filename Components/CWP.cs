@@ -66,19 +66,14 @@ namespace Enzyme.Components
             if (!DA.GetData(3, ref dB)) dB = 0.0;
             if (!DA.GetData(4, ref R)) R = 0.0;
 
-            string version = "v1.0";
-            string filletMessage = R == 0 ? "No fillet" : $"R={R}";
-            stopwatch.Stop();
-            Hud.Done(this, stopwatch.Elapsed.TotalMilliseconds, $"Version: {version}", $"Profile: {A}x{B}", filletMessage);
-
             if (A <= 0 || B <= 0)
             {
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Dimensions A and B must be positive.");
+                Hud.Error(this, "Dimensions A and B must be positive.");
                 return;
             }
             if (R < 0)
             {
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Fillet radius R cannot be negative.");
+                Hud.Error(this, "Fillet radius R cannot be negative.");
                 return;
             }
 
@@ -155,6 +150,11 @@ namespace Enzyme.Components
             polyline.Transform(Transform.Translation(offset));
 
             DA.SetData(0, polyline);
+
+            string version = "v1.0";
+            string filletMessage = R == 0 ? "No fillet" : $"R={R}";
+            stopwatch.Stop();
+            Hud.Done(this, stopwatch.Elapsed.TotalMilliseconds, $"Version: {version}", $"Profile: {A}x{B}", filletMessage);
         }
 
         protected override System.Drawing.Bitmap Icon

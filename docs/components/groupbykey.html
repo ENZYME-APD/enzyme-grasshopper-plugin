@@ -58,7 +58,7 @@
                 <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
                     <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
                     <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
-                        <li>Walks Keys and List together; each new key (compared by its plain value, so text A and A match) opens a new branch with path 0, 1, 2... in order of first appearance.</li>
+                        <li>Walks Keys and List together; each new key (compared by its plain value, so text A and A match) opens a new group in order of first appearance. A single list gives paths 0, 1, 2...; with several input branches, groups are written to (input path; group index). Null keys form their own group (null in Unique Keys).</li>
                         <li>Each value goes into its key's branch; Unique Keys lists the keys in the same order.</li>
                     </ol>
                 </div>

@@ -76,18 +76,18 @@
                     <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
                     <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
                         <li>Each centreline is sampled every Subdivide metres. At each station a horizontal normal (tangent × Z) gives the deck edges at ± (Directions × Lanes/Dir × Lane Width / 2 + Shoulder) and the lane centrelines. The deck is flat across at the centreline Z.</li>
-                        <li>The terrain height under the centre and both edges is found by vertical ray casting. If the centreline is more than Threshold above the terrain the station is a bridge: no earthworks, and a pillar line is drawn down to the terrain at least every Pillar Sep.</li>
+                        <li>The terrain height under the centre and both edges is found by vertical ray casting. If the centreline is more than Threshold above the terrain the station is a bridge: no earthworks, and a pillar line is drawn down to the terrain at least every Pillar Sep, measured along the centreline arc length.</li>
                         <li>Otherwise, at each edge differing from the ground by more than 0.1 m, a ray is cast outwards at Blend Angle from horizontal, up for cut and down for fill; where it hits the terrain is the daylight point. If it misses, or the edge is within 0.1 m, the slope toe is put 2 m out at ground level.</li>
                         <li>Cut and fill volumes are built between consecutive station profiles (daylight, edge, centre, edge, daylight versus the original ground under the same points). Each strip is split into triangles, split again where road and ground cross, and the volume is plan area × mean depth of each prism.</li>
                         <li>The terrain is rebuilt: original vertices within the daylight width + 1.5 × Subdivide of any station are removed, the station points are added (except those near other roads), and the set is re-triangulated with 2D Delaunay; triangles with an edge over 150 m are removed.</li>
-                        <li>Outputs: modified terrain, deck meshes, lane and edge polylines, pillar lines, closed cut and fill meshes; total cut and fill in m³ are shown on the component.</li>
+                        <li>Outputs: modified terrain, deck meshes, lane and edge polylines, pillar lines, closed cut and fill meshes, and contours of the output terrain every 1 m (Contours, levels not on a 5 m multiple) and every 5 m (Main Contours); total cut and fill in m³ are shown on the component only.</li>
                     </ol>
                 </div>
                 <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
                     <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
                     <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
                         <li>Centrelines are 3D and already carry the design levels; the tool does not design a vertical alignment.</li>
-                        <li>Model units are metres (fixed 0.1 m, 2 m, 150 m and 10 000 m ray offset).</li>
+                        <li>Model units are metres (fixed 0.1 m, 2 m, 150 m and 10 000 m ray offset); other units raise a warning.</li>
                         <li>The terrain is a single-valued surface (one height per plan point).</li>
                     </ul>
                 </div>
@@ -98,6 +98,7 @@
                         <li>Deep cuts (tunnels) are not detected; only high fills become bridges.</li>
                         <li>Volumes use the prismoid approximation between stations spaced Subdivide apart; stations more than 3.5 × Subdivide apart (gaps, bridges) are skipped.</li>
                         <li>Junctions are handled only by removing terrain points near other roads; there is no junction geometry.</li>
+                        <li>A tangent that turns more than 90° between stations is treated as flipped and reversed, so hairpins with a coarse Subdivide can get wrong edge sides.</li>
                     </ul>
                 </div>
                 <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">

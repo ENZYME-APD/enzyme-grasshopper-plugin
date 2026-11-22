@@ -28,7 +28,7 @@ namespace Enzyme.Components
         protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
             pManager.AddPointParameter("Points", "Pts", "Survey points (clean them first with Survey Outlier Cleaner if needed).", GH_ParamAccess.list);
-            pManager.AddCurveParameter("Breaklines", "Brk", "3D curves the terrain must follow: road edges, platform and deck outlines, plateau edges. Closed curves replace the survey points inside them (flat platforms); open curves clear survey points within Clear Radius.", GH_ParamAccess.list);
+            pManager.AddCurveParameter("Breaklines", "Brk", "3D curves the terrain should follow: road edges, platform and deck outlines, plateau edges. They are sampled every Spacing and the samples become mesh vertices (not constrained edges), so a long triangle can still cross a breakline between samples; use a small Spacing for a tight fit. Closed curves replace the survey points inside them (flat platforms); open curves clear survey points within Clear Radius.", GH_ParamAccess.list);
             pManager.AddNumberParameter("Spacing", "Spacing", "Distance between points sampled along breaklines and boundaries (model units). Smaller = tighter fit, heavier mesh.", GH_ParamAccess.item, 1.0);
             pManager.AddNumberParameter("Clear Radius", "Clear", "Survey points closer than this (in plan) to an open breakline are ignored, so the road/deck edge is not pulled out of shape.", GH_ParamAccess.item, 0.5);
             pManager.AddCurveParameter("Boundary", "Bnd", "Optional closed curve: the mesh is trimmed to it (tested in plan).", GH_ParamAccess.item);

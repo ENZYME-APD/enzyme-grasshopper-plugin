@@ -77,7 +77,7 @@ namespace Enzyme.Components
             pManager.AddNumberParameter("Cell Width", "X Dim", "Cell width", GH_ParamAccess.item, 1.0);
             pManager.AddNumberParameter("Cell Height", "Y Dim", "Cell height", GH_ParamAccess.item, 1.0);
             pManager.AddNumberParameter("Grout Width", "Grout", "Width of the grout joint between tiles. Default 0.", GH_ParamAccess.item, 0.0);
-            pManager.AddVectorParameter("Direction", "Dir", "Optional vector to align the grid's X-axis. Projects to the base plane.", GH_ParamAccess.item);
+            pManager.AddVectorParameter("Direction", "Dir", "Optional vector to align the grid's X-axis. Projects to the base plane. If not given, a closed-curve base uses the X axis of the curve's own plane (not necessarily world X); surfaces and Breps use the surface frame.", GH_ParamAccess.item);
             pManager[6].Optional = true;
             pManager.AddNumberParameter("Rotation", "Rot", "Optional rotation angle (in degrees) applied after alignment.", GH_ParamAccess.item, 0.0);
         }
@@ -113,6 +113,18 @@ namespace Enzyme.Components
             DA.GetData(6, ref dir);
             DA.GetData(7, ref rot);
             if (grout < 0) grout = 0;
+
+            string gridTypeKey = (gridType ?? "").Trim().ToLower();
+            if (gridTypeKey != "rectangular" && gridTypeKey != "offset_rectangular" && gridTypeKey != "hexagonal" && gridTypeKey != "triangular")
+            {
+                Hud.Error(this, "Unknown Grid Type '" + gridType + "'. Use rectangular, offset_rectangular, hexagonal or triangular.");
+                return;
+            }
+            if (x_dim <= 0 || ((gridTypeKey == "rectangular" || gridTypeKey == "offset_rectangular") && y_dim <= 0))
+            {
+                Hud.Error(this, "Cell Width and Cell Height must be greater than 0.");
+                return;
+            }
 
             Curve boundary = null;
             Plane originPlane = Plane.WorldXY;
@@ -167,12 +179,20 @@ namespace Enzyme.Components
                     AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Base Brep must be a single planar face.");
                     return;
                 }
-                Curve[] naked = b.DuplicateNakedEdgeCurves(true, false);
-                if (naked != null && naked.Length > 0)
+                // Use the outer loop of the face (naked edges could return a hole loop first).
+                BrepLoop outerLoop = b.Faces[0].OuterLoop;
+                if (outerLoop != null) boundary = outerLoop.To3dCurve();
+                if (boundary == null)
                 {
-                    Curve[] joined = Curve.JoinCurves(naked);
-                    if (joined != null && joined.Length > 0) boundary = joined[0];
+                    Curve[] naked = b.DuplicateNakedEdgeCurves(true, false);
+                    if (naked != null && naked.Length > 0)
+                    {
+                        Curve[] joined = Curve.JoinCurves(naked);
+                        if (joined != null && joined.Length > 0) boundary = joined[0];
+                    }
                 }
+                if (b.Faces[0].Loops.Count > 1)
+                    AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "The base face has holes; only its outer boundary is used and holes are not cut out of the tiles.");
                 
                 Surface bsrf = b.Faces[0].UnderlyingSurface();
                 double u = bsrf.Domain(0).Mid;
@@ -227,7 +247,20 @@ namespace Enzyme.Components
 
             BoundingBox bbox = localBoundary.GetBoundingBox(true);
 
-            List<GridCell> cells = GenerateCells(bbox, x_dim, y_dim, gridType.ToLower(), grout);
+            // Guard against a grid so fine relative to the boundary that it would stall Grasshopper.
+            double cellPitchX, cellPitchY, cellsPerPitch = 1.0;
+            if (gridTypeKey == "hexagonal") { cellPitchX = x_dim * 0.75; cellPitchY = x_dim * Math.Sqrt(3) / 2.0; }
+            else if (gridTypeKey == "triangular") { cellPitchX = x_dim + Math.Sqrt(3.0) * grout; cellPitchY = cellPitchX * Math.Sqrt(3) / 2.0; cellsPerPitch = 2.0; }
+            else { cellPitchX = x_dim + grout; cellPitchY = y_dim + grout; }
+            double estimatedCells = ((bbox.Max.X - bbox.Min.X) / cellPitchX + 3.0) * ((bbox.Max.Y - bbox.Min.Y) / cellPitchY + 3.0) * cellsPerPitch;
+            const double MaxCells = 250000;
+            if (double.IsNaN(estimatedCells) || estimatedCells > MaxCells)
+            {
+                Hud.Error(this, $"About {estimatedCells:N0} cells would be generated (limit {MaxCells:N0}). Increase Cell Width / Cell Height.");
+                return;
+            }
+
+            List<GridCell> cells = GenerateCells(bbox, x_dim, y_dim, gridTypeKey, grout);
 
             cells.RemoveAll(c => c == null || c.Curve == null);
             foreach (GridCell cell in cells)
@@ -242,7 +275,8 @@ namespace Enzyme.Components
                 CurveIntersections intersections = Intersection.CurveCurve(cell.Curve, boundary, 0.001, 0.001);
                 bool hasIntersection = intersections != null && intersections.Count > 0;
 
-                if (allInside)
+                // A tile is full only if no boundary edge cuts into it (concave boundaries, notches).
+                if (allInside && !hasIntersection)
                 {
                     allTiles.Add(cell.Curve);
                     fullTiles.Add(cell.Curve);

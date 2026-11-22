@@ -60,6 +60,7 @@ namespace Enzyme.Components
         protected override void SolveInstance(IGH_DataAccess DA)
         {
             Stopwatch sw = Stopwatch.StartNew();
+            _unjoinedBoundaries = 0;
             
             string jsonIn = "";
             DA.GetData(0, ref jsonIn);
@@ -155,6 +156,9 @@ namespace Enzyme.Components
                     bldgIndex++;
                 }
 
+                if (_unjoinedBoundaries > 0)
+                    AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, _unjoinedBoundaries + " boundary(ies) did not join into one curve; only the first joined piece of each is output.");
+
                 sw.Stop();
                 string searchMode = exactToggle ? "Exact" : "Flexible";
                 Hud.Done(this, sw.Elapsed.TotalMilliseconds, $"Returned: {matchCount}\nMode: {searchMode}");
@@ -201,6 +205,8 @@ namespace Enzyme.Components
             }
             return false;
         }
+
+        private int _unjoinedBoundaries;
 
         private Curve DeserializeCurve(JArray segmentsData)
         {
@@ -252,6 +258,7 @@ namespace Enzyme.Components
             if (joined != null && joined.Length > 0)
             {
                 Curve crv = joined[0];
+                if (joined.Length > 1) _unjoinedBoundaries++;
                 if (!crv.IsClosed) crv.MakeClosed(0.01);
                 return crv;
             }

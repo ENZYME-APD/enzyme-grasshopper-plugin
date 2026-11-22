@@ -22,7 +22,7 @@
         <div class="doc-header" style="display: flex; align-items: center;">
             <div>
                 <h1>Enzyme Heliodon</h1>
-                <p class="doc-subtitle">Generates a 3D solar dome and calculates annual sun vectors for environmental analysis.</p>
+                <p class="doc-subtitle">Generates a 3D solar dome and hourly sun vectors on the 21st of each selected month (one representative day per month) for environmental analysis.</p>
                 <div class="doc-meta">
                     <span class="badge site-analysis">Site Analysis</span>
                     <span>Nickname: <strong>Heliodon</strong></span>
@@ -67,7 +67,7 @@
                 <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
                     <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
                     <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
-                        <li>For the 21st of each month in Months (day of year 21, 52, 80 ... 355) it computes sun positions every 0.5 h from the start to the end of Hours, in local standard time.</li>
+                        <li>For the 21st of each month in Months (day of year 21, 52, 80 ... 355) it computes sun positions every 0.5 h on the half-hour grid, from the first half hour at or after the start of Hours to its end, in local standard time. Months is read from start to end; a start after the end wraps over the new year (11 to 2 = November to February).</li>
                         <li>Sun position uses the NOAA fractional-year formulas: equation of time and declination, true solar time = clock time + equation of time + 4 × Longitude − 60 × Time Zone (minutes), hour angle, then altitude and azimuth.</li>
                         <li>Positions with Z &gt; 0.01 (altitude above about 0.6°) are kept; whole-hour positions become Sun Vectors (unit vectors pointing to the sun) and Sun Points at Radius around Center.</li>
                         <li>Daily Arcs are degree-3 curves through the half-hourly positions of each day; Base Circle is the horizontal circle of Radius.</li>
@@ -76,7 +76,7 @@
                 <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
                     <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
                     <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
-                        <li>Model +Y is true north and +X east; there is no north-angle input.</li>
+                        <li>Model +Y is true north and +X east.</li>
                         <li>Time Zone is the standard offset from GMT; daylight saving is not applied.</li>
                         <li>Each vector stands for one hour on one representative day per month.</li>
                     </ul>
@@ -85,6 +85,7 @@
                     <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
                     <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
                         <li>Twelve representative days, not every day of the year: summing vectors gives hours on those days, not annual sun hours.</li>
+                        <li>No north-angle input: for a model rotated from true north the vectors must be rotated about Z downstream.</li>
                         <li>No atmospheric refraction; position accuracy is that of the NOAA approximation (around a few tenths of a degree).</li>
                     </ul>
                 </div>

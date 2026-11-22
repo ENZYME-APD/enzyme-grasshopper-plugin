@@ -22,7 +22,7 @@
         <div class="doc-header" style="display: flex; align-items: center;">
             <div>
                 <h1>Facade Module: Storefront</h1>
-                <p class="doc-subtitle">Generates patterned storefronts with intelligent canopies and structure.</p>
+                <p class="doc-subtitle">Generates patterned storefronts from planar outline curves: bays with a solid kickplate, a glass or solid middle band and a header band, mullion fins, optional flat canopies and column lines at the mullions.</p>
                 <div class="doc-meta">
                     <span class="badge json-masterplan-beta">JSON Masterplan (Beta)</span>
                     <span>Nickname: <strong>Mod_Retail</strong></span>
@@ -76,9 +76,9 @@
                     <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
                     <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
                         <li>Each Bounds curve is split into segments and each segment into bays: count = round(segment length / BayWidth), at least 1, so bays are equal within a segment. Heights are matched by branch path and index; 4.5 is used when missing.</li>
-                        <li>Each bay is extruded into up to three bands: kickplate from 0 to BaseHeight (solid), middle band from BaseHeight to TransomHeight (glass or solid), header from TransomHeight to the full height. Heights are clamped so the bands never go negative.</li>
+                        <li>Each bay is extruded straight up world Z into up to three bands: kickplate from 0 to BaseHeight (solid), middle band from BaseHeight to TransomHeight (glass or solid), header from TransomHeight to the full height. Heights are clamped so the bands never go negative.</li>
                         <li>The glass or solid choice per bay comes from a 0 and 1 string in HorizPattern (1 = glass), repeated along the curve. VertPattern digits choose which HorizPattern line each curve uses (curve index modulo).</li>
-                        <li>Mullions are vertical fins of depth MullionDepth, perpendicular to the bay, at both ends of every bay (duplicates removed by position rounded to 3 decimals), spanning the middle band. FlipMullions reverses their side.</li>
+                        <li>Mullions are vertical fins extruded straight up world Z, of depth MullionDepth, perpendicular to the bay, at both ends of every bay (duplicates removed by position rounded to 3 decimals), spanning the middle band. FlipMullions reverses their side.</li>
                         <li>Where CanopyPattern has 1 for that curve index and CanopyDepth &gt; 0, a flat canopy is lofted between the curve at transom height and its plan offset by CanopyDepth (sharp corners, offset tolerance 0.1). FlipCanopy offsets to the other side.</li>
                         <li>With ShowColumns, a column line is drawn at each mullion position, set ColumnOffset in from the offset canopy edge, from the ground to transom height.</li>
                     </ol>
@@ -95,6 +95,7 @@
                     <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
                     <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
                         <li>All elements are zero-thickness surfaces; columns are lines only.</li>
+                        <li>An unwired TransomHeight is 0, so the whole height becomes header, with no kickplate, glass or mullions (a remark is shown).</li>
                         <li>Canopies are flat surfaces at transom height; there is no structural logic beyond spacing columns at mullions.</li>
                         <li>Bay widths are rounded per segment, so they differ from BayWidth and from segment to segment.</li>
                     </ul>

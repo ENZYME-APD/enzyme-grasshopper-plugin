@@ -62,7 +62,7 @@
                     <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
                     <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
                         <li>When Run is True, for each Locations point it places the active viewport camera there, aims it at the matching Targets point (one target for all, or targets cycled by index) and sets the 35 mm lens length (default 50 mm).</li>
-                        <li>Each camera is saved as a Rhino Named View called Prefix + a 4-digit index (Shot_0000, Shot_0001...); an existing view with the same name is replaced. The original viewport camera is restored afterwards.</li>
+                        <li>Each camera is saved as a Rhino Named View called Prefix + a 4-digit index (Shot_0000, Shot_0001...); an existing view with the same name is replaced. The original viewport camera is restored afterwards. View Names lists Prefix + 4-digit index for every location whether or not Run is True; views are only written while Run is True.</li>
                     </ol>
                 </div>
                 <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
@@ -75,7 +75,6 @@
                 <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
                     <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
                     <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
-                        <li>View Names is only filled while Run is True; it is empty otherwise.</li>
                         <li>Named view changes are not added to Rhino's undo.</li>
                     </ul>
                 </div>

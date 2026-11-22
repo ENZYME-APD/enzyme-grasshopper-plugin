@@ -62,7 +62,7 @@
                     <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
                         <li>Parses MP_JSON as a JSON object whose top-level keys are building IDs.</li>
                         <li>If a building value is an object, its keys are read as program names and each array item is scanned for tower_id, floor_index and type. If it is an array, each item is scanned for tower_id, program, programs_above, type and floor_index.</li>
-                        <li>Unique values are returned sorted: Buildings, Towers, Programs, Types and Levels (integers).</li>
+                        <li>Unique values are returned sorted: Buildings, Towers, Programs, Types and Levels (integers); floor_index values that are not whole numbers are skipped with a warning.</li>
                     </ol>
                 </div>
                 <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">

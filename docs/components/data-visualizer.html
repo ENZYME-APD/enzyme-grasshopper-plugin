@@ -64,10 +64,10 @@
                 <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
                     <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
                     <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
-                        <li>Values are normalised with the minimum and maximum of the Values list: t = (v - min) / (max - min); if all values are equal the range is set to 1.</li>
+                        <li>Values are normalised with the minimum and maximum of the drawn values (the first N values, N = number of points): t = (v - min) / (max - min); if all values are equal the range is set to 1.</li>
                         <li>Size = Domain start + t × Domain length; colour = linear RGB interpolation between Colors spaced evenly over t (white if no colours).</li>
-                        <li>Type 0 draws a hexagonal prism of height Size and circumradius Bar Thickness (cycled per point), standing upright in world Z. Type 1 draws a flat hexagon of radius Size in a world XY plane. Type 2 (and any other value) draws an icosahedron of circumradius Size.</li>
-                        <li>All shapes are joined into one vertex-coloured mesh; Values and the interpolated Colors are also output per point.</li>
+                        <li>Type 0 draws a hexagonal prism of height Size and circumradius Bar Thickness (cycled per point, so a bar is about twice that wide), standing upright in world Z. Type 1 draws a flat hexagon of radius Size in a world XY plane. Type 2 (and any other value) draws an icosahedron of circumradius Size.</li>
+                        <li>All shapes are joined into one vertex-coloured mesh with computed vertex normals; Values and the interpolated Colors are also output per point.</li>
                     </ol>
                 </div>
                 <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
@@ -80,7 +80,7 @@
                     <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
                     <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
                         <li>Spheres are 20-face icosahedra and bars are hexagonal prisms, for speed.</li>
-                        <li>Shapes are aligned to world axes, not to any surface; mesh normals are not computed.</li>
+                        <li>Shapes are aligned to world axes, not to any surface.</li>
                     </ul>
                 </div>
                 <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">

@@ -90,6 +90,9 @@ namespace Enzyme.Components
                 setLabels.Add(sets.Count <= setNames.Count ? setNames[sets.Count - 1] : (tree.PathCount == 1 ? "Value" : "Set " + tree.Paths[bi]));
             }
 
+            if (nv == nf && sets.Count > 0)
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "The mesh has as many vertices as faces (" + nv + "), so it is ambiguous whether Values are per vertex or per face; they are read as per-vertex values. Check the result if your values are per face.");
+
             // closest point once per probe, reused for every result set
             var mps = new MeshPoint[pts.Count];
             var anchors = new List<Point3d>(pts.Count);

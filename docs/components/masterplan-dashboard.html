@@ -70,7 +70,8 @@
                     <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
                     <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
                         <li>Parses JSON Payload (keys programs, total_area and buildings) and draws a text table in the foreground of every Rhino viewport while Run is True.</li>
-                        <li>Global mode lists each program area; Group By Bldg lists program areas and a subtotal per building, then a target tracking section. Areas are formatted with two decimals plus Suffix.</li>
+                        <li>Global mode lists each program area; Group By Bldg lists program areas and a subtotal per building, then a target tracking section. Areas are formatted with two decimals and comma thousands separators in invariant culture, whatever the Windows locale, plus Suffix.</li>
+                        <li>Transparency is the background opacity: 0 = fully transparent, 1 = opaque (default 0.8).</li>
                         <li>Target JSON maps program names (case-insensitive) to target areas; each program shows value / target and %, in red when it exceeds the target. Target Global does the same for the total.</li>
                     </ol>
                 </div>

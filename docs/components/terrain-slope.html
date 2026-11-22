@@ -22,7 +22,7 @@
         <div class="doc-header" style="display: flex; align-items: center;">
             <div>
                 <h1>Terrain Slope</h1>
-                <p class="doc-subtitle">Ultra-fast mesh slope analyzer using raw C# sequential array processing and safe UI automation.</p>
+                <p class="doc-subtitle">Colours terrain mesh faces by slope (angle of the face normal from vertical): binary over / under a threshold in degrees, percent or 1:X, or a gradient across the slope range of all input meshes.</p>
                 <div class="doc-meta">
                     <span class="badge site-analysis">Site Analysis</span>
                     <span>Nickname: <strong>TerrainSlope</strong></span>
@@ -66,23 +66,21 @@
                         <li>Each mesh is unwelded and its face normals computed; face slope θ = acos(|n.Z|), so faces wound downwards read the same as upward ones.</li>
                         <li>ThresholdValue is converted to an angle from the chosen ThresholdMode: degrees, percent (θ = atan(p / 100)) or ratio 1:X (θ = atan(1 / X)).</li>
                         <li>Binary mode (default): faces with θ ≤ threshold take the first Custom Colors entry, steeper faces the last (defaults light green and red).</li>
-                        <li>Gradient mode: θ is normalised between the minimum and maximum slope of that mesh and coloured by linear interpolation through all Custom Colors.</li>
-                        <li>Dashboard Data reports the share of faces over the threshold over all meshes, and the average of the per-mesh shares.</li>
+                        <li>Gradient mode: θ is normalised between the minimum and maximum slope over all input meshes and coloured by linear interpolation through all Custom Colors; legend labels give the slope at each colour stop in the ThresholdMode unit.</li>
+                        <li>Dashboard Data reports the share of mesh surface area over the threshold over all meshes, and the average of the per-mesh area shares.</li>
                     </ol>
                 </div>
                 <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
                     <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Assumptions</h3>
                     <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
                         <li>Meshes are terrain with +Z up; units do not matter because slope is an angle.</li>
-                        <li>Faces are of similar size if the face share is read as an area share.</li>
                     </ul>
                 </div>
                 <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
                     <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Simplifications and limits</h3>
                     <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
                         <li>Slope is per face, with no smoothing across neighbouring faces, so mesh noise shows as steep faces.</li>
-                        <li>Gradient colours are relative to each mesh own slope range, not absolute angles, so colours cannot be compared between meshes or runs, and the legend labels (Step 0% to 100%) are positions in that range, not slopes.</li>
-                        <li>Over-threshold percentages count faces, not area.</li>
+                        <li>Gradient colours are relative to the slope range of the run, so they are comparable between the meshes of one run but not between runs.</li>
                     </ul>
                 </div>
                 <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">

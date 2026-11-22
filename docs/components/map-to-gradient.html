@@ -58,7 +58,8 @@
                 <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
                     <h3 style="color: var(--accent-teal); margin-bottom: 0.5rem;">Method</h3>
                     <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
-                        <li>Each value is normalised to t = (value - min) / (max - min) of the Source Domain (or of the values when no domain is given) and clamped to 0-1.</li>
+                        <li>Each value is normalised to t = (value - T0) / (T1 - T0) of the Source Domain, from its start to its end, and clamped to 0-1; a reversed domain (for example 10 to 0) flips the gradient. Without a domain the minimum and maximum of the values are used, ignoring NaN and infinite values.</li>
+                        <li>NaN values get the first colour and a warning.</li>
                         <li>t picks a position along the colour list and the colour is linearly interpolated in RGB between the two neighbouring colours (default blue, cyan, lime, yellow, red).</li>
                     </ol>
                 </div>

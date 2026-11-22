@@ -18,7 +18,7 @@ namespace Enzyme.Components
 
         public SlopeTerrainPlus()
             : base("Terrain Slope", "TerrainSlope",
-                "Ultra-fast mesh slope analyzer using raw C# sequential array processing and safe UI automation.",
+                "Colours terrain mesh faces by slope (angle of the face normal from vertical): binary over / under a threshold in degrees, percent or 1:X, or a gradient across the slope range of all input meshes.",
                 "Enzyme", "Site Analysis")
         {
         }
@@ -131,6 +131,15 @@ namespace Enzyme.Components
             int global_over_count = 0;
             int global_total_faces = 0;
 
+            // Pass 1: face slopes and areas of every mesh, and the slope range over ALL meshes, so gradient colours
+            // mean the same slope in every mesh of one solution.
+            List<Mesh> eval_meshes = new List<Mesh>();
+            List<double[]> all_slopes = new List<double[]>();
+            double minSlope = double.MaxValue;
+            double maxSlope = double.MinValue;
+            double global_over_area = 0.0;
+            double global_total_area = 0.0;
+
             foreach (Mesh input_mesh in TargetMeshes)
             {
                 if (input_mesh == null || !input_mesh.IsValid) continue;
@@ -141,16 +150,13 @@ namespace Enzyme.Components
                 eval_mesh.FaceNormals.ComputeFaceNormals();
                 
                 int faceCount = eval_mesh.Faces.Count;
-                int vertCount = eval_mesh.Vertices.Count;
                 if (faceCount == 0) continue;
 
                 var normals = eval_mesh.FaceNormals;
                 double[] slopeAngles = new double[faceCount];
-                Color[] vertexColors = new Color[vertCount];
 
-                double minSlope = double.MaxValue;
-                double maxSlope = double.MinValue;
                 int over_count = 0;
+                double over_area = 0.0, mesh_area = 0.0;
 
                 for (int i = 0; i < faceCount; i++) {
                     // |n.Z|: slope is the same whichever way the face is wound. Meshes whose faces
@@ -162,17 +168,41 @@ namespace Enzyme.Components
                     double s = Math.Acos(nz);
                     slopeAngles[i] = s;
 
+                    // Face area (quads: half the cross product of the diagonals)
+                    MeshFace f = eval_mesh.Faces[i];
+                    Point3d pa = eval_mesh.Vertices[f.A], pb = eval_mesh.Vertices[f.B], pc = eval_mesh.Vertices[f.C];
+                    double area = f.IsQuad
+                        ? 0.5 * Vector3d.CrossProduct(pc - pa, (Point3d)eval_mesh.Vertices[f.D] - pb).Length
+                        : 0.5 * Vector3d.CrossProduct(pb - pa, pc - pa).Length;
+                    mesh_area += area;
+
                     if (s < minSlope) minSlope = s;
                     if (s > maxSlope) maxSlope = s;
-                    if (s > threshold_rads) over_count++;
+                    if (s > threshold_rads) { over_count++; over_area += area; }
                 }
-
-                double slopeDomain = maxSlope - minSlope;
-                if (slopeDomain <= 0) slopeDomain = 1e-9;
 
                 global_over_count += over_count;
                 global_total_faces += faceCount;
-                double percent_over = ((double)over_count / faceCount) * 100.0;
+                global_over_area += over_area;
+                global_total_area += mesh_area;
+                // Share of the mesh surface area over the threshold (face count share if the area is zero)
+                double percent_over = mesh_area > 0 ? over_area / mesh_area * 100.0 : ((double)over_count / faceCount) * 100.0;
+                out_ratios.Add(Math.Round(percent_over, 2));
+
+                eval_meshes.Add(eval_mesh);
+                all_slopes.Add(slopeAngles);
+            }
+
+            double slopeDomain = maxSlope - minSlope;
+            if (slopeDomain <= 0) slopeDomain = 1e-9;
+
+            // Pass 2: colours
+            for (int m = 0; m < eval_meshes.Count; m++)
+            {
+                Mesh eval_mesh = eval_meshes[m];
+                double[] slopeAngles = all_slopes[m];
+                int faceCount = eval_mesh.Faces.Count;
+                Color[] vertexColors = new Color[eval_mesh.Vertices.Count];
 
                 for (int i = 0; i < faceCount; i++) {
                     MeshFace face = eval_mesh.Faces[i];
@@ -208,7 +238,6 @@ namespace Enzyme.Components
 
                 eval_mesh.VertexColors.SetColors(vertexColors);
                 out_meshes.Add(eval_mesh);
-                out_ratios.Add(Math.Round(percent_over, 2));
             }
 
             if (is_binary) {
@@ -217,10 +246,16 @@ namespace Enzyme.Components
                 out_values.Add("Under Threshold");
                 out_values.Add("Over Threshold");
             } else {
+                // Labels are the slopes at each colour stop, in the ThresholdMode unit
+                var inv = System.Globalization.CultureInfo.InvariantCulture;
                 for (int i = 0; i < customColors.Count; i++) {
                     out_colors.Add(customColors[i]);
-                    double p = (i / (double)(customColors.Count - 1)) * 100.0;
-                    out_values.Add($"Step {p:F0}%");
+                    double a = eval_meshes.Count > 0 ? minSlope + (i / (double)(customColors.Count - 1)) * (maxSlope - minSlope) : 0.0;
+                    string lbl;
+                    if (t_mode == 1) lbl = (Math.Tan(a) * 100.0).ToString("F1", inv) + "%";
+                    else if (t_mode == 2) lbl = a <= 1e-9 ? "flat" : "1:" + (1.0 / Math.Tan(a)).ToString("F1", inv);
+                    else lbl = (a * 180.0 / Math.PI).ToString("F1", inv) + "°";
+                    out_values.Add(lbl);
                 }
             }
 
@@ -238,7 +273,8 @@ namespace Enzyme.Components
                 foreach (var r in out_ratios) avgRatio += r;
                 if (out_ratios.Count > 0) avgRatio = (avgRatio / out_ratios.Count);
                 
-                double total_pct_over = global_total_faces > 0 ? ((double)global_over_count / global_total_faces * 100.0) : 0.0;
+                double total_pct_over = global_total_area > 0 ? (global_over_area / global_total_area * 100.0)
+                    : (global_total_faces > 0 ? ((double)global_over_count / global_total_faces * 100.0) : 0.0);
                 
                 var legendObj = new Newtonsoft.Json.Linq.JObject
                 {
@@ -259,7 +295,8 @@ namespace Enzyme.Components
             perf_start.Stop();
             double exec_ms = perf_start.Elapsed.TotalMilliseconds;
 
-            double final_pct_over = global_total_faces > 0 ? ((double)global_over_count / global_total_faces * 100.0) : 0.0;
+            double final_pct_over = global_total_area > 0 ? (global_over_area / global_total_area * 100.0)
+                : (global_total_faces > 0 ? ((double)global_over_count / global_total_faces * 100.0) : 0.0);
             string mode_str = is_binary ? "Binary" : "Gradient";
             string conversion_str = $"{deg:F1}° | {pct:F1}% | 1:{ratio:F1}";
 

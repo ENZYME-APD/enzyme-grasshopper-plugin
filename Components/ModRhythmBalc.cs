@@ -14,7 +14,7 @@ namespace Enzyme.Masterplan
     {
         public ModRhythmBalcComponent()
           : base("Facade Module: Rhythmic Balconies", "Mod_Rhythm_Balc",
-              "2D patterned balconies with merge logic, corner isolation, and fast math.",
+              "2D patterned balconies with merge logic and corner isolation. The slab area in the HUD is a quick estimate (bay length x Depth), approximate for curved bays.",
               "Enzyme", "JSON Masterplan (Beta)")
         {
         }
@@ -246,10 +246,10 @@ namespace Enzyme.Masterplan
                             double visionH = h - HeaderDrop;
                             if (visionH > 0)
                             {
-                                Extrusion extGlass = Extrusion.Create(cCrv, visionH, false);
+                                Brep extGlass = ExtrudeZ(cCrv, visionH);
                                 if (extGlass != null)
                                 {
-                                    outCorners.Add(extGlass.ToBrep(), path);
+                                    outCorners.Add(extGlass, path);
                                     cornerArea += cLen * visionH;
                                 }
                             }
@@ -257,10 +257,10 @@ namespace Enzyme.Masterplan
                             {
                                 Curve cTop = cCrv.DuplicateCurve();
                                 cTop.Transform(Transform.Translation(new Vector3d(0, 0, visionH)));
-                                Extrusion extTop = Extrusion.Create(cTop, HeaderDrop, false);
+                                Brep extTop = ExtrudeZ(cTop, HeaderDrop);
                                 if (extTop != null)
                                 {
-                                    outHeaders.Add(extTop.ToBrep(), path);
+                                    outHeaders.Add(extTop, path);
                                     headerArea += cLen * HeaderDrop;
                                 }
                             }
@@ -268,10 +268,10 @@ namespace Enzyme.Masterplan
                         else
                         {
                             // Solid Column Corner
-                            Extrusion extCorner = Extrusion.Create(cCrv, h, false);
+                            Brep extCorner = ExtrudeZ(cCrv, h);
                             if (extCorner != null)
                             {
-                                outCorners.Add(extCorner.ToBrep(), path);
+                                outCorners.Add(extCorner, path);
                                 cornerArea += cLen * h;
                             }
                         }
@@ -328,10 +328,10 @@ namespace Enzyme.Masterplan
                                 double glassH = h - HeaderDrop;
                                 if (glassH > 0)
                                 {
-                                    Extrusion glassWall = Extrusion.Create(bayCrv, glassH, false);
+                                    Brep glassWall = ExtrudeZ(bayCrv, glassH);
                                     if (glassWall != null)
                                     {
-                                        outGlass.Add(glassWall.ToBrep(), path);
+                                        outGlass.Add(glassWall, path);
                                         glassArea += bayLen * glassH;
                                     }
                                 }
@@ -341,10 +341,10 @@ namespace Enzyme.Masterplan
                                 {
                                     Curve topCrv = bayCrv.DuplicateCurve();
                                     topCrv.Transform(Transform.Translation(new Vector3d(0, 0, glassH)));
-                                    Extrusion topWall = Extrusion.Create(topCrv, HeaderDrop, false);
+                                    Brep topWall = ExtrudeZ(topCrv, HeaderDrop);
                                     if (topWall != null)
                                     {
-                                        outHeaders.Add(topWall.ToBrep(), path);
+                                        outHeaders.Add(topWall, path);
                                         headerArea += bayLen * HeaderDrop;
                                     }
                                 }
@@ -362,8 +362,8 @@ namespace Enzyme.Masterplan
                                         slabArea += bayLen * Math.Abs(Depth); // High-performance area
                                     }
 
-                                    Extrusion extRail = Extrusion.Create(offCrv, RailHeight, false);
-                                    if (extRail != null) outRails.Add(extRail.ToBrep(), path);
+                                    Brep extRail = ExtrudeZ(offCrv, RailHeight);
+                                    if (extRail != null) outRails.Add(extRail, path);
 
                                     // 4. Adjacency Logic (Partition Walls)
                                     bool prevActive = false;
@@ -386,15 +386,15 @@ namespace Enzyme.Masterplan
                                     if (!(MergeAdjacent && prevActive))
                                     {
                                         Line partLine1 = new Line(p1, p2);
-                                        Extrusion part1 = Extrusion.Create(partLine1.ToNurbsCurve(), RailHeight, false);
-                                        if (part1 != null) outParts.Add(part1.ToBrep(), path);
+                                        Brep part1 = ExtrudeZ(partLine1.ToNurbsCurve(), RailHeight);
+                                        if (part1 != null) outParts.Add(part1, path);
                                     }
 
                                     if (!(MergeAdjacent && nextActive))
                                     {
                                         Line partLine2 = new Line(p3, p4);
-                                        Extrusion part2 = Extrusion.Create(partLine2.ToNurbsCurve(), RailHeight, false);
-                                        if (part2 != null) outParts.Add(part2.ToBrep(), path);
+                                        Brep part2 = ExtrudeZ(partLine2.ToNurbsCurve(), RailHeight);
+                                        if (part2 != null) outParts.Add(part2, path);
                                     }
                                 }
                                 balconyCount++;
@@ -402,10 +402,10 @@ namespace Enzyme.Masterplan
                             else
                             {
                                 // Solid Wall (No Balcony)
-                                Extrusion solidWall = Extrusion.Create(bayCrv, h, false);
+                                Brep solidWall = ExtrudeZ(bayCrv, h);
                                 if (solidWall != null)
                                 {
-                                    outSolid.Add(solidWall.ToBrep(), path);
+                                    outSolid.Add(solidWall, path);
                                     solidArea += bayLen * h;
                                 }
                             }
@@ -451,6 +451,15 @@ namespace Enzyme.Masterplan
             {
                 return IconLoader.Load("Mod_Rhythm_Balc.png");
             }
+        }
+
+        // Extrudes straight up along world +Z (Extrusion.Create follows the curve's own plane normal, which can
+        // point downwards for clockwise closed outlines or be arbitrary for straight lines).
+        private static Brep ExtrudeZ(Curve crv, double height)
+        {
+            if (crv == null) return null;
+            Surface srf = Surface.CreateExtrusion(crv, new Vector3d(0, 0, height));
+            return srf?.ToBrep();
         }
 
         public override GH_Exposure Exposure => GH_Exposure.secondary;

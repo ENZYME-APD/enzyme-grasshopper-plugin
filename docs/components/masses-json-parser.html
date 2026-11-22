@@ -69,8 +69,8 @@
                     <ol style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
                         <li>Parses Masses_JSON as an object of buildings, each holding a list of blocks with program, tower_id, color [r,g,b], total_height, true_z and boundary.</li>
                         <li>Buildings, towers and programs are filtered by the Filter inputs: case-insensitive, exact when ExactMatch is true, otherwise substring match or wildcard match with * and ?. Empty filters keep everything.</li>
-                        <li>The boundary is rebuilt from Line, Arc (start, mid, end) and Polyline segments, joined with tolerance 0.01 and closed if needed. Its area is computed before it is moved up by true_z.</li>
-                        <li>Each block is extruded by total_height with caps into a Brep. Colours get alpha = (1 − Transparency) × 255. Each block goes to branch path building index ; block index, with a label building | tower | program.</li>
+                        <li>The boundary is rebuilt from Line, Arc (start, mid, end) and Polyline segments, joined with tolerance 0.01 and closed if needed (within tolerance, otherwise with a straight closing line). Blocks without a usable boundary are reported in a warning. Its area is computed before it is moved up by true_z.</li>
+                        <li>Each block is extruded upwards by total_height from true_z with caps into a Brep, whatever the boundary orientation. Colours get alpha = (1 − Transparency) × 255. Each block goes to branch path building index ; block index, with a label building | tower | program.</li>
                     </ol>
                 </div>
                 <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
@@ -85,6 +85,7 @@
                     <ul style="padding-left: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
                         <li>Blocks are straight vertical extrusions of one outline; no setbacks, floors or roof shapes.</li>
                         <li>If the joined segments form several pieces, only the first is used.</li>
+                        <li>Block paths use the original block index (gaps where blocks are filtered out), while the building index counts only matching buildings.</li>
                     </ul>
                 </div>
                 <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;">
